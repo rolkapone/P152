@@ -1,0 +1,11 @@
+# Réglages pnpm (pnpm 10.34 ignore minimumReleaseAge dans package.json > "pnpm" : vérifié, il faut ce fichier).
+# Pas de workspace multi-paquets : ce fichier ne porte que des réglages.
+# Chaîne d'approvisionnement : seuls ces paquets peuvent exécuter des scripts d'installation.
+onlyBuiltDependencies:
+  - esbuild
+  - simple-git-hooks
+# Refuse les versions publiées depuis moins de 3 jours (4320 minutes).
+minimumReleaseAge: 4320
+# rollup 4.64.8+ a moins de 3 jours le 2026-10-19 : épinglé à la dernière version mature (à retirer quand la fenêtre est passée).
+overrides:
+  rollup: 4.64.7
