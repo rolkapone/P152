@@ -1,16 +1,27 @@
 {
-  "id": "controller-stand.generic", "version": 1, "type": "controller-stand", "category": "gaming", "name": { "en": "Controller stand" },
-  "generator": "procedural", "model": null, "license": "Original work (project)", "source": "Generated in code",
+  "id": "controller-stand.generic",
+  "version": 1,
+  "type": "controller-stand",
+  "category": "gaming",
+  "name": { "en": "Controller stand" },
+  "generator": "procedural",
+  "model": null,
+  "license": "Original work (project)",
+  "source": "Generated in code",
   "params": {
-    "width":  { "unit": "mm", "default": 110, "min": 80,  "max": 200, "step": 5 },
-    "depth":  { "unit": "mm", "default": 100, "min": 80,  "max": 180, "step": 5 },
+    "width": { "unit": "mm", "default": 110, "min": 80, "max": 200, "step": 5 },
+    "depth": { "unit": "mm", "default": 100, "min": 80, "max": 180, "step": 5 },
     "height": { "unit": "mm", "default": 150, "min": 100, "max": 260, "step": 5 },
-    "showController": { "enum": [true, false], "default": true, "note": "Generic gamepad silhouette (no brand shape)" }
+    "showController": {
+      "enum": [true, false],
+      "default": true,
+      "note": "Generic gamepad silhouette (no brand shape)"
+    }
   },
   "slots": [
-    { "id": "body",   "role": "body",   "default": "mat.matte-black" },
+    { "id": "body", "role": "body", "default": "mat.matte-black" },
     { "id": "accent", "role": "accent", "default": "mat.graphite", "note": "Generic gamepad body" },
-    { "id": "led",    "role": "led",    "default": "mat.led-white" }
+    { "id": "led", "role": "led", "default": "mat.led-white" }
   ],
   "budget": { "tris": 2000, "drawCalls": 3 },
   "placement": { "restsOn": ["desk"], "canSupport": [] }

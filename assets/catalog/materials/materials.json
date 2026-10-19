@@ -3,40 +3,315 @@
   "schemaVersion": 2,
   "notes": "PBR material library (ADR-3D-05). v2 (studio look) adds optional physical fields clearcoat, clearcoatRoughness, sheen, sheenRoughness, sheenColor (renderer uses a physical material only when present). Flat colours only at MVP (no textures). Colours are sRGB hex. The 'textures' key is reserved for KTX2 maps (R2+), see docs/design/3d/licences-assets.md.",
   "materials": [
-    { "id": "mat.anodized-silver",    "name": { "en": "Anodised aluminium, silver" },   "tags": ["metal", "light", "premium"], "baseColor": "#d3d5d8", "metalness": 1.0,  "roughness": 0.36 },
-    { "id": "mat.anodized-graphite",  "name": { "en": "Anodised aluminium, graphite" }, "tags": ["metal", "dark", "premium"],  "baseColor": "#4a4d52", "metalness": 1.0,  "roughness": 0.40 },
-    { "id": "mat.soft-touch-black",   "name": { "en": "Soft-touch black" },    "tags": ["plastic", "matte", "dark", "premium"],  "baseColor": "#1d1f22", "metalness": 0.0, "roughness": 0.68, "sheen": 0.35, "sheenRoughness": 0.6, "sheenColor": "#5a5e66" },
-    { "id": "mat.soft-touch-white",   "name": { "en": "Soft-touch white" },    "tags": ["plastic", "matte", "light", "premium"], "baseColor": "#ecebe7", "metalness": 0.0, "roughness": 0.62, "sheen": 0.3, "sheenRoughness": 0.6, "sheenColor": "#ffffff" },
-    { "id": "mat.glass-clear",        "name": { "en": "Clear glass" },         "tags": ["glass", "transparent"],      "baseColor": "#dfe8ee", "metalness": 0.0,  "roughness": 0.04, "opacity": 0.16, "clearcoat": 1.0, "clearcoatRoughness": 0.03 },
-    { "id": "mat.fabric-woven",       "name": { "en": "Woven fabric" },        "tags": ["fabric", "matte", "premium"], "baseColor": "#8d9096", "metalness": 0.0, "roughness": 1.0, "sheen": 1.0, "sheenRoughness": 0.5, "sheenColor": "#c4c7cc" },
-    { "id": "mat.fabric-woven-dark",  "name": { "en": "Woven fabric, dark" },  "tags": ["fabric", "matte", "dark", "premium"], "baseColor": "#34373c", "metalness": 0.0, "roughness": 1.0, "sheen": 1.0, "sheenRoughness": 0.5, "sheenColor": "#6a6e75" },
-    { "id": "mat.matte-black",        "name": { "en": "Matte black" },         "tags": ["plastic", "matte", "dark"],  "baseColor": "#202226", "metalness": 0.0,  "roughness": 0.78 },
-    { "id": "mat.graphite",           "name": { "en": "Graphite" },            "tags": ["plastic", "matte", "dark"],  "baseColor": "#3b3f45", "metalness": 0.0,  "roughness": 0.70 },
-    { "id": "mat.satin-white",        "name": { "en": "Satin white" },         "tags": ["plastic", "satin", "light"], "baseColor": "#ecebe7", "metalness": 0.0,  "roughness": 0.50 },
-    { "id": "mat.warm-white",         "name": { "en": "Warm white" },          "tags": ["plastic", "matte", "light"], "baseColor": "#f1ede2", "metalness": 0.0,  "roughness": 0.60 },
-    { "id": "mat.light-grey",         "name": { "en": "Light grey" },          "tags": ["plastic", "matte", "light"], "baseColor": "#c7c9cc", "metalness": 0.0,  "roughness": 0.60 },
-    { "id": "mat.brushed-aluminium",  "name": { "en": "Brushed aluminium" },   "tags": ["metal", "light"],            "baseColor": "#c9ccd0", "metalness": 1.0,  "roughness": 0.38 },
-    { "id": "mat.black-metal",        "name": { "en": "Black metal" },         "tags": ["metal", "dark"],             "baseColor": "#2a2d31", "metalness": 0.85, "roughness": 0.45 },
-    { "id": "mat.oak",                "name": { "en": "Oak" },                 "tags": ["wood", "warm"],              "baseColor": "#c9a577", "metalness": 0.0,  "roughness": 0.62, "textures": null },
-    { "id": "mat.walnut",             "name": { "en": "Walnut" },              "tags": ["wood", "warm", "dark"],      "baseColor": "#6b4a35", "metalness": 0.0,  "roughness": 0.58, "textures": null },
-    { "id": "mat.birch",              "name": { "en": "Birch" },               "tags": ["wood", "light"],             "baseColor": "#e4cfa6", "metalness": 0.0,  "roughness": 0.65, "textures": null },
-    { "id": "mat.felt-grey",          "name": { "en": "Grey felt" },           "tags": ["fabric", "matte"],           "baseColor": "#6d7178", "metalness": 0.0,  "roughness": 1.0 },
-    { "id": "mat.felt-dark",          "name": { "en": "Dark felt" },           "tags": ["fabric", "matte", "dark"],   "baseColor": "#2d3035", "metalness": 0.0,  "roughness": 1.0 },
-    { "id": "mat.felt-light",         "name": { "en": "Light felt" },          "tags": ["fabric", "matte", "light"],  "baseColor": "#e3e1dc", "metalness": 0.0,  "roughness": 1.0 },
-    { "id": "mat.felt-sage",          "name": { "en": "Sage felt" },           "tags": ["fabric", "matte"],           "baseColor": "#9fb39a", "metalness": 0.0,  "roughness": 1.0 },
-    { "id": "mat.rubber-black",       "name": { "en": "Black rubber" },        "tags": ["rubber", "matte", "dark"],   "baseColor": "#17181b", "metalness": 0.0,  "roughness": 0.92 },
-    { "id": "mat.glass-smoked",       "name": { "en": "Smoked glass" },        "tags": ["glass", "transparent"],      "baseColor": "#1a1d22", "metalness": 0.0,  "roughness": 0.05, "opacity": 0.3 },
-    { "id": "mat.screen-lit",         "name": { "en": "Screen (lit)" },        "tags": ["screen", "emissive"],        "baseColor": "#0a0b0e", "metalness": 0.0,  "roughness": 0.12, "emissive": "#ffffff", "emissiveIntensity": 0.55, "kind": "screen" },
-    { "id": "mat.accent-coral",       "name": { "en": "Coral" },               "tags": ["plastic", "accent"],         "baseColor": "#e5694f", "metalness": 0.0,  "roughness": 0.55 },
-    { "id": "mat.accent-teal",        "name": { "en": "Teal" },                "tags": ["plastic", "accent"],         "baseColor": "#2b9a8c", "metalness": 0.0,  "roughness": 0.55 },
-    { "id": "mat.accent-mustard",     "name": { "en": "Mustard" },             "tags": ["plastic", "accent"],         "baseColor": "#e2b23a", "metalness": 0.0,  "roughness": 0.55 },
-    { "id": "mat.accent-sky",         "name": { "en": "Sky blue" },            "tags": ["plastic", "accent"],         "baseColor": "#5f9fd6", "metalness": 0.0,  "roughness": 0.55 },
-    { "id": "mat.accent-terracotta",  "name": { "en": "Terracotta" },          "tags": ["plastic", "accent", "warm"], "baseColor": "#bf6a4a", "metalness": 0.0,  "roughness": 0.65 },
-    { "id": "mat.led-white",          "name": { "en": "LED white" },           "tags": ["led", "emissive"],           "baseColor": "#222222", "metalness": 0.0,  "roughness": 0.4,  "emissive": "#fff4e0", "emissiveIntensity": 1.6 },
-    { "id": "mat.led-warm",           "name": { "en": "LED warm" },            "tags": ["led", "emissive", "warm"],   "baseColor": "#222222", "metalness": 0.0,  "roughness": 0.4,  "emissive": "#ffb870", "emissiveIntensity": 2.0 },
-    { "id": "mat.led-violet",         "name": { "en": "LED violet" },          "tags": ["led", "emissive", "rgb"],    "baseColor": "#222222", "metalness": 0.0,  "roughness": 0.4,  "emissive": "#8d5cff", "emissiveIntensity": 2.0 },
-    { "id": "mat.led-cyan",           "name": { "en": "LED cyan" },            "tags": ["led", "emissive", "rgb"],    "baseColor": "#222222", "metalness": 0.0,  "roughness": 0.4,  "emissive": "#4fd8ff", "emissiveIntensity": 2.0 },
-    { "id": "mat.leaf-green",         "name": { "en": "Leaf green" },          "tags": ["decor", "plant"],            "baseColor": "#4f7d4a", "metalness": 0.0,  "roughness": 0.7 },
-    { "id": "mat.ceramic-terracotta", "name": { "en": "Terracotta ceramic" },  "tags": ["decor", "ceramic"],          "baseColor": "#b9694a", "metalness": 0.0,  "roughness": 0.8 }
+    {
+      "id": "mat.anodized-silver",
+      "name": { "en": "Anodised aluminium, silver" },
+      "tags": ["metal", "light", "premium"],
+      "baseColor": "#d3d5d8",
+      "metalness": 1.0,
+      "roughness": 0.36
+    },
+    {
+      "id": "mat.anodized-graphite",
+      "name": { "en": "Anodised aluminium, graphite" },
+      "tags": ["metal", "dark", "premium"],
+      "baseColor": "#4a4d52",
+      "metalness": 1.0,
+      "roughness": 0.4
+    },
+    {
+      "id": "mat.soft-touch-black",
+      "name": { "en": "Soft-touch black" },
+      "tags": ["plastic", "matte", "dark", "premium"],
+      "baseColor": "#1d1f22",
+      "metalness": 0.0,
+      "roughness": 0.68,
+      "sheen": 0.35,
+      "sheenRoughness": 0.6,
+      "sheenColor": "#5a5e66"
+    },
+    {
+      "id": "mat.soft-touch-white",
+      "name": { "en": "Soft-touch white" },
+      "tags": ["plastic", "matte", "light", "premium"],
+      "baseColor": "#ecebe7",
+      "metalness": 0.0,
+      "roughness": 0.62,
+      "sheen": 0.3,
+      "sheenRoughness": 0.6,
+      "sheenColor": "#ffffff"
+    },
+    {
+      "id": "mat.glass-clear",
+      "name": { "en": "Clear glass" },
+      "tags": ["glass", "transparent"],
+      "baseColor": "#dfe8ee",
+      "metalness": 0.0,
+      "roughness": 0.04,
+      "opacity": 0.16,
+      "clearcoat": 1.0,
+      "clearcoatRoughness": 0.03
+    },
+    {
+      "id": "mat.fabric-woven",
+      "name": { "en": "Woven fabric" },
+      "tags": ["fabric", "matte", "premium"],
+      "baseColor": "#8d9096",
+      "metalness": 0.0,
+      "roughness": 1.0,
+      "sheen": 1.0,
+      "sheenRoughness": 0.5,
+      "sheenColor": "#c4c7cc"
+    },
+    {
+      "id": "mat.fabric-woven-dark",
+      "name": { "en": "Woven fabric, dark" },
+      "tags": ["fabric", "matte", "dark", "premium"],
+      "baseColor": "#34373c",
+      "metalness": 0.0,
+      "roughness": 1.0,
+      "sheen": 1.0,
+      "sheenRoughness": 0.5,
+      "sheenColor": "#6a6e75"
+    },
+    {
+      "id": "mat.matte-black",
+      "name": { "en": "Matte black" },
+      "tags": ["plastic", "matte", "dark"],
+      "baseColor": "#202226",
+      "metalness": 0.0,
+      "roughness": 0.78
+    },
+    {
+      "id": "mat.graphite",
+      "name": { "en": "Graphite" },
+      "tags": ["plastic", "matte", "dark"],
+      "baseColor": "#3b3f45",
+      "metalness": 0.0,
+      "roughness": 0.7
+    },
+    {
+      "id": "mat.satin-white",
+      "name": { "en": "Satin white" },
+      "tags": ["plastic", "satin", "light"],
+      "baseColor": "#ecebe7",
+      "metalness": 0.0,
+      "roughness": 0.5
+    },
+    {
+      "id": "mat.warm-white",
+      "name": { "en": "Warm white" },
+      "tags": ["plastic", "matte", "light"],
+      "baseColor": "#f1ede2",
+      "metalness": 0.0,
+      "roughness": 0.6
+    },
+    {
+      "id": "mat.light-grey",
+      "name": { "en": "Light grey" },
+      "tags": ["plastic", "matte", "light"],
+      "baseColor": "#c7c9cc",
+      "metalness": 0.0,
+      "roughness": 0.6
+    },
+    {
+      "id": "mat.brushed-aluminium",
+      "name": { "en": "Brushed aluminium" },
+      "tags": ["metal", "light"],
+      "baseColor": "#c9ccd0",
+      "metalness": 1.0,
+      "roughness": 0.38
+    },
+    {
+      "id": "mat.black-metal",
+      "name": { "en": "Black metal" },
+      "tags": ["metal", "dark"],
+      "baseColor": "#2a2d31",
+      "metalness": 0.85,
+      "roughness": 0.45
+    },
+    {
+      "id": "mat.oak",
+      "name": { "en": "Oak" },
+      "tags": ["wood", "warm"],
+      "baseColor": "#c9a577",
+      "metalness": 0.0,
+      "roughness": 0.62,
+      "textures": null
+    },
+    {
+      "id": "mat.walnut",
+      "name": { "en": "Walnut" },
+      "tags": ["wood", "warm", "dark"],
+      "baseColor": "#6b4a35",
+      "metalness": 0.0,
+      "roughness": 0.58,
+      "textures": null
+    },
+    {
+      "id": "mat.birch",
+      "name": { "en": "Birch" },
+      "tags": ["wood", "light"],
+      "baseColor": "#e4cfa6",
+      "metalness": 0.0,
+      "roughness": 0.65,
+      "textures": null
+    },
+    {
+      "id": "mat.felt-grey",
+      "name": { "en": "Grey felt" },
+      "tags": ["fabric", "matte"],
+      "baseColor": "#6d7178",
+      "metalness": 0.0,
+      "roughness": 1.0
+    },
+    {
+      "id": "mat.felt-dark",
+      "name": { "en": "Dark felt" },
+      "tags": ["fabric", "matte", "dark"],
+      "baseColor": "#2d3035",
+      "metalness": 0.0,
+      "roughness": 1.0
+    },
+    {
+      "id": "mat.felt-light",
+      "name": { "en": "Light felt" },
+      "tags": ["fabric", "matte", "light"],
+      "baseColor": "#e3e1dc",
+      "metalness": 0.0,
+      "roughness": 1.0
+    },
+    {
+      "id": "mat.felt-sage",
+      "name": { "en": "Sage felt" },
+      "tags": ["fabric", "matte"],
+      "baseColor": "#9fb39a",
+      "metalness": 0.0,
+      "roughness": 1.0
+    },
+    {
+      "id": "mat.rubber-black",
+      "name": { "en": "Black rubber" },
+      "tags": ["rubber", "matte", "dark"],
+      "baseColor": "#17181b",
+      "metalness": 0.0,
+      "roughness": 0.92
+    },
+    {
+      "id": "mat.glass-smoked",
+      "name": { "en": "Smoked glass" },
+      "tags": ["glass", "transparent"],
+      "baseColor": "#1a1d22",
+      "metalness": 0.0,
+      "roughness": 0.05,
+      "opacity": 0.3
+    },
+    {
+      "id": "mat.screen-lit",
+      "name": { "en": "Screen (lit)" },
+      "tags": ["screen", "emissive"],
+      "baseColor": "#0a0b0e",
+      "metalness": 0.0,
+      "roughness": 0.12,
+      "emissive": "#ffffff",
+      "emissiveIntensity": 0.55,
+      "kind": "screen"
+    },
+    {
+      "id": "mat.accent-coral",
+      "name": { "en": "Coral" },
+      "tags": ["plastic", "accent"],
+      "baseColor": "#e5694f",
+      "metalness": 0.0,
+      "roughness": 0.55
+    },
+    {
+      "id": "mat.accent-teal",
+      "name": { "en": "Teal" },
+      "tags": ["plastic", "accent"],
+      "baseColor": "#2b9a8c",
+      "metalness": 0.0,
+      "roughness": 0.55
+    },
+    {
+      "id": "mat.accent-mustard",
+      "name": { "en": "Mustard" },
+      "tags": ["plastic", "accent"],
+      "baseColor": "#e2b23a",
+      "metalness": 0.0,
+      "roughness": 0.55
+    },
+    {
+      "id": "mat.accent-sky",
+      "name": { "en": "Sky blue" },
+      "tags": ["plastic", "accent"],
+      "baseColor": "#5f9fd6",
+      "metalness": 0.0,
+      "roughness": 0.55
+    },
+    {
+      "id": "mat.accent-terracotta",
+      "name": { "en": "Terracotta" },
+      "tags": ["plastic", "accent", "warm"],
+      "baseColor": "#bf6a4a",
+      "metalness": 0.0,
+      "roughness": 0.65
+    },
+    {
+      "id": "mat.led-white",
+      "name": { "en": "LED white" },
+      "tags": ["led", "emissive"],
+      "baseColor": "#222222",
+      "metalness": 0.0,
+      "roughness": 0.4,
+      "emissive": "#fff4e0",
+      "emissiveIntensity": 1.6
+    },
+    {
+      "id": "mat.led-warm",
+      "name": { "en": "LED warm" },
+      "tags": ["led", "emissive", "warm"],
+      "baseColor": "#222222",
+      "metalness": 0.0,
+      "roughness": 0.4,
+      "emissive": "#ffb870",
+      "emissiveIntensity": 2.0
+    },
+    {
+      "id": "mat.led-violet",
+      "name": { "en": "LED violet" },
+      "tags": ["led", "emissive", "rgb"],
+      "baseColor": "#222222",
+      "metalness": 0.0,
+      "roughness": 0.4,
+      "emissive": "#8d5cff",
+      "emissiveIntensity": 2.0
+    },
+    {
+      "id": "mat.led-cyan",
+      "name": { "en": "LED cyan" },
+      "tags": ["led", "emissive", "rgb"],
+      "baseColor": "#222222",
+      "metalness": 0.0,
+      "roughness": 0.4,
+      "emissive": "#4fd8ff",
+      "emissiveIntensity": 2.0
+    },
+    {
+      "id": "mat.leaf-green",
+      "name": { "en": "Leaf green" },
+      "tags": ["decor", "plant"],
+      "baseColor": "#4f7d4a",
+      "metalness": 0.0,
+      "roughness": 0.7
+    },
+    {
+      "id": "mat.ceramic-terracotta",
+      "name": { "en": "Terracotta ceramic" },
+      "tags": ["decor", "ceramic"],
+      "baseColor": "#b9694a",
+      "metalness": 0.0,
+      "roughness": 0.8
+    }
   ]
 }

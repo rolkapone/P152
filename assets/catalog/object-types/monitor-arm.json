@@ -1,16 +1,42 @@
 {
-  "id": "monitor-arm.generic", "version": 1, "type": "monitor-arm", "category": "mount", "name": { "en": "Monitor arm" },
-  "generator": "procedural", "model": null, "license": "Original work (project)", "source": "Generated in code",
+  "id": "monitor-arm.generic",
+  "version": 1,
+  "type": "monitor-arm",
+  "category": "mount",
+  "name": { "en": "Monitor arm" },
+  "generator": "procedural",
+  "model": null,
+  "license": "Original work (project)",
+  "source": "Generated in code",
   "params": {
-    "poleHeight":  { "unit": "mm", "default": 400, "min": 250, "max": 500, "step": 10 },
-    "reach":       { "unit": "mm", "default": 450, "min": 300, "max": 800, "step": 10, "note": "Pole axis to VESA plate" },
+    "poleHeight": { "unit": "mm", "default": 400, "min": 250, "max": 500, "step": 10 },
+    "reach": {
+      "unit": "mm",
+      "default": 450,
+      "min": 300,
+      "max": 800,
+      "step": 10,
+      "note": "Pole axis to VESA plate"
+    },
     "clampDeskThickness": { "unit": "mm", "default": 30, "min": 15, "max": 80, "step": 1 },
-    "vesa":        { "enum": [75, 100], "default": 100 },
-    "maxDiagonalIn": { "default": 32, "min": 17, "max": 49, "note": "Informational (compatibility hint)" }
+    "vesa": { "enum": [75, 100], "default": 100 },
+    "maxDiagonalIn": {
+      "default": 32,
+      "min": 17,
+      "max": 49,
+      "note": "Informational (compatibility hint)"
+    }
   },
-  "slots": [
-    { "id": "metal", "role": "metal", "default": "mat.anodized-graphite" }
-  ],
+  "slots": [{ "id": "metal", "role": "metal", "default": "mat.anodized-graphite" }],
   "budget": { "tris": 2500, "drawCalls": 1 },
-  "placement": { "restsOn": ["desk-edge"], "edgeClamp": true, "canSupport": ["monitor.vesa"], "footprintParts": ["clamp (clamp, at the edge)", "pole (tiny base)", "arm+plate (overhang, raised)"] }
+  "placement": {
+    "restsOn": ["desk-edge"],
+    "edgeClamp": true,
+    "canSupport": ["monitor.vesa"],
+    "footprintParts": [
+      "clamp (clamp, at the edge)",
+      "pole (tiny base)",
+      "arm+plate (overhang, raised)"
+    ]
+  }
 }

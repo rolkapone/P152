@@ -2,7 +2,7 @@
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 
-const FORBIDDEN = ["__p152test", "__p152perf"];
+const FORBIDDEN = ["__p152test", "__p152perf", "VITE_E2E"];
 function walk(dir) {
   return readdirSync(dir).flatMap((n) => {
     const p = join(dir, n);
