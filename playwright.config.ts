@@ -15,7 +15,7 @@ export default defineConfig({
   forbidOnly: isCI,
   // Pas de retry : un test instable est un bug à signaler, pas à masquer (règle QA).
   retries: 0,
-  workers: isCI ? 2 : undefined,
+  ...(isCI ? { workers: 2 } : {}),
   reporter: isCI ? [["list"], ["html", { open: "never" }]] : [["list"]],
   timeout: 30_000,
   expect: {
