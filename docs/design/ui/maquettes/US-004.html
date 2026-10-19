@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>US-004 - 3D scene and view bar - mockup (Deskfit, provisional)</title>
+<style>
+/* Police : Inter si installee localement, sinon repli systeme. Aucun reseau. */
+@font-face{font-family:"Inter";font-style:normal;font-weight:100 900;font-display:swap;src:local("Inter Variable"),local("Inter")}
+
+/* ======================= BEGIN SYNCED (tokens.css <-> US-004.html) ======================= */
+:root {
+  /* ---- Typographie ---- */
+  --font-sans: "Inter", system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, "Cascadia Mono", Consolas, Menlo, monospace;
+  --text-sm: 0.875rem;   /* 14 px - minimum de l'UI */
+  --text-md: 1rem;       /* 16 px - corps */
+  --text-lg: 1.125rem;   /* 18 px */
+  --text-xl: 1.375rem;   /* 22 px */
+  --text-2xl: 1.75rem;   /* 28 px */
+  --text-3xl: 2.25rem;   /* 36 px - Welcome uniquement */
+  --leading-tight: 1.2;
+  --leading-normal: 1.5;
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --tracking-tight: -0.011em;   /* titres >= 22 px */
+  --tracking-overline: 0.06em;
+
+  /* ---- Espacements (base 4 px, plus genereux : panneaux 20, sections 32) ---- */
+  --space-0: 0;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --panel-pad: 20px;
+  --float-inset: 12px;   /* marge des panneaux flottants au bord du viewport */
+
+  /* ---- Rayons : echelle 6 / 10 / 16 / 24 / pill. Rayon interne = externe - padding ---- */
+  --radius-sm: 6px;      /* puces, tooltips, vignettes */
+  --radius-md: 10px;     /* boutons, champs */
+  --radius-lg: 16px;     /* cartes, alertes, toasts */
+  --radius-xl: 24px;     /* panneaux et barres flottants, modales */
+  --radius-pill: 999px;  /* verdict, barre de scene, segments */
+
+  /* ---- Tailles ---- */
+  --control-sm: 32px;
+  --control-md: 36px;
+  --control-lg: 44px;
+  --topbar-h: 56px;
+  --panel-left-w: 248px;
+  --panel-right-w: 312px;
+  --focus-width: 3px;
+  --focus-offset: 2px;
+  --border-width: 1px;
+
+  /* ---- Motion : durees ---- */
+  --duration-fast: 120ms;     /* survol, appui */
+  --duration-base: 200ms;     /* menus, toasts, fondus */
+  --duration-slow: 320ms;     /* panneaux, barres, modales */
+  --duration-camera: 480ms;   /* transitions de camera 3D */
+  /* ---- Motion : courbes ---- */
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);       /* changements d'etat */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);         /* entrees, deplacements */
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);     /* camera */
+  --ease-spring: cubic-bezier(0.34, 1.3, 0.64, 1);   /* ressort leger (depassement ~3 %) */
+  --press-scale: 0.97;                               /* appui bouton */
+
+  /* ---- Verre ---- */
+  --glass-blur: 24px;
+  --glass-saturate: 180%;
+  --glass-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  --glass-filter-soft: blur(12px) saturate(140%);    /* voile des modales */
+
+  /* ---- Z-index ---- */
+  --z-panel: 10;
+  --z-floating: 20;
+  --z-menu: 30;
+  --z-modal: 40;
+  --z-toast: 50;
+}
+
+/* ============================ THEME CLAIR ============================ */
+:root,
+[data-theme="light"] {
+  color-scheme: light;
+
+  --color-bg: #F3F4F7;
+  --color-surface: #FFFFFF;
+  --color-surface-2: #EEF0F4;
+  --color-overlay: rgba(16, 20, 28, 0.42);
+  --color-border: #DDE0E7;          /* decoratif (separateurs) */
+  --color-border-strong: #7A8394;   /* contours de champs : 3.8:1 sur surface */
+
+  --color-text: #1B1F27;            /* 16.3:1 */
+  --color-text-muted: #545D6C;      /* 6.7:1 sur surface, 5.8:1 sur surface-2 */
+  --color-text-disabled: #8B93A1;   /* desactive : exempte */
+
+  --color-accent: #1F5FD1;          /* UNE couleur d'accent. 5.8:1 sur surface */
+  --color-accent-hover: #1A4FB0;
+  --color-accent-active: #153F8F;
+  --color-on-accent: #FFFFFF;       /* 5.8:1 sur accent */
+  --color-accent-subtle: #E6EEFB;
+  --color-accent-subtle-text: #1A4FB0;  /* 6.9:1 sur accent-subtle */
+  --color-focus: #1F5FD1;
+
+  /* Statuts : semantiques, jamais decoratifs */
+  --color-success: #137A3F;
+  --color-success-bg: #E3F4EA;
+  --color-error: #B42318;
+  --color-error-bg: #FDECEA;
+  --color-warning: #8A4B00;         /* texte : 6.8:1 */
+  --color-warning-icon: #B86E00;    /* icone : 4.0:1 */
+  --color-warning-bg: #FFF3DC;
+  --color-info: #0B6B8A;
+  --color-info-bg: #E3F3F8;
+  --color-danger-solid: #B42318;
+  --color-on-danger: #FFFFFF;
+
+  /* Ombres douces multicouches */
+  --shadow-1: 0 1px 1px rgba(16,20,28,.04), 0 2px 4px rgba(16,20,28,.04), 0 4px 12px rgba(16,20,28,.05);
+  --shadow-2: 0 0 0 1px rgba(16,20,28,.04), 0 2px 4px rgba(16,20,28,.05), 0 8px 16px rgba(16,20,28,.07), 0 16px 32px rgba(16,20,28,.07);
+  --shadow-3: 0 0 0 1px rgba(16,20,28,.05), 0 4px 8px rgba(16,20,28,.06), 0 16px 32px rgba(16,20,28,.10), 0 40px 80px rgba(16,20,28,.14);
+
+  /* Verre : teinte opaque a 86 % (calcul de contraste sur le pire fond : noir pur, design-system.md 5) */
+  --glass-tint: rgba(255, 255, 255, 0.86);
+  --glass-border: rgba(255, 255, 255, 0.65);
+  --glass-shadow: 0 0 0 1px rgba(16,20,28,.05), 0 2px 4px rgba(16,20,28,.05), 0 8px 16px rgba(16,20,28,.08), 0 24px 48px rgba(16,20,28,.12), inset 0 1px 0 rgba(255,255,255,.7);
+  --glass-link: #1A4FB0;            /* lien sur verre : >= 5.4:1 sur le pire fond */
+
+  /* Scene 3D : studio clair neutre (photo produit), ne favorise aucun style */
+  --scene-bg-top: #FAFAFC;
+  --scene-bg-bottom: #DFE2E8;
+  --scene-floor: #EEF0F3;
+  --scene-shadow: rgba(40, 48, 64, 0.28);
+  --scene-desk: #D9CBB2;
+  --scene-desk-edge: #B2A283;
+  --scene-object: #8E97A6;
+  --scene-object-edge: #5F6878;
+  --scene-outline-inner: #FFFFFF;   /* contour a 2 tons : lisible sur sol clair ET sombre */
+  --scene-outline-outer: #1B1F27;
+  --scene-selection: #1F5FD1;
+  --scene-error: #B42318;
+  --scene-warning: #B86E00;
+}
+
+/* ============================ THEME SOMBRE ============================ */
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  --color-bg: #0E1115;
+  --color-surface: #171B22;
+  --color-surface-2: #212630;
+  --color-overlay: rgba(0, 0, 0, 0.55);
+  --color-border: #2C323D;
+  --color-border-strong: #7D8798;   /* 4.8:1 sur surface */
+
+  --color-text: #E8EBF0;            /* 14:1 */
+  --color-text-muted: #A3ACBA;      /* 6.8:1 sur surface-2 */
+  --color-text-disabled: #6B7482;
+
+  --color-accent: #6C9CFF;          /* 6.4:1 sur surface */
+  --color-accent-hover: #8AB2FF;
+  --color-accent-active: #A6C4FF;
+  --color-on-accent: #0B1220;       /* 7:1 sur accent */
+  --color-accent-subtle: #18284A;
+  --color-accent-subtle-text: #A6C4FF;
+  --color-focus: #8AB2FF;
+
+  --color-success: #4CC38A;
+  --color-success-bg: #12301F;
+  --color-error: #FF8A80;
+  --color-error-bg: #3A1714;
+  --color-warning: #F2B04A;
+  --color-warning-icon: #F2B04A;
+  --color-warning-bg: #33260D;
+  --color-info: #5CC4E0;
+  --color-info-bg: #0F2A33;
+  --color-danger-solid: #C4302B;    /* 5.5:1 avec texte blanc */
+  --color-on-danger: #FFFFFF;
+
+  --shadow-1: 0 1px 1px rgba(0,0,0,.30), 0 2px 4px rgba(0,0,0,.25), 0 0 0 1px rgba(255,255,255,.04);
+  --shadow-2: 0 0 0 1px rgba(255,255,255,.06), 0 2px 4px rgba(0,0,0,.30), 0 8px 16px rgba(0,0,0,.35), 0 16px 32px rgba(0,0,0,.35);
+  --shadow-3: 0 0 0 1px rgba(255,255,255,.08), 0 4px 8px rgba(0,0,0,.35), 0 16px 32px rgba(0,0,0,.45), 0 40px 80px rgba(0,0,0,.5);
+
+  --glass-tint: rgba(28, 32, 40, 0.86);
+  --glass-border: rgba(255, 255, 255, 0.14);
+  --glass-shadow: 0 0 0 1px rgba(255,255,255,.06), 0 2px 4px rgba(0,0,0,.30), 0 8px 16px rgba(0,0,0,.35), 0 24px 48px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.08);
+  --glass-link: #8AB2FF;
+
+  --scene-bg-top: #3A414D;
+  --scene-bg-bottom: #12161C;
+  --scene-floor: #1C2129;
+  --scene-shadow: rgba(0, 0, 0, 0.5);
+  --scene-desk: #8C7B62;
+  --scene-desk-edge: #6A5B46;
+  --scene-object: #8E97A6;
+  --scene-object-edge: #C3CAD6;
+  --scene-outline-inner: #FFFFFF;
+  --scene-outline-outer: #0B0E12;
+  --scene-selection: #8AB2FF;
+  --scene-error: #FF8A80;
+  --scene-warning: #F2B04A;
+}
+
+/* Preference systeme si aucun choix explicite (defaut = systeme) */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    color-scheme: dark;
+    --color-bg: #0E1115; --color-surface: #171B22; --color-surface-2: #212630;
+    --color-overlay: rgba(0,0,0,.55); --color-border: #2C323D; --color-border-strong: #7D8798;
+    --color-text: #E8EBF0; --color-text-muted: #A3ACBA; --color-text-disabled: #6B7482;
+    --color-accent: #6C9CFF; --color-accent-hover: #8AB2FF; --color-accent-active: #A6C4FF;
+    --color-on-accent: #0B1220; --color-accent-subtle: #18284A; --color-accent-subtle-text: #A6C4FF;
+    --color-focus: #8AB2FF;
+    --color-success: #4CC38A; --color-success-bg: #12301F;
+    --color-error: #FF8A80; --color-error-bg: #3A1714;
+    --color-warning: #F2B04A; --color-warning-icon: #F2B04A; --color-warning-bg: #33260D;
+    --color-info: #5CC4E0; --color-info-bg: #0F2A33;
+    --color-danger-solid: #C4302B; --color-on-danger: #FFFFFF;
+    --shadow-1: 0 1px 1px rgba(0,0,0,.30), 0 2px 4px rgba(0,0,0,.25), 0 0 0 1px rgba(255,255,255,.04);
+    --shadow-2: 0 0 0 1px rgba(255,255,255,.06), 0 2px 4px rgba(0,0,0,.30), 0 8px 16px rgba(0,0,0,.35), 0 16px 32px rgba(0,0,0,.35);
+    --shadow-3: 0 0 0 1px rgba(255,255,255,.08), 0 4px 8px rgba(0,0,0,.35), 0 16px 32px rgba(0,0,0,.45), 0 40px 80px rgba(0,0,0,.5);
+    --glass-tint: rgba(28,32,40,.86); --glass-border: rgba(255,255,255,.14);
+    --glass-shadow: 0 0 0 1px rgba(255,255,255,.06), 0 2px 4px rgba(0,0,0,.30), 0 8px 16px rgba(0,0,0,.35), 0 24px 48px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.08);
+    --glass-link: #8AB2FF;
+    --scene-bg-top: #3A414D; --scene-bg-bottom: #12161C; --scene-floor: #1C2129; --scene-shadow: rgba(0,0,0,.5);
+    --scene-desk: #8C7B62; --scene-desk-edge: #6A5B46; --scene-object: #8E97A6;
+    --scene-object-edge: #C3CAD6; --scene-outline-inner: #FFFFFF; --scene-outline-outer: #0B0E12;
+    --scene-selection: #8AB2FF; --scene-error: #FF8A80; --scene-warning: #F2B04A;
+  }
+}
+
+/* ============ VERRE : primitive + replis (opaque si non supporte / transparence reduite) ============
+   A appliquer aux panneaux et barres qui flottent au-dessus de la scene 3D.
+   Regle : tout texte sur verre reste >= 4.5:1 sur le PIRE fond (noir pur sous verre clair,
+   blanc pur sous verre sombre) parce que la teinte est a 86 %. Ne jamais descendre sous 86 %. */
+.glass {
+  background: var(--glass-tint);
+  -webkit-backdrop-filter: var(--glass-filter);
+  backdrop-filter: var(--glass-filter);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+}
+/* Voile des modales : flou leger de la scene derriere */
+.scrim {
+  background: var(--color-overlay);
+  -webkit-backdrop-filter: var(--glass-filter-soft);
+  backdrop-filter: var(--glass-filter-soft);
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass { background: var(--color-surface); border-color: var(--color-border); }
+  .scrim { background: var(--color-overlay); }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .glass { background: var(--color-surface); -webkit-backdrop-filter: none; backdrop-filter: none; border-color: var(--color-border); }
+  .scrim { -webkit-backdrop-filter: none; backdrop-filter: none; }
+}
+/* Simulation / option utilisateur : ajouter .no-glass sur <html> ou un conteneur */
+.no-glass .glass, .glass.no-glass { background: var(--color-surface); -webkit-backdrop-filter: none; backdrop-filter: none; border-color: var(--color-border); }
+.no-glass .scrim { -webkit-backdrop-filter: none; backdrop-filter: none; }
+
+/* Motion reduit : tout est neutralise (WCAG 2.3.3) */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-fast: 0ms;
+    --duration-base: 0ms;
+    --duration-slow: 0ms;
+    --duration-camera: 0ms;
+    --press-scale: 1;
+  }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Focus visible commun (wrappers : [data-focus-visible] de React Aria) */
+.focus-ring,
+:where(button, a, input, select, textarea, [tabindex]):focus-visible,
+[data-focus-visible] {
+  outline: var(--focus-width) solid var(--color-focus);
+  outline-offset: var(--focus-offset);
+  box-shadow: 0 0 0 calc(var(--focus-offset) + 1px) var(--color-surface);
+}
+/* ======================= END SYNCED ======================= */
+
+/* ===== Demo : reduced motion simule (bouton de la page) ===== */
+html.rm{--duration-fast:0ms;--duration-base:0ms;--duration-slow:0ms;--duration-camera:0ms;--press-scale:1}
+html.rm *,html.rm *::before,html.rm *::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+
+/* ===== BASE page ===== */
+*{box-sizing:border-box}
+body{margin:0;background:var(--color-bg);color:var(--color-text);font:var(--weight-regular) var(--text-md)/var(--leading-normal) var(--font-sans);font-variant-numeric:tabular-nums}
+h1,h2,h3{line-height:var(--leading-tight);margin:0;letter-spacing:var(--tracking-tight)}
+h1{font-size:var(--text-2xl);font-weight:var(--weight-semibold)}
+h2.sec{font-size:var(--text-xl);font-weight:var(--weight-semibold);margin:var(--space-12) 0 var(--space-3)}
+h3{font-size:var(--text-lg);font-weight:var(--weight-semibold)}
+p{margin:0 0 var(--space-3)}
+.muted{color:var(--color-text-muted)}.small{font-size:var(--text-sm)}
+code{font-family:var(--font-mono);font-size:var(--text-sm);background:var(--color-surface-2);padding:1px 6px;border-radius:var(--radius-sm)}
+a{color:var(--color-accent)}
+.wrap{max-width:1180px;margin:0 auto;padding:var(--space-6) var(--space-6) var(--space-16)}
+.row{display:flex;gap:var(--space-3);align-items:center;flex-wrap:wrap}
+.overline{font-size:var(--text-sm);font-weight:var(--weight-semibold);letter-spacing:var(--tracking-overline);text-transform:uppercase;color:var(--color-text-muted)}
+.i{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
+.i.sm{width:16px;height:16px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.ctl{position:sticky;top:0;z-index:var(--z-menu);background:var(--color-bg);padding:var(--space-3) 0;border-bottom:1px solid var(--color-border)}
+
+/* ===== Composants (identiques a index.html) ===== */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:var(--space-2);height:var(--control-md);padding:0 var(--space-4);border-radius:var(--radius-md);border:1px solid transparent;background:var(--color-surface-2);color:var(--color-text);font:var(--weight-medium) var(--text-md)/1 var(--font-sans);cursor:pointer;transition:background var(--duration-fast) var(--ease-standard),transform var(--duration-fast) var(--ease-spring),box-shadow var(--duration-base) var(--ease-standard)}
+.btn:hover{background:var(--color-border)}
+.btn:active{transform:scale(var(--press-scale))}
+.btn.primary{background:var(--color-accent);color:var(--color-on-accent)}
+.btn.primary:hover{background:var(--color-accent-hover)}
+.btn.primary:active{background:var(--color-accent-active)}
+.btn.ghost{background:transparent}.btn.ghost:hover{background:var(--color-surface-2)}
+.btn.lg{height:var(--control-lg);padding:0 var(--space-6)}
+.btn.sm{height:var(--control-sm);padding:0 var(--space-3);font-size:var(--text-sm)}
+.btn.icon{width:var(--control-md);padding:0}.btn.icon.sm{width:var(--control-sm)}
+.btn[aria-pressed=true]{background:var(--color-accent-subtle);color:var(--color-accent-subtle-text);box-shadow:inset 0 0 0 1px var(--color-accent)}
+.is-focus{outline:var(--focus-width) solid var(--color-focus);outline-offset:var(--focus-offset);box-shadow:0 0 0 calc(var(--focus-offset) + 1px) var(--color-surface)}
+
+/* ===== Scene (US-004) ===== */
+.stage{position:relative;overflow:hidden;border-radius:var(--radius-lg);background:linear-gradient(var(--scene-bg-top),var(--scene-bg-bottom));color:var(--color-text);container-type:inline-size;cursor:grab;box-shadow:var(--shadow-1);font-family:var(--font-sans)}
+.stage:active{cursor:grabbing}
+.stage.d{width:100%;max-width:1100px;aspect-ratio:16/10}
+.stage.m{width:375px;max-width:100%;height:640px}
+.stage.plain{background:var(--scene-floor);cursor:default}
+.stage:focus-visible{outline-offset:-3px}
+.art{position:absolute;inset:0;width:100%;height:100%;transition:transform var(--duration-camera) var(--ease-in-out)}
+.art g{opacity:0;transition:opacity var(--duration-camera) var(--ease-in-out)}
+.art[data-view=reset] .v-reset,.art[data-view=custom] .v-reset,.art[data-view=top] .v-top,.art[data-view=front] .v-front{opacity:1}
+.art[data-view=custom]{transform:scale(1.07) translateX(-14px)}
+
+.dock{position:absolute;left:var(--float-inset);right:var(--float-inset);bottom:var(--float-inset);display:flex;flex-direction:column;align-items:center;gap:var(--space-2);pointer-events:none;cursor:default}
+.dock>*{pointer-events:auto}
+@keyframes rise{from{opacity:0;transform:translateY(8px) scale(.96)}to{opacity:1;transform:none}}
+.tip,.bar{animation:rise var(--duration-slow) var(--ease-spring) both}
+.tip{width:min(100%,720px);display:flex;align-items:center;gap:var(--space-3);padding:var(--space-3) var(--space-4);border-radius:var(--radius-xl);font-size:var(--text-sm);line-height:var(--leading-normal)}
+.tip .ti{color:var(--color-info)}
+.tip p{margin:0;flex:1}
+.tip .acts{display:flex;align-items:center;gap:var(--space-2);flex:none}
+@container (max-width:560px){
+  .tip{flex-wrap:wrap}
+  .tip p{flex-basis:calc(100% - 36px)}
+  .tip .acts{margin-left:auto}
+}
+.bar{position:relative;z-index:2;display:flex;gap:var(--space-2);padding:var(--space-2);border-radius:var(--radius-pill)}
+@container (max-width:420px){.bar{padding:6px}}
+.tt-wrap{position:relative;display:inline-flex}
+.vb{display:inline-flex;align-items:center;gap:var(--space-2);height:var(--control-md);padding:0 var(--space-4) 0 var(--space-3);border-radius:var(--radius-pill);border:0;background:transparent;color:var(--color-text);font:var(--weight-medium) var(--text-sm)/1 var(--font-sans);cursor:pointer;transition:background var(--duration-fast) var(--ease-standard),transform var(--duration-fast) var(--ease-spring),box-shadow var(--duration-base) var(--ease-standard)}
+@container (max-width:420px){.vb{padding:0 var(--space-3) 0 10px}}
+.vb:hover,.vb.is-hover{background:var(--color-surface-2)}
+.vb:active{transform:scale(var(--press-scale))}
+.vb[aria-pressed=true]{background:var(--color-accent-subtle);color:var(--color-accent-subtle-text);font-weight:var(--weight-semibold);box-shadow:inset 0 0 0 2px var(--color-accent)}
+.vb[aria-pressed=true]:hover{background:var(--color-accent-subtle)}
+.vb[aria-pressed=true]:focus-visible,.vb[aria-pressed=true].is-focus{box-shadow:0 0 0 calc(var(--focus-offset) + 1px) var(--color-surface),inset 0 0 0 2px var(--color-accent)}
+.vb .chk{display:none}.vb[aria-pressed=true] .chk{display:block}.vb[aria-pressed=true] .ico{display:none}
+.vb[disabled]{color:var(--color-text-disabled);cursor:not-allowed;transform:none}
+.vb[disabled]:hover{background:transparent}
+.tt{position:absolute;bottom:calc(100% + var(--space-2));left:50%;transform:translateX(-50%);background:var(--color-text);color:var(--color-surface);font-size:var(--text-sm);line-height:1.3;padding:6px 10px;border-radius:var(--radius-sm);white-space:nowrap;opacity:0;pointer-events:none;transition:opacity var(--duration-fast) var(--ease-standard)}
+.tt.show{opacity:1}
+.tt-wrap:first-child .tt{left:0;transform:none}
+.tt-wrap:last-child .tt{left:auto;right:0;transform:none}
+
+.gl{position:absolute;inset:0;display:grid;place-items:center;padding:var(--space-4);cursor:default}
+.err{background:var(--color-surface);border-radius:var(--radius-xl);box-shadow:var(--shadow-3);padding:var(--space-8);max-width:520px;text-align:center;display:grid;gap:var(--space-3);justify-items:center}
+@container (max-width:420px){.err{padding:var(--space-6)}}
+.err .badge{width:48px;height:48px;border-radius:50%;background:var(--color-error-bg);color:var(--color-error);display:grid;place-items:center}
+.err .badge .i{width:24px;height:24px}
+.err h2{font-size:var(--text-xl);font-weight:var(--weight-semibold);letter-spacing:var(--tracking-tight);line-height:var(--leading-tight);margin:0}
+.err p{margin:0;color:var(--color-text)}
+.err .btn{margin-top:var(--space-2)}
+.load{position:absolute;inset:0;display:grid;place-content:center;justify-items:center;gap:var(--space-3);cursor:default}
+.load p{margin:0;font-size:var(--text-md);font-weight:var(--weight-medium)}
+.prog{width:min(280px,70cqw);height:8px;border-radius:var(--radius-pill);background:var(--color-border);box-shadow:inset 0 0 0 1px var(--color-border-strong);overflow:hidden}
+.prog>i{display:block;height:100%;background:var(--color-accent);border-radius:inherit;width:var(--p,60%);transition:width 2.4s linear}
+
+.fig{margin:var(--space-4) 0 0}
+.chip{display:inline-block;font-size:var(--text-sm);font-weight:var(--weight-semibold);background:var(--color-surface-2);padding:2px 10px;border-radius:var(--radius-pill);margin-bottom:var(--space-2)}
+.cap{margin:var(--space-2) 0 0;font-size:var(--text-sm);color:var(--color-text-muted)}
+.mobiles{display:flex;gap:var(--space-6);flex-wrap:wrap;align-items:flex-start}
+.bench{border-radius:var(--radius-lg);padding:var(--space-5);background:linear-gradient(var(--scene-bg-top),var(--scene-bg-bottom));display:grid;gap:var(--space-5);color:var(--color-text)}
+.bench .lbl{font-size:var(--text-sm);font-weight:var(--weight-semibold);margin-bottom:var(--space-2)}
+.bench .lbl span{background:var(--color-surface);padding:2px 8px;border-radius:var(--radius-sm)}
+.bench .bar{display:inline-flex;animation:none}
+.bench .tt{opacity:1}
+.benches{display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:var(--space-5)}
+table{border-collapse:collapse;width:100%;font-size:var(--text-sm)}
+th,td{text-align:left;vertical-align:top;padding:var(--space-2) var(--space-3);border-bottom:1px solid var(--color-border)}
+th{font-weight:var(--weight-semibold);background:var(--color-surface-2)}
+ul.dev{margin:0 0 var(--space-3);padding-left:var(--space-5)}ul.dev li{margin-bottom:var(--space-1)}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs><filter id="soft" x="-20%" y="-100%" width="140%" height="300%"><feGaussianBlur stdDeviation="9"/></filter></defs>
+  <symbol id="rot-l" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></symbol>
+  <symbol id="top" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/></symbol>
+  <symbol id="front" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/></symbol>
+  <symbol id="check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+  <symbol id="info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></symbol>
+  <symbol id="alert-triangle" viewBox="0 0 24 24"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3M12 9v4M12 17h.01"/></symbol>
+</svg>
+
+<main class="wrap">
+  <p class="overline">US-004 / Sprint 1 / High-fidelity mockup</p>
+  <h1>3D scene and view bar</h1>
+  <p class="muted" style="max-width:70ch;margin-top:var(--space-2)">Studio scene filling the frame, floating glass view bar (Reset view, Top, Front), dismissible tip, loading and "3D unavailable" states, light and dark. The scene image below is a <strong>placeholder drawing</strong>: the real render comes from Three.js (<code>assets/catalog/scene/studio.json</code>). Everything else (bar, tip, messages, tooltips, focus) is the final design. <a href="index.html">Back to the design system</a>.</p>
+
+  <div class="ctl row" role="group" aria-label="Demo options">
+    <button class="btn" id="b-glass" aria-pressed="false"><svg class="i" aria-hidden="true"><use href="#info"/></svg><span>Glass fallback: off</span></button>
+    <button class="btn" id="b-rm" aria-pressed="false"><svg class="i" aria-hidden="true"><use href="#info"/></svg><span>Reduced motion: off</span></button>
+    <button class="btn" id="b-reset"><svg class="i" aria-hidden="true"><use href="#rot-l"/></svg><span>Reset demo</span></button>
+    <span class="small muted">Glass fallback = opaque surface (no <code>backdrop-filter</code> / reduced transparency). Reduced motion = camera, tip and bar animations become instant, progress bar is static. Your OS settings are also honoured.</span>
+  </div>
+
+  <h2 class="sec" id="ready">1. Scene ready (nominal, tip visible)</h2>
+  <p class="muted small">Try it: click Top / Front / Reset view, hover or Tab to a button for its tooltip (400 ms, Esc closes), click "Got it" or X (focus moves to Reset view), drag the scene (the pressed button clears), focus the scene (Tab) and press 0, 1 or 2. Fade over 480 ms (<code>--duration-camera</code>, <code>--ease-in-out</code>) stands in for the real camera move.</p>
+  <div id="m-ready"></div>
+  <div class="mobiles" id="m-ready-mob"></div>
+
+  <h2 class="sec" id="notip">2. Tip hidden</h2>
+  <p class="muted small">The bar does not move. The tip stays hidden for good (preference stored in the browser) until Help (US-025) can reopen it.</p>
+  <div id="m-notip"></div>
+
+  <h2 class="sec" id="loading">3. Loading</h2>
+  <p class="muted small">Plain studio background (<code>--scene-floor</code>), no bar, same reserved size as the canvas (no layout shift). <button class="btn sm" id="b-replay" style="margin-left:var(--space-2)">Replay loading</button></p>
+  <div id="m-loading"></div>
+  <div class="mobiles" id="m-loading-mob"></div>
+
+  <h2 class="sec" id="webgl">4. 3D unavailable</h2>
+  <p class="muted small">Opaque message (no glass), <code>role="alert"</code>, focus goes to the title, no bar and no tip. The "Try again" button re-runs initialisation. In this demo it shows the loading state then returns here.</p>
+  <div id="m-webgl"></div>
+  <div class="mobiles" id="m-webgl-mob"></div>
+
+  <h2 class="sec" id="lost">5. 3D stopped (context lost in use)</h2>
+  <div id="m-lost"></div>
+
+  <h2 class="sec" id="states">6. View bar states</h2>
+  <p class="muted small">Over a worst-case background. Disabled is shown only for design-system completeness: US-004 never disables a view button.</p>
+  <div class="benches" id="m-states"></div>
+
+  <h2 class="sec" id="dev">7. For the developer</h2>
+  <h3 style="margin-top:var(--space-4)">Components to reuse (design-system.md sections 7, 8, 9, 14)</h3>
+  <ul class="dev">
+    <li><strong>SceneToolbar</strong> (RAC <code>Toolbar</code>, <code>role="toolbar"</code> <code>aria-label="View"</code>): <code>.glass</code> pill, padding <code>--space-2</code> (6 px under 420 px), gap <code>--space-2</code>, bottom-centre at <code>--float-inset</code> from the edge. Buttons: <code>--control-md</code> (36 px) high, pill, icon 20 px + visible label 14 px/500 (no aria-label needed: the text is the name). <strong>Reset view</strong> has no <code>aria-pressed</code>; <strong>Top</strong> and <strong>Front</strong> are toggle buttons (<code>aria-pressed</code>), at most one pressed, cleared by any manual view change and by Reset view.</li>
+    <li><strong>Pressed</strong> = <code>--color-accent-subtle</code> fill (opaque) + <code>--color-accent-subtle-text</code> + 2 px <code>--color-accent</code> contour + check icon replacing the view icon (same slot, so no layout shift) + weight 600. With focus: keep the contour, add the standard focus ring.</li>
+    <li><strong>Tooltip</strong>: inverted (<code>--color-text</code> background, <code>--color-surface</code> text), <code>--text-sm</code>, <code>--radius-sm</code>, delay 400 ms on hover and on focus, Esc closes without moving focus, linked with <code>aria-describedby</code>. Align left on the first button, right on the last, to stay inside the scene at 375 px.</li>
+    <li><strong>Tip</strong>: <code>.glass</code>, <code>--radius-xl</code>, padding <code>--space-3</code>/<code>--space-4</code>, 14 px, info icon <code>--color-info</code>; "Got it" = secondary <code>Button sm</code>, X = ghost icon button <code>sm</code> (32 px, <code>aria-label="Hide tip"</code>). Below 560 px width the buttons wrap under the text. Max width 720 px, centred above the bar, gap <code>--space-2</code>.</li>
+    <li><strong>Loading</strong>: background <code>--scene-floor</code>, text 16/500, <code>role="progressbar"</code> 8 px high (track <code>--color-border</code> + 1 px <code>--color-border-strong</code> inset, fill <code>--color-accent</code>), message in a polite <code>aria-live</code> region. Static under reduced motion.</li>
+    <li><strong>Error panel</strong> (WebGL / context lost): opaque card (<code>--color-surface</code>, <code>--radius-xl</code>, <code>--shadow-3</code>, max 520 px), 48 px badge <code>--color-error-bg</code> + <code>--color-error</code> triangle icon, title <code>--text-xl</code>/600 with <code>tabindex="-1"</code> to receive focus, body 16 px <code>--color-text</code>, primary <code>Button</code> "Try again" (<code>.btn.primary</code>, <code>--control-md</code>).</li>
+    <li><strong>Scene</strong>: cursor <code>grab</code> / <code>grabbing</code> (rotation) / <code>move</code> (right-drag); focus ring on the viewport inset (<code>outline-offset: -3px</code>) so it is not clipped; reserve the canvas size before it loads.</li>
+  </ul>
+  <h3>Tokens used</h3>
+  <ul class="dev">
+    <li>Glass: <code>--glass-tint</code>, <code>--glass-border</code>, <code>--glass-shadow</code>, <code>--glass-filter</code> via the <code>.glass</code> class (fallbacks included, never below 86 %).</li>
+    <li>Colour: <code>--color-text</code>, <code>--color-surface</code>, <code>--color-surface-2</code> (hover), <code>--color-accent*</code>, <code>--color-info</code>, <code>--color-error</code>, <code>--color-error-bg</code>, <code>--color-border</code>, <code>--color-border-strong</code>, <code>--color-focus</code>; scene: <code>--scene-bg-top/bottom</code>, <code>--scene-floor</code>. 3D colours of the studio itself come from <code>studio.json</code>.</li>
+    <li>Shape and size: <code>--radius-pill</code> (bar, buttons), <code>--radius-xl</code> (tip, error card), <code>--radius-sm</code> (tooltip), <code>--control-md</code>, <code>--control-sm</code>, <code>--control-lg</code>, <code>--space-2/3/4/6/8</code>, <code>--float-inset</code>, <code>--focus-width</code>, <code>--focus-offset</code>.</li>
+    <li>Motion: <code>--duration-fast</code> (hover/press), <code>--duration-slow</code> + <code>--ease-spring</code> (bar and tip entrance), <code>--duration-camera</code> + <code>--ease-in-out</code> (view change; 0 ms under reduced motion, which also drops the inertia), <code>--press-scale</code>.</li>
+    <li>No new token was needed.</li>
+  </ul>
+  <h3>Contrast (WCAG 2.2 AA)</h3>
+  <table>
+    <tr><th>Pair</th><th>Light</th><th>Dark</th><th>Required</th></tr>
+    <tr><td>Text on glass (worst background)</td><td>11.9:1</td><td>9.0:1</td><td>4.5</td></tr>
+    <tr><td>Pressed label on <code>accent-subtle</code></td><td>6.9:1</td><td>8+:1</td><td>4.5</td></tr>
+    <tr><td>Pressed 2 px contour (<code>accent</code>) on worst glass</td><td>4.2:1</td><td>4.0:1</td><td>3</td></tr>
+    <tr><td>Focus ring on worst glass</td><td>4.2:1</td><td>5.0:1</td><td>3</td></tr>
+    <tr><td>Info icon (<code>--color-info</code>) on worst glass</td><td>4.5:1</td><td>5.4:1</td><td>3</td></tr>
+    <tr><td>Error text/icon on <code>error-bg</code></td><td>5.7:1</td><td>7.0:1</td><td>4.5 / 3</td></tr>
+    <tr><td>Tooltip (<code>surface</code> on <code>text</code>)</td><td>16.3:1</td><td>14:1</td><td>4.5</td></tr>
+    <tr><td>Progress fill vs track</td><td>4.9:1</td><td>6+:1</td><td>3</td></tr>
+  </table>
+  <p class="small muted" style="margin-top:var(--space-3)">Hand-computed (WCAG relative luminance); QA re-checks with axe-core. Text is never below 14 px; view buttons are 36 px high with 8 px gaps (criteria 2.5.8: 24 px minimum).</p>
+</main>
+
+<script>
+(function(){
+var uid=0;
+var ico=function(id,cls){return '<svg class="i '+(cls||'')+'" aria-hidden="true" focusable="false"><use href="#'+id+'"/></svg>'};
+var BTN=[['reset','Reset view','rot-l','Reset view (0)'],['top','Top','top','View from above (1)'],['front','Front','front','View from the front (2)']];
+var ANN={reset:'View reset.',top:'Top view.',front:'Front view.'};
+
+function art(view){
+  var leg=function(x,y,w,h){return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="3" style="fill:var(--scene-object-edge)"/>'};
+  return '<svg class="art" viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid meet" data-view="'+view+'" aria-hidden="true" focusable="false">'+
+  '<g class="v-reset"><ellipse cx="515" cy="462" rx="340" ry="30" filter="url(#soft)" style="fill:var(--scene-shadow)"/>'+
+    leg(346,255,12,125)+leg(690,255,12,125)+leg(262,332,14,132)+leg(754,332,14,132)+
+    '<polygon points="330,255 700,255 790,320 240,320" style="fill:var(--scene-desk);stroke:var(--scene-desk-edge);stroke-width:2" stroke-linejoin="round"/>'+
+    '<polygon points="240,320 790,320 790,333 240,333" style="fill:var(--scene-desk-edge)"/></g>'+
+  '<g class="v-top"><rect x="215" y="215" width="570" height="290" rx="22" filter="url(#soft)" style="fill:var(--scene-shadow)"/>'+
+    '<rect x="220" y="140" width="560" height="280" rx="6" style="fill:var(--scene-desk);stroke:var(--scene-desk-edge);stroke-width:2"/>'+
+    '<rect x="236" y="156" width="14" height="14" rx="3" style="fill:var(--scene-object-edge)"/><rect x="750" y="156" width="14" height="14" rx="3" style="fill:var(--scene-object-edge)"/>'+
+    '<rect x="236" y="390" width="14" height="14" rx="3" style="fill:var(--scene-object-edge)"/><rect x="750" y="390" width="14" height="14" rx="3" style="fill:var(--scene-object-edge)"/></g>'+
+  '<g class="v-front"><ellipse cx="500" cy="472" rx="330" ry="22" filter="url(#soft)" style="fill:var(--scene-shadow)"/>'+
+    leg(232,264,14,208)+leg(754,264,14,208)+'<rect x="246" y="300" width="508" height="10" style="fill:var(--scene-object-edge)"/>'+
+    '<rect x="215" y="248" width="570" height="18" rx="4" style="fill:var(--scene-desk);stroke:var(--scene-desk-edge);stroke-width:2"/></g>'+
+  '</svg>';
+}
+function bar(pressed){
+  var n=++uid;
+  return '<div class="bar glass" role="toolbar" aria-label="View">'+BTN.map(function(b){
+    var tog=b[0]!=='reset';
+    return '<span class="tt-wrap"><button class="vb" type="button" data-act="'+b[0]+'"'+(tog?' aria-pressed="'+(pressed===b[0])+'"':'')+' aria-describedby="tt'+n+b[0]+'">'+ico(b[2],'ico')+(tog?ico('check','chk'):'')+'<span>'+b[1]+'</span></button><span class="tt" role="tooltip" id="tt'+n+b[0]+'">'+b[3]+'</span></span>';
+  }).join('')+'</div>';
+}
+var TIP='<div class="tip glass">'+ico('info','ti')+'<p>Drag to turn the view, scroll to zoom, right-drag to move the view.</p><div class="acts"><button class="btn sm" type="button" data-act="gotit">Got it</button><button class="btn ghost icon sm" type="button" data-act="hidetip" aria-label="Hide tip">'+ico('x','sm')+'</button></div></div>';
+
+function ready(o){
+  return '<div class="stage '+o.size+'" data-theme="'+o.theme+'" data-kind="ready" role="group" tabindex="0" aria-label="3D view of your desk. Use arrow keys to turn the view, plus and minus to zoom.">'+
+    art('reset')+'<div class="dock">'+(o.tip?TIP:'')+bar(null)+'</div></div>'+
+    '<p class="cap" role="status" aria-live="polite">Announced to screen readers (visually hidden in the app): <span class="ann">3D view ready. Desk 140 by 70 cm.</span></p>';
+}
+function loading(o,p){
+  return '<div class="stage plain '+o.size+'" data-theme="'+o.theme+'" data-kind="loading"><div class="load"><p role="status" aria-live="polite">Loading 3D scene…</p>'+
+    '<div class="prog" role="progressbar" aria-label="Loading 3D scene" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+(p===undefined?60:p)+'"><i style="--p:'+(p===undefined?60:p)+'%"></i></div></div></div>';
+}
+function errorPanel(o,title,body){
+  return '<div class="stage plain '+o.size+'" data-theme="'+o.theme+'" data-kind="error"><div class="gl"><div class="err" role="alert"><span class="badge">'+ico('alert-triangle')+'</span>'+
+    '<h2 tabindex="-1">'+title+'</h2><p>'+body+'</p><button class="btn primary" type="button" data-act="retry">Try again</button></div></div></div>';
+}
+var W3=function(o){return errorPanel(o,"The 3D view can't start","Your browser or device doesn't support 3D graphics (WebGL 2). Try updating your browser, turning on hardware acceleration, or opening Deskfit in Chrome, Edge, Firefox or Safari.")};
+var LOST=function(o){return errorPanel(o,'The 3D view stopped','The graphics connection was lost. Try again to restore your desk.')};
+
+function fig(label,html){return '<figure class="fig"><span class="chip">'+label+'</span>'+html+'</figure>'}
+var D=function(t){return {size:'d',theme:t}},M=function(t){return {size:'m',theme:t}};
+
+function mount(){
+  uid=0;
+  var set=function(id,h){document.getElementById(id).innerHTML=h};
+  set('m-ready',fig('Light, desktop (1366 x 768 target)',ready(Object.assign(D('light'),{tip:true})))+fig('Dark, desktop',ready(Object.assign(D('dark'),{tip:true}))));
+  set('m-ready-mob','<div>'+fig('Light, 375 px',ready(Object.assign(M('light'),{tip:true})))+'</div><div>'+fig('Dark, 375 px',ready(Object.assign(M('dark'),{tip:true})))+'</div>');
+  set('m-notip',fig('Light, desktop',ready(Object.assign(D('light'),{tip:false}))));
+  set('m-loading',fig('Light, desktop',loading(D('light'))));
+  set('m-loading-mob','<div>'+fig('Dark, 375 px',loading(M('dark')))+'</div>');
+  set('m-webgl',fig('Light, desktop',W3(D('light'))));
+  set('m-webgl-mob','<div>'+fig('Dark, 375 px',W3(M('dark')))+'</div>');
+  set('m-lost',fig('Dark, desktop',LOST(D('dark'))));
+  set('m-states',['light','dark'].map(function(t){return statesBench(t)}).join(''));
+}
+function statesBench(t){
+  var rows=[['Normal',''],['Hover','hover'],['Focus (keyboard)','focus'],['Active (aria-pressed="true") + hover tooltip','active'],['Disabled (not used in US-004)','dis']];
+  return '<div class="bench" data-theme="'+t+'"><h3 style="font-size:var(--text-md)"><span style="background:var(--color-surface);padding:2px 8px;border-radius:var(--radius-sm)">'+(t==='light'?'Light':'Dark')+' theme</span></h3>'+rows.map(function(r){
+    var n=++uid, k=r[1];
+    var btns=BTN.map(function(b,i){
+      var tog=b[0]!=='reset', cls='vb', attr='';
+      if(k==='hover'&&b[0]==='top')cls+=' is-hover';
+      if(k==='focus'&&b[0]==='top')cls+=' is-focus';
+      if(k==='active'&&b[0]==='top')attr=' aria-pressed="true"';else if(tog)attr=' aria-pressed="false"';
+      if(k==='dis'&&b[0]==='top')attr+=' disabled';
+      var tt=(k==='active'&&b[0]==='top')?'<span class="tt" role="tooltip">'+b[3]+'</span>':'';
+      return '<span class="tt-wrap"><button class="'+cls+'" type="button"'+attr+'>'+ico(b[2],'ico')+(tog?ico('check','chk'):'')+'<span>'+b[1]+'</span></button>'+tt+'</span>';
+    }).join('');
+    var pad=(k==='active')?'padding-top:40px;':'';
+    return '<div style="'+pad+'"><div class="lbl"><span>'+r[0]+'</span></div><div class="bar glass" role="toolbar" aria-label="View">'+btns+'</div></div>';
+  }).join('')+'</div>';
+}
+
+/* ---- interactions (delegated) ---- */
+var ttTimer=new WeakMap();
+function showTT(btn){var tt=btn.parentNode.querySelector('.tt');if(!tt)return;clearTimeout(ttTimer.get(btn));ttTimer.set(btn,setTimeout(function(){tt.classList.add('show')},400))}
+function hideTT(btn){var tt=btn.parentNode.querySelector('.tt');clearTimeout(ttTimer.get(btn));if(tt)tt.classList.remove('show')}
+function stageOf(el){return el.closest('.stage')}
+function announce(st,msg){var c=st.nextElementSibling;if(c){var s=c.querySelector('.ann');if(s)s.textContent=msg}}
+function setView(st,view){
+  var svg=st.querySelector('.art');svg.dataset.view=view==='reset'?'reset':view;
+  st.querySelectorAll('.vb[aria-pressed]').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.act===view))});
+  announce(st,ANN[view]);
+}
+function manual(st){
+  if(!st.querySelector('.art'))return;
+  st.querySelector('.art').dataset.view='custom';
+  st.querySelectorAll('.vb[aria-pressed]').forEach(function(b){b.setAttribute('aria-pressed','false')});
+}
+document.addEventListener('mouseover',function(e){var b=e.target.closest&&e.target.closest('.vb');if(b&&!b.closest('.bench'))showTT(b)});
+document.addEventListener('mouseout',function(e){var b=e.target.closest&&e.target.closest('.vb');if(b&&!b.closest('.bench'))hideTT(b)});
+document.addEventListener('focusin',function(e){var b=e.target.closest&&e.target.closest('.vb');if(b&&!b.closest('.bench'))showTT(b)});
+document.addEventListener('focusout',function(e){var b=e.target.closest&&e.target.closest('.vb');if(b&&!b.closest('.bench'))hideTT(b)});
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape'){document.querySelectorAll('.tt.show').forEach(function(t){t.classList.remove('show')});return}
+  var st=e.target.classList&&e.target.classList.contains('stage')?e.target:null;
+  if(st&&st.dataset.kind==='ready'){var m={'0':'reset','1':'top','2':'front'}[e.key];if(m){e.preventDefault();setView(st,m)}}
+});
+document.addEventListener('contextmenu',function(e){if(e.target.closest&&e.target.closest('.stage[data-kind=ready]')&&!e.target.closest('.dock'))e.preventDefault()});
+document.addEventListener('pointerdown',function(e){
+  var st=e.target.closest&&e.target.closest('.stage[data-kind=ready]');
+  if(st&&!e.target.closest('.dock')){manual(st);st.focus({preventScroll:true})}
+});
+document.addEventListener('click',function(e){
+  var b=e.target.closest&&e.target.closest('[data-act]');if(!b)return;
+  var st=stageOf(b),a=b.dataset.act;
+  if(a==='reset'||a==='top'||a==='front'){
+    if(b.closest('.bench'))return;
+    if(a==='top'||a==='front'){var was=b.getAttribute('aria-pressed')==='true';if(was){return}}
+    setView(st,a);
+  }else if(a==='gotit'||a==='hidetip'){
+    var tip=b.closest('.tip');tip.remove();
+    var r=st.querySelector('[data-act=reset]');if(r)r.focus();
+  }else if(a==='retry'){
+    var fig=st.parentNode,o={size:st.classList.contains('d')?'d':'m',theme:st.dataset.theme};
+    fig.querySelectorAll('.stage').forEach(function(s){s.outerHTML=loading(o,30)});
+    setTimeout(function(){var s=fig.querySelector('.stage');if(s)s.outerHTML=W3(o);var h=fig.querySelector('h2');if(h)h.focus()},1800);
+  }
+});
+document.getElementById('b-replay').addEventListener('click',function(){
+  var host=document.getElementById('m-loading'),o=D('light');
+  host.innerHTML=fig('Light, desktop',loading(o,0));
+  var i=host.querySelector('.prog>i');
+  requestAnimationFrame(function(){requestAnimationFrame(function(){i.style.setProperty('--p','100%');host.querySelector('.prog').setAttribute('aria-valuenow','100')})});
+  setTimeout(function(){host.innerHTML=fig('Light, desktop (ready)',ready(Object.assign(o,{tip:true})))},2700);
+});
+var g=document.getElementById('b-glass'),r=document.getElementById('b-rm');
+g.addEventListener('click',function(){var on=g.getAttribute('aria-pressed')!=='true';g.setAttribute('aria-pressed',String(on));document.documentElement.classList.toggle('no-glass',on);g.lastChild.textContent='Glass fallback: '+(on?'on':'off')});
+r.addEventListener('click',function(){var on=r.getAttribute('aria-pressed')!=='true';r.setAttribute('aria-pressed',String(on));document.documentElement.classList.toggle('rm',on);r.lastChild.textContent='Reduced motion: '+(on?'on':'off')});
+document.getElementById('b-reset').addEventListener('click',mount);
+mount();
+})();
+</script>
+</body>
+</html>

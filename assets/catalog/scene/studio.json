@@ -1,0 +1,65 @@
+{
+  "format": "p152.scene-studio",
+  "schemaVersion": 1,
+  "notes": "US-004 base scene parameters (three.js units: metres, Y up, Y=0 floor, desk centred on X/Z origin, user side = +Z). Values come from the PO-validated preview docs/design/3d/apercu/index.html. Everything procedural, no external asset. Colours sRGB hex. Backdrop/tokens: see docs/design/ui/tokens.css --scene-* (the UI tokens drive the 2D overlays; 3D colours below drive the render).",
+  "desk": { "type": "desk.rect", "preset": "standard", "widthMm": 1400, "depthMm": 700, "heightMm": 740, "thicknessMm": 25, "legStyle": "post", "materials": { "top": "mat.birch", "legs": "mat.black-metal" }, "edgeRadiusMm": 9, "budget": { "tris": 1500, "drawCalls": 2 }, "notes": "Generated from assets/catalog/object-types/desk.json. Legs: 4 posts r 22->18 mm at x +-640, z +-290 mm plus rear rail 1280x70x16 mm at z -290, y = top - 45 mm. Use InstancedMesh for legs." },
+  "backdrop": {
+    "light": { "background": "#e8e8ea", "floor": "#e2e2e5", "fog": { "color": "#e8e8ea", "near": 9, "far": 20 }, "envIntensity": 0.7, "exposure": 1.0 },
+    "dark":  { "background": "#1c1e22", "floor": "#212328", "fog": { "color": "#1c1e22", "near": 9, "far": 20 }, "envIntensity": 0.55, "exposure": 1.0 },
+    "default": "follow-system-theme"
+  },
+  "cyclorama": { "floorEndZ": 9, "curveStartZ": -1.6, "radius": 1.5, "wallHeight": 7, "halfWidthX": 16, "segments": 18, "roughness": 0.92, "receiveShadow": true, "tris": 72, "notes": "Single strip: floor curving into back wall, profile in (z,y), no seam." },
+  "lighting": {
+    "toneMapping": "NeutralToneMapping",
+    "exposure": 1.0,
+    "hemisphere": { "sky": "#ffffff", "ground": "#b8b8bd", "intensity": 0.35 },
+    "key":  { "color": "#fff6ea", "intensity": 2.4, "position": [1.8, 3.2, 2.2], "target": [0, 0.7, 0], "castShadow": true },
+    "fill": { "color": "#e3ecff", "intensity": 0.55, "position": [-2.6, 1.8, 1.8], "castShadow": false },
+    "rim":  { "color": "#ffffff", "intensity": 1.1, "position": [-0.8, 2.4, -2.6], "castShadow": false },
+    "environment": {
+      "kind": "procedural-pmrem", "sigma": 0.03,
+      "room": { "size": [14, 7, 14], "centerY": 3.5, "color": "#77777c" },
+      "softboxes": [
+        { "id": "key", "size": [4.5, 3.2], "position": [3.5, 4.2, 3.5], "emissive": 7 },
+        { "id": "fill", "size": [2.2, 4.5], "position": [-5, 2.6, 1.5], "emissive": 3 },
+        { "id": "overhead", "size": [6, 0.7], "position": [0, 6.4, -1], "emissive": 5 },
+        { "id": "rim", "size": [1.4, 4.5], "position": [-2.5, 2.6, -6], "emissive": 4 }
+      ],
+      "lookAt": [0, 1, 0], "bakeOnce": true
+    },
+    "contactShadow": { "opacity": 0.42, "technique": "radial/rounded-rect gradient plane under each object, generated once and shared", "deskFootprintMm": [1500, 800], "liftY": 0.001, "depthWrite": false, "fog": false }
+  },
+  "shadow": {
+    "type": "VSMShadowMap", "autoUpdate": false, "updateOn": "scene-change",
+    "frustum": { "half": 2.2, "near": 0.5, "far": 9 },
+    "bias": -0.0005, "normalBias": 0.02,
+    "tiers": {
+      "high":   { "mapSize": 2048, "radius": 10, "blurSamples": 16, "dprMax": 2,   "antialias": true,  "contactShadows": true, "fog": true },
+      "medium": { "mapSize": 1024, "radius": 8,  "blurSamples": 12, "dprMax": 1.5, "antialias": true,  "contactShadows": true, "fog": true },
+      "low":    { "mapSize": 512,  "radius": 6,  "blurSamples": 8,  "dprMax": 1.25, "antialias": false, "contactShadows": true, "fog": true, "notes": "contact shadows alone carry grounding; real shadow optional/off if the frame budget fails" }
+    },
+    "defaults": { "desktop": "high", "mobile": "medium" }
+  },
+  "camera": {
+    "fovDeg": 32, "near": 0.1, "far": 40,
+    "target": [0, 0.72, 0],
+    "reset": { "position": [1.75, 1.5, 2.7], "target": [0, 0.72, 0] },
+    "views": {
+      "reset": { "position": [1.75, 1.5, 2.7], "target": [0, 0.72, 0] },
+      "top":   { "position": [0, 3.4, 0.001], "target": [0, 0.74, 0.05], "notes": "0.001 m z offset avoids gimbal degeneracy" },
+      "front": { "position": [0, 1.1, 3.3], "target": [0, 0.72, 0] }
+    },
+    "limits": {
+      "minDistance": 0.8, "maxDistance": 4.5,
+      "minPolarDeg": 0, "maxPolarDeg": 89,
+      "minAzimuthDeg": -109, "maxAzimuthDeg": 109,
+      "minCameraY": 0.9,
+      "pan": { "x": [-1.0, 1.0], "y": [0.5, 1.1], "z": [-0.8, 0.8] },
+      "deskKeepOutMm": { "halfWidth": 700, "halfDepth": 350, "height": 740, "margin": 100, "notes": "camera must stay outside the desk box inflated by margin and above minCameraY (never under the top)" },
+      "damping": 0.07
+    },
+    "transition": { "durationMs": 480, "easing": "in-out (ease-in-out)", "path": "spherical arc around target", "reducedMotion": "instant jump", "notes": "US-004 criterion fixes 480 ms; the preview used 950 ms. Interrupt on user input." },
+    "mouse": { "left": "rotate", "wheel": "dolly", "right": "pan", "touch": "preparation only (US-021)" }
+  },
+  "perf": { "frameloop": "demand", "targetFps": 60, "minViewport": [1366, 768], "budget": { "drawCalls": 20, "triangles": 8000, "notes": "empty scene + desk; global budgets in ADR-3D-08" } }
+}
