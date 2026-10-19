@@ -4,7 +4,9 @@
   "private": true,
   "type": "module",
   "packageManager": "pnpm@10.34.7",
-  "engines": { "node": ">=24 <25" },
+  "engines": {
+    "node": ">=24 <25"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
@@ -29,10 +31,6 @@
   "lint-staged": {
     "*.{ts,tsx,js,mjs,json,css,html}": "prettier --write",
     "*.{ts,tsx}": "eslint --max-warnings 0"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": ["esbuild", "simple-git-hooks"],
-    "minimumReleaseAge": 4320
   },
   "dependencies": {
     "@react-three/drei": "10.7.9",
