@@ -1,6 +1,6 @@
-# Brouillon secdevops — à copier par le devops vers `.gitleaks.toml` (racine du dépôt).
-# Exige gitleaks >= 8.25 (syntaxe [[allowlists]], sous-commandes `git` et `dir`).
-# Source : docs/security/ci-security.md
+# Configuration gitleaks du projet P152 (propriétaire : secdevops ; toute modification passe par une revue secdevops).
+# Exige gitleaks >= 8.25 (syntaxe [[allowlists]], sous-commandes `git` et `dir`). Version CI : 8.30.1.
+# Spécification : docs/security/ci-security.md §3.1
 
 title = "P152 gitleaks configuration"
 
