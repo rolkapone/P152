@@ -1,0 +1,19 @@
+{
+  "id": "lamp.generic", "version": 1, "type": "lamp", "category": "lighting", "name": { "en": "Desk lamp" },
+  "generator": "procedural", "model": null, "license": "Original work (project)", "source": "Generated in code",
+  "params": {
+    "baseDiameter": { "unit": "mm", "default": 160, "min": 100, "max": 220, "step": 5 },
+    "height":       { "unit": "mm", "default": 450, "min": 300, "max": 650, "step": 10 },
+    "headDiameter": { "unit": "mm", "default": 140, "min": 80,  "max": 220, "step": 5 },
+    "reach":        { "unit": "mm", "default": 250, "min": 0,   "max": 500, "step": 10, "note": "Horizontal offset of the head from the base" },
+    "colorTempK":   { "default": 3000, "min": 2200, "max": 6500, "step": 100, "note": "Used by lighting, R3" },
+    "on":           { "enum": [true, false], "default": false }
+  },
+  "slots": [
+    { "id": "body",  "role": "body",  "default": "mat.black-metal" },
+    { "id": "shade", "role": "shade", "default": "mat.matte-black" },
+    { "id": "bulb",  "role": "bulb",  "default": "mat.led-warm" }
+  ],
+  "budget": { "tris": 3000, "drawCalls": 3 },
+  "placement": { "restsOn": ["desk"], "canSupport": [], "footprintParts": ["base (base)", "head (overhang, raised)"] }
+}

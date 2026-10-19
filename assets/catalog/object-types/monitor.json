@@ -1,0 +1,28 @@
+{
+  "id": "monitor.generic", "version": 1, "type": "monitor", "category": "display", "name": { "en": "Monitor" },
+  "generator": "procedural", "model": null, "license": "Original work (project)", "source": "Generated in code",
+  "params": {
+    "diagonalIn":  { "unit": "in", "default": 27, "min": 19, "max": 49, "step": 0.5, "note": "Panel width/height derived from diagonal and ratio" },
+    "ratio":       { "enum": ["16:9", "16:10", "21:9", "32:9"], "default": "16:9" },
+    "curveRadius": { "unit": "mm", "enum": [0, 1000, 1500, 1800], "default": 0, "note": "0 = flat" },
+    "stand":       { "enum": ["stand", "vesa", "none"], "default": "stand", "note": "vesa = no stand, to be mounted on an arm" },
+    "bezel":       { "unit": "mm", "default": 7, "min": 3, "max": 15, "step": 1 },
+    "depth":       { "unit": "mm", "default": 40, "min": 15, "max": 80, "step": 1, "note": "Back bulge included; 40 mm typical" },
+    "standBaseW":  { "unit": "mm", "default": 260, "min": 200, "max": 320, "step": 10 },
+    "standBaseD":  { "unit": "mm", "default": 190, "min": 160, "max": 260, "step": 10 }
+  },
+  "presets": [
+    { "id": "24-16-9", "params": { "diagonalIn": 24, "ratio": "16:9" } },
+    { "id": "27-16-9", "params": { "diagonalIn": 27, "ratio": "16:9" } },
+    { "id": "32-16-9", "params": { "diagonalIn": 32, "ratio": "16:9" } },
+    { "id": "34-ultrawide", "params": { "diagonalIn": 34, "ratio": "21:9", "curveRadius": 1800 } },
+    { "id": "49-super-ultrawide", "params": { "diagonalIn": 49, "ratio": "32:9", "curveRadius": 1800 } }
+  ],
+  "slots": [
+    { "id": "body",   "role": "body",   "default": "mat.soft-touch-black" },
+    { "id": "screen", "role": "screen", "default": "mat.screen-lit" },
+    { "id": "stand",  "role": "metal",  "default": "mat.anodized-graphite" }
+  ],
+  "budget": { "tris": 2500, "drawCalls": 3 },
+  "placement": { "restsOn": ["desk", "mousepad"], "mountable": ["monitor-arm.vesa"], "footprintParts": ["standBase (floor-level, base)", "panel (overhang, raised)"] }
+}

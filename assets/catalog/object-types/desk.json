@@ -1,0 +1,23 @@
+{
+  "id": "desk.rect", "version": 1, "type": "desk", "category": "furniture", "name": { "en": "Desk" },
+  "generator": "procedural", "model": null, "license": "Original work (project)", "source": "Generated in code",
+  "params": {
+    "width":     { "unit": "mm", "default": 1400, "min": 800, "max": 2400, "step": 10 },
+    "depth":     { "unit": "mm", "default": 700,  "min": 500, "max": 1000, "step": 10 },
+    "height":    { "unit": "mm", "default": 740,  "min": 600, "max": 1300, "step": 10 },
+    "thickness": { "unit": "mm", "default": 25,   "min": 18,  "max": 40,   "step": 1 },
+    "legStyle":  { "enum": ["post", "frame"], "default": "post" }
+  },
+  "presets": [
+    { "id": "compact", "params": { "width": 1000, "depth": 600 } },
+    { "id": "standard", "params": { "width": 1400, "depth": 700 } },
+    { "id": "large", "params": { "width": 1800, "depth": 800 } }
+  ],
+  "slots": [
+    { "id": "top",  "role": "top",  "default": "mat.birch" },
+    { "id": "legs", "role": "legs", "default": "mat.black-metal" }
+  ],
+  "budget": { "tris": 1500, "drawCalls": 2 },
+  "placement": { "restsOn": ["floor"], "canSupport": ["*"] },
+  "notes": "Corner (L-shaped) desk is a separate catalog entry desk.corner with its own params (backlog)."
+}

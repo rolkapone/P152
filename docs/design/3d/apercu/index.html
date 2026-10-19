@@ -1,0 +1,594 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>P152 - 3D look preview (studio product shot)</title>
+<!--
+  Visual target for the generic procedural objects (docs/design/3d/direction-artistique.md).
+  NOT the production renderer: it only shows the intended look, proportions, studio lighting and style presets.
+  three.js 0.170.0 (exact version) is loaded from jsDelivr (MIT licence). No other asset is loaded:
+  the studio environment, the cyclorama and the contact shadows are all generated in code.
+  The MATERIALS / STYLES / DEFAULTS / STUDIO tables below mirror assets/catalog/materials/materials.json and
+  assets/catalog/styles/styles.json (keep them in sync when editing).
+  Inspired by the calm, spacious, glassy language of premium product photography; no brand, logo,
+  protected typeface or recognisable product shape is reproduced (UI font: Inter if installed, else system-ui).
+-->
+<style>
+  :root { color-scheme: light; --glass: rgba(255,255,255,.62); --glass-line: rgba(255,255,255,.65); --fg: #1d1d1f; --muted: #5c5f66; --accent: #2a62d4; --accent-fg: #fff; --shadow: 0 8px 30px rgba(20,22,30,.12), 0 1px 3px rgba(20,22,30,.08); }
+  body[data-studio="dark"] { color-scheme: dark; --glass: rgba(38,40,46,.58); --glass-line: rgba(255,255,255,.12); --fg: #f2f3f5; --muted: #a9adb5; --accent: #6b9bff; --accent-fg: #0b1220; --shadow: 0 8px 30px rgba(0,0,0,.45); }
+  html, body { margin: 0; height: 100%; overflow: hidden; font: 14px/1.4 Inter, system-ui, "Segoe UI", Roboto, sans-serif; background: #e8e8ea; color: var(--fg); }
+  #c { position: fixed; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+  .panel { position: fixed; background: var(--glass); color: var(--fg); border: 1px solid var(--glass-line); border-radius: 20px; padding: 10px 14px; box-shadow: var(--shadow);
+           -webkit-backdrop-filter: blur(22px) saturate(1.5); backdrop-filter: blur(22px) saturate(1.5); transition: background .4s ease, color .4s ease; }
+  #top { top: 16px; left: 16px; display: flex; flex-wrap: wrap; gap: 8px 22px; align-items: center; max-width: calc(100% - 64px); }
+  .group { display: flex; gap: 4px; align-items: center; flex-wrap: wrap; }
+  .group > .lbl { font-size: 12px; font-weight: 600; letter-spacing: .02em; color: var(--muted); margin-right: 6px; }
+  button { font: inherit; color: var(--fg); background: transparent; border: 0; border-radius: 999px; padding: 6px 14px; min-height: 32px; cursor: pointer; transition: background .2s ease, color .2s ease, transform .2s ease; }
+  button:hover { background: rgba(127,130,140,.18); }
+  button:active { transform: scale(.97); }
+  button[aria-pressed="true"] { background: var(--accent); color: var(--accent-fg); }
+  button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  #stats { bottom: 16px; left: 16px; font-size: 12.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  #stats b { font-weight: 600; color: var(--fg); }
+  #hint { bottom: 16px; right: 16px; font-size: 12.5px; color: var(--muted); max-width: 320px; }
+  #err { top: 90px; left: 16px; display: none; max-width: 420px; }
+  @media (prefers-reduced-motion: reduce) { .panel, button { transition: none; } button:active { transform: none; } }
+</style>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+} }
+</script>
+</head>
+<body data-studio="light">
+<canvas id="c" aria-label="3D studio preview of a desk setup with generic objects" role="img"></canvas>
+
+<div id="top" class="panel">
+  <div class="group" role="group" aria-label="Style preset"><span class="lbl">Style</span><span id="styleBtns" class="group"></span></div>
+  <div class="group" role="group" aria-label="Backdrop"><span class="lbl">Backdrop</span>
+    <button type="button" data-studio="light" aria-pressed="true">Light</button>
+    <button type="button" data-studio="dark" aria-pressed="false">Dark</button>
+  </div>
+  <div class="group" role="group" aria-label="View"><span class="lbl">View</span>
+    <button type="button" data-view="reset">Reset</button>
+    <button type="button" data-view="top">Top</button>
+    <button type="button" data-view="front">Front</button>
+  </div>
+</div>
+<div id="stats" class="panel" aria-live="off"></div>
+<div id="hint" class="panel">Drag to turn the view, right-drag to move it, scroll to zoom. Generic procedural objects: no brands, no logos, no textures.</div>
+<div id="err" class="panel" role="alert">The 3D library could not be loaded (internet access to cdn.jsdelivr.net is required for this preview).</div>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+
+/* ------------------------------------------------------------------ data (mirror of assets/catalog) */
+// sheen:[amount,roughness,colour]  cc:[clearcoat,roughness]  -> MeshPhysicalMaterial only when present
+const MATERIALS = {
+  'mat.anodized-silver':{c:'#d3d5d8',m:1,r:.36}, 'mat.anodized-graphite':{c:'#4a4d52',m:1,r:.40},
+  'mat.soft-touch-black':{c:'#1d1f22',m:0,r:.68,sheen:[.35,.6,'#5a5e66']}, 'mat.soft-touch-white':{c:'#ecebe7',m:0,r:.62,sheen:[.3,.6,'#ffffff']},
+  'mat.glass-clear':{c:'#dfe8ee',m:0,r:.04,opacity:.16,cc:[1,.03]},
+  'mat.fabric-woven':{c:'#8d9096',m:0,r:1,sheen:[1,.5,'#c4c7cc']}, 'mat.fabric-woven-dark':{c:'#34373c',m:0,r:1,sheen:[1,.5,'#6a6e75']},
+  'mat.matte-black':{c:'#202226',m:0,r:.78}, 'mat.graphite':{c:'#3b3f45',m:0,r:.70}, 'mat.satin-white':{c:'#ecebe7',m:0,r:.50},
+  'mat.warm-white':{c:'#f1ede2',m:0,r:.60}, 'mat.light-grey':{c:'#c7c9cc',m:0,r:.60}, 'mat.brushed-aluminium':{c:'#c9ccd0',m:1,r:.38},
+  'mat.black-metal':{c:'#2a2d31',m:.85,r:.45}, 'mat.oak':{c:'#c9a577',m:0,r:.62}, 'mat.walnut':{c:'#6b4a35',m:0,r:.58},
+  'mat.birch':{c:'#e4cfa6',m:0,r:.65}, 'mat.felt-grey':{c:'#6d7178',m:0,r:1}, 'mat.felt-dark':{c:'#2d3035',m:0,r:1},
+  'mat.felt-light':{c:'#e3e1dc',m:0,r:1}, 'mat.felt-sage':{c:'#9fb39a',m:0,r:1}, 'mat.rubber-black':{c:'#17181b',m:0,r:.92},
+  'mat.glass-smoked':{c:'#1a1d22',m:0,r:.05,opacity:.3}, 'mat.screen-lit':{c:'#0a0b0e',m:0,r:.12,e:'#ffffff',ei:.55,screen:true},
+  'mat.accent-coral':{c:'#e5694f',m:0,r:.55}, 'mat.accent-teal':{c:'#2b9a8c',m:0,r:.55}, 'mat.accent-mustard':{c:'#e2b23a',m:0,r:.55},
+  'mat.accent-sky':{c:'#5f9fd6',m:0,r:.55}, 'mat.accent-terracotta':{c:'#bf6a4a',m:0,r:.65},
+  'mat.led-white':{c:'#222222',m:0,r:.4,e:'#fff4e0',ei:1.6}, 'mat.led-warm':{c:'#222222',m:0,r:.4,e:'#ffb870',ei:2},
+  'mat.led-violet':{c:'#222222',m:0,r:.4,e:'#8d5cff',ei:2}, 'mat.led-cyan':{c:'#222222',m:0,r:.4,e:'#4fd8ff',ei:2},
+  'mat.leaf-green':{c:'#4f7d4a',m:0,r:.7}, 'mat.ceramic-terracotta':{c:'#b9694a',m:0,r:.8}
+};
+const DEFAULTS = {
+  desk:{top:'mat.birch',legs:'mat.black-metal'},
+  monitor:{body:'mat.soft-touch-black',screen:'mat.screen-lit',metal:'mat.anodized-graphite'},
+  'pc-case':{body:'mat.graphite',accent:'mat.matte-black',glass:'mat.glass-smoked',led:'mat.led-white',feet:'mat.rubber-black'},
+  keyboard:{body:'mat.anodized-graphite',keycaps:'mat.warm-white',accent:'mat.light-grey'},
+  mouse:{body:'mat.matte-black',accent:'mat.graphite'},
+  mousepad:{mat:'mat.felt-dark'},
+  'controller-stand':{body:'mat.matte-black',accent:'mat.graphite',led:'mat.led-white'},
+  'monitor-arm':{metal:'mat.anodized-graphite'},
+  speakers:{body:'mat.matte-black',accent:'mat.graphite',driver:'mat.rubber-black',led:'mat.led-white'},
+  lamp:{body:'mat.black-metal',shade:'mat.matte-black',bulb:'mat.led-warm'},
+  decor:{pot:'mat.ceramic-terracotta',leaf:'mat.leaf-green'}
+};
+// mirror of styles.json "studio" block
+const STUDIO = {
+  light:{background:'#e8e8ea',floor:'#e2e2e5',envBias:0,rim:1.1},
+  dark:{background:'#1c1e22',floor:'#212328',envBias:-.15,rim:1.5}
+};
+const DEFAULT_AMBIENCE = {background:'#e8e8ea',floor:'#e2e2e5',exposure:1,keyColor:'#fff6ea',keyIntensity:2.4,hemiIntensity:.35,envIntensity:.7,lampOn:false,screenGradient:['#c9d6ea','#e9d3dc']};
+const STYLES = [
+  {id:'default',name:'Default',rules:{byRole:{},byType:{}},ambience:DEFAULT_AMBIENCE,suggestedDecor:[]},
+  {id:'style.all-white',name:'All white',rules:{byRole:{top:'mat.satin-white',legs:'mat.satin-white',body:'mat.satin-white',keycaps:'mat.warm-white',accent:'mat.light-grey',metal:'mat.anodized-silver',mat:'mat.felt-light',shade:'mat.satin-white',driver:'mat.light-grey',led:'mat.led-white',bulb:'mat.led-warm'},byType:{}},
+   ambience:{background:'#ecebed',floor:'#e4e4e7',exposure:1,keyColor:'#fff6ea',keyIntensity:2.4,hemiIntensity:.4,envIntensity:.7,lampOn:false,screenGradient:['#b9d4f2','#f3d9e6']},suggestedDecor:[]},
+  {id:'style.all-black',name:'All black',rules:{byRole:{top:'mat.matte-black',legs:'mat.black-metal',body:'mat.matte-black',keycaps:'mat.graphite',accent:'mat.graphite',metal:'mat.anodized-graphite',mat:'mat.felt-dark',shade:'mat.matte-black',driver:'mat.rubber-black',led:'mat.led-white',bulb:'mat.led-warm'},byType:{}},
+   ambience:{background:'#dcdde0',floor:'#d4d5d9',exposure:1.05,keyColor:'#f4f6ff',keyIntensity:2.8,hemiIntensity:.35,envIntensity:.8,lampOn:false,screenGradient:['#243b6b','#6d3fa3']},suggestedDecor:[]},
+  {id:'style.colorful',name:'Colorful',rules:{byRole:{top:'mat.birch',legs:'mat.accent-teal',body:'mat.satin-white',keycaps:'mat.warm-white',accent:'mat.accent-coral',metal:'mat.accent-mustard',mat:'mat.accent-sky',shade:'mat.accent-coral',driver:'mat.graphite',led:'mat.led-cyan',bulb:'mat.led-warm'},
+    byType:{speakers:{body:'mat.accent-sky'},'pc-case':{body:'mat.accent-teal',accent:'mat.satin-white'},lamp:{body:'mat.accent-mustard'},mouse:{body:'mat.accent-coral',accent:'mat.satin-white'}}},
+   ambience:{background:'#efeae3',floor:'#e6dfd3',exposure:1,keyColor:'#fff2e0',keyIntensity:2.4,hemiIntensity:.45,envIntensity:.72,lampOn:false,screenGradient:['#ff9a76','#6fa8dc']},suggestedDecor:[]},
+  {id:'style.cosy',name:'Cosy',rules:{byRole:{top:'mat.oak',legs:'mat.black-metal',body:'mat.graphite',keycaps:'mat.warm-white',accent:'mat.accent-terracotta',metal:'mat.black-metal',mat:'mat.felt-sage',shade:'mat.warm-white',driver:'mat.rubber-black',led:'mat.led-warm',bulb:'mat.led-warm'},
+    byType:{speakers:{body:'mat.walnut'},keyboard:{body:'mat.birch'},lamp:{body:'mat.walnut',shade:'mat.accent-terracotta'}}},
+   ambience:{background:'#8a7664',floor:'#7e6a58',exposure:.95,keyColor:'#ffc890',keyIntensity:1.7,hemiIntensity:.25,envIntensity:.4,lampOn:true,screenGradient:['#e08a5a','#5b3b6e']},suggestedDecor:['plant']}
+];
+
+/* ------------------------------------------------------------------ renderer, studio environment, lights */
+const reducedMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+const canvas = document.getElementById('c');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.toneMapping = THREE.NeutralToneMapping;      // neutral: material colours stay faithful
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.VSMShadowMap;         // wide soft penumbra, softbox-like
+renderer.shadowMap.autoUpdate = false;                // ADR-3D-08: shadows re-rendered only when the scene changes
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color('#e8e8ea');
+scene.fog = new THREE.Fog('#e8e8ea', 9, 20);
+
+// Procedural studio environment (no file): grey room + emissive softboxes, baked once with PMREM.
+function buildStudioEnv() {
+  const s = new THREE.Scene();
+  const room = new THREE.Mesh(new THREE.BoxGeometry(14, 7, 14), new THREE.MeshBasicMaterial({ color: 0x77777c, side: THREE.BackSide }));
+  room.position.y = 3.5; s.add(room);
+  const box = (w, h, pos, v) => {
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ color: new THREE.Color().setScalar(v), side: THREE.DoubleSide }));
+    m.position.set(...pos); m.lookAt(0, 1, 0); s.add(m);
+  };
+  box(4.5, 3.2, [3.5, 4.2, 3.5], 7);                  // key softbox, front right
+  box(2.2, 4.5, [-5, 2.6, 1.5], 3);                   // fill strip, left
+  box(6, 0.7, [0, 6.4, -1], 5);                       // overhead strip
+  box(1.4, 4.5, [-2.5, 2.6, -6], 4);                  // rim strip, behind
+  return s;
+}
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(buildStudioEnv(), 0.03).texture;
+
+const camera = new THREE.PerspectiveCamera(32, 1, 0.1, 40);
+const hemi = new THREE.HemisphereLight('#ffffff', '#b8b8bd', 0.35); scene.add(hemi);
+const key = new THREE.DirectionalLight('#fff6ea', 2.4);                 // key softbox
+key.position.set(1.8, 3.2, 2.2); key.target.position.set(0, 0.7, 0);
+key.castShadow = true; key.shadow.mapSize.set(2048, 2048);
+Object.assign(key.shadow.camera, { left: -2.2, right: 2.2, top: 2.2, bottom: -2.2, near: 0.5, far: 9 });
+key.shadow.bias = -0.0005; key.shadow.normalBias = 0.02; key.shadow.radius = 10; key.shadow.blurSamples = 16;
+scene.add(key, key.target);
+const fill = new THREE.DirectionalLight('#e3ecff', 0.55); fill.position.set(-2.6, 1.8, 1.8); scene.add(fill);
+const rim = new THREE.DirectionalLight('#ffffff', 1.1); rim.position.set(-0.8, 2.4, -2.6); scene.add(rim);
+
+/* Seamless cyclorama: floor curving up into the back wall with no visible seam. Profile in (z, y). */
+function buildCyclo() {
+  const prof = [[9, 0], [-1.6, 0]], R = 1.5, cz = -1.6, N = 18;
+  for (let i = 1; i <= N; i++) { const t = i / N * Math.PI / 2; prof.push([cz - R * Math.sin(t), R - R * Math.cos(t)]); }
+  prof.push([cz - R, 7]);
+  const X = 16, pos = [], nor = [], idx = [];
+  prof.forEach(([z, y], i) => {
+    const a = prof[Math.max(i - 1, 0)], b = prof[Math.min(i + 1, prof.length - 1)];
+    let tz = b[0] - a[0], ty = b[1] - a[1]; const l = Math.hypot(tz, ty); tz /= l; ty /= l;
+    for (const x of [-X, X]) { pos.push(x, y, z); nor.push(0, -tz, ty); }   // normal (y, z) = (-tz, ty)
+  });
+  for (let i = 0; i < prof.length - 1; i++) { const a = i * 2; idx.push(a, a + 1, a + 2, a + 1, a + 3, a + 2); }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  g.setAttribute('normal', new THREE.Float32BufferAttribute(nor, 3));
+  g.setIndex(idx); return g;
+}
+const floor = new THREE.Mesh(buildCyclo(), new THREE.MeshStandardMaterial({ color: '#e2e2e5', roughness: 0.92, side: THREE.DoubleSide, envMapIntensity: 0.6 }));
+floor.receiveShadow = true; scene.add(floor);
+
+/* Contact shadows: one soft rounded-rectangle gradient under each object (generated once, shared). */
+const contactTex = (() => {
+  const n = 128, cv = document.createElement('canvas'); cv.width = cv.height = n;
+  const ctx = cv.getContext('2d'), im = ctx.createImageData(n, n);
+  const sm = (a, b, x) => { const t = Math.min(Math.max((x - a) / (b - a), 0), 1); return t * t * (3 - 2 * t); };
+  for (let j = 0; j < n; j++) for (let i = 0; i < n; i++) {
+    const px = Math.abs((i + .5) / n * 2 - 1) - 0.62, py = Math.abs((j + .5) / n * 2 - 1) - 0.62, r = 0.18;
+    const qx = px + r, qy = py + r, d = Math.hypot(Math.max(qx, 0), Math.max(qy, 0)) + Math.min(Math.max(qx, qy), 0) - r;
+    const a = Math.pow(1 - sm(-0.08, 0.38, d), 1.6), k = (j * n + i) * 4;
+    im.data[k] = im.data[k + 1] = im.data[k + 2] = 0; im.data[k + 3] = Math.round(255 * a);
+  }
+  ctx.putImageData(im, 0, 0);
+  const t = new THREE.CanvasTexture(cv); t.anisotropy = 2; return t;
+})();
+const contactMat = new THREE.MeshBasicMaterial({ map: contactTex, transparent: true, depthWrite: false, opacity: 0.5, fog: false });
+const contactGeo = new THREE.PlaneGeometry(1, 1).rotateX(-Math.PI / 2);
+// Footprint w x d (m). The gradient core covers 62 % of the plane, so the plane is 1/0.62 larger than the footprint.
+function contact(parent, w, d, x = 0, y = 0.0015, z = 0) {
+  const m = new THREE.Mesh(contactGeo, contactMat);
+  m.scale.set(w / 0.62, 1, d / 0.62); m.position.set(x, y, z); m.renderOrder = 1; parent.add(m); return m;
+}
+
+/* ------------------------------------------------------------------ helpers */
+const PLACEHOLDER = new THREE.MeshStandardMaterial();
+const tagged = [];                                   // every mesh that takes a catalog material
+const rbox = (w, h, d, r, seg = 4) => new RoundedBoxGeometry(w, h, d, seg, Math.min(r, w / 2 - 1e-4, h / 2 - 1e-4, d / 2 - 1e-4));
+function add(group, geo, type, role, x = 0, y = 0, z = 0, noShadow = false) {
+  const m = new THREE.Mesh(geo, PLACEHOLDER);
+  m.userData = { type, role }; m.position.set(x, y, z);
+  m.castShadow = !noShadow; m.receiveShadow = true;
+  group.add(m); tagged.push(m); return m;
+}
+function limb(group, a, b, r, type, role) {          // cylinder between two points
+  const A = new THREE.Vector3(...a), B = new THREE.Vector3(...b), dir = B.clone().sub(A), len = dir.length();
+  const m = add(group, new THREE.CylinderGeometry(r, r, len, 16), type, role);
+  m.position.copy(A).addScaledVector(dir, 0.5);
+  m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir.normalize());
+  return m;
+}
+function roundedRectShape(w, d, r) {
+  const s = new THREE.Shape(), x = -w / 2, y = -d / 2;
+  s.moveTo(x + r, y); s.lineTo(x + w - r, y); s.quadraticCurveTo(x + w, y, x + w, y + r);
+  s.lineTo(x + w, y + d - r); s.quadraticCurveTo(x + w, y + d, x + w - r, y + d);
+  s.lineTo(x + r, y + d); s.quadraticCurveTo(x, y + d, x, y + d - r);
+  s.lineTo(x, y + r); s.quadraticCurveTo(x, y, x + r, y); return s;
+}
+
+const DESK_W = 1.4, DESK_D = 0.7, DESK_H = 0.74, DESK_T = 0.025;
+const PAD_TOP = 0.0056;                              // mouse pad top above the desk surface (m)
+
+/* ------------------------------------------------------------------ generic objects (millimetres -> metres) */
+function makeDesk() {
+  const g = new THREE.Group();
+  add(g, rbox(DESK_W, DESK_T, DESK_D, 0.009), 'desk', 'top', 0, DESK_H - DESK_T / 2, 0);
+  for (const sx of [-1, 1]) for (const sz of [-1, 1]) {
+    add(g, new THREE.CylinderGeometry(0.022, 0.018, DESK_H - DESK_T, 24), 'desk', 'legs', sx * 0.64, (DESK_H - DESK_T) / 2, sz * 0.29);
+    contact(g, 0.07, 0.07, sx * 0.64, 0.0015, sz * 0.29);                // each foot touches the floor
+  }
+  add(g, rbox(1.28, 0.07, 0.016, 0.006), 'desk', 'legs', 0, DESK_H - DESK_T - 0.045, -0.29);
+  contact(g, 1.5, 0.8, 0, 0.001, 0).material = contactMat;               // broad ambient occlusion under the desk
+  return g;
+}
+
+function makeMonitor(diagIn = 27, ratio = [16, 9]) {   // origin = panel centre, screen faces +Z (generic flat panel)
+  const g = new THREE.Group(), d = diagIn * 0.0254, k = d / Math.hypot(ratio[0], ratio[1]);
+  const w = ratio[0] * k, h = ratio[1] * k, bz = 0.007, th = 0.012;
+  add(g, rbox(w + 2 * bz, h + 2 * bz, th, 0.0059), 'monitor', 'body');
+  add(g, new THREE.PlaneGeometry(w, h), 'monitor', 'screen', 0, 0, th / 2 + 0.0004, true);
+  add(g, rbox(w * 0.5, h * 0.55, 0.025, 0.011), 'monitor', 'body', 0, 0, -(th / 2 + 0.0105));
+  g.userData.h = h + 2 * bz;
+  return g;
+}
+
+function makeMonitorArm() {                           // origin = pole axis at the desk surface, reaches toward +Z
+  const g = new THREE.Group(), T = 'monitor-arm', R = 'metal';
+  add(g, rbox(0.06, 0.012, 0.09, 0.0055), T, R, 0, 0.006, 0);                // top plate
+  add(g, rbox(0.06, 0.05, 0.012, 0.005), T, R, 0, -0.018, -0.051);          // back plate
+  add(g, rbox(0.06, 0.012, 0.06, 0.0055), T, R, 0, -DESK_T - 0.006, -0.021); // under plate
+  add(g, new THREE.CylinderGeometry(0.016, 0.016, 0.43, 24), T, R, 0, 0.215, 0);
+  add(g, new THREE.CylinderGeometry(0.026, 0.026, 0.04, 28), T, R, 0, 0.43, 0);
+  add(g, rbox(0.04, 0.034, 0.17, 0.012), T, R, 0, 0.43, 0.085);
+  add(g, new THREE.CylinderGeometry(0.024, 0.024, 0.04, 28), T, R, 0, 0.43, 0.17);
+  add(g, rbox(0.034, 0.03, 0.095, 0.011), T, R, 0, 0.43, 0.2175);
+  add(g, rbox(0.1, 0.1, 0.008, 0.0039), T, R, 0, 0.43, 0.262);               // VESA plate
+  return g;
+}
+
+function makeKeyboard() {                              // full size, ANSI-like block, no legends
+  const g = new THREE.Group(), u = 0.01905, K = [];
+  const push = (x, y, w, h = 1, a = false) => K.push({ x, y, w, h, a });
+  push(0, 0, 1, 1, true);
+  let x = 2; for (let grp = 0; grp < 3; grp++) { for (let i = 0; i < 4; i++) push(x++, 0, 1); x += 0.5; }
+  const row = (y, ws, accentLast = false) => { let cx = 0; ws.forEach((w, i) => { push(cx, y, w, 1, accentLast && i === ws.length - 1); cx += w; }); };
+  const ones = n => Array(n).fill(1);
+  row(1.5, [...ones(13), 2]); row(2.5, [1.5, ...ones(12), 1.5]); row(3.5, [1.75, ...ones(11), 2.25], true);
+  row(4.5, [2.25, ...ones(10), 2.75]); row(5.5, [1.25, 1.25, 1.25, 6.25, 1.25, 1.25, 1.25, 1.25]);
+  const nx = 15.25;
+  for (let i = 0; i < 3; i++) { push(nx + i, 0, 1); push(nx + i, 1.5, 1); push(nx + i, 2.5, 1); push(nx + i, 5.5, 1); }
+  push(nx + 1, 4.5, 1);
+  const px = 18.5;
+  for (let i = 0; i < 4; i++) push(px + i, 1.5, 1);
+  for (let i = 0; i < 3; i++) { push(px + i, 2.5, 1); push(px + i, 3.5, 1); push(px + i, 4.5, 1); }
+  push(px + 3, 2.5, 1, 2); push(px + 3, 4.5, 1, 2); push(px, 5.5, 2); push(px + 2, 5.5, 1);
+
+  const totalW = 22.5 * u, depthKeys = 6.5 * u, caseH = 0.02;
+  add(g, rbox(totalW + 0.0114, caseH, depthKeys + 0.0162, 0.0075, 3), 'keyboard', 'body', 0, caseH / 2, 0);
+  // tapered 12-triangle keycap, flat shaded; unit footprint so scale = size in metres
+  let kg = new THREE.CylinderGeometry(0.42, 0.707, 1, 4, 1).rotateY(Math.PI / 4).translate(0, 0.5, 0).toNonIndexed();
+  kg.computeVertexNormals();
+  const capH = 0.0085, groups = { keycaps: K.filter(k => !k.a), accent: K.filter(k => k.a) }, dummy = new THREE.Object3D();
+  for (const [role, list] of Object.entries(groups)) {
+    const im = new THREE.InstancedMesh(kg, PLACEHOLDER, list.length);
+    list.forEach((k, i) => {
+      dummy.position.set(-totalW / 2 + (k.x + k.w / 2) * u, caseH - 0.002, -depthKeys / 2 + (k.y + k.h / 2) * u);
+      dummy.scale.set(k.w * u - 0.0016, capH, k.h * u - 0.0016); dummy.updateMatrix(); im.setMatrixAt(i, dummy.matrix);
+    });
+    im.userData = { type: 'keyboard', role }; im.castShadow = true; im.receiveShadow = true; g.add(im); tagged.push(im);
+  }
+  g.rotation.x = 0.105;                               // 6 degrees, back raised
+  const wrap = new THREE.Group(); g.position.y = 0.0075; wrap.add(g);
+  return wrap;
+}
+
+function makeMouse() {                                 // 120 x 65 x 38 mm, symmetric
+  const g = new THREE.Group();
+  const body = add(g, new THREE.SphereGeometry(0.5, 40, 24), 'mouse', 'body', 0, 0.012, 0);
+  body.scale.set(0.065, 0.052, 0.12);
+  add(g, rbox(0.0016, 0.0016, 0.034, 0.0006, 1), 'mouse', 'accent', 0, 0.0325, -0.038, true);
+  const wheel = add(g, new THREE.CylinderGeometry(0.0045, 0.0045, 0.007, 16), 'mouse', 'accent', 0, 0.0352, -0.026, true);
+  wheel.rotation.z = Math.PI / 2;
+  return g;
+}
+
+function makeMousepad() {                              // 900 x 400 x 4 mm desk mat
+  const geo = new THREE.ExtrudeGeometry(roundedRectShape(0.9, 0.4, 0.012), { depth: 0.004, bevelEnabled: true, bevelSize: 0.0008, bevelThickness: 0.0008, bevelSegments: 2, curveSegments: 6 });
+  geo.rotateX(-Math.PI / 2);
+  const g = new THREE.Group(); add(g, geo, 'mousepad', 'mat', 0, 0.0008, 0); return g;
+}
+
+function makePcCase() {                                // mid tower 210 x 450 x 420 mm, glass on its left side. Stands on the floor on 4 rubber feet.
+  const root = new THREE.Group(), g = new THREE.Group(), T = 'pc-case', W = 0.21, H = 0.45, D = 0.42, FOOT = 0.008;
+  g.position.y = FOOT; root.add(g);
+  for (const sx of [-1, 1]) for (const sz of [-1, 1])
+    add(root, new THREE.CylinderGeometry(0.014, 0.016, FOOT, 20), T, 'feet', sx * (W / 2 - 0.03), FOOT / 2, sz * (D / 2 - 0.04));
+  contact(root, W, D, 0, 0.0015, 0);                    // contact shadow: the case rests on the floor
+  contact(root, W * 1.9, D * 1.5, 0, 0.001, 0);          // wider, fainter occlusion halo
+  add(g, rbox(W, H, D, 0.012), T, 'body', 0, H / 2, 0);
+  add(g, new THREE.PlaneGeometry(W - 0.03, H - 0.05), T, 'accent', 0, H / 2, D / 2 + 0.0008, true);          // front mesh panel
+  const inner = add(g, new THREE.PlaneGeometry(D - 0.04, H - 0.04), T, 'accent', -W / 2 - 0.0008, H / 2, 0, true); // dark interior
+  inner.rotation.y = -Math.PI / 2;
+  for (const y of [0.1, 0.225, 0.35]) {                // front fans seen through the glass
+    const ring = add(g, new THREE.RingGeometry(0.036, 0.05, 48), T, 'led', -W / 2 - 0.0016, y, 0.14, true); ring.rotation.y = -Math.PI / 2;
+  }
+  add(g, rbox(0.04, 0.05, 0.3, 0.009), T, 'body', -W / 2 + 0.03, 0.2, -0.02);                                  // graphics card block
+  const gf = add(g, new THREE.RingGeometry(0.014, 0.022, 32), T, 'led', -W / 2 + 0.0095, 0.2, -0.06, true); gf.rotation.y = -Math.PI / 2;
+  const gf2 = add(g, new THREE.RingGeometry(0.014, 0.022, 32), T, 'led', -W / 2 + 0.0095, 0.2, 0.03, true); gf2.rotation.y = -Math.PI / 2;
+  const glass = add(g, new THREE.PlaneGeometry(D - 0.02, H - 0.02), T, 'glass', -W / 2 - 0.0045, H / 2, 0, true);
+  glass.rotation.y = -Math.PI / 2; glass.renderOrder = 2;
+  return root;
+}
+
+function makeSpeaker(side) {                           // 150 x 260 x 200 mm
+  const g = new THREE.Group(), T = 'speakers', w = 0.15, h = 0.26, d = 0.2;
+  add(g, rbox(w, h, d, 0.014), T, 'body', 0, h / 2, 0);
+  add(g, rbox(w * 0.9, h * 0.92, 0.004, 0.0019, 2), T, 'accent', 0, h / 2, d / 2 + 0.0005);
+  const woofer = add(g, new THREE.CylinderGeometry(w * 0.3, w * 0.24, 0.012, 40), T, 'driver', 0, h * 0.33, d / 2 + 0.004, true); woofer.rotation.x = Math.PI / 2;
+  add(g, new THREE.TorusGeometry(w * 0.3, 0.004, 8, 40), T, 'accent', 0, h * 0.33, d / 2 + 0.004, true);
+  const tw = add(g, new THREE.CylinderGeometry(w * 0.11, w * 0.09, 0.008, 28), T, 'driver', 0, h * 0.78, d / 2 + 0.004, true); tw.rotation.x = Math.PI / 2;
+  const dot = add(g, new THREE.CylinderGeometry(0.0035, 0.0035, 0.002, 12), T, 'led', 0, h * 0.1, d / 2 + 0.0035, true); dot.rotation.x = Math.PI / 2;
+  contact(g, w, d, 0, 0.0015, 0);
+  g.rotation.y = side * 0.21;
+  return g;
+}
+
+const lampLight = new THREE.PointLight('#ffb870', 0, 3, 2);
+function makeLamp() {                                  // 160 mm base, 450 mm tall, head over the desk (toward -X)
+  const g = new THREE.Group(), T = 'lamp';
+  add(g, new THREE.CylinderGeometry(0.075, 0.08, 0.02, 48), T, 'body', 0, 0.01, 0);
+  limb(g, [0, 0.02, 0], [0, 0.27, 0], 0.007, T, 'body');
+  add(g, new THREE.SphereGeometry(0.014, 20, 14), T, 'body', 0, 0.27, 0);
+  limb(g, [0, 0.27, 0], [-0.19, 0.43, 0.03], 0.006, T, 'body');
+  const head = new THREE.Group(); head.position.set(-0.19, 0.43, 0.03); head.rotation.z = 0.25; g.add(head);
+  add(head, new THREE.SphereGeometry(0.013, 20, 14), T, 'body', 0, 0.01, 0);
+  const shade = add(head, new THREE.CylinderGeometry(0.02, 0.07, 0.09, 48, 1, true), T, 'shade', 0, -0.03, 0);
+  shade.userData.doubleSided = true;
+  add(head, new THREE.SphereGeometry(0.022, 24, 16), T, 'bulb', 0, -0.062, 0, true);
+  lampLight.position.set(-0.19, 0.36, 0.03); g.add(lampLight);
+  contact(g, 0.16, 0.16, 0, 0.0015, 0);
+  return g;
+}
+
+function makeControllerStand() {                       // 110 x 100 x ~150 mm incl. a generic gamepad silhouette
+  const g = new THREE.Group(), T = 'controller-stand';
+  add(g, rbox(0.11, 0.016, 0.1, 0.007), T, 'body', 0, 0.008, 0);
+  add(g, rbox(0.03, 0.1, 0.014, 0.006), T, 'body', 0, 0.06, -0.035);
+  for (const sx of [-1, 1]) add(g, rbox(0.012, 0.07, 0.05, 0.0059), T, 'body', sx * 0.05, 0.05, 0.008);
+  const pad = new THREE.Group(); pad.position.set(0, 0.125, 0.0); pad.rotation.x = 1.15; g.add(pad);
+  add(pad, rbox(0.14, 0.03, 0.09, 0.0149), T, 'accent', 0, 0, 0);
+  for (const sx of [-1, 1]) { const grip = add(pad, rbox(0.04, 0.03, 0.08, 0.0149), T, 'accent', sx * 0.056, 0, 0.055); grip.rotation.y = -sx * 0.18; }
+  for (const sx of [-1, 1]) add(pad, new THREE.CylinderGeometry(0.011, 0.012, 0.012, 20), T, 'body', sx * 0.03, 0.019, 0.012, true);
+  for (let i = 0; i < 4; i++) {
+    const a = i * Math.PI / 2; add(pad, new THREE.SphereGeometry(0.005, 12, 8), T, 'led', 0.047 + Math.cos(a) * 0.011, 0.016, -0.015 + Math.sin(a) * 0.011, true);
+  }
+  contact(g, 0.11, 0.1, 0, 0.0015, 0);
+  return g;
+}
+
+const plantLeaves = (() => {                          // decor example (not an MVP catalog type): one instanced mesh
+  const g = new THREE.Group();
+  add(g, new THREE.CylinderGeometry(0.06, 0.045, 0.1, 32), 'decor', 'pot', 0, 0.05, 0);
+  const geo = new THREE.SphereGeometry(1, 12, 8), im = new THREE.InstancedMesh(geo, PLACEHOLDER, 11), o = new THREE.Object3D();
+  for (let i = 0; i < 11; i++) {
+    const a = i * 2.4, tilt = 0.25 + (i % 4) * 0.14, len = 0.085 + (i % 3) * 0.02;
+    o.position.set(Math.sin(a) * 0.012, 0.1, Math.cos(a) * 0.012);
+    o.rotation.set(0, a, 0); o.rotateX(tilt); o.translateY(len); o.scale.set(0.017, len, 0.005); o.updateMatrix(); im.setMatrixAt(i, o.matrix);
+  }
+  im.userData = { type: 'decor', role: 'leaf' }; im.castShadow = im.receiveShadow = true; g.add(im); tagged.push(im);
+  contact(g, 0.12, 0.12, 0, 0.0015, 0);
+  return g;
+})();
+
+/* ------------------------------------------------------------------ scene layout (positions in the desk frame) */
+const setup = new THREE.Group(); scene.add(setup);      // ADR-3D-09: one root node, origin on the floor
+setup.add(makeDesk());
+
+const pad = makeMousepad(); pad.position.set(0, DESK_H, 0.13); setup.add(pad);
+contact(setup, 0.9, 0.4, 0, DESK_H + 0.0012, 0.13);
+const kb = makeKeyboard(); kb.position.set(-0.13, DESK_H + PAD_TOP, 0.14); setup.add(kb);
+contact(kb, 0.44, 0.14, 0, 0.0016, 0);
+const mouse = makeMouse(); mouse.position.set(0.3, DESK_H + PAD_TOP, 0.13); mouse.rotation.y = 0.12; setup.add(mouse);
+contact(mouse, 0.065, 0.12, 0, 0.0016, 0);
+
+const arm = makeMonitorArm(); arm.position.set(0, DESK_H, -0.31); setup.add(arm);
+contact(arm, 0.07, 0.1, 0, 0.0015, -0.01);
+const mon = makeMonitor(27); mon.position.set(0, 0.43, 0.3); arm.add(mon);
+
+const spL = makeSpeaker(1); spL.position.set(-0.44, DESK_H, -0.2); setup.add(spL);
+const spR = makeSpeaker(-1); spR.position.set(0.44, DESK_H, -0.2); setup.add(spR);
+
+const lamp = makeLamp(); lamp.position.set(0.62, DESK_H, -0.2); lamp.rotation.y = 0.1; setup.add(lamp);
+const stand = makeControllerStand(); stand.position.set(0.58, DESK_H, 0.17); stand.rotation.y = -0.45; setup.add(stand);
+
+// PC tower: placed on the FLOOR beside the desk (y = 0), glass side turned toward the viewer, clear of the legs.
+const pc = makePcCase(); pc.position.set(-1.0, 0, 0.08); pc.rotation.y = Math.PI / 2 - 0.35; setup.add(pc);
+plantLeaves.position.set(-0.6, DESK_H, -0.24); setup.add(plantLeaves);
+
+/* ------------------------------------------------------------------ materials and styles (ADR-3D-05 cascade) */
+const matCache = new Map(), screenTex = new Map();
+function gradientTexture(c0, c1) {
+  const id = c0 + c1; if (screenTex.has(id)) return screenTex.get(id);
+  const cv = document.createElement('canvas'); cv.width = 512; cv.height = 288; const x = cv.getContext('2d');
+  const gr = x.createLinearGradient(0, 0, 512, 288); gr.addColorStop(0, c0); gr.addColorStop(1, c1); x.fillStyle = gr; x.fillRect(0, 0, 512, 288);
+  x.fillStyle = 'rgba(255,255,255,.18)'; x.beginPath(); x.roundRect(40, 36, 250, 170, 14); x.fill();
+  x.fillStyle = 'rgba(0,0,0,.12)'; x.beginPath(); x.roundRect(250, 100, 220, 150, 14); x.fill();
+  x.fillStyle = 'rgba(255,255,255,.35)'; x.fillRect(0, 262, 512, 26);
+  const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; screenTex.set(id, t); return t;
+}
+function getMaterial(id, amb, doubleSided = false) {
+  const def = MATERIALS[id]; const cacheKey = (def.screen ? id + amb.screenGradient.join() : id) + (doubleSided ? '|2s' : '');
+  if (matCache.has(cacheKey)) return matCache.get(cacheKey);
+  const p = { color: def.c, metalness: def.m, roughness: def.r };
+  if (doubleSided) p.side = THREE.DoubleSide;
+  if (def.e) { p.emissive = new THREE.Color(def.e); p.emissiveIntensity = def.ei; }
+  if (def.opacity != null) { p.transparent = true; p.opacity = def.opacity; p.depthWrite = false; }
+  let mat;
+  if (def.sheen || def.cc) {                           // soft-touch, fabric, glass coat: physical material only where needed
+    if (def.sheen) { p.sheen = def.sheen[0]; p.sheenRoughness = def.sheen[1]; p.sheenColor = new THREE.Color(def.sheen[2]); }
+    if (def.cc) { p.clearcoat = def.cc[0]; p.clearcoatRoughness = def.cc[1]; }
+    mat = new THREE.MeshPhysicalMaterial(p);
+  } else mat = new THREE.MeshStandardMaterial(p);
+  if (def.screen) mat.emissiveMap = gradientTexture(...amb.screenGradient);
+  matCache.set(cacheKey, mat); return mat;
+}
+function resolve(style, type, role) {                  // override > byType > byRole > type default
+  return style.rules.byType?.[type]?.[role] ?? style.rules.byRole[role] ?? DEFAULTS[type]?.[role];
+}
+
+/* Ambience as a set of animatable values; `live` is what is currently on screen. */
+let studio = 'light', current = STYLES[0], trans = null;
+const live = { bg: new THREE.Color(), floor: new THREE.Color(), keyC: new THREE.Color(), exposure: 1, key: 2.4, hemi: .35, env: .7, rim: 1.1, lamp: 0, plant: 0 };
+function targetOf(style) {
+  const a = style.ambience, dark = studio === 'dark', s = STUDIO[studio];
+  return {
+    bg: new THREE.Color(dark ? s.background : a.background), floor: new THREE.Color(dark ? s.floor : a.floor), keyC: new THREE.Color(a.keyColor),
+    exposure: a.exposure, key: a.keyIntensity, hemi: a.hemiIntensity, env: a.envIntensity + (dark ? s.envBias : 0), rim: s.rim,
+    lamp: a.lampOn ? .9 : 0, plant: style.suggestedDecor.includes('plant') ? 1 : 0
+  };
+}
+function setLive(v) {
+  Object.assign(live, { exposure: v.exposure, key: v.key, hemi: v.hemi, env: v.env, rim: v.rim, lamp: v.lamp, plant: v.plant });
+  live.bg.copy(v.bg); live.floor.copy(v.floor); live.keyC.copy(v.keyC);
+  scene.background.copy(live.bg); scene.fog.color.copy(live.bg); floor.material.color.copy(live.floor);
+  key.color.copy(live.keyC); key.intensity = live.key; hemi.intensity = live.hemi; rim.intensity = live.rim;
+  scene.environmentIntensity = live.env; renderer.toneMappingExposure = live.exposure; lampLight.intensity = live.lamp;
+  plantLeaves.visible = live.plant > 0.001; plantLeaves.scale.setScalar(0.4 + 0.6 * live.plant);
+  contactMat.opacity = studio === 'dark' ? 0.75 : 0.5;
+  document.body.style.background = '#' + live.bg.getHexString();
+}
+const ease = t => t * t * t * (t * (6 * t - 15) + 10);          // smootherstep
+const mix = (a, b, k) => a + (b - a) * k;
+
+// Style change: ambience and every material cross-fade (colour, roughness, metalness, emissive) over ~650 ms.
+function transitionTo(style, { materials = true, instant = false } = {}) {
+  current = style; const amb = style.ambience, to = targetOf(style);
+  const quick = instant || reducedMotion();
+  const prevTmps = trans ? trans.items.map(i => i.tmp) : [];
+  const items = [];
+  if (materials) for (const m of tagged) {
+    const { type, role } = m.userData;
+    let id = resolve(style, type, role);
+    if (role === 'bulb' && !amb.lampOn) id = 'mat.light-grey';
+    const target = getMaterial(id, amb, !!m.userData.doubleSided), old = m.material;
+    if (old === target) continue;
+    if (quick || old === PLACEHOLDER) { m.material = target; continue; }
+    const tmp = target.clone();                                  // keeps flags (transparent, side, maps) of the target
+    items.push({ m, tmp, final: target, from: { c: old.color.clone(), r: old.roughness, mt: old.metalness, e: old.emissive.clone(), ei: old.emissiveIntensity } });
+    tmp.color.copy(old.color); tmp.roughness = old.roughness; tmp.metalness = old.metalness; tmp.emissive.copy(old.emissive); tmp.emissiveIntensity = old.emissiveIntensity;
+    m.material = tmp;
+  }
+  prevTmps.forEach(t => t.dispose());
+  renderer.shadowMap.needsUpdate = true;
+  document.querySelectorAll('#styleBtns button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.id === style.id)));
+  if (quick) { trans = null; setLive(to); return; }
+  const from = { bg: live.bg.clone(), floor: live.floor.clone(), keyC: live.keyC.clone(), exposure: live.exposure, key: live.key, hemi: live.hemi, env: live.env, rim: live.rim, lamp: live.lamp, plant: live.plant };
+  trans = { t0: performance.now(), dur: 650, from, to, items };
+}
+function stepTransition(now) {
+  if (!trans) return;
+  const k = Math.min((now - trans.t0) / trans.dur, 1), e = ease(k), { from, to } = trans;
+  setLive({
+    bg: from.bg.clone().lerp(to.bg, e), floor: from.floor.clone().lerp(to.floor, e), keyC: from.keyC.clone().lerp(to.keyC, e),
+    exposure: mix(from.exposure, to.exposure, e), key: mix(from.key, to.key, e), hemi: mix(from.hemi, to.hemi, e), env: mix(from.env, to.env, e),
+    rim: mix(from.rim, to.rim, e), lamp: mix(from.lamp, to.lamp, e), plant: mix(from.plant, to.plant, e)
+  });
+  for (const it of trans.items) {
+    it.tmp.color.lerpColors(it.from.c, it.final.color, e); it.tmp.emissive.lerpColors(it.from.e, it.final.emissive, e);
+    it.tmp.roughness = mix(it.from.r, it.final.roughness, e); it.tmp.metalness = mix(it.from.mt, it.final.metalness, e);
+    it.tmp.emissiveIntensity = mix(it.from.ei, it.final.emissiveIntensity, e);
+  }
+  renderer.shadowMap.needsUpdate = true;                          // plant scale may change the shadow
+  if (k >= 1) { for (const it of trans.items) { it.m.material = it.final; it.tmp.dispose(); } trans = null; }
+}
+
+const btnHost = document.getElementById('styleBtns');
+for (const s of STYLES) {
+  const b = document.createElement('button'); b.type = 'button'; b.textContent = s.name; b.dataset.id = s.id; b.setAttribute('aria-pressed', 'false');
+  b.addEventListener('click', () => transitionTo(s)); btnHost.appendChild(b);
+}
+document.querySelectorAll('[data-studio]').forEach(b => b.addEventListener('click', () => {
+  if (b.tagName !== 'BUTTON') return;
+  studio = b.dataset.studio; document.body.dataset.studio = studio;
+  document.querySelectorAll('button[data-studio]').forEach(x => x.setAttribute('aria-pressed', String(x.dataset.studio === studio)));
+  transitionTo(current, { materials: false });
+}));
+
+/* ------------------------------------------------------------------ camera and controls (eased view transitions) */
+const controls = new OrbitControls(camera, canvas);
+controls.target.set(-0.08, 0.72, 0.05);
+controls.enableDamping = !reducedMotion(); controls.dampingFactor = 0.07;
+controls.minDistance = 0.8; controls.maxDistance = 4.5; controls.maxPolarAngle = Math.PI * 0.495;
+controls.minAzimuthAngle = -1.9; controls.maxAzimuthAngle = 1.9;      // stay inside the cyclorama
+const VIEWS = {
+  reset: { pos: [1.75, 1.5, 2.7], tgt: [-0.08, 0.72, 0.05] },
+  top:   { pos: [-0.08, 3.4, 0.001], tgt: [-0.08, 0.74, 0.05] },
+  front: { pos: [-0.08, 1.1, 3.3], tgt: [-0.08, 0.72, 0.05] }
+};
+let camTween = null;
+function setView(name, instant = false) {
+  const v = VIEWS[name], toT = new THREE.Vector3(...v.tgt), toP = new THREE.Vector3(...v.pos);
+  if (instant || reducedMotion()) { camTween = null; camera.position.copy(toP); controls.target.copy(toT); controls.update(); return; }
+  // interpolate around the target in spherical coordinates: the camera glides along an arc and never cuts through the scene
+  const fromT = controls.target.clone();
+  camTween = { t0: performance.now(), dur: 950, fromT, toT, fromS: new THREE.Spherical().setFromVector3(camera.position.clone().sub(fromT)), toS: new THREE.Spherical().setFromVector3(toP.clone().sub(toT)) };
+}
+function stepCamera(now) {
+  if (!camTween) return;
+  const c = camTween, k = Math.min((now - c.t0) / c.dur, 1), e = ease(k);
+  let dth = c.toS.theta - c.fromS.theta; dth = Math.atan2(Math.sin(dth), Math.cos(dth));     // shortest way round
+  const s = new THREE.Spherical(mix(c.fromS.radius, c.toS.radius, e), mix(c.fromS.phi, c.toS.phi, e), c.fromS.theta + dth * e);
+  controls.target.lerpVectors(c.fromT, c.toT, e);
+  camera.position.setFromSpherical(s).add(controls.target);
+  if (k >= 1) camTween = null;
+}
+['pointerdown', 'wheel'].forEach(ev => canvas.addEventListener(ev, () => { camTween = null; }, { passive: true }));   // the user takes over
+document.querySelectorAll('[data-view]').forEach(b => b.addEventListener('click', () => setView(b.dataset.view)));
+matchMedia('(prefers-reduced-motion: reduce)').addEventListener?.('change', () => { controls.enableDamping = !reducedMotion(); });
+
+function resize() { const w = innerWidth, h = innerHeight; renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); }
+addEventListener('resize', resize); resize(); setView('reset', true);
+transitionTo(STYLES[0], { instant: true });
+
+const stats = document.getElementById('stats');
+let last = 0, maxCalls = 0, maxTris = 0;
+renderer.setAnimationLoop(t => {
+  stepCamera(t); stepTransition(performance.now());
+  controls.update(); renderer.render(scene, camera);
+  const r = renderer.info.render; maxCalls = Math.max(maxCalls, r.calls); maxTris = Math.max(maxTris, r.triangles);   // max keeps shadow-pass frames visible
+  if (t - last > 500) {
+    last = t;
+    stats.innerHTML = `Draw calls <b>${maxCalls}</b> (budget 150) &middot; Triangles <b>${maxTris.toLocaleString('en')}</b> (budget 300k)`;
+    maxCalls = maxTris = 0;
+  }
+});
+</script>
+<script>
+  // shown only if the module above failed (e.g. offline)
+  addEventListener('error', e => { if (e.target && e.target.tagName === 'SCRIPT') document.getElementById('err').style.display = 'block'; }, true);
+  window.addEventListener('unhandledrejection', () => { document.getElementById('err').style.display = 'block'; });
+</script>
+</body>
+</html>

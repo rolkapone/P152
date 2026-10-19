@@ -1,0 +1,25 @@
+{
+  "id": "keyboard.generic", "version": 1, "type": "keyboard", "category": "input", "name": { "en": "Keyboard" },
+  "generator": "procedural", "model": null, "license": "Original work (project)", "source": "Generated in code",
+  "params": {
+    "format":   { "enum": ["60", "65", "75", "tkl", "96", "full"], "default": "full", "note": "Default per UX principles: full-size (100 %)" },
+    "height":   { "unit": "mm", "default": 28, "min": 18, "max": 40, "step": 1, "note": "Back edge incl. keycaps" },
+    "tilt":     { "unit": "deg", "default": 6, "min": 0, "max": 9, "step": 1 },
+    "caseMargin": { "unit": "mm", "default": 8, "min": 4, "max": 14, "step": 1 }
+  },
+  "formats": {
+    "60":   { "widthMm": 295, "depthMm": 100, "keys": 61 },
+    "65":   { "widthMm": 325, "depthMm": 110, "keys": 68 },
+    "75":   { "widthMm": 330, "depthMm": 135, "keys": 82 },
+    "tkl":  { "widthMm": 360, "depthMm": 140, "keys": 87 },
+    "96":   { "widthMm": 385, "depthMm": 135, "keys": 100 },
+    "full": { "widthMm": 440, "depthMm": 140, "keys": 104 }
+  },
+  "slots": [
+    { "id": "body",    "role": "body",    "default": "mat.anodized-graphite" },
+    { "id": "keycaps", "role": "keycaps", "default": "mat.warm-white" },
+    { "id": "accent",  "role": "accent",  "default": "mat.light-grey", "note": "Esc, Enter and modifier highlights" }
+  ],
+  "budget": { "tris": 2500, "drawCalls": 3, "note": "Keycaps = one InstancedMesh of tapered 12-triangle caps; no legends (no printed text)" },
+  "placement": { "restsOn": ["desk", "mousepad"], "canSupport": [], "clearanceFrontMm": 150 }
+}

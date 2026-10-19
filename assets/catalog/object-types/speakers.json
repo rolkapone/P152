@@ -1,0 +1,24 @@
+{
+  "id": "speakers.generic", "version": 1, "type": "speakers", "category": "audio", "name": { "en": "Speakers (pair)" },
+  "generator": "procedural", "model": null, "license": "Original work (project)", "source": "Generated in code",
+  "params": {
+    "width":   { "unit": "mm", "default": 150, "min": 90,  "max": 250, "step": 5 },
+    "height":  { "unit": "mm", "default": 260, "min": 150, "max": 400, "step": 5 },
+    "depth":   { "unit": "mm", "default": 200, "min": 110, "max": 300, "step": 5 },
+    "spacing": { "unit": "mm", "default": 1000, "min": 400, "max": 1600, "step": 10, "note": "Centre to centre; the pair is one object with two footprint parts" },
+    "toeIn":   { "unit": "deg", "default": 12, "min": 0, "max": 30, "step": 1 }
+  },
+  "presets": [
+    { "id": "mini",      "params": { "width": 100, "height": 170, "depth": 130 } },
+    { "id": "bookshelf", "params": { "width": 150, "height": 260, "depth": 200 } },
+    { "id": "large",     "params": { "width": 200, "height": 330, "depth": 260 } }
+  ],
+  "slots": [
+    { "id": "body",   "role": "body",   "default": "mat.matte-black" },
+    { "id": "baffle", "role": "accent", "default": "mat.graphite" },
+    { "id": "driver", "role": "driver", "default": "mat.rubber-black" },
+    { "id": "led",    "role": "led",    "default": "mat.led-white" }
+  ],
+  "budget": { "tris": 4000, "drawCalls": 4 },
+  "placement": { "restsOn": ["desk", "floor"], "canSupport": [] }
+}
