@@ -9,8 +9,18 @@ import { readFileSync } from "node:fs";
 
 // Licences permissives autorisées sans revue.
 const ALLOWED = new Set([
-  "MIT", "MIT-0", "ISC", "0BSD", "BSD-2-Clause", "BSD-3-Clause", "Apache-2.0",
-  "Zlib", "CC0-1.0", "Unlicense", "BlueOak-1.0.0", "Python-2.0",
+  "MIT",
+  "MIT-0",
+  "ISC",
+  "0BSD",
+  "BSD-2-Clause",
+  "BSD-3-Clause",
+  "Apache-2.0",
+  "Zlib",
+  "CC0-1.0",
+  "Unlicense",
+  "BlueOak-1.0.0",
+  "Python-2.0",
 ]);
 
 // Licences acceptables après revue secdevops (copyleft faible, attribution) : avertissement non bloquant.
@@ -22,7 +32,10 @@ const EXCEPTIONS = {};
 const file = process.argv[2] ?? "licenses.json";
 const data = JSON.parse(readFileSync(file, "utf8"));
 
-const clean = (s) => String(s ?? "UNKNOWN").replace(/[()]/g, "").trim();
+const clean = (s) =>
+  String(s ?? "UNKNOWN")
+    .replace(/[()]/g, "")
+    .trim();
 
 /** Évalue une expression SPDX simple (OR / AND sans imbrication profonde). */
 function verdict(expression) {

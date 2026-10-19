@@ -94,7 +94,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          fetch-depth: 0              # historique complet
+          fetch-depth: 0 # historique complet
           persist-credentials: false
       - name: Installer gitleaks (version et checksum épinglés)
         run: |
@@ -186,7 +186,7 @@ jobs:
       - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
       - name: zizmor (bloquant à partir de high)
         env:
-          GH_TOKEN: ${{ github.token }}   # audits en ligne (actions vulnérables connues), lecture seule
+          GH_TOKEN: ${{ github.token }} # audits en ligne (actions vulnérables connues), lecture seule
         run: uvx zizmor@1.31.1 --min-severity high .github/workflows/
 
   sec-dependencies:
@@ -312,7 +312,8 @@ jobs:
   security:
     name: security
     if: always()
-    needs: [sec-secrets, sec-codeql, sec-semgrep, sec-workflows, sec-dependencies, sec-build-hardening]
+    needs:
+      [sec-secrets, sec-codeql, sec-semgrep, sec-workflows, sec-dependencies, sec-build-hardening]
     runs-on: ubuntu-24.04
     timeout-minutes: 2
     permissions: {}
