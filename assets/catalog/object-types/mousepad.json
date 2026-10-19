@@ -1,22 +1,27 @@
 {
-  "id": "mousepad.generic", "version": 1, "type": "mousepad", "category": "accessory", "name": { "en": "Mouse pad / desk mat" },
-  "generator": "procedural", "model": null, "license": "Original work (project)", "source": "Generated in code",
+  "id": "mousepad.generic",
+  "version": 1,
+  "type": "mousepad",
+  "category": "accessory",
+  "name": { "en": "Mouse pad / desk mat" },
+  "generator": "procedural",
+  "model": null,
+  "license": "Original work (project)",
+  "source": "Generated in code",
   "params": {
-    "width":     { "unit": "mm", "default": 900, "min": 200, "max": 1800, "step": 10 },
-    "depth":     { "unit": "mm", "default": 400, "min": 200, "max": 900,  "step": 10 },
-    "thickness": { "unit": "mm", "default": 4,   "min": 2,   "max": 6,    "step": 1 },
-    "corner":    { "unit": "mm", "default": 8,   "min": 0,   "max": 30,   "step": 1 }
+    "width": { "unit": "mm", "default": 900, "min": 200, "max": 1800, "step": 10 },
+    "depth": { "unit": "mm", "default": 400, "min": 200, "max": 900, "step": 10 },
+    "thickness": { "unit": "mm", "default": 4, "min": 2, "max": 6, "step": 1 },
+    "corner": { "unit": "mm", "default": 8, "min": 0, "max": 30, "step": 1 }
   },
   "presets": [
-    { "id": "small",    "params": { "width": 250,  "depth": 210 } },
-    { "id": "medium",   "params": { "width": 320,  "depth": 270 } },
-    { "id": "large",    "params": { "width": 450,  "depth": 400 } },
-    { "id": "desk-mat", "params": { "width": 900,  "depth": 400 } },
-    { "id": "xxl",      "params": { "width": 1200, "depth": 600 } }
+    { "id": "small", "params": { "width": 250, "depth": 210 } },
+    { "id": "medium", "params": { "width": 320, "depth": 270 } },
+    { "id": "large", "params": { "width": 450, "depth": 400 } },
+    { "id": "desk-mat", "params": { "width": 900, "depth": 400 } },
+    { "id": "xxl", "params": { "width": 1200, "depth": 600 } }
   ],
-  "slots": [
-    { "id": "surface", "role": "mat", "default": "mat.felt-dark" }
-  ],
+  "slots": [{ "id": "surface", "role": "mat", "default": "mat.felt-dark" }],
   "budget": { "tris": 400, "drawCalls": 1 },
   "placement": { "restsOn": ["desk"], "canSupport": ["keyboard", "mouse", "monitor-stand"] }
 }

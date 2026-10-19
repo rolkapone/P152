@@ -1,26 +1,48 @@
 {
-  "id": "pc-case.generic", "version": 1, "type": "pc-case", "category": "computer", "name": { "en": "PC case" },
-  "generator": "procedural", "model": null, "license": "Original work (project)", "source": "Generated in code",
+  "id": "pc-case.generic",
+  "version": 1,
+  "type": "pc-case",
+  "category": "computer",
+  "name": { "en": "PC case" },
+  "generator": "procedural",
+  "model": null,
+  "license": "Original work (project)",
+  "source": "Generated in code",
   "params": {
-    "width":      { "unit": "mm", "default": 210, "min": 160, "max": 260, "step": 5 },
-    "height":     { "unit": "mm", "default": 450, "min": 280, "max": 600, "step": 5 },
-    "depth":      { "unit": "mm", "default": 420, "min": 300, "max": 560, "step": 5 },
-    "glassSide":  { "enum": ["none", "left", "right"], "default": "right", "note": "Seen from the front of the case" },
+    "width": { "unit": "mm", "default": 210, "min": 160, "max": 260, "step": 5 },
+    "height": { "unit": "mm", "default": 450, "min": 280, "max": 600, "step": 5 },
+    "depth": { "unit": "mm", "default": 420, "min": 300, "max": 560, "step": 5 },
+    "glassSide": {
+      "enum": ["none", "left", "right"],
+      "default": "right",
+      "note": "Seen from the front of the case"
+    },
     "frontPanel": { "enum": ["solid", "mesh"], "default": "mesh" },
-    "fans":       { "default": 3, "min": 0, "max": 3, "step": 1, "note": "Visible through the glass; LED ring on the slot 'led'" }
+    "fans": {
+      "default": 3,
+      "min": 0,
+      "max": 3,
+      "step": 1,
+      "note": "Visible through the glass; LED ring on the slot 'led'"
+    }
   },
   "presets": [
-    { "id": "mini-itx",  "params": { "width": 190, "height": 330, "depth": 360 } },
+    { "id": "mini-itx", "params": { "width": 190, "height": 330, "depth": 360 } },
     { "id": "micro-atx", "params": { "width": 220, "height": 400, "depth": 400 } },
     { "id": "mid-tower", "params": { "width": 210, "height": 450, "depth": 420 } },
-    { "id": "full-tower","params": { "width": 240, "height": 560, "depth": 520 } }
+    { "id": "full-tower", "params": { "width": 240, "height": 560, "depth": 520 } }
   ],
   "slots": [
-    { "id": "body",   "role": "body",   "default": "mat.graphite" },
-    { "id": "panel",  "role": "accent", "default": "mat.matte-black" },
-    { "id": "glass",  "role": "glass",  "default": "mat.glass-smoked" },
-    { "id": "led",    "role": "led",    "default": "mat.led-white" },
-    { "id": "feet",   "role": "feet",   "default": "mat.rubber-black", "note": "4 rubber feet (8 mm): the case rests on them, floor or desk" }
+    { "id": "body", "role": "body", "default": "mat.graphite" },
+    { "id": "panel", "role": "accent", "default": "mat.matte-black" },
+    { "id": "glass", "role": "glass", "default": "mat.glass-smoked" },
+    { "id": "led", "role": "led", "default": "mat.led-white" },
+    {
+      "id": "feet",
+      "role": "feet",
+      "default": "mat.rubber-black",
+      "note": "4 rubber feet (8 mm): the case rests on them, floor or desk"
+    }
   ],
   "budget": { "tris": 3500, "drawCalls": 6 },
   "placement": { "restsOn": ["desk", "floor"], "canSupport": [] }
