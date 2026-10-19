@@ -31,7 +31,7 @@ Une app web 3D, en anglais, pour prévisualiser et designer son setup avant d'ac
 - Navigation 3D autour de la scène.
 - Alertes "ça ne rentre pas" : profondeur, débordement, encombrement (collisions).
 - Sauvegarde locale du setup + export/import JSON (validé par le PO, 2026-10-19).
-- Interface entièrement en anglais, unités métriques (mm/cm), pas de pouces au MVP.
+- Interface entièrement en anglais, unités métriques (mm/cm), pas de pouces au MVP, **sauf la diagonale d'écran affichée en pouces avec son équivalent en mm** (décision du PO, 2026-10-19).
 
 ## Vision long terme (l'architecture doit la permettre dès le départ)
 Livrée release après release (détail dans `docs/backlog.md`, section "Plus tard") :
@@ -46,7 +46,7 @@ Livrée release après release (détail dans `docs/backlog.md`, section "Plus ta
 Conséquences d'architecture : modèle de données du setup sérialisable et versionné ; objets décrits par un schéma (dimensions, paramètres, matériaux, slots de style) ; catalogue extensible et indépendant du code ; séparation scène 3D / état applicatif / interface ; i18n dès le départ (anglais par défaut ; le français pourra être ajouté comme langue secondaire en release ultérieure, option non engagée) ; matériaux et éclairage modifiables sans refonte.
 
 ## Hors périmètre (MVP)
-Comptes utilisateurs et backend, partage en ligne, prix et catalogue de produits réels, couleurs/matières/styles, éclairage avancé et RGB, murs et déco, import de modèles ou photo vers 3D, réalité augmentée, langues autres que l'anglais (le français est une option future, non engagée), pouces/unités impériales, monétisation.
+Comptes utilisateurs et backend, partage en ligne, prix et catalogue de produits réels, couleurs/matières/styles, éclairage avancé et RGB, murs et déco, import de modèles ou photo vers 3D, réalité augmentée, langues autres que l'anglais (le français est une option future, non engagée), pouces/unités impériales (hors diagonale d'écran), monétisation.
 
 ## Indicateurs de succès
 - Un utilisateur novice compose un setup de 5 objets en moins de 5 minutes sans aide.
@@ -60,7 +60,7 @@ Comptes utilisateurs et backend, partage en ligne, prix et catalogue de produits
 | H1 | Objets génériques simples (boîtes aux proportions réalistes) au MVP : suffisent pour répondre à "ça rentre ?". **Validé par le PO (2026-10-19)** | Prototype tôt, test avec 3 à 5 utilisateurs |
 | H2 | Pas de compte ni backend au MVP ; sauvegarde locale + export/import JSON. **Validé par le PO (2026-10-19)** | n/a |
 | H3 | Desktop d'abord, tactile en Could. **Validé par le PO (2026-10-19)** | n/a |
-| H4 | Unités métriques mm/cm uniquement. **Validé par le PO (2026-10-19)** | n/a |
+| H4 | Unités métriques mm/cm uniquement, exception : diagonale d'écran en pouces avec équivalent mm. **Validé par le PO (2026-10-19)** | n/a |
 | H5 | Seuils d'alerte par défaut (70 % d'occupation, 100 mm de marge de profondeur, 150 mm de zone libre devant le clavier) acceptés comme valeurs par défaut ajustables. **Validé par le PO (2026-10-19)** | Configurables |
 | R1 | Qualité visuelle perçue faible avec des objets génériques | Direction artistique 3D tôt (technical-artist), presets de matériaux préparés |
 | R2 | Performances sur mobile | Budgets de perf, assets optimisés, QA perf à chaque story 3D |

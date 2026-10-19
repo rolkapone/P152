@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deskfit (P152) - Design system and Studio mockups v0.2</title>
+<style>
+/* Police : Inter si installee localement, sinon repli systeme. Aucune requete reseau.
+   (L'app, elle, auto-heberge public/fonts/inter-latin-wght-normal.woff2 : voir tokens.css.) */
+@font-face{font-family:"Inter";font-weight:100 900;src:local("Inter Variable"),local("Inter")}
+
+/* ======================= BEGIN SYNCED (tokens.css <-> index.html) ======================= */
+:root {
+  /* ---- Typographie ---- */
+  --font-sans: "Inter", system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, "Cascadia Mono", Consolas, Menlo, monospace;
+  --text-sm: 0.875rem;   /* 14 px - minimum de l'UI */
+  --text-md: 1rem;       /* 16 px - corps */
+  --text-lg: 1.125rem;   /* 18 px */
+  --text-xl: 1.375rem;   /* 22 px */
+  --text-2xl: 1.75rem;   /* 28 px */
+  --text-3xl: 2.25rem;   /* 36 px - Welcome uniquement */
+  --leading-tight: 1.2;
+  --leading-normal: 1.5;
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --tracking-tight: -0.011em;   /* titres >= 22 px */
+  --tracking-overline: 0.06em;
+
+  /* ---- Espacements (base 4 px, plus genereux : panneaux 20, sections 32) ---- */
+  --space-0: 0;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --panel-pad: 20px;
+  --float-inset: 12px;   /* marge des panneaux flottants au bord du viewport */
+
+  /* ---- Rayons : echelle 6 / 10 / 16 / 24 / pill. Rayon interne = externe - padding ---- */
+  --radius-sm: 6px;      /* puces, tooltips, vignettes */
+  --radius-md: 10px;     /* boutons, champs */
+  --radius-lg: 16px;     /* cartes, alertes, toasts */
+  --radius-xl: 24px;     /* panneaux et barres flottants, modales */
+  --radius-pill: 999px;  /* verdict, barre de scene, segments */
+
+  /* ---- Tailles ---- */
+  --control-sm: 32px;
+  --control-md: 36px;
+  --control-lg: 44px;
+  --topbar-h: 56px;
+  --panel-left-w: 248px;
+  --panel-right-w: 312px;
+  --focus-width: 3px;
+  --focus-offset: 2px;
+  --border-width: 1px;
+
+  /* ---- Motion : durees ---- */
+  --duration-fast: 120ms;     /* survol, appui */
+  --duration-base: 200ms;     /* menus, toasts, fondus */
+  --duration-slow: 320ms;     /* panneaux, barres, modales */
+  --duration-camera: 480ms;   /* transitions de camera 3D */
+  /* ---- Motion : courbes ---- */
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);       /* changements d'etat */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);         /* entrees, deplacements */
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);     /* camera */
+  --ease-spring: cubic-bezier(0.34, 1.3, 0.64, 1);   /* ressort leger (depassement ~3 %) */
+  --press-scale: 0.97;                               /* appui bouton */
+
+  /* ---- Verre ---- */
+  --glass-blur: 24px;
+  --glass-saturate: 180%;
+  --glass-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  --glass-filter-soft: blur(12px) saturate(140%);    /* voile des modales */
+
+  /* ---- Z-index ---- */
+  --z-panel: 10;
+  --z-floating: 20;
+  --z-menu: 30;
+  --z-modal: 40;
+  --z-toast: 50;
+}
+
+/* ============================ THEME CLAIR ============================ */
+:root,
+[data-theme="light"] {
+  color-scheme: light;
+
+  --color-bg: #F3F4F7;
+  --color-surface: #FFFFFF;
+  --color-surface-2: #EEF0F4;
+  --color-overlay: rgba(16, 20, 28, 0.42);
+  --color-border: #DDE0E7;          /* decoratif (separateurs) */
+  --color-border-strong: #7A8394;   /* contours de champs : 3.8:1 sur surface */
+
+  --color-text: #1B1F27;            /* 16.3:1 */
+  --color-text-muted: #545D6C;      /* 6.7:1 sur surface, 5.8:1 sur surface-2 */
+  --color-text-disabled: #8B93A1;   /* desactive : exempte */
+
+  --color-accent: #1F5FD1;          /* UNE couleur d'accent. 5.8:1 sur surface */
+  --color-accent-hover: #1A4FB0;
+  --color-accent-active: #153F8F;
+  --color-on-accent: #FFFFFF;       /* 5.8:1 sur accent */
+  --color-accent-subtle: #E6EEFB;
+  --color-accent-subtle-text: #1A4FB0;  /* 6.9:1 sur accent-subtle */
+  --color-focus: #1F5FD1;
+
+  /* Statuts : semantiques, jamais decoratifs */
+  --color-success: #137A3F;
+  --color-success-bg: #E3F4EA;
+  --color-error: #B42318;
+  --color-error-bg: #FDECEA;
+  --color-warning: #8A4B00;         /* texte : 6.8:1 */
+  --color-warning-icon: #B86E00;    /* icone : 4.0:1 */
+  --color-warning-bg: #FFF3DC;
+  --color-info: #0B6B8A;
+  --color-info-bg: #E3F3F8;
+  --color-danger-solid: #B42318;
+  --color-on-danger: #FFFFFF;
+
+  /* Ombres douces multicouches */
+  --shadow-1: 0 1px 1px rgba(16,20,28,.04), 0 2px 4px rgba(16,20,28,.04), 0 4px 12px rgba(16,20,28,.05);
+  --shadow-2: 0 0 0 1px rgba(16,20,28,.04), 0 2px 4px rgba(16,20,28,.05), 0 8px 16px rgba(16,20,28,.07), 0 16px 32px rgba(16,20,28,.07);
+  --shadow-3: 0 0 0 1px rgba(16,20,28,.05), 0 4px 8px rgba(16,20,28,.06), 0 16px 32px rgba(16,20,28,.10), 0 40px 80px rgba(16,20,28,.14);
+
+  /* Verre : teinte opaque a 86 % (calcul de contraste sur le pire fond : noir pur, design-system.md 5) */
+  --glass-tint: rgba(255, 255, 255, 0.86);
+  --glass-border: rgba(255, 255, 255, 0.65);
+  --glass-shadow: 0 0 0 1px rgba(16,20,28,.05), 0 2px 4px rgba(16,20,28,.05), 0 8px 16px rgba(16,20,28,.08), 0 24px 48px rgba(16,20,28,.12), inset 0 1px 0 rgba(255,255,255,.7);
+  --glass-link: #1A4FB0;            /* lien sur verre : >= 5.4:1 sur le pire fond */
+
+  /* Scene 3D : studio clair neutre (photo produit), ne favorise aucun style */
+  --scene-bg-top: #FAFAFC;
+  --scene-bg-bottom: #DFE2E8;
+  --scene-floor: #EEF0F3;
+  --scene-shadow: rgba(40, 48, 64, 0.28);
+  --scene-desk: #D9CBB2;
+  --scene-desk-edge: #B2A283;
+  --scene-object: #8E97A6;
+  --scene-object-edge: #5F6878;
+  --scene-outline-inner: #FFFFFF;   /* contour a 2 tons : lisible sur sol clair ET sombre */
+  --scene-outline-outer: #1B1F27;
+  --scene-selection: #1F5FD1;
+  --scene-error: #B42318;
+  --scene-warning: #B86E00;
+}
+
+/* ============================ THEME SOMBRE ============================ */
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  --color-bg: #0E1115;
+  --color-surface: #171B22;
+  --color-surface-2: #212630;
+  --color-overlay: rgba(0, 0, 0, 0.55);
+  --color-border: #2C323D;
+  --color-border-strong: #7D8798;   /* 4.8:1 sur surface */
+
+  --color-text: #E8EBF0;            /* 14:1 */
+  --color-text-muted: #A3ACBA;      /* 6.8:1 sur surface-2 */
+  --color-text-disabled: #6B7482;
+
+  --color-accent: #6C9CFF;          /* 6.4:1 sur surface */
+  --color-accent-hover: #8AB2FF;
+  --color-accent-active: #A6C4FF;
+  --color-on-accent: #0B1220;       /* 7:1 sur accent */
+  --color-accent-subtle: #18284A;
+  --color-accent-subtle-text: #A6C4FF;
+  --color-focus: #8AB2FF;
+
+  --color-success: #4CC38A;
+  --color-success-bg: #12301F;
+  --color-error: #FF8A80;
+  --color-error-bg: #3A1714;
+  --color-warning: #F2B04A;
+  --color-warning-icon: #F2B04A;
+  --color-warning-bg: #33260D;
+  --color-info: #5CC4E0;
+  --color-info-bg: #0F2A33;
+  --color-danger-solid: #C4302B;    /* 5.5:1 avec texte blanc */
+  --color-on-danger: #FFFFFF;
+
+  --shadow-1: 0 1px 1px rgba(0,0,0,.30), 0 2px 4px rgba(0,0,0,.25), 0 0 0 1px rgba(255,255,255,.04);
+  --shadow-2: 0 0 0 1px rgba(255,255,255,.06), 0 2px 4px rgba(0,0,0,.30), 0 8px 16px rgba(0,0,0,.35), 0 16px 32px rgba(0,0,0,.35);
+  --shadow-3: 0 0 0 1px rgba(255,255,255,.08), 0 4px 8px rgba(0,0,0,.35), 0 16px 32px rgba(0,0,0,.45), 0 40px 80px rgba(0,0,0,.5);
+
+  --glass-tint: rgba(28, 32, 40, 0.86);
+  --glass-border: rgba(255, 255, 255, 0.14);
+  --glass-shadow: 0 0 0 1px rgba(255,255,255,.06), 0 2px 4px rgba(0,0,0,.30), 0 8px 16px rgba(0,0,0,.35), 0 24px 48px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.08);
+  --glass-link: #8AB2FF;
+
+  --scene-bg-top: #3A414D;
+  --scene-bg-bottom: #12161C;
+  --scene-floor: #1C2129;
+  --scene-shadow: rgba(0, 0, 0, 0.5);
+  --scene-desk: #8C7B62;
+  --scene-desk-edge: #6A5B46;
+  --scene-object: #8E97A6;
+  --scene-object-edge: #C3CAD6;
+  --scene-outline-inner: #FFFFFF;
+  --scene-outline-outer: #0B0E12;
+  --scene-selection: #8AB2FF;
+  --scene-error: #FF8A80;
+  --scene-warning: #F2B04A;
+}
+
+/* Preference systeme si aucun choix explicite (defaut = systeme) */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    color-scheme: dark;
+    --color-bg: #0E1115; --color-surface: #171B22; --color-surface-2: #212630;
+    --color-overlay: rgba(0,0,0,.55); --color-border: #2C323D; --color-border-strong: #7D8798;
+    --color-text: #E8EBF0; --color-text-muted: #A3ACBA; --color-text-disabled: #6B7482;
+    --color-accent: #6C9CFF; --color-accent-hover: #8AB2FF; --color-accent-active: #A6C4FF;
+    --color-on-accent: #0B1220; --color-accent-subtle: #18284A; --color-accent-subtle-text: #A6C4FF;
+    --color-focus: #8AB2FF;
+    --color-success: #4CC38A; --color-success-bg: #12301F;
+    --color-error: #FF8A80; --color-error-bg: #3A1714;
+    --color-warning: #F2B04A; --color-warning-icon: #F2B04A; --color-warning-bg: #33260D;
+    --color-info: #5CC4E0; --color-info-bg: #0F2A33;
+    --color-danger-solid: #C4302B; --color-on-danger: #FFFFFF;
+    --shadow-1: 0 1px 1px rgba(0,0,0,.30), 0 2px 4px rgba(0,0,0,.25), 0 0 0 1px rgba(255,255,255,.04);
+    --shadow-2: 0 0 0 1px rgba(255,255,255,.06), 0 2px 4px rgba(0,0,0,.30), 0 8px 16px rgba(0,0,0,.35), 0 16px 32px rgba(0,0,0,.35);
+    --shadow-3: 0 0 0 1px rgba(255,255,255,.08), 0 4px 8px rgba(0,0,0,.35), 0 16px 32px rgba(0,0,0,.45), 0 40px 80px rgba(0,0,0,.5);
+    --glass-tint: rgba(28,32,40,.86); --glass-border: rgba(255,255,255,.14);
+    --glass-shadow: 0 0 0 1px rgba(255,255,255,.06), 0 2px 4px rgba(0,0,0,.30), 0 8px 16px rgba(0,0,0,.35), 0 24px 48px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.08);
+    --glass-link: #8AB2FF;
+    --scene-bg-top: #3A414D; --scene-bg-bottom: #12161C; --scene-floor: #1C2129; --scene-shadow: rgba(0,0,0,.5);
+    --scene-desk: #8C7B62; --scene-desk-edge: #6A5B46; --scene-object: #8E97A6;
+    --scene-object-edge: #C3CAD6; --scene-outline-inner: #FFFFFF; --scene-outline-outer: #0B0E12;
+    --scene-selection: #8AB2FF; --scene-error: #FF8A80; --scene-warning: #F2B04A;
+  }
+}
+
+/* ============ VERRE : primitive + replis (opaque si non supporte / transparence reduite) ============
+   A appliquer aux panneaux et barres qui flottent au-dessus de la scene 3D.
+   Regle : tout texte sur verre reste >= 4.5:1 sur le PIRE fond (noir pur sous verre clair,
+   blanc pur sous verre sombre) parce que la teinte est a 86 %. Ne jamais descendre sous 86 %. */
+.glass {
+  background: var(--glass-tint);
+  -webkit-backdrop-filter: var(--glass-filter);
+  backdrop-filter: var(--glass-filter);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+}
+/* Voile des modales : flou leger de la scene derriere */
+.scrim {
+  background: var(--color-overlay);
+  -webkit-backdrop-filter: var(--glass-filter-soft);
+  backdrop-filter: var(--glass-filter-soft);
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass { background: var(--color-surface); border-color: var(--color-border); }
+  .scrim { background: var(--color-overlay); }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .glass { background: var(--color-surface); -webkit-backdrop-filter: none; backdrop-filter: none; border-color: var(--color-border); }
+  .scrim { -webkit-backdrop-filter: none; backdrop-filter: none; }
+}
+/* Simulation / option utilisateur : ajouter .no-glass sur <html> ou un conteneur */
+.no-glass .glass, .glass.no-glass { background: var(--color-surface); -webkit-backdrop-filter: none; backdrop-filter: none; border-color: var(--color-border); }
+.no-glass .scrim { -webkit-backdrop-filter: none; backdrop-filter: none; }
+
+/* Motion reduit : tout est neutralise (WCAG 2.3.3) */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-fast: 0ms;
+    --duration-base: 0ms;
+    --duration-slow: 0ms;
+    --duration-camera: 0ms;
+    --press-scale: 1;
+  }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Focus visible commun (wrappers : [data-focus-visible] de React Aria) */
+.focus-ring,
+:where(button, a, input, select, textarea, [tabindex]):focus-visible,
+[data-focus-visible] {
+  outline: var(--focus-width) solid var(--color-focus);
+  outline-offset: var(--focus-offset);
+  box-shadow: 0 0 0 calc(var(--focus-offset) + 1px) var(--color-surface);
+}
+/* ======================= END SYNCED ======================= */
+
+/* ===== BASE (page catalogue) ===== */
+*{box-sizing:border-box}
+body{margin:0;background:var(--color-bg);color:var(--color-text);font:var(--weight-regular) var(--text-md)/var(--leading-normal) var(--font-sans);font-variant-numeric:tabular-nums}
+h1,h2,h3,h4{line-height:var(--leading-tight);margin:0;letter-spacing:var(--tracking-tight)}
+h2{font-size:var(--text-2xl);margin:var(--space-16) 0 var(--space-6);font-weight:var(--weight-semibold)}
+h3{font-size:var(--text-lg);margin:var(--space-8) 0 var(--space-4);font-weight:var(--weight-semibold)}
+p{margin:0 0 var(--space-3)}
+.muted{color:var(--color-text-muted)}
+.small{font-size:var(--text-sm)}
+code{font-family:var(--font-mono);font-size:var(--text-sm);background:var(--color-surface-2);padding:1px 6px;border-radius:var(--radius-sm)}
+a{color:var(--color-accent)}
+.is-focus{outline:var(--focus-width) solid var(--color-focus);outline-offset:var(--focus-offset);box-shadow:0 0 0 calc(var(--focus-offset) + 1px) var(--color-surface)}
+.i{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
+.i.sm{width:16px;height:16px}
+.wrap{max-width:1200px;margin:0 auto;padding:var(--space-8) var(--space-6) var(--space-16)}
+.skip{position:absolute;left:-999px;top:0;background:var(--color-accent);color:var(--color-on-accent);padding:var(--space-2) var(--space-4);z-index:99;border-radius:var(--radius-md)}
+.skip:focus{left:var(--space-2);top:var(--space-2)}
+.page-head{display:flex;justify-content:space-between;align-items:flex-start;gap:var(--space-6);flex-wrap:wrap}
+.grid{display:grid;gap:var(--space-5);grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}
+.row{display:flex;gap:var(--space-3);align-items:center;flex-wrap:wrap}
+.panel-demo{background:var(--color-surface);border-radius:var(--radius-lg);padding:var(--space-5);box-shadow:var(--shadow-1)}
+.overline{font-size:var(--text-sm);font-weight:var(--weight-semibold);letter-spacing:var(--tracking-overline);text-transform:uppercase;color:var(--color-text-muted)}
+.sw{border-radius:var(--radius-lg);overflow:hidden;background:var(--color-surface);font-size:var(--text-sm);box-shadow:var(--shadow-1)}
+.sw div.c{height:44px;border-bottom:1px solid var(--color-border)}.sw div.t{padding:var(--space-3)}
+.sw b{display:block;font-weight:var(--weight-semibold)}
+
+/* ===== COMPOSANTS ===== */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:var(--space-2);height:var(--control-md);padding:0 var(--space-4);border-radius:var(--radius-md);border:1px solid transparent;background:var(--color-surface-2);color:var(--color-text);font:var(--weight-medium) var(--text-md)/1 var(--font-sans);cursor:pointer;transition:background var(--duration-fast) var(--ease-standard),transform var(--duration-fast) var(--ease-spring),box-shadow var(--duration-base) var(--ease-standard)}
+.btn:hover,.btn.is-hover{background:var(--color-border)}
+.btn:active{transform:scale(var(--press-scale))}
+.btn.primary{background:var(--color-accent);color:var(--color-on-accent)}
+.btn.primary:hover,.btn.primary.is-hover{background:var(--color-accent-hover)}
+.btn.primary:active{background:var(--color-accent-active)}
+.btn.danger{background:var(--color-danger-solid);color:var(--color-on-danger)}
+.btn.ghost{background:transparent}
+.btn.ghost:hover,.btn.ghost.is-hover{background:var(--color-surface-2)}
+.btn.link{background:none;color:var(--color-accent);text-decoration:underline;padding:0 var(--space-2)}
+.btn.link:hover{background:none;color:var(--color-accent-hover)}
+.glass .btn.link,.glass .btn.link:hover{color:var(--glass-link)}
+.btn.lg{height:var(--control-lg);padding:0 var(--space-6)}
+.btn.sm{height:var(--control-sm);padding:0 var(--space-3);font-size:var(--text-sm)}
+.btn.icon{width:var(--control-md);padding:0}.btn.icon.sm{width:var(--control-sm)}
+.btn[disabled],.btn[aria-disabled=true]{color:var(--color-text-disabled);background:var(--color-surface-2);cursor:not-allowed;transform:none}
+.btn.ghost[disabled]{background:transparent}
+.btn[aria-pressed=true],.btn[aria-selected=true]{background:var(--color-accent-subtle);color:var(--color-accent-subtle-text);box-shadow:inset 0 0 0 1px var(--color-accent)}
+.label{display:block;font-size:var(--text-sm);font-weight:var(--weight-medium);margin-bottom:var(--space-2)}
+.input{width:100%;height:var(--control-md);padding:0 var(--space-3);border-radius:var(--radius-md);border:1px solid var(--color-border-strong);background:var(--color-surface);color:var(--color-text);font:inherit;transition:background var(--duration-fast) var(--ease-standard)}
+.input:hover{background:var(--color-surface-2)}
+.input[disabled]{color:var(--color-text-disabled);border-color:var(--color-border);background:var(--color-surface-2)}
+.nf-box{display:flex;align-items:center;height:var(--control-md);border:1px solid var(--color-border-strong);border-radius:var(--radius-md);background:var(--color-surface);overflow:hidden}
+.nf-box input{flex:1;min-width:0;width:100%;border:0;background:none;color:var(--color-text);font:inherit;text-align:right;padding:0 var(--space-2);height:100%;outline:0}
+.nf-box .unit{color:var(--color-text-muted);font-size:var(--text-sm);padding-right:var(--space-3)}
+.nf-box button{width:var(--control-sm);height:100%;border:0;background:var(--color-surface-2);color:var(--color-text);cursor:pointer;display:grid;place-items:center;transition:background var(--duration-fast) var(--ease-standard)}
+.nf-box button:first-child{border-right:1px solid var(--color-border)}.nf-box button:last-child{border-left:1px solid var(--color-border)}
+.nf-box button:hover{background:var(--color-border)}
+.nf-box:focus-within,.nf-box.is-focus{outline:var(--focus-width) solid var(--color-focus);outline-offset:var(--focus-offset)}
+.nf.error .nf-box{border:2px solid var(--color-error)}
+.nf-box.disabled{border-color:var(--color-border);background:var(--color-surface-2);color:var(--color-text-disabled)}
+.nf-box.disabled input{color:var(--color-text-disabled)}
+.help{font-size:var(--text-sm);color:var(--color-text-muted);margin-top:var(--space-2)}
+.err-msg{display:flex;gap:var(--space-1);align-items:flex-start;font-size:var(--text-sm);color:var(--color-error);margin-top:var(--space-2);font-weight:var(--weight-medium)}
+.nf+.nf{margin-top:var(--space-4)}
+/* verdict */
+.verdict{display:inline-flex;align-items:center;gap:var(--space-2);height:40px;padding:0 var(--space-4);border-radius:var(--radius-pill);border:1px solid;font-size:var(--text-lg);font-weight:var(--weight-semibold);white-space:nowrap;transition:background var(--duration-base) var(--ease-standard),color var(--duration-base) var(--ease-standard)}
+.verdict.ok{background:var(--color-success-bg);border-color:var(--color-success);color:var(--color-success)}
+.verdict.bad{background:var(--color-error-bg);border-color:var(--color-error);color:var(--color-error)}
+.verdict .sub{font-weight:var(--weight-regular);font-size:var(--text-sm)}
+.verdict.load{background:var(--color-surface-2);border-color:var(--color-border-strong);color:var(--color-text-muted)}
+/* alerts */
+.alerts-title{display:flex;justify-content:space-between;align-items:center}
+.alert{display:flex;gap:var(--space-3);padding:var(--space-3) var(--space-4);border-radius:var(--radius-lg);margin-top:var(--space-3);font-size:var(--text-sm)}
+.alert .sev{display:block;font-weight:var(--weight-semibold)}
+.alert.error{background:var(--color-error-bg);color:var(--color-error)}
+.alert.warning{background:var(--color-warning-bg);color:var(--color-warning)}
+.alert.info{background:var(--color-info-bg);color:var(--color-info)}
+.alert.success{background:var(--color-success-bg);color:var(--color-success)}
+.alert .body{flex:1;color:var(--color-text)}
+.alert .body .sev{color:inherit}
+.alert.error .sev{color:var(--color-error)}.alert.warning .sev{color:var(--color-warning)}.alert.info .sev{color:var(--color-info)}.alert.success .sev{color:var(--color-success)}
+.alert .btn{align-self:flex-start;background:var(--color-surface)}
+.alert .btn:hover{background:var(--color-border)}
+/* segmented tabs / cards */
+.tabs{display:flex;gap:2px;padding:3px;background:var(--color-surface-2);border-radius:var(--radius-md)}
+.tab{flex:1;height:32px;border:0;border-radius:calc(var(--radius-md) - 3px);background:none;color:var(--color-text-muted);font:var(--weight-medium) var(--text-md)/1 var(--font-sans);cursor:pointer;transition:background var(--duration-base) var(--ease-standard),box-shadow var(--duration-base) var(--ease-standard)}
+.tab:hover{color:var(--color-text)}
+.tab[aria-selected=true]{background:var(--color-surface);color:var(--color-text);font-weight:var(--weight-semibold);box-shadow:var(--shadow-1)}
+.card{position:relative;border:1px solid var(--color-border-strong);border-radius:var(--radius-lg);background:var(--color-surface);padding:var(--space-3);text-align:center;font:inherit;font-size:var(--text-sm);color:var(--color-text);cursor:pointer;display:block;width:100%;transition:transform var(--duration-base) var(--ease-out),box-shadow var(--duration-base) var(--ease-out)}
+.card:hover{transform:translateY(-1px);box-shadow:var(--shadow-2)}
+.card .thumb{height:40px;border-radius:var(--radius-sm);background:var(--color-surface-2);margin-bottom:var(--space-2)}
+.card[aria-checked=true]{border:2px solid var(--color-accent);background:var(--color-accent-subtle);color:var(--color-accent-subtle-text);font-weight:var(--weight-semibold);padding:11px}
+.card .tick{position:absolute;top:6px;right:6px}
+.lib{display:flex;flex-direction:column;align-items:center;gap:var(--space-2);height:76px;justify-content:center;padding:var(--space-2);border:0;border-radius:var(--radius-lg);background:var(--color-surface-2);color:var(--color-text);font:inherit;font-size:var(--text-sm);cursor:pointer;line-height:1.2;text-align:center;transition:transform var(--duration-base) var(--ease-out),box-shadow var(--duration-base) var(--ease-out),background var(--duration-base) var(--ease-standard)}
+.lib:hover{background:var(--color-surface);transform:translateY(-1px);box-shadow:var(--shadow-2)}
+.lib-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-3)}
+.group-h{display:flex;align-items:center;gap:var(--space-1);font-size:var(--text-sm);font-weight:var(--weight-semibold);margin:var(--space-6) 0 var(--space-3);background:none;border:0;color:var(--color-text);padding:0;cursor:pointer;font-family:inherit}
+/* floating toolbar (verre) */
+.float{display:inline-flex;align-items:center;gap:var(--space-1);padding:6px;border-radius:var(--radius-pill)}
+.float .sep{width:1px;height:24px;background:var(--color-border-strong);margin:0 var(--space-1);opacity:.5}
+.float .btn{border-radius:var(--radius-pill);background:transparent;height:var(--control-sm)}
+.float .btn:hover{background:var(--color-surface-2)}
+.float .btn[aria-pressed=true]{background:var(--color-accent-subtle)}
+.float .btn.danger-t{color:var(--color-error)}
+/* modal */
+.modal-bg{display:grid;place-items:center;padding:var(--space-6);border-radius:var(--radius-xl)}
+.modal{background:var(--color-surface);border-radius:var(--radius-xl);box-shadow:var(--shadow-3);padding:var(--space-8);width:100%;max-width:480px;position:relative;animation:pop var(--duration-slow) var(--ease-spring) both}
+.modal h3{font-size:var(--text-xl);margin:0 0 var(--space-3)}
+.modal .actions{display:flex;gap:var(--space-2);justify-content:flex-end;margin-top:var(--space-8);flex-wrap:wrap}
+.modal .close{position:absolute;top:var(--space-4);right:var(--space-4)}
+.toast{display:flex;gap:var(--space-3);align-items:center;background:var(--color-surface);border-radius:var(--radius-lg);box-shadow:var(--shadow-2);padding:var(--space-3) var(--space-4);max-width:400px;font-size:var(--text-sm);animation:slide-in var(--duration-slow) var(--ease-spring) both}
+.toast .ic-ok{color:var(--color-success)}.toast .ic-err{color:var(--color-error)}
+.tooltip{display:inline-block;background:var(--color-text);color:var(--color-bg);font-size:var(--text-sm);padding:var(--space-1) var(--space-3);border-radius:var(--radius-sm)}
+.progress{height:8px;border-radius:var(--radius-pill);background:var(--color-surface-2);box-shadow:inset 0 0 0 1px var(--color-border-strong);overflow:hidden}
+.progress i{display:block;height:100%;width:60%;background:var(--color-accent);border-radius:var(--radius-pill)}
+.banner{display:flex;gap:var(--space-3);align-items:center;padding:var(--space-3) var(--space-4);background:var(--color-error-bg);color:var(--color-text);border-radius:var(--radius-lg)}
+.banner .ic{color:var(--color-error)}
+.banner span.txt{flex:1}
+.banner .btn{background:var(--color-surface)}
+.sep-h{border:0;border-top:1px solid var(--color-border);margin:var(--space-6) 0}
+.seg{display:flex;gap:2px;padding:3px;background:var(--color-surface-2);border-radius:var(--radius-pill)}
+.seg .btn{flex:1;padding:0 var(--space-2);font-size:var(--text-sm);border-radius:var(--radius-pill);background:transparent;height:30px}
+.seg .btn:hover{background:var(--color-border)}
+.seg .btn[aria-checked=true]{background:var(--color-surface);color:var(--color-text);box-shadow:var(--shadow-1),inset 0 0 0 1px var(--color-accent);font-weight:var(--weight-semibold)}
+.check{display:flex;align-items:center;gap:var(--space-2);min-height:var(--control-sm);font-size:var(--text-md)}
+.check input{width:20px;height:20px;accent-color:var(--color-accent)}
+.demo-states .cell{display:flex;flex-direction:column;gap:var(--space-3);align-items:flex-start}
+@keyframes pop{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:none}}
+@keyframes rise{from{opacity:0;transform:translateY(12px) scale(.98)}to{opacity:1;transform:none}}
+@keyframes slide-in{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:none}}
+@keyframes verdict-pop{0%{transform:scale(1)}40%{transform:scale(1.06)}100%{transform:scale(1)}}
+
+/* ===== MAQUETTES ===== */
+.frame-wrap{overflow:auto;border-radius:var(--radius-lg);box-shadow:var(--shadow-2)}
+.studio{position:relative;width:1366px;height:768px;overflow:hidden;background:var(--color-bg)}
+.viewport{position:absolute;inset:0;z-index:1;background:radial-gradient(120% 90% at 50% 38%,var(--scene-bg-top) 0%,var(--scene-bg-bottom) 100%)}
+.viewport svg.scene{position:absolute;inset:0;width:100%;height:100%}
+.topbar{position:absolute;z-index:3;top:var(--float-inset);left:var(--float-inset);right:var(--float-inset);height:var(--topbar-h);display:flex;align-items:center;gap:var(--space-3);padding:0 var(--space-5);border-radius:var(--radius-xl)}
+.logo{font-weight:var(--weight-semibold);font-size:var(--text-lg);letter-spacing:var(--tracking-tight);display:flex;align-items:center;gap:var(--space-2)}
+.logo i{width:22px;height:22px;border-radius:7px;background:var(--color-accent);display:inline-block}
+.name-field{display:flex;align-items:center;gap:var(--space-2);height:var(--control-md);padding:0 var(--space-3);border-radius:var(--radius-md);font-weight:var(--weight-medium);border:0;background:none;color:var(--color-text);font-size:var(--text-md);font-family:inherit;cursor:text}
+.name-field:hover{background:var(--color-surface-2)}
+.spacer{flex:1}
+.side{position:absolute;z-index:3;top:calc(var(--float-inset)*2 + var(--topbar-h));bottom:var(--float-inset);display:flex;flex-direction:column;overflow:hidden;border-radius:var(--radius-xl)}
+.side.l{left:var(--float-inset);width:var(--panel-left-w)}
+.side.r{right:var(--float-inset);width:var(--panel-right-w);overflow-y:auto}
+.side .pad{padding:var(--panel-pad)}
+.float-wrap{position:absolute;left:calc(var(--panel-left-w) + var(--float-inset)*2);right:calc(var(--panel-right-w) + var(--float-inset)*2);bottom:var(--space-4);display:flex;flex-direction:column;align-items:center;gap:var(--space-3);z-index:2}
+.float-wrap>*{animation:rise var(--duration-slow) var(--ease-spring) both}
+.float-wrap>*:nth-child(2){animation-delay:60ms}
+.collapse{position:absolute;z-index:2;top:calc(var(--float-inset)*2 + var(--topbar-h));border-radius:var(--radius-pill)}
+.pill-note{position:absolute;z-index:2;padding:var(--space-1) var(--space-4);border-radius:var(--radius-pill);font-size:var(--text-sm);color:var(--color-text-muted);display:flex;align-items:center;gap:var(--space-2)}
+.tip{top:calc(var(--float-inset)*2 + var(--topbar-h));left:calc(var(--panel-left-w) + var(--float-inset)*2 + 56px);right:calc(var(--panel-right-w) + var(--float-inset)*2 + 56px);margin:0 auto;width:max-content;max-width:100%}
+.ph{right:calc(var(--panel-right-w) + var(--float-inset)*2);bottom:var(--space-4)}
+.welcome-frame{position:relative;width:1366px;height:768px;overflow:hidden;background:var(--color-bg)}
+.welcome-frame .scrim{position:absolute;inset:0;z-index:5;display:grid;place-items:center}
+.steps{display:flex;gap:var(--space-4);margin:var(--space-8) 0;padding:0;list-style:none}
+.steps li{flex:1;display:flex;gap:var(--space-3);align-items:flex-start;padding:var(--space-4);border-radius:var(--radius-lg);background:var(--color-surface-2)}
+.steps .n{width:28px;height:28px;border-radius:var(--radius-pill);background:var(--color-accent);color:var(--color-on-accent);display:grid;place-items:center;font-weight:var(--weight-semibold);flex:none}
+.steps b{display:block}
+.sp-demo{display:flex;align-items:flex-end;gap:var(--space-4);flex-wrap:wrap}
+.sp-demo div{background:var(--color-accent);border-radius:var(--radius-sm)}
+/* banc d'essai du verre */
+.bench{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:var(--space-4);padding:var(--space-4);border-radius:var(--radius-lg);background:var(--color-bg)}
+.bench .bg{border-radius:var(--radius-lg);padding:var(--space-5);min-height:200px;display:flex;align-items:center}
+.bench .glass{width:100%;padding:var(--space-4);border-radius:var(--radius-xl);color:var(--color-text);font-size:var(--text-sm)}
+.bg-white{background:#FFFFFF}.bg-mid{background:#8A9099}.bg-black{background:#000000}
+.bg-busy{background:repeating-linear-gradient(45deg,#ff4d4d 0 14px,#ffffff 14px 28px,#1d1d1d 28px 42px,#3ddc84 42px 56px)}
+.bg-dwhite{background:#FFFFFF}
+.err-t{color:var(--color-error);font-weight:var(--weight-medium)}
+.bench-dark{display:contents}
+.motion-demo{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:var(--space-5)}
+.motion-demo .stage{background:var(--color-bg);border-radius:var(--radius-lg);padding:var(--space-5);min-height:130px;display:flex;flex-direction:column;gap:var(--space-3);align-items:flex-start}
+table{border-collapse:collapse;width:100%;font-size:var(--text-sm)}
+th,td{text-align:left;padding:var(--space-2) var(--space-3);border-bottom:1px solid var(--color-border)}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<defs>
+<symbol id="check-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></symbol>
+<symbol id="x-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6M9 9l6 6"/></symbol>
+<symbol id="alert-triangle" viewBox="0 0 24 24"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3M12 9v4M12 17h.01"/></symbol>
+<symbol id="info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></symbol>
+<symbol id="undo" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></symbol>
+<symbol id="redo" viewBox="0 0 24 24"><path d="m15 14 5-5-5-5"/><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/></symbol>
+<symbol id="help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01"/></symbol>
+<symbol id="pencil" viewBox="0 0 24 24"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></symbol>
+<symbol id="chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+<symbol id="rot-l" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></symbol>
+<symbol id="rot-r" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></symbol>
+<symbol id="copy" viewBox="0 0 24 24"><rect x="8" y="8" width="14" height="14" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></symbol>
+<symbol id="trash" viewBox="0 0 24 24"><path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></symbol>
+<symbol id="magnet" viewBox="0 0 24 24"><path d="m6 15-4-4 6.75-6.77a7.79 7.79 0 0 1 11 11L13 22l-4-4 6.39-6.36a2.14 2.14 0 0 0-3-3L6 15"/><path d="m5 8 4 4M12 15l4 4"/></symbol>
+<symbol id="monitor" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></symbol>
+<symbol id="keyboard" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M8 12h.01M12 12h.01M16 12h.01M7 16h10"/></symbol>
+<symbol id="mouse" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="7"/><path d="M12 6v4"/></symbol>
+<symbol id="speaker" viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><circle cx="12" cy="14" r="4"/><path d="M12 6h.01"/></symbol>
+<symbol id="lamp" viewBox="0 0 24 24"><path d="M8 2h8l4 10H4z"/><path d="M12 12v6M8 22h8M12 18v4"/></symbol>
+<symbol id="pc" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M9 6h6M12 18h.01"/></symbol>
+<symbol id="mat" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="3"/></symbol>
+<symbol id="arm" viewBox="0 0 24 24"><path d="M4 21V8l8-4 8 4M12 4v8M8 21h-8"/><rect x="14" y="12" width="8" height="6" rx="1"/></symbol>
+<symbol id="gamepad" viewBox="0 0 24 24"><path d="M6 12h4M8 10v4M15 13h.01M18 11h.01"/><rect x="2" y="6" width="20" height="12" rx="6"/></symbol>
+<symbol id="panel-l" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/></symbol>
+<symbol id="panel-r" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M15 3v18"/></symbol>
+<symbol id="x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+<symbol id="plus" viewBox="0 0 24 24"><path d="M5 12h14M12 5v14"/></symbol>
+<symbol id="minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+<symbol id="reset" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3M16 21h3a2 2 0 0 0 2-2v-3"/></symbol>
+<symbol id="top" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/></symbol>
+<symbol id="front" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/></symbol>
+<symbol id="search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></symbol>
+<symbol id="upload" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></symbol>
+
+<!-- Scene 3D de remplacement : studio clair, ombres de contact douces, reflets. 1366x768 -->
+<filter id="blur18" x="-30%" y="-80%" width="160%" height="260%"><feGaussianBlur stdDeviation="18"/></filter>
+<filter id="blur6" x="-30%" y="-80%" width="160%" height="260%"><feGaussianBlur stdDeviation="6"/></filter>
+<linearGradient id="sheen" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".5"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+<pattern id="hatch" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="3" height="8" style="fill:var(--scene-error)"/></pattern>
+<symbol id="scene-art" viewBox="0 0 1366 768">
+  <g transform="translate(250 70)">
+    <ellipse cx="400" cy="474" rx="400" ry="64" style="fill:var(--scene-floor)" opacity=".85"/>
+    <ellipse cx="400" cy="470" rx="340" ry="34" style="fill:var(--scene-shadow)" filter="url(#blur18)"/>
+    <!-- bureau -->
+    <rect x="90" y="416" width="14" height="80" rx="3" style="fill:var(--scene-desk-edge)"/><rect x="696" y="416" width="14" height="80" rx="3" style="fill:var(--scene-desk-edge)"/>
+    <polygon points="150,200 650,200 735,400 65,400" style="fill:var(--scene-desk);stroke:var(--scene-desk-edge)" stroke-width="1.5" stroke-linejoin="round"/>
+    <polygon points="150,200 650,200 735,400 65,400" fill="url(#sheen)"/>
+    <rect x="65" y="400" width="670" height="16" rx="3" style="fill:var(--scene-desk-edge)"/>
+    <!-- ombres de contact -->
+    <ellipse cx="350" cy="296" rx="120" ry="9" style="fill:var(--scene-shadow)" filter="url(#blur6)"/>
+    <ellipse cx="352" cy="372" rx="110" ry="8" style="fill:var(--scene-shadow)" filter="url(#blur6)"/>
+    <!-- moniteur (selectionne) -->
+    <rect x="300" y="262" width="26" height="40" rx="3" style="fill:var(--scene-object-edge)"/>
+    <rect x="215" y="150" width="270" height="120" rx="8" style="fill:var(--scene-object);stroke:var(--scene-object-edge)" stroke-width="2"/>
+    <rect x="215" y="150" width="270" height="120" rx="8" fill="url(#sheen)"/>
+    <rect x="211" y="146" width="278" height="128" rx="11" fill="none" style="stroke:var(--scene-outline-outer)" stroke-width="7"/>
+    <rect x="211" y="146" width="278" height="128" rx="11" fill="none" style="stroke:var(--scene-outline-inner)" stroke-width="5"/>
+    <rect x="211" y="146" width="278" height="128" rx="11" fill="none" style="stroke:var(--scene-selection)" stroke-width="3"/>
+    <circle cx="350" cy="136" r="9" style="fill:var(--scene-selection);stroke:var(--scene-outline-inner)" stroke-width="2"/>
+    <!-- clavier, souris -->
+    <polygon points="262,330 440,330 450,368 252,368" style="fill:var(--scene-object);stroke:var(--scene-object-edge)" stroke-width="2" stroke-linejoin="round"/>
+    <polygon points="262,330 440,330 450,368 252,368" fill="url(#sheen)"/>
+    <ellipse cx="520" cy="350" rx="16" ry="22" style="fill:var(--scene-object);stroke:var(--scene-object-edge)" stroke-width="2"/>
+    <ellipse cx="520" cy="350" rx="16" ry="22" fill="url(#sheen)"/>
+    <!-- enceinte qui deborde (Error) -->
+    <polygon points="640,250 700,250 725,310 662,310" style="fill:var(--scene-object);stroke:var(--scene-object-edge)" stroke-width="2" stroke-linejoin="round"/>
+    <polygon points="640,250 700,250 725,310 662,310" fill="url(#hatch)"/>
+    <polygon points="640,250 700,250 725,310 662,310" fill="none" style="stroke:var(--scene-outline-inner)" stroke-width="5" stroke-linejoin="round"/>
+    <polygon points="640,250 700,250 725,310 662,310" fill="none" style="stroke:var(--scene-error)" stroke-width="3" stroke-linejoin="round"/>
+    <circle cx="682" cy="238" r="14" style="fill:var(--scene-bg-top);stroke:var(--scene-error)" stroke-width="2"/>
+    <path d="m676 232 12 12M688 232l-12 12" fill="none" style="stroke:var(--scene-error)" stroke-width="2.5" stroke-linecap="round"/>
+    <!-- cote -->
+    <line x1="65" y1="425" x2="215" y2="425" style="stroke:var(--scene-outline-outer)" stroke-width="2"/>
+    <rect x="85" y="436" width="110" height="26" rx="13" style="fill:var(--scene-outline-inner);stroke:var(--scene-outline-outer)"/>
+    <text x="140" y="454" text-anchor="middle" font-size="14" style="fill:var(--scene-outline-outer);font-family:var(--font-sans)">120 mm</text>
+  </g>
+</symbol>
+</defs>
+</svg>
+
+<main id="main" class="wrap">
+<div class="page-head">
+  <div>
+    <p class="overline">Design system v0.2</p>
+    <h1 style="font-size:var(--text-3xl);font-weight:var(--weight-semibold)">Deskfit <span class="muted" style="font-weight:400">(provisional name, P152)</span></h1>
+    <p class="muted" style="max-width:62ch;margin-top:var(--space-3)">Clean · Airy · Precise. Neutrals plus one accent, generous radii, soft layered shadows, glass panels floating over a studio-lit 3D scene. English UI, WCAG 2.2 AA, desktop first (min 1366×768).</p>
+  </div>
+  <div class="row">
+    <button class="btn" id="theme"><svg class="i"><use href="#info"/></svg><span>Theme: System</span></button>
+    <button class="btn" id="noglass" aria-pressed="false"><svg class="i"><use href="#info"/></svg><span>Glass fallback: off</span></button>
+  </div>
+</div>
+<p class="small muted" style="margin-top:var(--space-3)">Theme cycles System / Light / Dark (default: System). "Glass fallback" simulates the opaque fallback used when <code>backdrop-filter</code> is unsupported or <code>prefers-reduced-transparency: reduce</code>. To check reduced motion, enable "Reduce motion" in your OS.</p>
+
+<nav aria-label="Page sections" class="row small" style="margin-top:var(--space-4);gap:var(--space-4)">
+  <a href="#colors">Colors</a> <a href="#type">Type</a> <a href="#space">Space, radii, elevation</a> <a href="#glass">Glass</a> <a href="#icons">Icons</a> <a href="#states">States</a> <a href="#comps">Components</a> <a href="#studio">Studio mockup</a> <a href="#welcome">Welcome mockup</a> <a href="#motion">Motion</a>
+</nav>
+
+<h2 id="colors">1. Colors</h2>
+<p class="muted small">Neutrals plus a single accent. Status colors are semantic only and are never conveyed by color alone: always icon + word. Ratios are in <code>design-system.md</code> section 3.</p>
+<div class="grid" id="swatches"></div>
+<h3>Status</h3>
+<div class="grid">
+  <div class="alert success" style="margin:0"><svg class="i"><use href="#check-circle"/></svg><div class="body"><span class="sev">Success</span>Everything fits.</div></div>
+  <div class="alert error" style="margin:0"><svg class="i"><use href="#x-circle"/></svg><div class="body"><span class="sev">Error</span>Speakers overflow the desk by 80 mm.</div></div>
+  <div class="alert warning" style="margin:0"><svg class="i"><use href="#alert-triangle"/></svg><div class="body"><span class="sev">Warning</span>Desk is 78 % full (limit 70 %).</div></div>
+  <div class="alert info" style="margin:0"><svg class="i"><use href="#info"/></svg><div class="body"><span class="sev">Tip</span>Monitor is close to the edge.</div></div>
+</div>
+
+<h2 id="type">2. Typography</h2>
+<div class="panel-demo">
+  <div style="font-size:var(--text-3xl);font-weight:600;letter-spacing:var(--tracking-tight);line-height:1.15">Plan your desk setup. (36 / 600, Welcome only)</div>
+  <div style="font-size:var(--text-2xl);font-weight:600;margin-top:var(--space-4);letter-spacing:var(--tracking-tight)">Plan your desk setup before you buy. (28 / 600)</div>
+  <div style="font-size:var(--text-xl);font-weight:600;margin-top:var(--space-4);letter-spacing:var(--tracking-tight)">Start a new setup? (22 / 600)</div>
+  <div style="font-size:var(--text-lg);font-weight:600;margin-top:var(--space-4)">It fits - 2 tips (18 / 600)</div>
+  <div style="margin-top:var(--space-4)">Body text 16 / 400. Check that everything fits - no 3D skills needed.</div>
+  <div class="small muted" style="margin-top:var(--space-4)">Small 14 / 400: help text, labels. Minimum size in the UI. Tabular figures: 1400 mm, 0700 mm, 740 mm.</div>
+  <div class="overline" style="margin-top:var(--space-4)">Overline 14 / 600 uppercase</div>
+</div>
+<p class="small muted" style="margin-top:var(--space-3)">Font: <b>Inter</b> (SIL OFL 1.1), self-hosted in the app as a latin variable woff2 at <code>public/fonts/inter-latin-wght-normal.woff2</code> (about 48 KB, no third-party request). This page uses Inter if installed locally, otherwise the system font: no network needed.</p>
+
+<h2 id="space">3. Spacing, radii, elevation</h2>
+<div class="sp-demo" id="spacing"></div>
+<div class="row" style="margin-top:var(--space-8);gap:var(--space-6)">
+  <div class="panel-demo" style="border-radius:var(--radius-sm)">sm 6<br><span class="small muted">chips, tooltips</span></div>
+  <div class="panel-demo" style="border-radius:var(--radius-md)">md 10<br><span class="small muted">buttons, fields</span></div>
+  <div class="panel-demo" style="border-radius:var(--radius-lg)">lg 16<br><span class="small muted">cards, alerts</span></div>
+  <div class="panel-demo" style="border-radius:var(--radius-xl)">xl 24<br><span class="small muted">panels, modals</span></div>
+  <div class="panel-demo" style="border-radius:var(--radius-pill);padding-inline:var(--space-8)">pill</div>
+</div>
+<div class="row" style="margin-top:var(--space-8);gap:var(--space-8);padding:var(--space-8);background:var(--color-bg);border-radius:var(--radius-xl)">
+  <div class="panel-demo" style="box-shadow:none">Level 0<br><span class="small muted">flat</span></div>
+  <div class="panel-demo" style="box-shadow:var(--shadow-1)">Level 1<br><span class="small muted">cards</span></div>
+  <div class="panel-demo" style="box-shadow:var(--shadow-2)">Level 2<br><span class="small muted">menus, toasts</span></div>
+  <div class="panel-demo" style="box-shadow:var(--shadow-3)">Level 3<br><span class="small muted">modals</span></div>
+</div>
+
+<h2 id="glass">4. Glass (panels over the 3D scene)</h2>
+<p class="muted small" style="max-width:70ch">Recipe: tint at 86 %, <code>blur(24px) saturate(180%)</code>, 1 px light border, layered shadow with a 1 px inner highlight. The tint is high enough that text stays at 4.5:1 or more even on the worst possible background (pure black under light glass, pure white under dark glass). Below: the same panel on four hard backgrounds, in light glass, dark glass, and the opaque fallback.</p>
+<h3>Light glass</h3>
+<div class="bench" id="bench-light"></div>
+<h3>Dark glass</h3>
+<div class="bench" data-theme="dark" id="bench-dark"></div>
+<h3>Opaque fallback (no <code>backdrop-filter</code> or reduced transparency)</h3>
+<div class="bench no-glass" id="bench-fb"></div>
+
+<h2 id="icons">5. Icons</h2>
+<p class="muted small">Lucide (ISC license, <code>lucide-react</code>), 20 px, stroke 1.75, <code>currentColor</code>. Never alone without an accessible name or tooltip. Shapes below are equivalent inline drawings.</p>
+<div class="row" id="icongrid" style="gap:var(--space-5)"></div>
+
+<h2 id="states">6. States</h2>
+<div class="panel-demo demo-states">
+  <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(160px,1fr))">
+    <div class="cell"><span class="overline">Normal</span><button class="btn primary">Primary</button><button class="btn">Secondary</button></div>
+    <div class="cell"><span class="overline">Hover</span><button class="btn primary is-hover">Primary</button><button class="btn is-hover">Secondary</button></div>
+    <div class="cell"><span class="overline">Focus visible</span><button class="btn primary is-focus">Primary</button><button class="btn is-focus">Secondary</button></div>
+    <div class="cell"><span class="overline">Selected</span><button class="btn" aria-pressed="true"><svg class="i sm"><use href="#check-circle"/></svg>Snap</button></div>
+    <div class="cell"><span class="overline">Disabled</span><button class="btn primary" disabled>Primary</button><button class="btn" disabled>Secondary</button></div>
+    <div class="cell"><span class="overline">Destructive</span><button class="btn danger"><svg class="i sm"><use href="#trash"/></svg>Delete</button></div>
+    <div class="cell"><span class="overline">Ghost / link</span><button class="btn ghost">Cancel</button><button class="btn link">Skip and explore on my own</button></div>
+    <div class="cell"><span class="overline">Sizes</span><button class="btn lg primary">Large 44</button><button class="btn">Medium 36</button><button class="btn sm">Small 32</button></div>
+  </div>
+</div>
+
+<h2 id="comps">7. Components</h2>
+
+<h3>Verdict (always visible in the top bar)</h3>
+<div class="row" style="gap:var(--space-4)">
+  <span class="verdict ok" role="status"><svg class="i"><use href="#check-circle"/></svg>It fits</span>
+  <span class="verdict ok" role="status"><svg class="i"><use href="#check-circle"/></svg>It fits <span class="sub">- 2 tips</span></span>
+  <span class="verdict bad" role="status"><svg class="i"><use href="#x-circle"/></svg>Doesn't fit <span class="sub">- 2 issues</span></span>
+  <span class="verdict load" role="status"><svg class="i"><use href="#info"/></svg>Checking…</span>
+</div>
+<p class="help">Only Errors make the verdict "Doesn't fit". Warnings are tips and keep "It fits". Under the verdict (Alerts panel): "Based on the dimensions you entered."</p>
+
+<h3>NumberField (mm)</h3>
+<div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(240px,1fr))">
+  <div class="nf"><label class="label" for="nf1">Width</label><div class="nf-box"><button aria-label="Decrease width"><svg class="i sm"><use href="#minus"/></svg></button><input id="nf1" value="1400" inputmode="numeric" aria-describedby="h1"><span class="unit">mm</span><button aria-label="Increase width"><svg class="i sm"><use href="#plus"/></svg></button></div><div class="help" id="h1">Allowed: 600–3000 mm</div></div>
+  <div class="nf"><label class="label" for="nf2">Width (focus)</label><div class="nf-box is-focus"><button aria-label="Decrease width"><svg class="i sm"><use href="#minus"/></svg></button><input id="nf2" value="1400"><span class="unit">mm</span><button aria-label="Increase width"><svg class="i sm"><use href="#plus"/></svg></button></div></div>
+  <div class="nf error"><label class="label" for="nf3">Width (error)</label><div class="nf-box"><button aria-label="Decrease width"><svg class="i sm"><use href="#minus"/></svg></button><input id="nf3" value="4000" aria-invalid="true" aria-describedby="e3"><span class="unit">mm</span><button aria-label="Increase width"><svg class="i sm"><use href="#plus"/></svg></button></div><div class="err-msg" id="e3"><svg class="i sm"><use href="#x-circle"/></svg>Enter a width between 600 and 3000 mm.</div></div>
+  <div class="nf"><label class="label" for="nf4">Height (disabled)</label><div class="nf-box disabled"><button disabled aria-label="Decrease height"><svg class="i sm"><use href="#minus"/></svg></button><input id="nf4" value="740" disabled><span class="unit">mm</span><button disabled aria-label="Increase height"><svg class="i sm"><use href="#plus"/></svg></button></div></div>
+  <div class="nf"><label class="label" for="nf5">Diagonal</label><div class="nf-box"><button aria-label="Decrease diagonal"><svg class="i sm"><use href="#minus"/></svg></button><input id="nf5" value="34"><span class="unit">in</span><button aria-label="Increase diagonal"><svg class="i sm"><use href="#plus"/></svg></button></div><div class="help">about 864 mm</div></div>
+  <div><label class="label" for="tx1">Setup name (text field)</label><input class="input" id="tx1" value="My desk setup"></div>
+</div>
+
+<h3>Segmented tabs, desk cards, library</h3>
+<div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(270px,1fr))">
+  <div class="panel-demo">
+    <div class="tabs" role="tablist" aria-label="Left panel"><button class="tab" role="tab" aria-selected="false">Desk</button><button class="tab" role="tab" aria-selected="true">Objects</button></div>
+    <div class="lib-grid" style="margin-top:var(--space-4)">
+      <button class="lib"><svg class="i"><use href="#monitor"/></svg>Monitor</button>
+      <button class="lib"><svg class="i"><use href="#keyboard"/></svg>Keyboard</button>
+    </div>
+  </div>
+  <div class="panel-demo">
+    <div class="lib-grid" role="radiogroup" aria-label="Choose your desk">
+      <button class="card" role="radio" aria-checked="false"><div class="thumb"></div>120×60 cm</button>
+      <button class="card" role="radio" aria-checked="true"><svg class="i sm tick"><use href="#check-circle"/></svg><div class="thumb"></div>140×70 cm</button>
+    </div>
+  </div>
+</div>
+
+<h3>Alerts list (states)</h3>
+<div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(280px,1fr))">
+  <div class="panel-demo"><div class="alerts-title"><span class="overline">Alerts</span></div><p class="small muted" style="margin-top:var(--space-3)">Nothing to check yet. Add an object to see if it fits.</p></div>
+  <div class="panel-demo"><div class="alerts-title"><span class="overline">Alerts (0)</span></div><div class="alert success"><svg class="i"><use href="#check-circle"/></svg><div class="body"><span class="sev">Everything fits.</span>Based on the dimensions you entered.</div></div></div>
+  <div class="panel-demo"><div class="alerts-title"><span class="overline">Alerts (3)</span></div>
+    <div class="alert error"><svg class="i"><use href="#x-circle"/></svg><div class="body"><span class="sev">Error</span>Speakers overflow the desk by 80 mm on the right. Move them left.</div><button class="btn sm">Show</button></div>
+    <div class="alert warning"><svg class="i"><use href="#alert-triangle"/></svg><div class="body"><span class="sev">Warning</span>Desk is 78 % full (limit 70 %).</div></div>
+    <div class="alert info"><svg class="i"><use href="#info"/></svg><div class="body"><span class="sev">Tip</span>Monitor is close to the edge.</div></div>
+  </div>
+</div>
+
+<h3>Floating scene bars (glass over the studio backdrop)</h3>
+<div style="background:radial-gradient(120% 90% at 50% 38%,var(--scene-bg-top),var(--scene-bg-bottom));border-radius:var(--radius-xl);padding:var(--space-8);display:flex;flex-direction:column;align-items:center;gap:var(--space-3)">
+  <div class="float glass" role="toolbar" aria-label="Selected object"><button class="btn icon sm" aria-label="Rotate 15 degrees left"><svg class="i"><use href="#rot-l"/></svg></button><button class="btn icon sm" aria-label="Rotate 15 degrees right"><svg class="i"><use href="#rot-r"/></svg></button><span class="sep"></span><button class="btn sm"><svg class="i sm"><use href="#copy"/></svg>Duplicate</button><button class="btn sm danger-t"><svg class="i sm"><use href="#trash"/></svg>Delete</button></div>
+  <div class="float glass" role="toolbar" aria-label="View"><button class="btn sm"><svg class="i sm"><use href="#reset"/></svg>Reset view</button><button class="btn sm" aria-pressed="false"><svg class="i sm"><use href="#top"/></svg>Top</button><button class="btn sm" aria-pressed="false"><svg class="i sm"><use href="#front"/></svg>Front</button><span class="sep"></span><button class="btn sm" aria-pressed="true"><svg class="i sm"><use href="#magnet"/></svg>Snap on</button></div>
+  <span class="tooltip">Hold Shift to move freely</span>
+</div>
+
+<h3>Dialogs, toasts, banner, loading</h3>
+<div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(360px,1fr))">
+  <div class="modal-bg scrim"><div class="modal" role="dialog" aria-labelledby="m1"><h3 id="m1">Start a new setup?</h3><p class="muted">Your current setup will be replaced. Export it first if you want to keep it.</p><div class="actions"><button class="btn">Cancel</button><button class="btn">Export first</button><button class="btn danger">Start new</button></div></div></div>
+  <div class="modal-bg scrim"><div class="modal" role="dialog" aria-labelledby="m2"><button class="btn icon ghost close" aria-label="Close"><svg class="i"><use href="#x"/></svg></button><h3 id="m2">Alert settings</h3>
+    <div class="nf"><label class="label" for="a1">Maximum desk occupancy</label><div class="nf-box"><input id="a1" value="70"><span class="unit">%</span></div></div>
+    <div class="nf"><label class="label" for="a2">Comfort margin (depth)</label><div class="nf-box"><input id="a2" value="100"><span class="unit">mm</span></div></div>
+    <div class="nf"><label class="label" for="a3">Free space in front of keyboard</label><div class="nf-box"><input id="a3" value="150"><span class="unit">mm</span></div></div>
+    <div class="actions"><button class="btn ghost" style="margin-right:auto">Reset to defaults</button><button class="btn">Cancel</button><button class="btn primary">Save</button></div></div></div>
+</div>
+<div class="row" style="margin-top:var(--space-6);align-items:flex-start">
+  <div class="toast" role="status"><svg class="i ic-ok"><use href="#check-circle"/></svg><span>Monitor added.</span><button class="btn sm link">Undo</button><button class="btn icon sm ghost" aria-label="Dismiss"><svg class="i sm"><use href="#x"/></svg></button></div>
+  <div class="toast" role="alert"><svg class="i ic-err"><use href="#x-circle"/></svg><span>This file isn't a valid setup. Choose another file.</span><button class="btn icon sm ghost" aria-label="Dismiss"><svg class="i sm"><use href="#x"/></svg></button></div>
+</div>
+<div class="banner" role="alert" style="margin-top:var(--space-6)"><svg class="i ic"><use href="#x-circle"/></svg><span class="txt"><b>We couldn't restore your last setup.</b></span><button class="btn sm">Start new</button><button class="btn sm">Import a file</button></div>
+<div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(320px,1fr));margin-top:var(--space-6)">
+  <div class="panel-demo"><span class="overline">Loading</span><p style="margin:var(--space-3) 0">Loading 3D scene…</p><div class="progress" role="progressbar" aria-label="Loading 3D scene" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100"><i></i></div><p class="help">Panels stay visible. Static bar when motion is reduced.</p></div>
+  <div class="panel-demo"><span class="overline">Unsupported browser</span><p style="margin:var(--space-3) 0 var(--space-2);font-weight:600">Your browser can't show 3D.</p><p class="muted small">Try an up-to-date Chrome, Firefox, Edge or Safari.</p></div>
+</div>
+
+<h2 id="studio">8. Studio mockup (state: "Doesn't fit")</h2>
+<p class="muted small" style="max-width:75ch">Reference size 1366×768 (scroll sideways on narrower windows). The 3D view fills the whole area; top bar, side panels and scene bars are glass panels floating over it. 3D scene = placeholder visual in a light studio. Tab order: top bar, left panel, scene, right panel. The monitor is selected; the speakers overflow the desk (Error: red outline + hatching + icon badge); desk 78 % full (Warning).</p>
+<div class="frame-wrap"><div class="studio">
+  <section class="viewport" aria-label="3D view of your desk">
+    <svg class="scene" viewBox="0 0 1366 768" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Desk with monitor, keyboard, mouse and speakers. The speakers overflow the right edge."><use href="#scene-art" width="1366" height="768"/></svg>
+    <span class="pill-note glass tip"><svg class="i sm"><use href="#info"/></svg>Drag to turn the view · scroll to zoom · right-drag to move<button class="btn sm link">Hide</button></span>
+    <span class="pill-note glass ph">3D scene placeholder</span>
+    <div class="float-wrap">
+      <div class="float glass" role="toolbar" aria-label="Selected object"><button class="btn icon sm" aria-label="Rotate 15 degrees left"><svg class="i"><use href="#rot-l"/></svg></button><button class="btn icon sm" aria-label="Rotate 15 degrees right"><svg class="i"><use href="#rot-r"/></svg></button><span class="sep"></span><button class="btn sm"><svg class="i sm"><use href="#copy"/></svg>Duplicate</button><button class="btn sm danger-t"><svg class="i sm"><use href="#trash"/></svg>Delete</button></div>
+      <div class="float glass" role="toolbar" aria-label="View"><button class="btn sm"><svg class="i sm"><use href="#reset"/></svg>Reset view</button><button class="btn sm" aria-pressed="false"><svg class="i sm"><use href="#top"/></svg>Top</button><button class="btn sm" aria-pressed="false"><svg class="i sm"><use href="#front"/></svg>Front</button><span class="sep"></span><button class="btn sm" aria-pressed="true"><svg class="i sm"><use href="#magnet"/></svg>Snap on</button></div>
+    </div>
+    <button class="btn icon sm collapse glass" style="left:calc(var(--panel-left-w) + var(--float-inset)*2)" aria-label="Collapse left panel"><svg class="i"><use href="#panel-l"/></svg></button>
+    <button class="btn icon sm collapse glass" style="right:calc(var(--panel-right-w) + var(--float-inset)*2)" aria-label="Collapse right panel"><svg class="i"><use href="#panel-r"/></svg></button>
+  </section>
+
+  <header class="topbar glass">
+    <span class="logo"><i aria-hidden="true"></i>Deskfit</span>
+    <button class="name-field" aria-label="Setup name: My desk setup. Edit">My desk setup <svg class="i sm"><use href="#pencil"/></svg></button>
+    <span class="small muted">Saved in this browser</span>
+    <button class="btn icon ghost" aria-label="Undo"><svg class="i"><use href="#undo"/></svg></button>
+    <button class="btn icon ghost" aria-label="Redo" disabled><svg class="i"><use href="#redo"/></svg></button>
+    <button class="btn ghost">File <svg class="i sm"><use href="#chev"/></svg></button>
+    <span class="spacer"></span>
+    <span class="verdict bad" role="status"><svg class="i"><use href="#x-circle"/></svg>Doesn't fit <span class="sub">- 1 issue</span></span>
+    <button class="btn icon ghost" aria-label="Help"><svg class="i"><use href="#help"/></svg></button>
+  </header>
+
+  <aside class="side l glass" aria-label="Library">
+    <div class="pad" style="overflow:auto">
+      <div class="tabs" role="tablist"><button class="tab" role="tab" aria-selected="false">Desk</button><button class="tab" role="tab" aria-selected="true">Objects</button></div>
+      <label class="label" for="s1" style="margin-top:var(--space-5)">Search objects</label>
+      <input class="input" id="s1" placeholder="Search objects…">
+      <button class="group-h"><svg class="i sm"><use href="#chev"/></svg>Essentials</button>
+      <div class="lib-grid"><button class="lib"><svg class="i"><use href="#monitor"/></svg>Monitor</button><button class="lib"><svg class="i"><use href="#keyboard"/></svg>Keyboard</button><button class="lib"><svg class="i"><use href="#mouse"/></svg>Mouse</button></div>
+      <button class="group-h"><svg class="i sm"><use href="#chev"/></svg>Computer</button>
+      <div class="lib-grid"><button class="lib"><svg class="i"><use href="#pc"/></svg>PC case</button><button class="lib"><svg class="i"><use href="#mat"/></svg>Desk mat</button></div>
+      <button class="group-h"><svg class="i sm"><use href="#chev"/></svg>Accessories</button>
+      <div class="lib-grid"><button class="lib"><svg class="i"><use href="#arm"/></svg>Monitor arm</button><button class="lib"><svg class="i"><use href="#speaker"/></svg>Speakers</button><button class="lib"><svg class="i"><use href="#lamp"/></svg>Lamp</button><button class="lib"><svg class="i"><use href="#gamepad"/></svg>Controller stand</button></div>
+      <p class="small muted" style="margin-top:var(--space-6)">4 objects on desk</p>
+    </div>
+  </aside>
+
+  <aside class="side r glass" aria-label="Properties and alerts">
+    <div class="pad">
+      <span class="overline">Properties</span>
+      <h3 style="margin:var(--space-1) 0 var(--space-4)">Monitor</h3>
+      <div class="nf"><label class="label" for="p1">Diagonal</label><div class="nf-box"><button aria-label="Decrease diagonal"><svg class="i sm"><use href="#minus"/></svg></button><input id="p1" value="34"><span class="unit">in</span><button aria-label="Increase diagonal"><svg class="i sm"><use href="#plus"/></svg></button></div><div class="help">about 864 mm</div></div>
+      <div style="margin-top:var(--space-4)"><span class="label" id="rl">Ratio</span><div class="seg" role="radiogroup" aria-labelledby="rl"><button class="btn" role="radio" aria-checked="false">16:9</button><button class="btn" role="radio" aria-checked="true">21:9</button><button class="btn" role="radio" aria-checked="false">32:9</button></div></div>
+      <div class="row" style="margin-top:var(--space-3);gap:var(--space-5)"><label class="check"><input type="checkbox"> Curved</label><label class="check"><input type="checkbox" checked> Stand</label></div>
+      <div class="nf" style="margin-top:var(--space-3)"><label class="label" for="p2">Position X</label><div class="nf-box"><button aria-label="Decrease X"><svg class="i sm"><use href="#minus"/></svg></button><input id="p2" value="450"><span class="unit">mm</span><button aria-label="Increase X"><svg class="i sm"><use href="#plus"/></svg></button></div></div>
+      <div class="nf"><label class="label" for="p3">Position Y</label><div class="nf-box"><button aria-label="Decrease Y"><svg class="i sm"><use href="#minus"/></svg></button><input id="p3" value="120"><span class="unit">mm</span><button aria-label="Increase Y"><svg class="i sm"><use href="#plus"/></svg></button></div></div>
+      <div class="nf"><label class="label" for="p4">Rotation</label><div class="nf-box"><input id="p4" value="0"><span class="unit">°</span></div></div>
+      <p class="small muted" style="margin-top:var(--space-3)">Size 800 × 350 × 450 mm</p>
+      <hr class="sep-h">
+      <div class="alerts-title"><span class="overline">Alerts (2)</span><button class="btn sm link">Alert settings</button></div>
+      <div class="alert error"><svg class="i"><use href="#x-circle"/></svg><div class="body"><span class="sev">Error</span>Speakers overflow the desk by 80 mm on the right. Move them left.</div><button class="btn sm">Show</button></div>
+      <div class="alert warning"><svg class="i"><use href="#alert-triangle"/></svg><div class="body"><span class="sev">Warning</span>Desk is 78 % full (limit 70 %).</div></div>
+      <p class="help">Based on the dimensions you entered.</p>
+    </div>
+  </aside>
+</div></div>
+
+<h2 id="welcome">9. Welcome mockup (first launch)</h2>
+<p class="muted small">Opaque modal over the Studio, whose scene and glass panels are softly blurred by the scrim. Initial focus on "Start with a desk". Esc = Skip. Reopenable from Help.</p>
+<div class="frame-wrap"><div class="welcome-frame">
+  <div class="studio" aria-hidden="true">
+    <div class="viewport"><svg class="scene" viewBox="0 0 1366 768" preserveAspectRatio="xMidYMid slice"><use href="#scene-art" width="1366" height="768"/></svg></div>
+    <div class="topbar glass"><span class="logo"><i></i>Deskfit</span><span class="spacer"></span><span class="verdict ok"><svg class="i"><use href="#check-circle"/></svg>It fits</span></div>
+    <div class="side l glass"></div><div class="side r glass"></div>
+  </div>
+  <div class="scrim"><div class="modal" role="dialog" aria-labelledby="wt" style="max-width:640px;padding:var(--space-10)">
+    <button class="btn icon ghost close" aria-label="Skip and close"><svg class="i"><use href="#x"/></svg></button>
+    <p class="overline">Welcome to Deskfit</p>
+    <h3 id="wt" style="font-size:var(--text-3xl);margin-top:var(--space-3);line-height:1.15;font-weight:600">Plan your desk setup before you buy.</h3>
+    <p class="muted" style="font-size:var(--text-lg);margin-top:var(--space-3)">Check that everything fits - no 3D skills needed.</p>
+    <ol class="steps"><li><span class="n">1</span><span><b>Pick a desk</b><span class="small muted">Real sizes, in mm.</span></span></li><li><span class="n">2</span><span><b>Add objects</b><span class="small muted">Monitor, keyboard, speakers…</span></span></li><li><span class="n">3</span><span><b>Check it fits</b><span class="small muted">Clear answer, always visible.</span></span></li></ol>
+    <div class="row"><button class="btn primary lg is-focus">Start with a desk</button><button class="btn lg"><svg class="i"><use href="#upload"/></svg>Import a setup</button></div>
+    <div style="margin-top:var(--space-5)"><button class="btn link">Skip and explore on my own</button></div>
+  </div></div>
+</div></div>
+
+<h2 id="motion">10. Motion</h2>
+<p class="muted small" style="max-width:70ch">Smooth, short and never blocking. A light spring (about 3 % overshoot) is used for things that appear. With <code>prefers-reduced-motion: reduce</code>, every duration token is 0 ms and all animations and transitions are neutralized (camera jumps to the target view, loading is a static bar).</p>
+<table>
+  <tr><th>Token</th><th>Value</th><th>Used for</th></tr>
+  <tr><td><code>--duration-fast</code></td><td>120 ms</td><td>hover, press</td></tr>
+  <tr><td><code>--duration-base</code></td><td>200 ms</td><td>menus, toasts, fades</td></tr>
+  <tr><td><code>--duration-slow</code></td><td>320 ms</td><td>panels, bars, dialogs</td></tr>
+  <tr><td><code>--duration-camera</code></td><td>480 ms</td><td>3D camera moves</td></tr>
+  <tr><td><code>--ease-standard</code></td><td>0.2, 0, 0, 1</td><td>state changes</td></tr>
+  <tr><td><code>--ease-out</code></td><td>0.16, 1, 0.3, 1</td><td>entrances, lifts</td></tr>
+  <tr><td><code>--ease-in-out</code></td><td>0.65, 0, 0.35, 1</td><td>camera</td></tr>
+  <tr><td><code>--ease-spring</code></td><td>0.34, 1.3, 0.64, 1</td><td>light spring: bars, dialogs, verdict</td></tr>
+</table>
+<div class="motion-demo" style="margin-top:var(--space-6)">
+  <div class="stage"><span class="overline">Dialog</span><div class="panel-demo anim" data-a="pop var(--duration-slow) var(--ease-spring) both" style="border-radius:var(--radius-xl)">Scale 0.96 to 1, spring</div><button class="btn sm replay">Replay</button></div>
+  <div class="stage"><span class="overline">Floating bar</span><div class="float glass anim" data-a="rise var(--duration-slow) var(--ease-spring) both"><button class="btn sm">Reset view</button><button class="btn sm" aria-pressed="true">Snap on</button></div><button class="btn sm replay">Replay</button></div>
+  <div class="stage"><span class="overline">Toast</span><div class="toast anim" data-a="slide-in var(--duration-slow) var(--ease-spring) both"><svg class="i ic-ok"><use href="#check-circle"/></svg>Monitor added.</div><button class="btn sm replay">Replay</button></div>
+  <div class="stage"><span class="overline">Verdict change</span><span class="verdict bad anim" data-a="verdict-pop var(--duration-slow) var(--ease-spring) both"><svg class="i"><use href="#x-circle"/></svg>Doesn't fit</span><button class="btn sm replay">Replay</button></div>
+</div>
+<ul style="margin-top:var(--space-8)">
+  <li>Focus: 3 px ring + 2 px offset + surface halo, never hidden under floating panels.</li>
+  <li>Targets 32 px minimum (36 default, 44 for primary dialog actions). Text 14 px minimum. Layout holds at 200 % zoom by collapsing side panels.</li>
+  <li>Every drag has an alternative: X/Y fields in mm, arrow keys (10 mm, Shift 1 mm, Ctrl 100 mm), R to rotate.</li>
+</ul>
+</main>
+
+<script>
+(function(){
+  var root=document.documentElement,btn=document.getElementById('theme');
+  var states=['system','light','dark'],idx=0;
+  btn.addEventListener('click',function(){
+    idx=(idx+1)%3;var s=states[idx];
+    if(s==='system')root.removeAttribute('data-theme');else root.setAttribute('data-theme',s);
+    btn.lastChild.textContent='Theme: '+s.charAt(0).toUpperCase()+s.slice(1);
+    sw();
+  });
+  var ng=document.getElementById('noglass');
+  ng.addEventListener('click',function(){
+    var on=ng.getAttribute('aria-pressed')!=='true';
+    ng.setAttribute('aria-pressed',on);root.classList.toggle('no-glass',on);
+    ng.lastChild.textContent='Glass fallback: '+(on?'on':'off');
+  });
+  var names=['bg','surface','surface-2','border','border-strong','text','text-muted','text-disabled','accent','accent-hover','on-accent','accent-subtle','focus','success','success-bg','error','error-bg','warning','warning-icon','warning-bg','info','info-bg','danger-solid'];
+  var box=document.getElementById('swatches');
+  function sw(){
+    box.innerHTML='';
+    names.forEach(function(n){
+      var v=getComputedStyle(root).getPropertyValue('--color-'+n).trim();
+      var d=document.createElement('div');d.className='sw';
+      d.innerHTML='<div class="c" style="background:var(--color-'+n+')"></div><div class="t"><b>--color-'+n+'</b>'+v+'</div>';
+      box.appendChild(d);
+    });
+  }
+  sw();
+  var sp=document.getElementById('spacing');
+  [1,2,3,4,5,6,8,10,12,16].forEach(function(n){
+    var w=document.createElement('span');w.className='small';w.style.textAlign='center';
+    w.innerHTML='<div style="width:var(--space-'+n+');height:var(--space-'+n+')"></div>'+n;
+    sp.appendChild(w);
+  });
+  var icons=['check-circle','x-circle','alert-triangle','info','undo','redo','help','pencil','chev','rot-l','rot-r','copy','trash','magnet','monitor','keyboard','mouse','speaker','lamp','pc','mat','arm','gamepad','panel-l','panel-r','x','plus','minus','reset','top','front','search','upload'];
+  var g=document.getElementById('icongrid');
+  icons.forEach(function(n){
+    var s=document.createElement('span');s.className='small muted';s.style.cssText='display:flex;flex-direction:column;align-items:center;gap:4px;min-width:64px';
+    s.innerHTML='<svg class="i" style="color:var(--color-text)" aria-hidden="true"><use href="#'+n+'"/></svg>'+n;
+    g.appendChild(s);
+  });
+  /* banc d'essai du verre : 4 fonds durs */
+  var bgs=[['bg-white','Pure white'],['bg-mid','Mid grey'],['bg-black','Pure black (worst case, light glass)'],['bg-busy','Busy stripes']];
+  var bgsDark=[['bg-dwhite','Pure white (worst case, dark glass)'],['bg-mid','Mid grey'],['bg-black','Pure black'],['bg-busy','Busy stripes']];
+  function bench(id,list){
+    var el=document.getElementById(id);
+    list.forEach(function(b){
+      var d=document.createElement('div');d.className='bg '+b[0];
+      d.innerHTML='<div class="glass"><b style="font-size:var(--text-md)">Alerts (2)</b><div style="color:var(--color-text-muted);margin:4px 0 8px">'+b[1]+'. Muted text 4.5:1 or more.</div><div class="err-t" style="display:flex;gap:6px;align-items:center"><svg class="i sm"><use href="#x-circle"/></svg>Error: overflows by 80 mm</div><div style="margin-top:8px"><button class="btn sm link">Alert settings</button> <button class="btn sm" aria-pressed="true">Snap on</button></div></div>';
+      el.appendChild(d);
+    });
+  }
+  bench('bench-light',bgs);bench('bench-dark',bgsDark);bench('bench-fb',bgs);
+  /* demos de motion */
+  document.querySelectorAll('.replay').forEach(function(b){
+    b.addEventListener('click',function(){
+      var a=b.parentNode.querySelector('.anim');
+      a.style.animation='none';void a.offsetWidth;a.style.animation=a.getAttribute('data-a');
+    });
+  });
+})();
+</script>
+</body>
+</html>
