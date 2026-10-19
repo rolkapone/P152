@@ -6,11 +6,11 @@
 |---|---|
 | Points MVP (Must + Should) | **95** (Must 85, Should 10) |
 | Dont stories sécurité (SEC-01 à SEC-05) | 8 (Must 7, Should 1) |
-| Points « Could » MVP (hors total, bonus) | 7 |
-| Points livrés | 0 (US-001 et US-002 partiellement produites, non DONE) |
-| Vitesse moyenne | 15 pts/sprint (par défaut, pas d'historique) |
-| Sprints restants estimés avant MVP | **7** (95 / 15 = 6,3 arrondi à 7) |
-| Dernière mise à jour | 2026-10-19 (fin du kickoff, préparation du Sprint 1) |
+| Points « Could » MVP (hors total, bonus) | 9 (US-021, US-023, SEC-06) |
+| Points livrés | 3 (US-001 DONE le 2026-10-19 ; US-002 en cours) |
+| Vitesse moyenne | 15 pts/sprint (par défaut, pas d'historique ; recalcul en fin de Sprint 1) |
+| Sprints restants estimés avant MVP | **7** (92 pts restants / 15 = 6,1 arrondi à 7) |
+| Dernière mise à jour | 2026-10-19 (Sprint 1 en cours : US-001 DONE, US-002 IN PROGRESS) |
 
 Détail du recalcul : 83 pts (kickoff) + SEC-01 (3) + SEC-02 (1) + SEC-03 (2) + SEC-04 (1) + SEC-05 (1) + US-024 (2, réglages d'alertes) + US-025 (2, Help et préférences d'affichage) = **95**.
 Hypothèse : le premier déploiement public n'a lieu qu'à la fin du MVP (SEC-03 avant ce déploiement, SEC-05 juste avant la release).
@@ -36,22 +36,23 @@ Les critères UX/UI de ce document viennent de `docs/design/ux/principes.md`, `d
 
 ### US-001 — Setup repo, build et CI  [Must | 3 pts]
 En tant qu'équipe, je veux un repo avec build, lint, tests et CI afin de livrer chaque story de façon fiable.
-**État au 2026-10-19 : partiellement fait.** Repo git local sur `main` (3 commits : outillage, jobs sécurité, ossature E2E Playwright) ; `ci.yml`, `security-scheduled.yml`, `dependabot.yml`, `.gitignore`, `.gitattributes` (LFS), `.env.example`, `.npmrc`, `vite.config.ts` (`sourcemap: false`) écrits. **Rien n'a été exécuté** : Node 24 et pnpm ne sont pas installés sur le poste du PO ; pas de lockfile ; pas de dépôt distant.
+**État au 2026-10-19 : DONE.** Mergée dans `main` (merge `--no-ff` dfdfcfe). Revue APPROVE au cycle 2/3 (`docs/reviews/US-001.md` ; cycle 1 bloqué sur l'audit tinypool/vitest, corrigé par Vitest 4.1.12). Secdevops PASS (`docs/security/scans/US-001.md`). Checks locaux verts (`docs/ci/local-run-US-001.md`). **Écart consigné** : la CI distante n'a pas été exécutée (décision PO : pas de dépôt ni de push au Sprint 1) ; son exécution réelle est reportée au Sprint 2 (SEC-01, SEC-02).
 Critères d'acceptation :
-- [ ] Étant donné un clone propre, quand on lance `pnpm install --frozen-lockfile` puis le build, alors il réussit sans erreur (premier `pnpm install && pnpm check` exécuté, `pnpm-lock.yaml` commité).
-- [ ] Étant donné les jobs de `ci.yml`, quand on lance en local les mêmes commandes que ceux-ci (lint, types, tests unitaires, build), alors tout est vert. *(Décision PO 2026-10-19 : pas de dépôt GitHub ni de push au Sprint 1 ; la vérification de l'exécution réelle de la CI sur une PR est reportée au Sprint 2.)*
-- [ ] Étant donné le repo, alors `.env` est dans `.gitignore` et `.env.example` existe (présent, à valider au premier run).
-- [ ] Les fichiers binaires > 1 Mo sont suivis par Git LFS (`.gitattributes` présent, `check:assets` vert).
-- [ ] *(sécurité)* `.npmrc`/`pnpm-workspace.yaml` avec `onlyBuiltDependencies` en liste blanche et `minimumReleaseAge` (3 jours) ; `.env` ignoré, `.env.example` factice ; `build.sourcemap` désactivé (ou `hidden` non déployé) pour le build de production.
+- [x] Étant donné un clone propre, quand on lance `pnpm install --frozen-lockfile` puis le build, alors il réussit sans erreur (premier `pnpm install && pnpm check` exécuté, `pnpm-lock.yaml` commité).
+- [x] Étant donné les jobs de `ci.yml`, quand on lance en local les mêmes commandes que ceux-ci (lint, types, tests unitaires, build), alors tout est vert. *(Décision PO 2026-10-19 : pas de dépôt GitHub ni de push au Sprint 1 ; la vérification de l'exécution réelle de la CI sur une PR est reportée au Sprint 2.)*
+- [x] Étant donné le repo, alors `.env` est dans `.gitignore` et `.env.example` existe.
+- [x] Les fichiers binaires > 1 Mo sont suivis par Git LFS (`.gitattributes` présent, `check:assets` vert).
+- [x] *(sécurité)* `.npmrc`/`pnpm-workspace.yaml` avec `onlyBuiltDependencies` en liste blanche et `minimumReleaseAge` (3 jours) ; `.env` ignoré, `.env.example` factice ; `build.sourcemap` désactivé (ou `hidden` non déployé) pour le build de production.
 Notes techniques / dépendances : devops. Bloque toutes les autres stories. **Prérequis PO** : installer Node 24 LTS et pnpm 10.34.7 ; accord explicite pour créer le dépôt GitHub public et pousser.
 
 ### US-002 — Threat model initial  [Must | 2 pts]
 En tant que PO, je veux un threat model du produit afin d'anticiper les risques de sécurité dès la conception.
-**État au 2026-10-19 : livrable produit** (`docs/security/threat-model.md` v1.0, `docs/security/ci-security.md`, brouillons `docs/security/ci/`). Reste à le passer par la boucle DoD : relecture reviewer (lecture seule, story documentaire, ni UI ni 3D donc ni contrôle design ni QA), validation secdevops, commit/merge par le devops sur branche `feature/US-002-threat-model`.
+**État au 2026-10-19 : IN PROGRESS** (branche `feature/US-002-threat-model`, implémenteur secdevops). Livrable produit au kickoff (`docs/security/threat-model.md` v1.0, `docs/security/ci-security.md`, brouillons `docs/security/ci/`), commité directement sur `main` (304e3f9). Reste pour la DoD : (1) relecture et mise à jour par secdevops selon les décisions PO (dépôt public, Cloudflare Pages, pas de push au Sprint 1, Vitest 4.1) et les findings du scan US-001 (`docs/security/scans/US-001.md`, dont `_headers` bloquant et findings LOW de SEC-06) ; (2) revue formelle reviewer sur le diff de la branche contre `main` (story documentaire : ni contrôle design ni QA) ; (3) merge `--no-ff` par le devops.
 Critères d'acceptation :
 - [x] Étant donné l'architecture MVP, quand le threat model est rédigé, alors `docs/security/threat-model.md` liste actifs, surfaces d'attaque (import de fichiers, stockage local, dépendances) et mesures.
 - [x] Les scans SAST, dépendances et secrets sont définis pour la CI (`docs/security/ci-security.md`).
-- [ ] Revue APPROVE du reviewer et merge dans `main` (DoD).
+- [ ] Le threat model et `ci-security.md` sont cohérents avec les décisions PO et le scan US-001 (SEC-03a avant le premier push, findings LOW tracés en SEC-06, Vitest 4.1), avec liens exacts et aucun secret.
+- [ ] Revue APPROVE du reviewer (3 cycles max) et merge `--no-ff` dans `main` (DoD).
 Notes techniques / dépendances : secdevops. À réviser avant R6 (comptes) et R7 (import). Les stories SEC-01 à SEC-05 en sont issues.
 
 ### US-003 — Architecture socle et modèle de données du setup  [Must | 3 pts]
@@ -71,7 +72,7 @@ Critères d'acceptation :
 - [ ] *(reporté au Sprint 2 : exige le dépôt distant, décision PO 2026-10-19)* Une PR de test contenant un faux secret, un `innerHTML`, une dépendance vulnérable HIGH, et un `dist` contenant `__p152test` fait échouer la CI (4 cas vérifiés puis annulés).
 - [ ] `.gitleaks.toml`, `.semgrep/p152.yml`, `scripts/check-licenses.mjs`, `.github/dependabot.yml` et le workflow hebdomadaire sont en place ; actions et images épinglées par SHA/digest.
 - [ ] *(reporté au Sprint 2 : exige le dépôt distant)* Les rapports SARIF remontent dans l'onglet Code scanning.
-Notes techniques / dépendances : devops + secdevops. Dépend de US-001 (CI exécutée au moins une fois). Le job `build-hardening` échouera tant que `dist/_headers` n'existe pas : la génération des en-têtes est livrée par SEC-03 (voir cette story) ; d'ici là le contrôle est en avertissement documenté pour cette seule vérification.
+Notes techniques / dépendances : devops + secdevops. Dépend de US-001 (CI exécutée au moins une fois). Le contrôle `dist/_headers` de `build-hardening` **reste bloquant** (décision secdevops, scan US-001) : il n'y a pas d'avertissement toléré. La génération de `public/_headers` est donc livrée par SEC-03a **avant le premier push** (Sprint 2, en tête). Les findings LOW du scan US-001 sont regroupés dans SEC-06.
 
 ### SEC-02 — Durcissement du dépôt GitHub public  [Must | 1 pt]
 En tant qu'équipe, je veux un dépôt public durci afin de réduire le risque de compromission de la chaîne de production.
@@ -83,15 +84,33 @@ Critères d'acceptation :
 - [ ] `CODEOWNERS` couvre `.github/`, `config/security-headers.mjs`, `package.json`, `pnpm-lock.yaml`, `pnpm-workspace.yaml`, `.npmrc`, `.gitleaks.toml`, `.semgrep/`.
 Notes techniques / dépendances : devops. **Les réglages du compte/dépôt GitHub ne sont appliqués qu'avec l'accord explicite du PO** (le PO réalise ou valide chaque action). Dépend de US-001 et de la création du dépôt distant.
 
-### SEC-03 — Déploiement sécurisé sur Cloudflare Pages  [Must avant le premier déploiement | 2 pts]
+### SEC-03a — Génération des en-têtes de sécurité (`_headers`, CSP)  [Must, avant le premier push | 1 pt]
+En tant qu'équipe, je veux que le build produise les en-têtes de sécurité afin que le contrôle `build-hardening` passe et que le premier push n'échoue pas.
+Critères d'acceptation :
+- [ ] Étant donné `config/security-headers.mjs` (source unique), quand on lance le build, alors `public/_headers` est généré et `dist/_headers` existe avec CSP stricte sans `unsafe-inline`/`unsafe-eval`, `nosniff`, `Referrer-Policy`, `Permissions-Policy`, COOP, HSTS.
+- [ ] Un test unitaire vérifie que le contenu de `dist/_headers` correspond à `config/security-headers.mjs` ; le contrôle `dist/_headers` de `sec-build-hardening` (ci.yml) est vert, sans avertissement toléré.
+- [ ] Le preview/E2E servi avec ces en-têtes ne produit aucune violation CSP en console.
+Notes techniques / dépendances : devops + secdevops. **Sprint 2, en tête, avant tout push** (décision secdevops : contrôle bloquant). Dépend de US-001 (DONE). Débloque SEC-01 (jobs) et US-022 (E2E sous CSP).
+
+### SEC-03b — Déploiement sécurisé sur Cloudflare Pages  [Must avant le premier déploiement | 1 pt]
 En tant qu'équipe, je veux un déploiement protégé afin qu'aucun bundle altéré n'atteigne les utilisateurs.
 Critères d'acceptation :
-- [ ] **Génération de `dist/_headers`** à partir de la source unique `config/security-headers.mjs` (CSP stricte sans `unsafe-inline`/`unsafe-eval`, `nosniff`, `Referrer-Policy`, `Permissions-Policy`, COOP, HSTS) : actuellement absente, ce qui fait échouer le job `build-hardening` ; le job passe au vert une fois la story livrée.
 - [ ] Environnement GitHub `production` : approbation du PO, déploiement depuis les tags `v*` uniquement ; secrets Cloudflare présents uniquement dans cet environnement (et `preview` séparé avec son propre jeton).
 - [ ] Jeton Cloudflare à portée « Pages : Edit » sur le seul compte ; MFA Cloudflare ; procédure de rotation écrite dans `docs/security/`.
 - [ ] Après chaque déploiement, un contrôle automatique lit les en-têtes de l'URL réelle et échoue si un en-tête diffère de `config/security-headers.mjs`.
 - [ ] Les previews portent `X-Robots-Tag: noindex` et ne sont jamais construites depuis un fork.
-Notes techniques / dépendances : devops + secdevops. La partie « génération de `_headers`/CSP » doit être livrée avant ou avec SEC-01 si on veut une CI entièrement verte ; le reste (Cloudflare, environnement `production`) avant le premier déploiement, sur ordre du PO. Pas de domaine personnalisé (`*.pages.dev`).
+Notes techniques / dépendances : devops + secdevops. Dépend de SEC-03a et SEC-02. À livrer avant le premier déploiement, sur ordre du PO. Pas de domaine personnalisé (`*.pages.dev`).
+
+### SEC-06 — Durcissement CI (findings LOW du scan US-001)  [Could | 2 pts, priorité basse]
+En tant qu'équipe, je veux traiter les findings LOW du scan US-001 afin de réduire la surface de la chaîne CI. À planifier après SEC-01 (peut être pris en tâches dans SEC-01 si de la place).
+Critères d'acceptation :
+- [ ] `persist-credentials: false` sur les `actions/checkout` des jobs `quality`, `unit`, `build` et `assets` de `ci.yml` (zizmor sans alerte `artipacked`).
+- [ ] `id-token: write` retiré de `security-scheduled.yml` (permissions minimales par job).
+- [ ] `security-scheduled.yml` exécute aussi gitleaks (historique complet) et CodeQL en hebdomadaire.
+- [ ] zizmor est installé à version et empreinte fixées (hash vérifié), plus via `uvx` sans empreinte.
+- [ ] Dependabot (`docker-compose`) suit les digests des images semgrep et playwright, ou une procédure de mise à jour documentée les remplace.
+- [ ] Migration d'ESLint 9 (déprécié) vers la version supportée, ADR consigné, `pnpm check` vert.
+Notes techniques / dépendances : devops + secdevops. Source : `docs/security/scans/US-001.md`. Hors total MVP (Could).
 
 ### SEC-04 — Mention « vos données restent dans ce navigateur »  [UI] [Should | 1 pt]
 En tant qu'utilisateur, je veux savoir où sont stockées mes données afin de décider en confiance.
@@ -106,7 +125,7 @@ Critères d'acceptation :
 - [ ] Threat model révisé ; scans complets sur `main` sans CRITICAL/HIGH ouvert.
 - [ ] Tests manuels de l'import avec le jeu de fichiers malveillants ; en-têtes de l'URL de production vérifiés (Mozilla HTTP Observatory, note visée A+).
 - [ ] Rapport `docs/security/release-mvp.md`.
-Notes techniques / dépendances : secdevops. Dernière story du MVP ; dépend de SEC-03, US-018, US-022.
+Notes techniques / dépendances : secdevops. Dernière story du MVP ; dépend de SEC-03a, SEC-03b, US-018, US-022.
 
 ## Epic B — Scène 3D et navigation
 
@@ -345,7 +364,7 @@ Critères d'acceptation :
 - [ ] Une mesure de FPS est enregistrée sur une scène de 20 objets avec seuil d'échec configurable (viewport minimal 1366×768).
 - [ ] Des captures sont archivées comme artefacts.
 - [ ] *(sécurité)* L'E2E échoue sur tout événement `securitypolicyviolation` ou erreur console CSP, sur `dist-e2e` servi avec les en-têtes de production.
-Notes techniques / dépendances : qa-tester + devops. Dépend de US-012, US-017, US-018, SEC-03 (en-têtes). Ossature Playwright déjà présente (`tests/e2e/`).
+Notes techniques / dépendances : qa-tester + devops. Dépend de US-012, US-017, US-018, SEC-03a (en-têtes). Ossature Playwright déjà présente (`tests/e2e/`).
 
 ### US-021 — Utilisation tactile et mobile  [UI] [Could | 5 pts]
 En tant qu'utilisateur mobile, je veux manipuler la scène au doigt afin de consulter mon setup sur smartphone.
@@ -361,7 +380,7 @@ Critères d'acceptation :
 - [ ] *(sécurité)* La capture PNG ne contient que le canvas (aucune donnée de l'interface ni métadonnée).
 Notes techniques / dépendances : prépare le partage (R6).
 
-**Récapitulatif MVP** : Must 85 pts (US-001 à 006, 008 à 018, 022, 024, 025, SEC-01, 02, 03, 05) ; Should 10 pts (US-007, 019, 020, SEC-04) ; Could 7 pts (US-021, 023, hors total). Total MVP : **95 pts**.
+**Récapitulatif MVP** : Must 85 pts (US-001 à 006, 008 à 018, 022, 024, 025, SEC-01, 02, 03a, 03b, 05) ; Should 10 pts (US-007, 019, 020, SEC-04) ; Could 9 pts (US-021, 023, SEC-06, hors total). Total MVP : **95 pts**.
 
 ---
 
