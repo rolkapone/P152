@@ -3,15 +3,44 @@
   "schemaVersion": 2,
   "studio": {
     "notes": "Seamless cyclorama (v2). 'light' is the default backdrop for every style, 'dark' is the variant (UI toggle). Styles keep their own lighting character; this block gives background, floor and bias values.",
-    "light": { "background": "#e8e8ea", "floor": "#e2e2e5", "exposureBias": 0.0, "envIntensityBias": 0.0 },
-    "dark":  { "background": "#1c1e22", "floor": "#212328", "exposureBias": 0.0, "envIntensityBias": -0.15 },
+    "light": {
+      "background": "#e8e8ea",
+      "floor": "#e2e2e5",
+      "exposureBias": 0.0,
+      "envIntensityBias": 0.0
+    },
+    "dark": {
+      "background": "#1c1e22",
+      "floor": "#212328",
+      "exposureBias": 0.0,
+      "envIntensityBias": -0.15
+    },
     "lights": {
-      "key":  { "type": "directional", "color": "#fff6ea", "intensity": 2.4, "position": [1.8, 3.2, 2.2], "shadow": "soft (VSM, radius 10)" },
-      "fill": { "type": "directional", "color": "#e3ecff", "intensity": 0.55, "position": [-2.6, 1.8, 1.8] },
-      "rim":  { "type": "directional", "color": "#ffffff", "intensity": 1.1, "position": [-0.8, 2.4, -2.6] }
+      "key": {
+        "type": "directional",
+        "color": "#fff6ea",
+        "intensity": 2.4,
+        "position": [1.8, 3.2, 2.2],
+        "shadow": "soft (VSM, radius 10)"
+      },
+      "fill": {
+        "type": "directional",
+        "color": "#e3ecff",
+        "intensity": 0.55,
+        "position": [-2.6, 1.8, 1.8]
+      },
+      "rim": {
+        "type": "directional",
+        "color": "#ffffff",
+        "intensity": 1.1,
+        "position": [-0.8, 2.4, -2.6]
+      }
     },
     "toneMapping": "Neutral",
-    "contactShadow": { "opacity": 0.42, "technique": "soft radial-gradient plane under each object" }
+    "contactShadow": {
+      "opacity": 0.42,
+      "technique": "soft radial-gradient plane under each object"
+    }
   },
   "notes": "Style presets (ADR-3D-05). Cascade: object override > style.rules.byType[type][role] > style.rules.byRole[role] > object-type slot default. Applying a style never changes positions or params. 'ambience' feeds the lighting preset (R3); the MVP does not expose styles to users.",
   "styles": [
@@ -20,13 +49,31 @@
       "name": { "en": "All white" },
       "rules": {
         "byRole": {
-          "top": "mat.satin-white", "legs": "mat.satin-white", "body": "mat.satin-white", "keycaps": "mat.warm-white",
-          "accent": "mat.light-grey", "metal": "mat.anodized-silver", "mat": "mat.felt-light", "shade": "mat.satin-white",
-          "driver": "mat.light-grey", "led": "mat.led-white", "bulb": "mat.led-warm"
+          "top": "mat.satin-white",
+          "legs": "mat.satin-white",
+          "body": "mat.satin-white",
+          "keycaps": "mat.warm-white",
+          "accent": "mat.light-grey",
+          "metal": "mat.anodized-silver",
+          "mat": "mat.felt-light",
+          "shade": "mat.satin-white",
+          "driver": "mat.light-grey",
+          "led": "mat.led-white",
+          "bulb": "mat.led-warm"
         },
         "byType": {}
       },
-      "ambience": { "background": "#ecebed", "floor": "#e4e4e7", "exposure": 1.0, "keyColor": "#fff4e6", "keyIntensity": 2.6, "hemiIntensity": 0.55, "envIntensity": 0.6, "lampOn": false, "screenGradient": ["#b9d4f2", "#f3d9e6"] },
+      "ambience": {
+        "background": "#ecebed",
+        "floor": "#e4e4e7",
+        "exposure": 1.0,
+        "keyColor": "#fff4e6",
+        "keyIntensity": 2.6,
+        "hemiIntensity": 0.55,
+        "envIntensity": 0.6,
+        "lampOn": false,
+        "screenGradient": ["#b9d4f2", "#f3d9e6"]
+      },
       "suggestedDecor": []
     },
     {
@@ -34,13 +81,31 @@
       "name": { "en": "All black" },
       "rules": {
         "byRole": {
-          "top": "mat.matte-black", "legs": "mat.black-metal", "body": "mat.matte-black", "keycaps": "mat.graphite",
-          "accent": "mat.graphite", "metal": "mat.anodized-graphite", "mat": "mat.felt-dark", "shade": "mat.matte-black",
-          "driver": "mat.rubber-black", "led": "mat.led-white", "bulb": "mat.led-warm"
+          "top": "mat.matte-black",
+          "legs": "mat.black-metal",
+          "body": "mat.matte-black",
+          "keycaps": "mat.graphite",
+          "accent": "mat.graphite",
+          "metal": "mat.anodized-graphite",
+          "mat": "mat.felt-dark",
+          "shade": "mat.matte-black",
+          "driver": "mat.rubber-black",
+          "led": "mat.led-white",
+          "bulb": "mat.led-warm"
         },
         "byType": {}
       },
-      "ambience": { "background": "#dcdde0", "floor": "#d4d5d9", "exposure": 1.05, "keyColor": "#f4f6ff", "keyIntensity": 3.0, "hemiIntensity": 0.45, "envIntensity": 0.7, "lampOn": false, "screenGradient": ["#243b6b", "#6d3fa3"] },
+      "ambience": {
+        "background": "#dcdde0",
+        "floor": "#d4d5d9",
+        "exposure": 1.05,
+        "keyColor": "#f4f6ff",
+        "keyIntensity": 3.0,
+        "hemiIntensity": 0.45,
+        "envIntensity": 0.7,
+        "lampOn": false,
+        "screenGradient": ["#243b6b", "#6d3fa3"]
+      },
       "suggestedDecor": []
     },
     {
@@ -48,9 +113,17 @@
       "name": { "en": "Colorful" },
       "rules": {
         "byRole": {
-          "top": "mat.birch", "legs": "mat.accent-teal", "body": "mat.satin-white", "keycaps": "mat.warm-white",
-          "accent": "mat.accent-coral", "metal": "mat.accent-mustard", "mat": "mat.accent-sky", "shade": "mat.accent-coral",
-          "driver": "mat.graphite", "led": "mat.led-cyan", "bulb": "mat.led-warm"
+          "top": "mat.birch",
+          "legs": "mat.accent-teal",
+          "body": "mat.satin-white",
+          "keycaps": "mat.warm-white",
+          "accent": "mat.accent-coral",
+          "metal": "mat.accent-mustard",
+          "mat": "mat.accent-sky",
+          "shade": "mat.accent-coral",
+          "driver": "mat.graphite",
+          "led": "mat.led-cyan",
+          "bulb": "mat.led-warm"
         },
         "byType": {
           "speakers": { "body": "mat.accent-sky" },
@@ -59,7 +132,17 @@
           "mouse": { "body": "mat.accent-coral", "accent": "mat.satin-white" }
         }
       },
-      "ambience": { "background": "#efeae3", "floor": "#e6dfd3", "exposure": 1.0, "keyColor": "#fff2e0", "keyIntensity": 2.6, "hemiIntensity": 0.6, "envIntensity": 0.65, "lampOn": false, "screenGradient": ["#ff9a76", "#6fa8dc"] },
+      "ambience": {
+        "background": "#efeae3",
+        "floor": "#e6dfd3",
+        "exposure": 1.0,
+        "keyColor": "#fff2e0",
+        "keyIntensity": 2.6,
+        "hemiIntensity": 0.6,
+        "envIntensity": 0.65,
+        "lampOn": false,
+        "screenGradient": ["#ff9a76", "#6fa8dc"]
+      },
       "suggestedDecor": []
     },
     {
@@ -67,9 +150,17 @@
       "name": { "en": "Cosy" },
       "rules": {
         "byRole": {
-          "top": "mat.oak", "legs": "mat.black-metal", "body": "mat.graphite", "keycaps": "mat.warm-white",
-          "accent": "mat.accent-terracotta", "metal": "mat.black-metal", "mat": "mat.felt-sage", "shade": "mat.warm-white",
-          "driver": "mat.rubber-black", "led": "mat.led-warm", "bulb": "mat.led-warm"
+          "top": "mat.oak",
+          "legs": "mat.black-metal",
+          "body": "mat.graphite",
+          "keycaps": "mat.warm-white",
+          "accent": "mat.accent-terracotta",
+          "metal": "mat.black-metal",
+          "mat": "mat.felt-sage",
+          "shade": "mat.warm-white",
+          "driver": "mat.rubber-black",
+          "led": "mat.led-warm",
+          "bulb": "mat.led-warm"
         },
         "byType": {
           "speakers": { "body": "mat.walnut" },
@@ -77,7 +168,17 @@
           "lamp": { "body": "mat.walnut", "shade": "mat.accent-terracotta" }
         }
       },
-      "ambience": { "background": "#8a7664", "floor": "#7e6a58", "exposure": 0.95, "keyColor": "#ffc890", "keyIntensity": 1.7, "hemiIntensity": 0.3, "envIntensity": 0.35, "lampOn": true, "screenGradient": ["#e08a5a", "#5b3b6e"] },
+      "ambience": {
+        "background": "#8a7664",
+        "floor": "#7e6a58",
+        "exposure": 0.95,
+        "keyColor": "#ffc890",
+        "keyIntensity": 1.7,
+        "hemiIntensity": 0.3,
+        "envIntensity": 0.35,
+        "lampOn": true,
+        "screenGradient": ["#e08a5a", "#5b3b6e"]
+      },
       "suggestedDecor": ["plant"]
     }
   ]

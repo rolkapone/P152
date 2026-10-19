@@ -1,20 +1,36 @@
 {
-  "id": "mouse.generic", "version": 1, "type": "mouse", "category": "input", "name": { "en": "Mouse" },
-  "generator": "procedural", "model": null, "license": "Original work (project)", "source": "Generated in code",
+  "id": "mouse.generic",
+  "version": 1,
+  "type": "mouse",
+  "category": "input",
+  "name": { "en": "Mouse" },
+  "generator": "procedural",
+  "model": null,
+  "license": "Original work (project)",
+  "source": "Generated in code",
   "params": {
-    "length": { "unit": "mm", "default": 120, "min": 95,  "max": 135, "step": 1 },
-    "width":  { "unit": "mm", "default": 65,  "min": 50,  "max": 80,  "step": 1 },
-    "height": { "unit": "mm", "default": 38,  "min": 28,  "max": 48,  "step": 1 },
-    "shape":  { "enum": ["symmetric", "ergonomic"], "default": "symmetric", "note": "ergonomic is a later variant; MVP renders symmetric" }
+    "length": { "unit": "mm", "default": 120, "min": 95, "max": 135, "step": 1 },
+    "width": { "unit": "mm", "default": 65, "min": 50, "max": 80, "step": 1 },
+    "height": { "unit": "mm", "default": 38, "min": 28, "max": 48, "step": 1 },
+    "shape": {
+      "enum": ["symmetric", "ergonomic"],
+      "default": "symmetric",
+      "note": "ergonomic is a later variant; MVP renders symmetric"
+    }
   },
   "presets": [
-    { "id": "compact",  "params": { "length": 100, "width": 58, "height": 33 } },
+    { "id": "compact", "params": { "length": 100, "width": 58, "height": 33 } },
     { "id": "standard", "params": { "length": 120, "width": 65, "height": 38 } },
-    { "id": "large",    "params": { "length": 130, "width": 75, "height": 42 } }
+    { "id": "large", "params": { "length": 130, "width": 75, "height": 42 } }
   ],
   "slots": [
-    { "id": "body",   "role": "body",   "default": "mat.matte-black" },
-    { "id": "accent", "role": "accent", "default": "mat.graphite", "note": "Buttons split line and wheel" }
+    { "id": "body", "role": "body", "default": "mat.matte-black" },
+    {
+      "id": "accent",
+      "role": "accent",
+      "default": "mat.graphite",
+      "note": "Buttons split line and wheel"
+    }
   ],
   "budget": { "tris": 1200, "drawCalls": 2 },
   "placement": { "restsOn": ["desk", "mousepad"], "canSupport": [] }
