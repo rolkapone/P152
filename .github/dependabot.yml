@@ -1,13 +1,35 @@
 version: 2
 updates:
-  - package-ecosystem: npm
+  - package-ecosystem: npm            # couvre pnpm (pnpm-lock.yaml) ; vérifier le support pnpm 10
     directory: /
-    schedule:
-      interval: weekly
+    schedule: { interval: weekly, day: monday, time: "05:00", timezone: Europe/Paris }
+    cooldown:                         # aligné sur minimumReleaseAge ; ne retarde pas les MAJ de sécurité
+      default-days: 3
+      semver-major-days: 7
+    open-pull-requests-limit: 10
+    versioning-strategy: increase
     groups:
-      npm:
-        patterns: ["*"]
-  - package-ecosystem: github-actions
+      dev-tooling:
+        dependency-type: development
+        update-types: [minor, patch]
+      runtime-minor:
+        dependency-type: production
+        update-types: [minor, patch]
+    commit-message: { prefix: chore, include: scope }
+    labels: [dependencies]
+
+  - package-ecosystem: github-actions # met à jour les SHA épinglés et leur commentaire de version
     directory: /
-    schedule:
-      interval: weekly
+    schedule: { interval: weekly, day: monday, time: "05:00", timezone: Europe/Paris }
+    cooldown: { default-days: 3 }
+    groups:
+      actions:
+        patterns: ["*"]
+    commit-message: { prefix: ci, include: scope }
+    labels: [dependencies, ci]
+
+  - package-ecosystem: docker-compose # image Playwright (ADR-OPS-05) ; si non supporté, utiliser "docker"
+    directory: /
+    schedule: { interval: weekly }
+    commit-message: { prefix: chore, include: scope }
+    labels: [dependencies]

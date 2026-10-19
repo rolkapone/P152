@@ -1,0 +1,121 @@
+# Brouillon secdevops — à copier par le devops vers `.semgrep/p152.yml`.
+# Règles propres à P152, en complément des packs du registre (p/typescript, p/react, p/javascript).
+# Sévérité ERROR = bloquant en CI ; WARNING = signalé dans Code scanning, non bloquant.
+# Référence : docs/security/threat-model.md (M-03, M-12, SR-01, SR-02).
+
+rules:
+  - id: p152-dom-html-sink
+    message: >-
+      Écriture de HTML brut dans le DOM (risque XSS, M-03). Rendre le texte via React
+      (échappement automatique) ou `textContent`.
+    severity: ERROR
+    languages: [typescript, javascript]
+    metadata: { category: security, cwe: "CWE-79: Cross-site Scripting", confidence: HIGH }
+    pattern-either:
+      - pattern: $EL.innerHTML = $X
+      - pattern: $EL.outerHTML = $X
+      - pattern: $EL.insertAdjacentHTML(...)
+      - pattern: document.write(...)
+      - pattern: document.writeln(...)
+      - pattern: $R.createContextualFragment(...)
+
+  - id: p152-react-dangerously-set-inner-html
+    message: >-
+      `dangerouslySetInnerHTML` est interdit (ADR-APP-03/05). Utiliser `<Trans>` avec
+      composants explicites ou du texte.
+    severity: ERROR
+    languages: [typescript, javascript]
+    metadata: { category: security, cwe: "CWE-79: Cross-site Scripting", confidence: HIGH }
+    pattern-regex: dangerouslySetInnerHTML
+    paths:
+      include: ["src/**"]
+
+  - id: p152-dynamic-code
+    message: >-
+      Exécution de code dynamique interdite (CSP sans 'unsafe-eval', SR-02).
+    severity: ERROR
+    languages: [typescript, javascript]
+    metadata: { category: security, cwe: "CWE-95: Eval Injection", confidence: HIGH }
+    pattern-either:
+      - pattern: eval(...)
+      - pattern: new Function(...)
+      - pattern: Function(...)
+      - pattern: setTimeout("...", ...)
+      - pattern: setInterval("...", ...)
+
+  - id: p152-storage-outside-persistence
+    message: >-
+      Accès direct au stockage du navigateur hors de `src/persistence/` (ADR-APP-04/07).
+      Toute lecture doit passer par le repository puis `parseSetup` (SR-01).
+    severity: WARNING
+    languages: [typescript, javascript]
+    metadata: { category: security, confidence: MEDIUM }
+    pattern-either:
+      - pattern: localStorage
+      - pattern: window.localStorage
+      - pattern: globalThis.localStorage
+      - pattern: sessionStorage
+      - pattern: window.sessionStorage
+      - pattern: indexedDB
+      - pattern: window.indexedDB
+    paths:
+      include: ["src/**"]
+      exclude: ["src/persistence/**", "**/*.test.ts", "**/*.test.tsx"]
+
+  - id: p152-json-parse-outside-io
+    message: >-
+      `JSON.parse` hors de `src/core/io/` : une donnée externe doit passer par
+      `parseSetup` (ADR-APP-03, SR-01). Ignorer seulement pour une donnée de confiance, avec justification.
+    severity: WARNING
+    languages: [typescript, javascript]
+    metadata: { category: security, confidence: MEDIUM }
+    pattern: JSON.parse(...)
+    paths:
+      include: ["src/**"]
+      exclude: ["src/core/io/**", "**/*.test.ts", "**/*.test.tsx"]
+
+  - id: p152-test-hook-reference
+    message: >-
+      Référence à un hook de test (`__p152test` / `__p152perf`). Vérifier qu'elle est
+      gardée par `import.meta.env.VITE_E2E === "true"` (M-12). Contrôle bloquant
+      effectué sur `dist/` par le job build-hardening.
+    severity: WARNING
+    languages: [typescript, javascript]
+    metadata: { category: security, confidence: LOW }
+    pattern-regex: __p152(test|perf)
+    paths:
+      include: ["src/**"]
+      exclude: ["**/*.test.ts", "**/*.test.tsx", "**/*.d.ts"]
+
+  - id: p152-message-listener
+    message: >-
+      Écouteur `message` (postMessage) : vérifier `event.origin` et valider `event.data`
+      par schéma avant usage.
+    severity: WARNING
+    languages: [typescript, javascript]
+    metadata: { category: security, cwe: "CWE-346: Origin Validation Error", confidence: MEDIUM }
+    pattern-either:
+      - pattern: $W.addEventListener("message", ...)
+      - pattern: $W.onmessage = $F
+
+  - id: p152-insecure-random
+    message: >-
+      `Math.random()` n'est pas adapté aux identifiants (setups, liens de partage R6).
+      Utiliser `crypto.randomUUID()` ou `crypto.getRandomValues()`.
+    severity: WARNING
+    languages: [typescript, javascript]
+    metadata: { category: security, cwe: "CWE-338", confidence: LOW }
+    pattern: Math.random()
+    paths:
+      include: ["src/core/**", "src/state/**", "src/persistence/**"]
+
+  - id: p152-plain-http-url
+    message: >-
+      URL en clair `http://` dans le code applicatif (CSP `upgrade-insecure-requests`,
+      aucune ressource tierce au MVP).
+    severity: WARNING
+    languages: [typescript, javascript]
+    metadata: { category: security, confidence: MEDIUM }
+    pattern-regex: '["''`]http://(?!localhost|127\.0\.0\.1|www\.w3\.org)'
+    paths:
+      include: ["src/**"]

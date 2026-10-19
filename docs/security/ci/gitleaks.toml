@@ -1,0 +1,35 @@
+# Brouillon secdevops — à copier par le devops vers `.gitleaks.toml` (racine du dépôt).
+# Exige gitleaks >= 8.25 (syntaxe [[allowlists]], sous-commandes `git` et `dir`).
+# Source : docs/security/ci-security.md
+
+title = "P152 gitleaks configuration"
+
+[extend]
+# Conserve les règles par défaut de gitleaks (fournisseurs cloud, JWT, clés privées, jetons GitHub, Cloudflare...).
+useDefault = true
+
+# --- Règles propres au projet ------------------------------------------------
+
+[[rules]]
+id = "p152-cloudflare-token-assignment"
+description = "Valeur affectée à CLOUDFLARE_API_TOKEN (doit vivre uniquement dans les secrets GitHub)"
+regex = '''(?i)CLOUDFLARE_API_TOKEN\s*[:=]\s*["']?([A-Za-z0-9_\-]{30,})'''
+secretGroup = 1
+keywords = ["cloudflare_api_token"]
+
+[[rules]]
+id = "p152-public-vite-secret"
+description = "Variable VITE_* nommée comme un secret : toute variable VITE_ est embarquée dans le bundle public"
+regex = '''(?i)\bVITE_[A-Z0-9_]*(SECRET|TOKEN|PASSWORD|PASSWD|PRIVATE|API_KEY|APIKEY|SERVICE_ROLE)[A-Z0-9_]*\s*[:=]\s*["']?([^\s"'#]{8,})'''
+secretGroup = 2
+keywords = ["vite_"]
+
+# --- Exceptions -----------------------------------------------------------------
+# Toute nouvelle exception doit être justifiée dans la PR et validée par secdevops.
+
+[[allowlists]]
+description = "Valeurs factices documentées dans .env.example"
+regexTarget = "secret"
+regexes = [
+  '''(?i)^(changeme|change-me|placeholder|example|dummy|fake|xxx+|<[^>]*>|\$\{[^}]*\})$''',
+]

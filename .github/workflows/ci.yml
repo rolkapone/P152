@@ -78,9 +78,254 @@ jobs:
       - run: node scripts/check-assets.mjs
       # TODO (technical-artist): budgets (assets/catalog/budgets.json), glTF validation, licence check.
 
-  # SECDEVOPS-SLOT
-  # Job `security` (SAST, dependency audit, gitleaks...) to be added here by secdevops.
-  # Once added, append `security` to `needs` of `ci-ok`.
+  # ============================ SECDEVOPS-SLOT ============================
+  # Propriétaire : secdevops. Spécification : docs/security/ci-security.md
+  # Toute modification de ce bloc passe par une revue secdevops (CODEOWNERS).
+
+  sec-secrets:
+    name: security / secrets (gitleaks)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    env:
+      GITLEAKS_VERSION: "8.30.1"
+      GITLEAKS_SHA256: "551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0              # historique complet
+          persist-credentials: false
+      - name: Installer gitleaks (version et checksum épinglés)
+        run: |
+          set -euo pipefail
+          url="https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          curl -sSfL -o /tmp/gitleaks.tgz "$url"
+          echo "${GITLEAKS_SHA256}  /tmp/gitleaks.tgz" | sha256sum -c -
+          tar -xzf /tmp/gitleaks.tgz -C /tmp gitleaks
+          sudo install -m 0755 /tmp/gitleaks /usr/local/bin/gitleaks
+      - name: gitleaks sur tout l'historique git
+        run: |
+          set -euo pipefail
+          cfg=(); [ -f .gitleaks.toml ] && cfg=(--config .gitleaks.toml)
+          gitleaks git "${cfg[@]}" --redact --verbose --exit-code 1 .
+
+  sec-codeql:
+    name: security / codeql (${{ matrix.language }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [javascript-typescript, actions]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: github/codeql-action/init@6f2ac81f5cd81fe351a197ba0b00d91d03cd2aee # v4.39.0
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: none
+          queries: security-extended
+          config: |
+            paths-ignore:
+              - tests/fixtures/**
+              - dist/**
+      - uses: github/codeql-action/analyze@6f2ac81f5cd81fe351a197ba0b00d91d03cd2aee # v4.39.0
+        with:
+          category: "/language:${{ matrix.language }}"
+
+  sec-semgrep:
+    name: security / semgrep
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      security-events: write
+    container:
+      image: semgrep/semgrep:1.181.0@sha256:81474464c1f07483ba0682a44787fd93c91397419762a04abe2bafaae396304b
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Semgrep, rapport complet (SARIF, non bloquant)
+        run: >
+          semgrep scan --metrics=off
+          --config p/typescript --config p/react --config p/javascript
+          --config .semgrep/
+          --exclude tests/fixtures --exclude dist
+          --sarif --output semgrep.sarif
+      - name: Envoi SARIF
+        if: always() && hashFiles('semgrep.sarif') != ''
+        uses: github/codeql-action/upload-sarif@6f2ac81f5cd81fe351a197ba0b00d91d03cd2aee # v4.39.0
+        with:
+          sarif_file: semgrep.sarif
+          category: semgrep
+      - name: Semgrep, règles bloquantes (ERROR)
+        run: >
+          semgrep scan --metrics=off
+          --config p/typescript --config p/react --config p/javascript
+          --config .semgrep/
+          --exclude tests/fixtures --exclude dist
+          --severity ERROR --error
+
+  sec-workflows:
+    name: security / workflows (zizmor)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+      - name: zizmor (bloquant à partir de high)
+        env:
+          GH_TOKEN: ${{ github.token }}   # audits en ligne (actions vulnérables connues), lecture seule
+        run: uvx zizmor@1.31.1 --min-severity high .github/workflows/
+
+  sec-dependencies:
+    name: security / dependencies & licences
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - name: pnpm audit (bloquant HIGH/CRITICAL, prod + dev)
+        run: pnpm audit --audit-level high
+      - name: Dependency review (PR uniquement)
+        if: github.event_name == 'pull_request'
+        uses: actions/dependency-review-action@2031cfc080254a8a887f58cffee85186f0e49e48 # v4.9.0
+        with:
+          fail-on-severity: high
+          fail-on-scopes: runtime, development
+          allow-licenses: MIT, MIT-0, ISC, 0BSD, BSD-2-Clause, BSD-3-Clause, Apache-2.0, Zlib, CC0-1.0, Unlicense, BlueOak-1.0.0, Python-2.0, MPL-2.0, CC-BY-4.0, CC-BY-3.0
+          comment-summary-in-pr: never
+          show-openssf-scorecard: true
+          warn-on-openssf-scorecard-level: 3
+      - name: OSV-Scanner (rapport, non bloquant)
+        uses: google/osv-scanner-action/osv-scanner-action@b1d267aea5211fa648d9d442fa64b90dbdcbdd36 # v2.7.0
+        continue-on-error: true
+        with:
+          scan-args: |-
+            --lockfile=pnpm-lock.yaml
+            --format=sarif
+            --output=osv.sarif
+      - name: Envoi SARIF OSV
+        if: always() && hashFiles('osv.sarif') != ''
+        uses: github/codeql-action/upload-sarif@6f2ac81f5cd81fe351a197ba0b00d91d03cd2aee # v4.39.0
+        with:
+          sarif_file: osv.sarif
+          category: osv-scanner
+      - name: Installation (scripts limités par onlyBuiltDependencies)
+        run: pnpm install --frozen-lockfile
+      - name: Licences des dépendances de production
+        run: |
+          set -euo pipefail
+          pnpm licenses list --prod --json > licenses.json
+          node scripts/check-licenses.mjs licenses.json
+
+  sec-build-hardening:
+    name: security / build hardening (CSP, headers, test hooks)
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    env:
+      GITLEAKS_VERSION: "8.30.1"
+      GITLEAKS_SHA256: "551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb"
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: dist
+          path: dist
+      - name: Hooks de test absents du build de production
+        run: |
+          set -euo pipefail
+          if grep -rIlE '__p152test|__p152perf|VITE_E2E' dist/; then
+            echo "::error::Hook de test ou VITE_E2E présent dans dist/ (ADR-APP-08, M-12)"; exit 1
+          fi
+          if find dist -name '*.map' | grep -q .; then
+            echo "::error::Source maps présentes dans dist/ (build.sourcemap doit être false en prod)"; exit 1
+          fi
+      - name: CSP et en-têtes de sécurité (dist/_headers)
+        run: |
+          set -euo pipefail
+          H=dist/_headers; fail=0
+          [ -f "$H" ] || { echo "::error::$H absent"; exit 1; }
+          csp="$(grep -iE '^[[:space:]]*Content-Security-Policy:' "$H" | head -n1 | cut -d: -f2-)"
+          [ -n "$csp" ] || { echo "::error::Aucune Content-Security-Policy dans $H"; exit 1; }
+          for d in "default-src 'self'" "script-src 'self'" "object-src 'none'" \
+                   "base-uri 'none'" "form-action 'none'" "frame-ancestors 'none'"; do
+            grep -qF -- "$d" <<<"$csp" || { echo "::error::CSP : directive manquante : $d"; fail=1; }
+          done
+          for bad in "'unsafe-inline'" "'unsafe-eval'" "'unsafe-hashes'"; do
+            if grep -qF -- "$bad" "$H"; then echo "::error::Source interdite dans $H : $bad"; fail=1; fi
+          done
+          script_src="$(grep -oE "script-src[^;]*" <<<"$csp" || true)"
+          if grep -qE "(^|[[:space:]])(\*|data:|blob:|http:|https:)" <<<"${script_src#script-src}"; then
+            echo "::error::script-src trop large : $script_src"; fail=1
+          fi
+          if grep -qF "'wasm-unsafe-eval'" <<<"$csp"; then
+            echo "::warning::'wasm-unsafe-eval' présent : autorisé uniquement après l'ADR de SEC-10"
+          fi
+          for h in "X-Content-Type-Options: nosniff" "Referrer-Policy:" "Permissions-Policy:" \
+                   "Cross-Origin-Opener-Policy: same-origin"; do
+            grep -qiF -- "$h" "$H" || { echo "::error::En-tête manquant : $h"; fail=1; }
+          done
+          exit "$fail"
+      - name: index.html sans script/style en ligne ni ressource tierce
+        run: |
+          set -euo pipefail
+          I=dist/index.html; fail=0
+          if grep -Pzq '(?is)<script\b(?![^>]*\bsrc\s*=)[^>]*>' "$I"; then echo "::error::<script> en ligne dans $I"; fail=1; fi
+          if grep -Piq '<style\b' "$I"; then echo "::error::<style> en ligne dans $I"; fail=1; fi
+          if grep -Piq '\sstyle\s*=' "$I"; then echo "::error::attribut style= dans $I"; fail=1; fi
+          if grep -Piq '\s(src|href)\s*=\s*["'"'"']?(https?:)?//' "$I"; then echo "::error::ressource externe dans $I"; fail=1; fi
+          exit "$fail"
+      - name: Installer gitleaks (version et checksum épinglés)
+        run: |
+          set -euo pipefail
+          url="https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          curl -sSfL -o /tmp/gitleaks.tgz "$url"
+          echo "${GITLEAKS_SHA256}  /tmp/gitleaks.tgz" | sha256sum -c -
+          tar -xzf /tmp/gitleaks.tgz -C /tmp gitleaks
+          sudo install -m 0755 /tmp/gitleaks /usr/local/bin/gitleaks
+      - name: gitleaks sur dist/
+        run: gitleaks dir --redact --verbose --exit-code 1 dist
+
+  security:
+    name: security
+    if: always()
+    needs: [sec-secrets, sec-codeql, sec-semgrep, sec-workflows, sec-dependencies, sec-build-hardening]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 2
+    permissions: {}
+    steps:
+      - name: Verdict sécurité
+        env:
+          RESULTS: ${{ toJSON(needs.*.result) }}
+        run: |
+          echo "$RESULTS"
+          if echo "$RESULTS" | grep -qE '"(failure|cancelled)"'; then
+            echo "::error::Au moins un contrôle de sécurité a échoué"; exit 1
+          fi
+  # ========================== fin SECDEVOPS-SLOT ==========================
 
   # E2E-SLOT
   # Job `e2e` (Playwright, needs: [quality, unit, build]) to be added here by qa-tester.
@@ -88,7 +333,7 @@ jobs:
 
   ci-ok:
     if: always()
-    needs: [quality, unit, build, assets]
+    needs: [quality, unit, build, assets, security]
     runs-on: ubuntu-24.04
     timeout-minutes: 2
     steps:
