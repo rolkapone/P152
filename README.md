@@ -12,14 +12,18 @@
 
 | Command             | What it does                                          |
 | ------------------- | ----------------------------------------------------- |
-| `pnpm install`      | Install dependencies                                  |
+| `pnpm install`      | Install dependencies (CI: `pnpm install --frozen-lockfile`) |
 | `pnpm dev`          | Dev server on http://localhost:5173                   |
 | `pnpm test`         | Unit tests (Vitest); `pnpm test:cov` adds coverage    |
 | `pnpm lint`         | ESLint; `pnpm format` / `pnpm format:check` Prettier  |
 | `pnpm typecheck`    | `tsc --noEmit`                                        |
 | `pnpm build`        | Production build in `dist/`                           |
-| `pnpm check`        | Everything CI runs (except E2E and assets)            |
+| `pnpm check`        | Everything CI runs (format, lint, types, tests + coverage, build, bundle; not E2E nor assets)            |
 | `pnpm check:assets` | Fails on files > 1 MiB not stored in Git LFS          |
+| `pnpm check:bundle` | Bundle size budget (after `pnpm build`)               |
+| `pnpm build:e2e` then `pnpm test:e2e` | E2E build (test hooks) + Playwright; first run: `pnpm exec playwright install chromium` |
 
 Copy `.env.example` to `.env` for local settings (never committed).
 Commits follow Conventional Commits (`feat:`, `fix:`, `chore:`...).
+
+Supply chain: `pnpm-workspace.yaml` holds `onlyBuiltDependencies` (install-script allow-list) and `minimumReleaseAge` (3 days). Local CI run results: `docs/ci/local-run-US-001.md`.
