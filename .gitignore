@@ -1,0 +1,16 @@
+node_modules/
+dist/
+dist-e2e/
+coverage/
+*.tsbuildinfo
+.env
+.env.*
+!.env.example
+.vite/
+playwright-report/
+test-results/
+.DS_Store
+Thumbs.db
+*.log
+.vscode/*
+!.vscode/extensions.json

@@ -1,0 +1,8 @@
+dist
+dist-e2e
+coverage
+pnpm-lock.yaml
+docs
+.claude
+_claude-setup
+*.md
