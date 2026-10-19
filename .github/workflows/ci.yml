@@ -328,12 +328,47 @@ jobs:
   # ========================== fin SECDEVOPS-SLOT ==========================
 
   # E2E-SLOT
-  # Job `e2e` (Playwright, needs: [quality, unit, build]) to be added here by qa-tester.
-  # Once added, append `e2e` to `needs` of `ci-ok`.
+  e2e:
+    name: e2e (playwright)
+    needs: [quality, unit, build]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    # Image officielle Playwright, tag = version de @playwright/test (1.64.1), épinglée par digest
+    # (index multi-arch relevé sur mcr.microsoft.com le 2026-10-19). Mettre à jour tag ET digest ensemble.
+    # TODO (devops) : script de vérification tag image == version @playwright/test (ADR-OPS-05).
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.1-noble@sha256:7852dc5a7d72f5fe458a597d690f6c42fbc8e9e26ddfa95f8e6ef552558d9bbf
+      options: --ipc=host
+    env:
+      CI: "true"
+      HOME: /root
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      # Build E2E (VITE_E2E=true) : jamais déployé, distinct de l'artefact `dist`.
+      - run: pnpm build:e2e
+      # Navigateurs fournis par l'image ; pas de `playwright install`.
+      - run: pnpm test:e2e
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: playwright-report
+          path: |
+            playwright-report
+            test-results
+          if-no-files-found: ignore
+          retention-days: 14
 
   ci-ok:
     if: always()
-    needs: [quality, unit, build, assets, security]
+    needs: [quality, unit, build, assets, security, e2e]
     runs-on: ubuntu-24.04
     timeout-minutes: 2
     steps:

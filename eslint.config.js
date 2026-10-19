@@ -6,7 +6,19 @@ import globals from "globals";
 import tseslint from "typescript-eslint";
 
 export default tseslint.config(
-  { ignores: ["dist", "dist-e2e", "coverage", "docs", ".claude", "_claude-setup", "assets"] },
+  {
+    ignores: [
+      "dist",
+      "dist-e2e",
+      "playwright-report",
+      "test-results",
+      "coverage",
+      "docs",
+      ".claude",
+      "_claude-setup",
+      "assets",
+    ],
+  },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
