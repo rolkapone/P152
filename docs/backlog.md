@@ -39,7 +39,7 @@ En tant qu'équipe, je veux un repo avec build, lint, tests et CI afin de livrer
 **État au 2026-10-19 : partiellement fait.** Repo git local sur `main` (3 commits : outillage, jobs sécurité, ossature E2E Playwright) ; `ci.yml`, `security-scheduled.yml`, `dependabot.yml`, `.gitignore`, `.gitattributes` (LFS), `.env.example`, `.npmrc`, `vite.config.ts` (`sourcemap: false`) écrits. **Rien n'a été exécuté** : Node 24 et pnpm ne sont pas installés sur le poste du PO ; pas de lockfile ; pas de dépôt distant.
 Critères d'acceptation :
 - [ ] Étant donné un clone propre, quand on lance `pnpm install --frozen-lockfile` puis le build, alors il réussit sans erreur (premier `pnpm install && pnpm check` exécuté, `pnpm-lock.yaml` commité).
-- [ ] Étant donné une pull request, quand la CI s'exécute, alors lint, tests unitaires et build sont exécutés et visibles (vérifié sur le dépôt GitHub une fois créé avec l'accord du PO).
+- [ ] Étant donné les jobs de `ci.yml`, quand on lance en local les mêmes commandes que ceux-ci (lint, types, tests unitaires, build), alors tout est vert. *(Décision PO 2026-10-19 : pas de dépôt GitHub ni de push au Sprint 1 ; la vérification de l'exécution réelle de la CI sur une PR est reportée au Sprint 2.)*
 - [ ] Étant donné le repo, alors `.env` est dans `.gitignore` et `.env.example` existe (présent, à valider au premier run).
 - [ ] Les fichiers binaires > 1 Mo sont suivis par Git LFS (`.gitattributes` présent, `check:assets` vert).
 - [ ] *(sécurité)* `.npmrc`/`pnpm-workspace.yaml` avec `onlyBuiltDependencies` en liste blanche et `minimumReleaseAge` (3 jours) ; `.env` ignoré, `.env.example` factice ; `build.sourcemap` désactivé (ou `hidden` non déployé) pour le build de production.
@@ -68,9 +68,9 @@ Notes techniques / dépendances : developer + graphics-engineer + devops. Dépen
 En tant qu'équipe, je veux que chaque PR soit scannée (secrets, SAST, dépendances, licences, workflows, build) afin qu'aucune vulnérabilité CRITICAL/HIGH ni aucun secret n'atteigne `main`.
 Critères d'acceptation :
 - [ ] Le slot `# SECDEVOPS-SLOT` de `ci.yml` contient les jobs de `docs/security/ci-security.md` (gitleaks, CodeQL, Semgrep, zizmor, SCA + licences, `build-hardening`) et un job agrégateur `security` requis par `ci-ok`.
-- [ ] Une PR de test contenant un faux secret, un `innerHTML`, une dépendance vulnérable HIGH, et un `dist` contenant `__p152test` fait échouer la CI (4 cas vérifiés puis annulés).
+- [ ] *(reporté au Sprint 2 : exige le dépôt distant, décision PO 2026-10-19)* Une PR de test contenant un faux secret, un `innerHTML`, une dépendance vulnérable HIGH, et un `dist` contenant `__p152test` fait échouer la CI (4 cas vérifiés puis annulés).
 - [ ] `.gitleaks.toml`, `.semgrep/p152.yml`, `scripts/check-licenses.mjs`, `.github/dependabot.yml` et le workflow hebdomadaire sont en place ; actions et images épinglées par SHA/digest.
-- [ ] Les rapports SARIF remontent dans l'onglet Code scanning.
+- [ ] *(reporté au Sprint 2 : exige le dépôt distant)* Les rapports SARIF remontent dans l'onglet Code scanning.
 Notes techniques / dépendances : devops + secdevops. Dépend de US-001 (CI exécutée au moins une fois). Le job `build-hardening` échouera tant que `dist/_headers` n'existe pas : la génération des en-têtes est livrée par SEC-03 (voir cette story) ; d'ici là le contrôle est en avertissement documenté pour cette seule vérification.
 
 ### SEC-02 — Durcissement du dépôt GitHub public  [Must | 1 pt]
@@ -122,7 +122,31 @@ Critères d'acceptation :
 - [ ] Le rendu est de type « photo produit en studio » (fond clair continu, éclairage doux, ombres de contact douces) ; les tokens `--scene-*` donnent un studio clair en thème clair et anthracite en thème sombre.
 - [ ] Le rendu tient ≥ 60 FPS sur desktop milieu de gamme avec une scène vide et un bureau, à 1366×768 minimum. Unités : mètre, origine au sol.
 - [ ] Les entrées utilisent les Pointer Events (préparation du tactile, US-021).
+
+Critères UX testables (source : `docs/design/ux/stories/US-004.md` §7) :
+- [ ] UX-1 Au chargement, "Loading 3D scene…" est visible avec `role="progressbar"` ; à la fin, "3D view ready. Desk 140 by 70 cm." est annoncé dans la zone `aria-live="polite"` et le canvas occupe la même place sans décalage de mise en page.
+- [ ] UX-2 La barre de vue (`role="toolbar"`, `aria-label="View"`) affiche, avec libellés visibles et icônes, "Reset view", "Top", "Front" ; chaque bouton mesure ≥ 32 px de haut (jamais < 24 px) et sa zone de clic est séparée de ≥ 8 px de la suivante.
+- [ ] UX-3 Tab atteint dans l'ordre : scène → Reset view → Top → Front → "Got it" → "Hide tip" ; aucun piège clavier ; l'anneau de focus est visible (contraste ≥ 3:1) sur fond clair et sombre, et n'est pas masqué par l'astuce.
+- [ ] UX-4 Chaque bouton de vue affiche une info-bulle après ~400 ms au survol **et** au focus clavier ("Reset view (0)", "View from above (1)", "View from the front (2)") ; Échap la ferme sans quitter le focus.
+- [ ] UX-5 Après clic ou Entrée/Espace sur Top, `aria-pressed="true"` sur Top uniquement, coche + contour visibles (pas la couleur seule) ; annonce "Top view." ; après un glisser, un zoom ou Reset view, plus aucun bouton n'est pressé.
+- [ ] UX-6 Reset view ramène exactement la vue par défaut depuis n'importe quelle vue, y compris après des limites atteintes ; Top montre le plateau entier, à plat, bord arrière en haut ; Front montre le bureau entier de face.
+- [ ] UX-7 Clic gauche glissé sur le vide tourne la vue ; molette zoome ; clic droit glissé déplace la vue, sans menu contextuel du navigateur ; la vue ne passe jamais sous le plateau/sol ; le zoom ne traverse jamais le bureau ; au zoom max (éloigné) le bureau reste visible et le déplacement ne le sort jamais complètement du cadre.
+- [ ] UX-8 Au clavier, viewport focalisé : flèches tournent (15° gauche/droite, 10° haut/bas), + / - zooment (pas de 10 %), Maj+flèches déplacent, 0/1/2 activent Reset/Top/Front ; ces touches n'agissent pas hors du viewport ; une annonce unique est émise après 600 ms d'inactivité, aucune pendant un glisser souris.
+- [ ] UX-9 Une transition de vue dure 480 ms (courbe `in-out`) ; une action de l'utilisateur pendant la transition l'interrompt sans à-coup.
+- [ ] UX-10 Avec `prefers-reduced-motion: reduce`, Reset/Top/Front sautent à la vue sans animation, sans inertie ; la barre de chargement est statique.
+- [ ] UX-11 L'astuce "Drag to turn the view, scroll to zoom, right-drag to move the view." est visible à la première visite ; "Got it" ou "Hide tip" la masque, le focus passe sur Reset view, et elle ne réapparaît pas après rechargement (préférence locale).
+- [ ] UX-12 Barre et astuce sont en verre ≥ 86 % d'opacité avec repli opaque (sans `backdrop-filter`, avec `prefers-reduced-transparency`) ; texte ≥ 4,5:1 et icônes ≥ 3:1 sur studio clair et sombre ; texte ≥ 14 px.
+- [ ] UX-13 Si WebGL 2 est indisponible, le message "The 3D view can't start" (`role="alert"`, focus sur le titre) et "Try again" remplacent la scène ; aucune barre de vue ; aucune exception non gérée en console ; "Try again" relance l'initialisation. Contexte perdu : "The 3D view stopped".
+- [ ] UX-14 L'interface de la scène reste utilisable à 200 % de zoom navigateur et à 1366×768 : la barre ne recouvre pas le bureau au cadrage par défaut ; l'astuce reste lisible sans masquer la barre.
+- [ ] UX-15 Aucun libellé visible, info-bulle ou annonce ne contient "orbit", "pan", "mesh" ou "camera".
+
+Décisions UX **VALIDÉES par le PO le 2026-10-19** :
+- Astuce masquée : reste masquée définitivement tant que Help (US-025) n'existe pas ; rouvrable via Help en US-025.
+- Raccourcis 0 / 1 / 2 pour Reset / Top / Front : acceptés, actifs seulement quand la scène a le focus (WCAG 2.1.4).
+- Message WebGL indisponible : texte neutre, **sans nom d'application** (ni « Deskfit » ni autre) ; texte isolé dans les fichiers i18n.
+
 Notes techniques / dépendances : graphics-engineer + technical-artist ; ux-designer/ui-designer pour la barre flottante de scène. Dépend de US-001, US-003. Références : maquette `docs/design/ui/maquettes/index.html` (barre de scène), `docs/design/3d/apercu/index.html`, `docs/design/3d/direction-artistique.md` §3 et §10, wireframe W2.
+Références de design US-004 : UX `docs/design/ux/stories/US-004.md` ; maquette `docs/design/ui/maquettes/US-004.html` (**section 7 = consignes developer**, `docs/design/ui/design-system.md` §14) ; paramètres de scène `assets/catalog/scene/studio.json` ; spécification 3D `docs/design/3d/US-004-scene.md` (transition caméra 480 ms, cible (0 ; 0,72 ; 0), caméra jamais sous Y = 0,9 m ni dans le bureau).
 
 ### US-005 — Shell de l'application en anglais  [UI] [Must | 5 pts]
 En tant qu'utilisateur, je veux une interface claire en anglais (zone 3D, panneau d'objets, panneau de propriétés, alertes) afin de m'y repérer sans aide.
@@ -224,7 +248,7 @@ Critères d'acceptation :
 - [ ] Suppression via bouton et touche Suppr ; duplication via bouton et Ctrl+D, avec léger décalage ; barre contextuelle flottante de scène (W5) avec info-bulles.
 - [ ] Clavier : Tab parcourt les objets ; flèches = 10 mm (Maj 1 mm, Ctrl 100 mm) ; raccourcis non actifs dans les champs de saisie.
 - [ ] Toutes les actions sont accessibles au clavier et annoncées aux lecteurs d'écran (`aria-live="polite"`, ex. "Monitor moved 10 mm left") ; une liste textuelle "Objects on desk" (nom, position, taille) est disponible.
-Notes techniques / dépendances : dépend de US-012.
+Notes techniques / dépendances : dépend de US-012. **Note US-004 (UX)** : dès qu'un objet est sélectionné, les flèches déplacent l'objet ; l'orbite clavier de la vue (flèches gauche/droite/haut/bas, Maj+flèches pour déplacer la vue) passe alors en **Alt+flèches** (Alt+Maj+flèches pour déplacer la vue, à confirmer par l'ux-designer). Mettre à jour l'aria-label de la région 3D et les tests clavier de US-004.
 
 ## Epic F — Alertes « ça rentre ? »
 

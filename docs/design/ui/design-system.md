@@ -124,6 +124,9 @@ Onglets Style / Ambience / Decor, Material, Day/Night, Shopping list : mêmes co
 - les captures, visuels ou assets d'un produit Apple, y compris comme référence dans les maquettes livrées.
 Toute nouvelle inspiration est jugée sur ce critère : on reprend un principe, jamais une œuvre.
 
+## 14. Scène 3D et barre de vue (US-004)
+Maquette : `maquettes/US-004.html` (section 7 = consignes développeur, aucun nouveau token). Barre de vue = pill de verre, boutons pill 36 px (icône + libellé 14 px), Reset view sans état, Top/Front en `aria-pressed` (fond `accent-subtle` opaque + contour 2 px accent + coche remplaçant l'icône, sans décalage). Astuce = bandeau de verre `radius-xl`, "Got it" + X. Chargement : fond `--scene-floor` + `progressbar`. WebGL indisponible / contexte perdu : carte opaque `radius-xl`, `role="alert"`, "Try again". Info-bulles : fond `text` inversé, 400 ms, aussi au focus. Transition de vue : `--duration-camera` / `--ease-in-out`, 0 ms en reduced motion.
+
 ## 13. Questions pour le PO
 1. Nom **Deskfit** acceptable (provisoire) ?
 2. Accent **bleu** sobre acceptable, ou autre teinte (vert sauge, violet) ? (une seule, pour tout le produit)
