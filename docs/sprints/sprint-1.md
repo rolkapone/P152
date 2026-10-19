@@ -102,7 +102,7 @@ Décisions UX **VALIDÉES par le PO le 2026-10-19** : astuce masquée définitiv
 | US-001 | IN PROGRESS | 0 / 3 | Branche `feature/US-001-repo-build-ci`, implémenteur : devops. Node/pnpm installés. CI vérifiée en local ; T6 (CI distante) reportée au Sprint 2. |
 | US-002 | TODO | 0 / 3 | Livrable produit ; reste relecture reviewer, validation secdevops, merge devops. |
 | US-003 | TODO | 0 / 3 | Démarre après US-001 T3 (`pnpm check` vert). |
-| SEC-01 | TODO | 0 / 3 | Implémenteurs : devops + secdevops. Démarre après US-001 T3 ; `_headers` en avertissement jusqu'à SEC-03 ; T5/T6 dépendent du push. |
+| SEC-01 | TODO | 0 / 3 | Implémenteurs : devops + secdevops. Démarre après US-001 T3 ; `dist/_headers` absent = erreur bloquante de `sec-build-hardening` (ci.yml:251) : SEC-03 doit précéder le premier push ; T5/T6 dépendent du push. |
 | US-004 | TODO | 0 / 3 | Graphics-engineer (+ developer pour la barre). Conditionnelle (capacité). Design requis d'abord (voir section). Dépend de US-001 et US-003. |
 
 ## Risques
@@ -112,10 +112,11 @@ Décisions UX **VALIDÉES par le PO le 2026-10-19** : astuce masquée définitiv
 | R1 | ~~Node/pnpm absents~~ levé ; risque résiduel : PATH périmé dans des shells ouverts | Faible / Faible | Les agents rechargent le PATH machine+user |
 | R2 | Première exécution de `pnpm install` / `pnpm check` : écarts d'outillage (versions ESLint 9.39, TS 5.9, Vite 7, Vitest 3 jamais testées ensemble) | Moyenne / Moyen | Time-box d'une journée en T2/T3 ; ajuster les versions par ADR |
 | R3 | Dépôt GitHub non autorisé : CI distante et CodeQL non vérifiables, SEC-01 partiellement validable | Élevée / Moyen | Vérification locale (mêmes commandes que la CI) ; demander l'accord du PO pendant le sprint ; sinon reporter US-001 T6 et SEC-01 T5/T6 au Sprint 2 |
-| R4 | `build-hardening` rouge faute de `dist/_headers` | Élevée / Faible | Avertissement documenté en SEC-01 (T4) ou avancer la génération des en-têtes |
+| R4 | `build-hardening` rouge faute de `dist/_headers` | Élevée / Faible | SEC-03 avant le premier push (le job échoue sans `dist/_headers`) ; un `::warning::` temporaire relève de secdevops |
 | R5 | Sprint à 16 pts (capacité 15) | Moyenne / Faible | US-004 retirée en premier si retard |
 | R6 | Performances WebGL sur la machine du PO non connues (≥ 60 FPS sur milieu de gamme) | Faible / Moyen | Mesure dès T7 de US-004 ; paliers de qualité ADR-3D-08 |
 | R7 | Les 5 pts de US-005 (shell + Inter + verre) sont chargés pour le Sprint 2 ; US-004 en livre déjà une partie (barre de scène) | Moyenne / Faible | Coordonner le périmètre de la barre entre US-004 et US-005 |
+| R8 | Override `rollup: 4.64.7` dans `pnpm-workspace.yaml` (rollup 4.64.8+ trop récent pour `minimumReleaseAge`) | Certaine / Faible | Retirer l'override quand la version a plus de 3 jours (dès le 2026-10-23), puis `pnpm install` et `pnpm check` (devops) |
 
 ## Définition de terminé (rappel)
 Critères d'acceptation vérifiés, tests verts sans baisse de couverture, revue APPROVE (3 cycles maximum, puis escalade au PO), contrôle design CONFORME et QA PASS pour US-004, aucun finding CRITICAL/HIGH ouvert, CI verte, merge `--no-ff` dans `main`.
