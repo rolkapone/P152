@@ -1,3 +1,5 @@
+# Obsolète, voir les fichiers en place : ce brouillon (revue US-002) n est plus maintenu.
+# Fichier actif : .semgrep/p152.yml. Toute modification se fait là-bas, avec revue secdevops.
 # Brouillon secdevops — à copier par le devops vers `.semgrep/p152.yml`.
 # Règles propres à P152, en complément des packs du registre (p/typescript, p/react, p/javascript).
 # Sévérité ERROR = bloquant en CI ; WARNING = signalé dans Code scanning, non bloquant.
