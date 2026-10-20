@@ -1,7 +1,7 @@
 import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { I18nextProvider } from "react-i18next";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { createI18n } from "../ui/i18n/config";
 import { App } from "./App";
 
@@ -11,11 +11,13 @@ declare global {
 
 afterEach(() => {
   document.body.replaceChildren();
+  vi.restoreAllMocks();
 });
 
 describe("App", () => {
   it("renders its title through i18n", async () => {
     globalThis.IS_REACT_ACT_ENVIRONMENT = true;
+    vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(null); // no WebGL in jsdom
     const container = document.createElement("div");
     document.body.append(container);
     const root = createRoot(container);
@@ -28,6 +30,10 @@ describe("App", () => {
       await Promise.resolve();
     });
     expect(container.querySelector("h1")?.textContent).toBe("P152");
+    const view = container.querySelector("[role=group]");
+    expect(view?.getAttribute("aria-label")).toBe(
+      "3D view of your desk. Use arrow keys to turn the view, plus and minus to zoom.",
+    );
     act(() => root.unmount());
   });
 });
