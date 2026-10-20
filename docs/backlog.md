@@ -116,12 +116,12 @@ Notes techniques / dépendances : devops + secdevops. Dépend de SEC-03a et SEC-
 ### SEC-06 — Durcissement CI (findings LOW du scan US-001)  [Could | 2 pts, priorité basse]
 En tant qu'équipe, je veux traiter les findings LOW du scan US-001 afin de réduire la surface de la chaîne CI. À planifier après SEC-01 (peut être pris en tâches dans SEC-01 si de la place).
 Critères d'acceptation :
-- [ ] `persist-credentials: false` sur les `actions/checkout` des jobs `quality`, `unit`, `build` et `assets` de `ci.yml` (zizmor sans alerte `artipacked`).
-- [ ] `id-token: write` retiré de `security-scheduled.yml` (permissions minimales par job).
-- [ ] `security-scheduled.yml` exécute aussi gitleaks (historique complet) et CodeQL en hebdomadaire.
+- [x] `persist-credentials: false` sur les `actions/checkout` des jobs `quality`, `unit`, `build` et `assets` de `ci.yml` (zizmor sans alerte `artipacked`). *(fait dans SEC-01, branche non mergée)*
+- [x] `id-token: write` retiré de `security-scheduled.yml` (permissions minimales par job). *(fait dans SEC-01, branche non mergée)*
+- [x] `security-scheduled.yml` exécute aussi gitleaks (historique complet) et CodeQL en hebdomadaire. *(fait dans SEC-01, branche non mergée)*
 - [ ] zizmor est installé à version et empreinte fixées (hash vérifié), plus via `uvx` sans empreinte.
 - [ ] Dependabot (`docker-compose`) suit les digests des images semgrep et playwright, ou une procédure de mise à jour documentée les remplace.
-- [ ] L'agrégateur `security` de `ci.yml` traite un job `skipped` comme un échec (aujourd'hui seuls `failure` et `cancelled` font échouer l'agrégation ; aligner sur `ci-ok`, qui exige `success`).
+- [x] L'agrégateur `security` de `ci.yml` traite un job `skipped` comme un échec (aujourd'hui seuls `failure` et `cancelled` font échouer l'agrégation ; aligner sur `ci-ok`, qui exige `success`). *(fait dans SEC-01, branche non mergée)*
 - [ ] Migration d'ESLint 9 (déprécié) vers la version supportée, ADR consigné, `pnpm check` vert.
 Notes techniques / dépendances : devops + secdevops. Source : `docs/security/scans/US-001.md`. Hors total MVP (Could).
 

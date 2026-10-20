@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+// Obsolète, voir les fichiers en place : ce brouillon (revue US-002) n est plus maintenu.
+// Fichier actif : scripts/check-licenses.mjs. Toute modification se fait là-bas, avec revue secdevops.
 // Brouillon secdevops — à copier par le devops vers `scripts/check-licenses.mjs`.
 // Usage : pnpm licenses list --prod --json > licenses.json && node scripts/check-licenses.mjs licenses.json
 // Sortie : code 1 si une licence de dépendance de production n'est pas autorisée.
