@@ -2,16 +2,22 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { basename, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { loadEmbeddedCatalog, type Catalog, type CatalogFiles } from "../../../src/core/catalog";
+import { validateCatalog, type Catalog, type CatalogFiles } from "../../../src/core/catalog";
 
 const ROOT = fileURLToPath(new URL("../../../", import.meta.url));
 export const SETUP_FIXTURES = join(ROOT, "tests/fixtures/setups/v1");
 export const CATALOG_DIR = join(ROOT, "assets/catalog");
 
+let catalog: Catalog | null = null;
+
+/** The catalog of assets/catalog read from disk and validated once (no bundler needed). */
 export function testCatalog(): Catalog {
-  const result = loadEmbeddedCatalog();
-  if (!result.ok) throw new Error(`embedded catalog invalid: ${JSON.stringify(result.error)}`);
-  return result.value;
+  if (catalog === null) {
+    const result = validateCatalog(readCatalogFiles());
+    if (!result.ok) throw new Error(`catalog invalid: ${JSON.stringify(result.error)}`);
+    catalog = result.value;
+  }
+  return catalog;
 }
 
 export function readText(path: string): string {

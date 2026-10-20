@@ -10,4 +10,3 @@ export {
   type CatalogIssue,
   type CatalogIssueCode,
 } from "./validate";
-export { EMBEDDED_CATALOG_FILES, embeddedCatalogSource, loadEmbeddedCatalog } from "./embedded";

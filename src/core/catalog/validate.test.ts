@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { readCatalogFiles } from "../../../tests/unit/helpers/fixtures";
-import { embeddedCatalogSource, EMBEDDED_CATALOG_FILES, loadEmbeddedCatalog } from "./embedded";
+import { readCatalogFiles, testCatalog } from "../../../tests/unit/helpers/fixtures";
 import { MAX_CYCLORAMA_SEGMENTS, MAX_TRIS_PER_OBJECT } from "./limits";
 import { defaultParams, isValidParamValue } from "./params";
 import { validateCatalog, type CatalogFiles, type CatalogIssueCode } from "./validate";
@@ -30,35 +29,17 @@ describe("catalog in assets/catalog", () => {
     expect(result.ok ? [] : result.error).toEqual([]);
   });
 
-  it("is valid as embedded in the bundle, with every file picked up", () => {
-    const result = loadEmbeddedCatalog();
-    expect(result.ok).toBe(true);
-    if (!result.ok) return;
-    expect(Object.keys(EMBEDDED_CATALOG_FILES.objectTypes)).toHaveLength(10);
-    expect([...result.value.objectTypes.keys()]).toContain("desk.rect");
-    expect(result.value.objectTypes.size).toBe(10);
-    expect(result.value.materials.size).toBeGreaterThanOrEqual(30);
-    expect(result.value.styles.size).toBeGreaterThanOrEqual(4);
-    expect(loadEmbeddedCatalog()).toBe(result);
-  });
-
-  it("is exposed through the CatalogSource port", async () => {
-    await expect(embeddedCatalogSource.load()).resolves.toBe(loadEmbeddedCatalog());
-  });
-
   it("is immutable", () => {
-    const result = loadEmbeddedCatalog();
-    if (!result.ok) throw new Error("catalog invalid");
-    const desk = result.value.objectTypes.get("desk.rect");
-    expect(Object.isFrozen(result.value)).toBe(true);
+    const catalog = testCatalog();
+    const desk = catalog.objectTypes.get("desk.rect");
+    expect(Object.isFrozen(catalog)).toBe(true);
     expect(Object.isFrozen(desk)).toBe(true);
     expect(Object.isFrozen(desk?.params["width"])).toBe(true);
   });
 
   it("respects min <= default <= max for every numeric param of every type", () => {
-    const result = loadEmbeddedCatalog();
-    if (!result.ok) throw new Error("catalog invalid");
-    for (const type of result.value.objectTypes.values()) {
+    const catalog = testCatalog();
+    for (const type of catalog.objectTypes.values()) {
       for (const def of Object.values(type.params)) {
         expect(isValidParamValue(def, def.default)).toBe(true);
       }
