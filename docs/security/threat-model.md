@@ -1,6 +1,6 @@
 # Threat model — P152
 
-> Story : US-002 (threat model initial). Auteur : secdevops. **Version 1.1 du 2026-10-19** (v1.0 produite au kickoff ; historique en §13).
+> Story : US-002 (threat model initial). Auteur : secdevops. **Version 1.2 du 2026-10-20** (v1.0 produite au kickoff ; historique en §13).
 > Entrées : [`docs/vision.md`](../vision.md) v0.2, [`docs/backlog.md`](../backlog.md), [`docs/architecture.md`](../architecture.md) (ADR-3D-02/03/04/09, ADR-APP-03/04/08/09, section « Sécurité transverse », ADR-OPS-01 à 07 et « Décisions du PO »), scan de US-001 [`scans/US-001.md`](scans/US-001.md), exécution locale de la CI [`docs/ci/local-run-US-001.md`](../ci/local-run-US-001.md), workflows réels [`.github/workflows/`](../../.github/workflows/).
 > Contexte : SPA statique React/Vite/three.js, sans backend ni compte au MVP. **Décisions PO (2026-10-19)** : code sur GitHub, **dépôt public** ; app sur **Cloudflare Pages**, **sans domaine personnalisé** (`*.pages.dev`) ; **aucun dépôt distant ni push au Sprint 1** : la CI est vérifiée **en local** avec les mêmes commandes que les jobs ; aucun déploiement sans ordre du PO.
 > Méthode : actifs → acteurs → frontières de confiance → flux → STRIDE par composant → mesures → exigences et stories.
@@ -291,7 +291,7 @@ Menaces principales du MVP, par ordre de priorité : **M-16 (supply chain npm), 
 
 ## 9. Stories de sécurité (reprises au backlog)
 
-Les stories ci-dessous sont reprises dans [`docs/backlog.md`](../backlog.md) avec ces identifiants. **Le backlog fait foi** pour la priorité, l'estimation, les critères et le statut ; cette section donne l'origine (menaces couvertes) et un résumé.
+Les stories ci-dessous sont reprises dans [`docs/backlog.md`](../backlog.md) avec ces identifiants. **Le backlog fait foi** pour la priorité, l'estimation, les critères d'acceptation détaillés (y compris ceux de SEC-10 à SEC-50, sous chaque id) et le statut ; cette section donne l'origine (menaces couvertes) et un résumé.
 
 ### MVP
 
@@ -327,7 +327,7 @@ Les stories ci-dessous sont reprises dans [`docs/backlog.md`](../backlog.md) ave
 | SEC-42 | Confidentialité des photos | R7 (dépend de la question PO §12 q.3) | L-52 |
 | SEC-50 | AR à permissions minimales | R8 | L-60, L-61 |
 
-Les critères détaillés de SEC-10 à SEC-50 sont ceux de la v1.0 de ce document, repris au backlog ; ils seront précisés à la révision de début de release.
+Les critères d'acceptation détaillés de SEC-10 à SEC-50 sont dans [`docs/backlog.md`](../backlog.md) (section « Plus tard », sous chaque id) : repris de la v1.0 de ce document (commit `304e3f9`, §9) et adaptés aux décisions PO du 2026-10-19 (en-têtes via `config/security-headers.mjs`, page « Privacy » de SEC-04, pas de domaine personnalisé). Ils seront précisés à la révision de début de release.
 
 ---
 
@@ -379,6 +379,7 @@ Décisions déjà prises par le PO (2026-10-19), intégrées dans cette version 
 |---|---|---|---|
 | 1.0 | 2026-10-19 | secdevops | Version initiale (kickoff), commitée sur `main` |
 | 1.1 | 2026-10-19 | secdevops | US-002 : décisions PO (dépôt public, Cloudflare Pages sans domaine, pas de push au Sprint 1 : H-S6, H-S7, M-25 réécrite) ; scan US-001 (contrôle `dist/_headers` bloquant, SEC-03 découpée en SEC-03a/SEC-03b, findings LOW → SEC-06) ; incident tinypool corrigé par Vitest 4.1.12 (M-16) ; état réel de la CI (§6, §8) ; §9 aligné sur les identifiants du backlog ; §10 statut des amendements ; §14 conditions avant le premier push |
+| 1.2 | 2026-10-20 | secdevops | Revue US-002 cycle 1 : critères détaillés de SEC-10 à SEC-50 rétablis dans le backlog (§9 corrigé) ; §14 : MFA GitHub et Cloudflare du PO avant le push, commande gitleaks alignée sur `ci-security.md` §6.1 |
 
 ---
 
@@ -387,7 +388,8 @@ Décisions déjà prises par le PO (2026-10-19), intégrées dans cette version 
 Le premier push rend public, d'un coup, tout l'historique. À vérifier dans cet ordre (détail opérationnel : [`ci-security.md`](ci-security.md) §6) :
 
 1. **SEC-03a mergée** : `dist/_headers` généré, contrôle `sec-build-hardening` vert en local.
-2. **Scan gitleaks final** de toutes les branches locales (`gitleaks git --log-opts=--all --redact`) sans fuite ; aucun `.env` suivi.
-3. Dépôt créé public par le PO, **secret scanning et push protection actifs avant le push**, signalement privé de vulnérabilités activé.
-4. Recommandé (SEC-06, ~1 pt) : `persist-credentials: false` sur tous les `checkout`, retrait de `id-token: write`, gitleaks hebdomadaire.
-5. Après le push : SEC-02 (MFA, ruleset `main`, CODEOWNERS), puis SEC-01 (PR de test aux 4 échecs volontaires, SARIF visibles).
+2. **Scan gitleaks final** de toutes les branches locales (`gitleaks git --config .gitleaks.toml --log-opts=--all --redact .`) sans fuite ; aucun `.env` suivi.
+3. **MFA actif sur les comptes GitHub et Cloudflare du PO** (passkey ou clé de sécurité de préférence), avant toute création de dépôt ou de projet Pages (M-22, M-23).
+4. Dépôt créé public par le PO, **secret scanning et push protection actifs avant le push**, signalement privé de vulnérabilités activé.
+5. Recommandé (SEC-06, ~1 pt) : `persist-credentials: false` sur tous les `checkout`, retrait de `id-token: write`, gitleaks hebdomadaire.
+6. Après le push : SEC-02 (ruleset `main`, CODEOWNERS), puis SEC-01 (PR de test aux 4 échecs volontaires, SARIF visibles).
