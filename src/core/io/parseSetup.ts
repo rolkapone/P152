@@ -33,6 +33,8 @@ import { SetupV1Schema, type ParamValue, type SetupV1 } from "../schema/setupV1"
 import { importError, type ImportError } from "./errors";
 import { utf8ByteLength } from "./utf8";
 
+const UTF8_BOM = "\uFEFF";
+
 export interface ParseSetupOptions {
   /** Size announced by the source (e.g. `File.size`), checked before anything else. */
   readonly declaredBytes?: number;
@@ -147,6 +149,8 @@ function withDefaults(
   catalog: Catalog,
 ): Record<string, ParamValue> {
   const entry = catalog.objectTypes.get(catalogId);
+  // Unreachable after checkAgainstCatalog (unknown entries are rejected before normalize);
+  // kept only to narrow the type without a non-null assertion.
   if (entry === undefined) return { ...params };
   const out: Record<string, ParamValue> = {};
   for (const [key, def] of Object.entries(entry.params)) {
@@ -221,7 +225,8 @@ export function parseSetup(
   }
   let raw: unknown;
   try {
-    raw = JSON.parse(input);
+    // A UTF-8 BOM (U+FEFF) left by some editors is not JSON whitespace: strip it.
+    raw = JSON.parse(input.startsWith(UTF8_BOM) ? input.slice(UTF8_BOM.length) : input);
   } catch {
     return err(importError("notJson"));
   }
