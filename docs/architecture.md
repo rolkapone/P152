@@ -499,6 +499,8 @@ Contraintes d'entrée : UI en anglais avec i18n prête pour une 2e langue, pas d
 
 ### ADR-APP-06 — Composants accessibles : React Aria Components (headless), stylés avec nos tokens
 
+> Précisé par ADR-APP-11 (région live propre à la scène, US-004).
+
 **Contexte.** WCAG 2.2 AA (principes UX) : navigation clavier complète, focus visible et non masqué, onglets, menus, modales sans piège clavier, champs numériques avec unité et erreurs liées, info-bulles sur les icônes, barres d'outils, annonces live, cibles ≥ 24 px, zoom 200 %. Le design system (ui-designer) impose ses propres styles : pas de thème imposé par une lib.
 
 **Décision.**
