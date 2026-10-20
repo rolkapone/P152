@@ -1,3 +1,5 @@
+# Obsolète, voir les fichiers en place : ce brouillon (revue US-002) n est plus maintenu.
+# Fichier actif : .gitleaks.toml (racine). Toute modification se fait là-bas, avec revue secdevops.
 # Brouillon secdevops — à copier par le devops vers `.gitleaks.toml` (racine du dépôt).
 # Exige gitleaks >= 8.25 (syntaxe [[allowlists]], sous-commandes `git` et `dir`).
 # Source : docs/security/ci-security.md
