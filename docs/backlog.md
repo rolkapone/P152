@@ -7,10 +7,10 @@
 | Points MVP (Must + Should) | **95** (Must 85, Should 10) |
 | Dont stories sécurité (SEC-01 à SEC-05) | 8 (Must 7, Should 1) |
 | Points « Could » MVP (hors total, bonus) | 9 (US-021, US-023, SEC-06) |
-| Points livrés | 5 (US-001 DONE le 2026-10-19 ; US-002 DONE le 2026-10-20) |
+| Points livrés | 8 (US-001 DONE le 2026-10-19 ; US-002 et US-003 DONE le 2026-10-20) |
 | Vitesse moyenne | 15 pts/sprint (par défaut, pas d'historique ; recalcul en fin de Sprint 1) |
-| Sprints restants estimés avant MVP | **7** (92 pts restants / 15 = 6,1 arrondi à 7) |
-| Dernière mise à jour | 2026-10-20 (Sprint 1 en cours : US-001 et US-002 DONE, US-003 IN PROGRESS) |
+| Sprints restants estimés avant MVP | **6** (87 pts restants / 15 = 5,8 arrondi à 6) |
+| Dernière mise à jour | 2026-10-20 (Sprint 1 en cours : US-001, US-002, US-003 DONE ; SEC-01 IN PROGRESS) |
 
 Détail du recalcul : 83 pts (kickoff) + SEC-01 (3) + SEC-02 (1) + SEC-03a (1) + SEC-03b (1) + SEC-04 (1) + SEC-05 (1) + US-024 (2, réglages d'alertes) + US-025 (2, Help et préférences d'affichage) = **95**.
 Hypothèse : le premier déploiement public n'a lieu qu'à la fin du MVP (SEC-03a avant le premier push, SEC-03b avant ce déploiement, SEC-05 juste avant la release).
@@ -57,21 +57,32 @@ Notes techniques / dépendances : secdevops. À réviser avant R6 (comptes) et R
 
 ### US-003 — Architecture socle et modèle de données du setup  [Must | 3 pts]
 En tant que développeur, je veux une architecture documentée et un modèle de données versionné afin que la vision long terme (matières, éclairage, déco, partage) n'impose pas de refonte.
+**État au 2026-10-20 : DONE.** Mergée dans `main` (10af92a). Revue APPROVE au **cycle 3/3, limite atteinte** (`docs/reviews/US-003.md` ; cycles 1 et 2 sur les frontières de couches du lint). Secdevops PASS (`docs/security/scans/US-003.md`, findings LOW tracés ci-dessous). Dette de revue et findings LOW rattachés aux stories concernées (voir « Dette issue de US-003 » plus bas).
 Critères d'acceptation :
-- [ ] Étant donné `docs/architecture.md`, alors les choix de stack et leurs ADR sont consignés (fait, statut « Accepté » au 2026-10-19).
-- [ ] Le schéma du setup (bureau, objets, position, rotation, paramètres, champ matériau réservé, version de schéma) est défini et validé par des tests.
-- [ ] Le catalogue d'objets est décrit par des données (`assets/catalog/`), indépendamment du code de la scène.
-- [ ] Les textes de l'interface passent par un système i18n (anglais par défaut ; le français reste une option ultérieure non engagée).
-- [ ] *(sécurité)* Le catalogue est validé par schéma en test (clés de prototype rejetées, bornes cohérentes `min ≤ défaut ≤ max`).
-- [ ] *(corrections docs issues de la revue US-002, à faire avant SEC-03a)* Dans `docs/architecture.md` : la CSP de « Sécurité transverse » (~l.608) est identique à celle d'ADR-OPS-06 (`form-action 'none'`, `upgrade-insecure-requests`) ; HSTS est ajouté à ADR-OPS-06 ; ADR-OPS-03 indique que la génération des en-têtes revient à SEC-03a (pas encore faite) ; « Vitest 3 » devient « Vitest 4.1 » (~l.853). Vérifiable par `grep` : plus aucune occurrence de « Vitest 3 », une seule CSP.
-Notes techniques / dépendances : developer + graphics-engineer + devops. Dépend de US-001. **État au 2026-10-20 : IN PROGRESS** (branche `feature/US-003-architecture-socle`). Le catalogue du technical-artist existe déjà (10 fichiers JSON, matériaux, styles) : la story le charge et le valide.
+- [x] Étant donné `docs/architecture.md`, alors les choix de stack et leurs ADR sont consignés (fait, statut « Accepté » au 2026-10-19).
+- [x] Le schéma du setup (bureau, objets, position, rotation, paramètres, champ matériau réservé, version de schéma) est défini et validé par des tests.
+- [x] Le catalogue d'objets est décrit par des données (`assets/catalog/`), indépendamment du code de la scène.
+- [x] Les textes de l'interface passent par un système i18n (anglais par défaut ; le français reste une option ultérieure non engagée).
+- [x] *(sécurité)* Le catalogue est validé par schéma en test (clés de prototype rejetées, bornes cohérentes `min ≤ défaut ≤ max`).
+- [x] *(corrections docs issues de la revue US-002, à faire avant SEC-03a)* Dans `docs/architecture.md` : la CSP de « Sécurité transverse » (~l.608) est identique à celle d'ADR-OPS-06 (`form-action 'none'`, `upgrade-insecure-requests`) ; HSTS est ajouté à ADR-OPS-06 ; ADR-OPS-03 indique que la génération des en-têtes revient à SEC-03a (pas encore faite) ; « Vitest 3 » devient « Vitest 4.1 » (~l.853). Vérifiable par `grep` : plus aucune occurrence de « Vitest 3 », une seule CSP.
+Notes techniques / dépendances : developer + graphics-engineer + devops. Dépend de US-001. Le catalogue du technical-artist existe déjà (10 fichiers JSON, matériaux, styles) : la story le charge et le valide.
+
+### Dette issue de US-003 (revue cycle 3 et scan LOW) — à traiter dans les stories indiquées
+- **Hors story, à rattacher au sprint en cours ou à SEC-06 (developer/devops)** : (1) `from ".."` refusé à tort dans `core` (`eslint.config.js:22`) : corriger la règle de frontières de couches et ajouter un test du lint ; (2) le test TS7026 devient un vrai test de compilation (`tsc` sur fixture, échec attendu vérifié) ; (3) branche inatteignable de `withDefaults` : la supprimer ou la couvrir par un test.
+- **Première story qui crée un module dans `src/state`** (probablement US-005/US-006) : créer en même temps le seuil de couverture de `src/state` dans la config Vitest (critère d'acceptation de cette story).
+- **US-018** : libellés `tooLarge` ("1 MB" alors que la limite est 1 Mio) et `tooManyObjects` à valider par l'ux-designer ; `NO_CONTROL_CHARS` laisse passer les caractères C1 et bidi (risque d'usurpation visuelle des noms) ; restriction d'import de `zod` étendue à tout `src/` et E2E CSP sur le vrai `dist` (le jitless de Zod dépend de l'ordre d'import).
+- **US-004, US-008, US-009** : `z.looseObject` dans `StudioSceneSchema` ; les générateurs ne doivent lire que des champs validés (test dédié).
 
 ### SEC-01 — Pipeline sécurité en CI  [Must | 3 pts]
 En tant qu'équipe, je veux que chaque PR soit scannée (secrets, SAST, dépendances, licences, workflows, build) afin qu'aucune vulnérabilité CRITICAL/HIGH ni aucun secret n'atteigne `main`.
+**État au 2026-10-20 : IN PROGRESS** (branche `feature/SEC-01-pipeline-securite`, devops + secdevops). Les jobs sont déjà dans `ci.yml` depuis le kickoff (304e3f9) ; le sprint 1 porte la vérification locale. CI distante, SARIF et PR de test reportés au Sprint 2 (décision PO, pas de push).
 Critères d'acceptation :
 - [ ] Le slot `# SECDEVOPS-SLOT` de `ci.yml` contient les jobs de `docs/security/ci-security.md` (gitleaks, CodeQL, Semgrep, zizmor, SCA + licences, `build-hardening`) et un job agrégateur `security` requis par `ci-ok`.
 - [ ] *(reporté au Sprint 2 : exige le dépôt distant, décision PO 2026-10-19)* Une PR de test contenant un faux secret, un `innerHTML`, une dépendance vulnérable HIGH, et un `dist` contenant `__p152test` fait échouer la CI (4 cas vérifiés puis annulés).
 - [ ] `.gitleaks.toml`, `.semgrep/p152.yml`, `scripts/check-licenses.mjs`, `.github/dependabot.yml` et le workflow hebdomadaire sont en place ; actions et images épinglées par SHA/digest.
+- [ ] *(vérification locale, Sprint 1)* Chaque job de sécurité est exécuté en local avec la même commande que dans `ci.yml` (gitleaks, SCA + licences, zizmor, `build-hardening` hors contrôle `_headers`, Semgrep) et le résultat est consigné dans `docs/ci/local-run-SEC-01.md` ; ce qui n'est pas exécutable en local (CodeQL, Semgrep si Docker est arrêté) est listé comme non vérifié, jamais comme vert.
+- [ ] *(vérification locale)* Les 4 cas négatifs (faux secret, `innerHTML`, dépendance HIGH, `__p152test` dans `dist`) sont rejoués en local sur une copie jetable, chacun fait échouer la commande du job correspondant, puis tout est annulé (arbre propre) ; les cas non faisables sont consignés.
+- [ ] `docs/security/ci/` porte un bandeau « obsolète : les fichiers actifs sont à la racine / dans `.github/` » (finding de la revue US-002).
 - [ ] *(reporté au Sprint 2 : exige le dépôt distant)* Les rapports SARIF remontent dans l'onglet Code scanning.
 Notes techniques / dépendances : devops + secdevops. Dépend de US-001 (CI exécutée au moins une fois). Le contrôle `dist/_headers` de `build-hardening` **reste bloquant** (décision secdevops, scan US-001) : il n'y a pas d'avertissement toléré. La génération de `public/_headers` est donc livrée par SEC-03a **avant le premier push** (Sprint 2, en tête). Les findings LOW du scan US-001 sont regroupés dans SEC-06.
 
@@ -334,6 +345,7 @@ Critères d'acceptation :
 - [ ] Export/import JSON du setup (fichier validé par schéma, confirmation "Replace current setup?", import annulable par Ctrl+Z).
 - [ ] *(sécurité)* Fixtures malveillantes dans `tests/fixtures/setups/malicious/` (> 1 Mio, `__proto__`/`constructor` à tous les niveaux, 51 objets, `1e308`, chaîne de 1 Mo, `mount` cyclique, clé inconnue contenant du HTML, version future) toutes rejetées sans exception ; fuzzing fast-check « ne lève jamais » ; le message d'erreur n'affiche jamais le contenu du fichier ni de pile ; la relecture sur événement `storage` passe par `parseSetup`.
 - [ ] *(sécurité)* L'import de fichier appelle `checkDeclaredSize(file.size)` **avant** `file.text()` (un fichier > 1 Mio n'est jamais lu en mémoire), puis `parseSetup(text, catalog, { declaredBytes: file.size })`.
+- [ ] *(dette US-003)* Les messages `tooLarge` (limite 1 Mio, libellé exact) et `tooManyObjects` sont validés par l'ux-designer ; `NO_CONTROL_CHARS` rejette aussi les caractères C1 et bidi dans les noms (test) ; `zod` n'est importable que depuis le point d'entrée prévu dans tout `src/` (règle lint) et un E2E sur le vrai `dist` sous CSP vérifie que le mode jitless est actif.
 Notes techniques / dépendances : dépend de US-003. L'import de fichier est une surface d'attaque (threat model M-01 à M-06).
 
 ### US-019 — Annuler / rétablir  [UI] [Should | 3 pts]

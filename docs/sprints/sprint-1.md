@@ -64,23 +64,28 @@ Démarrée le 2026-10-19, implémenteur : secdevops. Le threat model a été com
 
 ### US-003 — Architecture socle et modèle de données du setup [developer + graphics-engineer] — 3 pts
 Branche : `feature/US-003-architecture-socle`. Implémenteur : developer (graphics-engineer si une tâche touche à la scène). Démarrée le 2026-10-20.
-- [ ] T0 **Avant SEC-03a** : corrections de `docs/architecture.md` demandées par la revue US-002 : CSP de « Sécurité transverse » (~l.608) alignée sur ADR-OPS-06 (`form-action 'none'`, `upgrade-insecure-requests`) ; HSTS ajouté à ADR-OPS-06 ; ADR-OPS-03 : génération des en-têtes par SEC-03a (pas encore faite) ; « Vitest 3 » → « Vitest 4.1 » (~l.853).
-- [ ] T1 Créer l'ossature `src/core/` (`schema`, `catalog`, `io`) conforme aux règles de dépendance (ADR-APP-07).
-- [ ] T2 Schéma Zod `SetupV1` (jitless) et types dérivés ; `parseSetup` minimal (taille, JSON, enveloppe, validation stricte).
-- [ ] T3 Chargement et validation du catalogue `assets/catalog/` par schéma (clés de prototype rejetées, `min ≤ défaut ≤ max`) + tests.
-- [ ] T4 Tests unitaires du schéma (cas valides, invalides, limites) et fixtures `tests/fixtures/setups/`.
-- [ ] T5 i18n : mise en place d'i18next, fichier `en` et clé typée (aucun texte en dur).
-- [ ] T6 Vérifier que `docs/architecture.md` reste à jour (ADR) ; ajouter les ADR manquants.
+**DONE**, mergée dans `main` (10af92a). Revue APPROVE au cycle 3/3 ; secdevops PASS. Tâches T0 à T6 réalisées. Dette tracée dans `docs/backlog.md` (« Dette issue de US-003 »).
+- [x] T0 **Avant SEC-03a** : corrections de `docs/architecture.md` demandées par la revue US-002 : CSP de « Sécurité transverse » (~l.608) alignée sur ADR-OPS-06 (`form-action 'none'`, `upgrade-insecure-requests`) ; HSTS ajouté à ADR-OPS-06 ; ADR-OPS-03 : génération des en-têtes par SEC-03a (pas encore faite) ; « Vitest 3 » → « Vitest 4.1 » (~l.853).
+- [x] T1 Créer l'ossature `src/core/` (`schema`, `catalog`, `io`) conforme aux règles de dépendance (ADR-APP-07).
+- [x] T2 Schéma Zod `SetupV1` (jitless) et types dérivés ; `parseSetup` minimal (taille, JSON, enveloppe, validation stricte).
+- [x] T3 Chargement et validation du catalogue `assets/catalog/` par schéma (clés de prototype rejetées, `min ≤ défaut ≤ max`) + tests.
+- [x] T4 Tests unitaires du schéma (cas valides, invalides, limites) et fixtures `tests/fixtures/setups/`.
+- [x] T5 i18n : mise en place d'i18next, fichier `en` et clé typée (aucun texte en dur).
+- [x] T6 Vérifier que `docs/architecture.md` reste à jour (ADR) ; ajouter les ADR manquants.
 Références : ADR-3D-02, ADR-APP-03/05/07.
 
 ### SEC-01 — Pipeline sécurité en CI [devops + secdevops] — 3 pts
-Branche : `feature/SEC-01-ci-security`. Dépend de US-001 (T3 au minimum).
-- [ ] T1 Intégrer les jobs gitleaks, CodeQL, Semgrep, zizmor, SCA + licences, `build-hardening` dans le slot `# SECDEVOPS-SLOT` ; job agrégateur `security` requis par `ci-ok`.
-- [ ] T2 Installer `.gitleaks.toml`, `.semgrep/p152.yml`, `scripts/check-licenses.mjs` depuis `docs/security/ci/`.
-- [ ] T3 Épingler actions et images (SHA / digest) ; vérifier `dependabot.yml` et `security-scheduled.yml`.
+Branche : `feature/SEC-01-pipeline-securite`. **IN PROGRESS** (devops + secdevops). Dépend de US-001 (DONE).
+Périmètre du sprint 1 (décision PO : pas de push) : les jobs sont déjà dans `ci.yml` depuis le kickoff (304e3f9) ; il reste la vérification locale. CI distante, SARIF et PR de test sont reportés au Sprint 2.
+- [x] T1 (fait au kickoff, 304e3f9) Jobs gitleaks, CodeQL, Semgrep, zizmor, SCA + licences, `build-hardening` dans `ci.yml` ; agrégateur `security` requis par `ci-ok`. Reste : relecture rapide de cohérence.
+- [ ] T2 Vérifier que `.gitleaks.toml`, `.semgrep/p152.yml`, `scripts/check-licenses.mjs` sont en place à la racine et identiques aux sources de `docs/security/ci/`.
+- [ ] T3 Vérifier l'épinglage SHA / digest des actions et images, `dependabot.yml` et `security-scheduled.yml`.
+- [ ] T3a Exécuter en local chaque job (gitleaks, SCA + licences, zizmor, `build-hardening`, Semgrep) avec les mêmes commandes que `ci.yml` ; consigner dans `docs/ci/local-run-SEC-01.md`. Semgrep : Docker est arrêté, démarrer Docker Desktop (demander au PO) ou binaire local ; sinon marquer « non vérifié ». CodeQL : non exécutable en local, consigné comme tel.
+- [ ] T3b Bandeau « obsolète » en tête des fichiers de `docs/security/ci/` (revue US-002), avec renvoi vers les fichiers actifs.
+- [ ] T3c (optionnel, si le temps le permet) Absorber les findings LOW de SEC-06 sans migration ESLint : `persist-credentials: false`, retrait de `id-token: write`, `skipped` = échec dans l'agrégateur `security`, gitleaks et CodeQL hebdomadaires. Cocher les critères correspondants de SEC-06.
 - [ ] T4 `build-hardening` : `dist/_headers` n'existe pas encore (génération livrée par SEC-03a, Sprint 2 en tête). Décision secdevops : le contrôle **reste bloquant** (pas d'avertissement) ; il ne s'exécute réellement qu'au premier push, qui n'aura lieu qu'après SEC-03a. Les autres contrôles (hooks de test, `index.html`, gitleaks `dist`) restent bloquants. Les findings LOW du scan US-001 sont tracés dans SEC-06 (backlog), hors Sprint 1.
-- [ ] T5 Vérification des 4 cas négatifs (faux secret, `innerHTML`, dépendance HIGH, `__p152test` dans `dist`) sur une PR de test, puis annulation.
-- [ ] T6 Vérifier la remontée SARIF dans Code scanning.
+- [ ] T5 (aligné) Rejouer en **local** les 4 cas négatifs (faux secret, `innerHTML`, dépendance HIGH, `__p152test` dans `dist`) sur une copie jetable, vérifier l'échec de chaque commande, tout annuler. Cas non faisables consignés. La **PR de test distante est reportée au Sprint 2** (décision PO).
+- [ ] T6 **Reportée au Sprint 2** : remontée SARIF dans Code scanning (exige le dépôt distant).
 Références : `docs/security/ci-security.md`, `docs/security/ci/`.
 
 ### US-004 — Scène 3D de base et caméra orbitale [UI][3D] [graphics-engineer + technical-artist] — 5 pts
@@ -104,8 +109,8 @@ Décisions UX **VALIDÉES par le PO le 2026-10-19** : astuce masquée définitiv
 |---|---|---|---|
 | US-001 | DONE | 2 / 3 | Mergée dans `main` (merge `--no-ff` dfdfcfe). Revue APPROVE au cycle 2 (`docs/reviews/US-001.md` ; cycle 1 bloqué sur l'audit tinypool/vitest, corrigé par Vitest 4.1.12). Secdevops PASS (`docs/security/scans/US-001.md`). Checks locaux verts ; CI distante (T6) reportée au Sprint 2 (décision PO). |
 | US-002 | DONE | 2 / 3 | Mergée dans `main` (55a93a6). Revue APPROVE au cycle 2 (cycle 1 : critères SEC-10 à SEC-50 perdus, remis dans le backlog). Secdevops PASS (`docs/security/scans/US-002.md`, `.gitleaksignore` pour un faux positif). Finding LOW : e-mail nominatif dans les commits, décision PO avant push. |
-| US-003 | IN PROGRESS | 0 / 3 | Branche `feature/US-003-architecture-socle`, developer (+ graphics-engineer si besoin). T0 = corrections architecture.md de la revue US-002, avant SEC-03a. |
-| SEC-01 | TODO | 0 / 3 | Implémenteurs : devops + secdevops. Démarre après US-001 T3 ; `dist/_headers` absent = erreur bloquante de `sec-build-hardening` (ci.yml:270), maintenue (décision secdevops) : SEC-03a doit précéder le premier push ; T5/T6 dépendent du push. |
+| US-003 | DONE | 3 / 3 | Mergée dans `main` (10af92a). Revue APPROVE au cycle 3 (`docs/reviews/US-003.md` ; cycles 1 et 2 : frontières de couches du lint). Secdevops PASS (`docs/security/scans/US-003.md`, findings LOW). Dette tracée dans le backlog. |
+| SEC-01 | IN PROGRESS | 0 / 3 | Branche `feature/SEC-01-pipeline-securite`, devops + secdevops. Jobs déjà dans `ci.yml` (304e3f9) ; reste vérification locale, Semgrep (Docker arrêté), bandeau « obsolète », 4 cas négatifs en local. T5 (PR de test) et T6 (SARIF) reportés au Sprint 2 (décision PO). `dist/_headers` absent = erreur bloquante maintenue : SEC-03a avant le premier push. |
 | US-004 | TODO | 0 / 3 | Graphics-engineer (+ developer pour la barre). Conditionnelle (capacité). Design requis d'abord (voir section). Dépend de US-001 et US-003. |
 
 ## Risques
@@ -129,3 +134,7 @@ Critères d'acceptation vérifiés, tests verts sans baisse de couverture, revue
 
 ## Rétro
 *(à rédiger en fin de sprint : ce qui a marché, ce qui a coincé, 1 à 3 actions pour le Sprint 2)*
+
+Notes en cours :
+- **US-003 a atteint la limite de 3 cycles de review** (cycles 1 et 2 sur les frontières de couches du lint, cycle 3 APPROVE). Point à creuser en rétro : définir les règles de lint des frontières avant le code, ou les faire relire plus tôt par le reviewer.
+- US-001 et US-002 ont chacune pris 2 cycles.
