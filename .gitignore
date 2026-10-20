@@ -14,3 +14,10 @@ Thumbs.db
 *.log
 .vscode/*
 !.vscode/extensions.json
+
+# Configuration locale de l equipe Claude : jamais versionnee (decision PO 2026-10-20)
+.claude/
+CLAUDE.md
+LISEZMOI-EQUIPE.md
+KICKOFF.txt
+_claude-setup/
