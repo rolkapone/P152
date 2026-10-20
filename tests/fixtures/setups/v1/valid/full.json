@@ -1,0 +1,208 @@
+{
+  "format": "p152.setup",
+  "schemaVersion": 1,
+  "id": "00000000-0000-4000-8000-000000000001",
+  "name": "Gaming corner",
+  "createdAt": "2026-10-20T08:00:00.000Z",
+  "updatedAt": "2026-10-20T08:30:00.000Z",
+  "units": "mm",
+  "desk": {
+    "catalogId": "desk.rect",
+    "catalogVersion": 1,
+    "params": {
+      "width": 1400,
+      "depth": 700,
+      "height": 740,
+      "thickness": 25,
+      "legStyle": "post"
+    },
+    "materials": {
+      "top": "mat.oak"
+    }
+  },
+  "objects": [
+    {
+      "id": "00000000-0000-4000-8000-000000000010",
+      "type": "mousepad",
+      "catalogId": "mousepad.generic",
+      "catalogVersion": 1,
+      "params": {
+        "width": 900,
+        "depth": 400
+      },
+      "transform": {
+        "x": 0,
+        "z": 150,
+        "rotationY": 0
+      },
+      "mount": null,
+      "materials": {},
+      "product": null,
+      "label": null
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000011",
+      "type": "keyboard",
+      "catalogId": "keyboard.generic",
+      "catalogVersion": 1,
+      "params": {
+        "format": "tkl"
+      },
+      "transform": {
+        "x": -60,
+        "z": 180,
+        "rotationY": 0
+      },
+      "mount": null,
+      "materials": {
+        "keycaps": "mat.warm-white"
+      },
+      "product": null,
+      "label": null
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000012",
+      "type": "mouse",
+      "catalogId": "mouse.generic",
+      "catalogVersion": 1,
+      "params": {},
+      "transform": {
+        "x": 250,
+        "z": 180,
+        "rotationY": 0
+      },
+      "mount": null,
+      "materials": {},
+      "product": null,
+      "label": "Main mouse"
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000013",
+      "type": "monitor-arm",
+      "catalogId": "monitor-arm.generic",
+      "catalogVersion": 1,
+      "params": {
+        "reach": 450
+      },
+      "transform": {
+        "x": 0,
+        "z": -330,
+        "rotationY": 0
+      },
+      "mount": null,
+      "materials": {},
+      "product": null,
+      "label": null
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000014",
+      "type": "monitor",
+      "catalogId": "monitor.generic",
+      "catalogVersion": 1,
+      "params": {
+        "diagonalIn": 34,
+        "ratio": "21:9",
+        "curveRadius": 1800,
+        "stand": "vesa"
+      },
+      "transform": {
+        "x": 0,
+        "z": -200,
+        "rotationY": 0
+      },
+      "mount": {
+        "parentId": "00000000-0000-4000-8000-000000000013",
+        "socket": "vesa"
+      },
+      "materials": {},
+      "product": null,
+      "label": null
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000015",
+      "type": "speakers",
+      "catalogId": "speakers.generic",
+      "catalogVersion": 1,
+      "params": {
+        "spacing": 1100,
+        "toeIn": 15
+      },
+      "transform": {
+        "x": 0,
+        "z": -250,
+        "rotationY": 0
+      },
+      "mount": null,
+      "materials": {},
+      "product": null,
+      "label": null
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000016",
+      "type": "lamp",
+      "catalogId": "lamp.generic",
+      "catalogVersion": 1,
+      "params": {
+        "on": true
+      },
+      "transform": {
+        "x": -600,
+        "z": -250,
+        "rotationY": 0
+      },
+      "mount": null,
+      "materials": {},
+      "product": null,
+      "label": null
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000017",
+      "type": "pc-case",
+      "catalogId": "pc-case.generic",
+      "catalogVersion": 1,
+      "params": {},
+      "transform": {
+        "x": 600,
+        "z": -150,
+        "rotationY": -90
+      },
+      "mount": null,
+      "materials": {},
+      "product": null,
+      "label": null
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000018",
+      "type": "controller-stand",
+      "catalogId": "controller-stand.generic",
+      "catalogVersion": 1,
+      "params": {
+        "showController": false
+      },
+      "transform": {
+        "x": 450,
+        "z": -100,
+        "rotationY": 0
+      },
+      "mount": null,
+      "materials": {},
+      "product": null,
+      "label": null
+    }
+  ],
+  "environment": {
+    "stylePreset": "style.cosy",
+    "lighting": "neutral",
+    "room": null
+  },
+  "alertSettings": {
+    "occupancyMax": 0.7,
+    "depthMarginMm": 100,
+    "keyboardClearanceMm": 150
+  },
+  "extensions": {
+    "x-note": {
+      "any": "value"
+    }
+  }
+}

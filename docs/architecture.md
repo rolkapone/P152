@@ -6,7 +6,7 @@
 ## Sommaire
 1. Vue d'ensemble et découpage en couches
 2. Scène 3D (ADR-3D-01 à ADR-3D-09)
-3. Application (ADR-APP-01 à ADR-APP-09)
+3. Application (ADR-APP-01 à ADR-APP-10)
 4. Build, CI et hébergement (ADR-OPS-01 à ADR-OPS-07)
 
 ---
@@ -92,7 +92,8 @@ Règles de dépendance (à faire respecter par lint, ex. `eslint-plugin-boundari
   "units": "mm",
   "desk": {
     "catalogId": "desk.rect", "catalogVersion": 1,
-    "params": { "width": 1400, "depth": 700, "height": 740 }   // L-shape : params dédiés
+    "params": { "width": 1400, "depth": 700, "height": 740 },  // L-shape : params dédiés
+    "materials": {}             // surcharges par slot (top, legs), ajout US-003 (ADR-APP-10)
   },
   "objects": [{
     "id": "uuid", "type": "monitor", "catalogId": "monitor.generic", "catalogVersion": 1,
@@ -601,11 +602,46 @@ Tests unitaires et de composants **colocalisés** (`*.test.ts(x)` à côté du f
 
 ---
 
+### ADR-APP-10 — Socle `core/` livré en US-003 : contrats du schéma v1, du catalogue et des garde-fous
+
+> Statut : **Accepté** (2026-10-20, revue US-003 APPROVE). Précise ADR-3D-02, ADR-APP-03/05/07/08 sans les contredire.
+
+**Contexte.** US-003 livre le premier code de `src/core/` (schéma, catalogue, pipeline d'import) avant toute UI et toute scène. Plusieurs points laissés ouverts par les ADR doivent être fixés pour que US-004 (scène), US-005 (shell) et US-018 (persistance) s'appuient dessus sans refonte.
+
+**Décision.**
+- **Schéma `SetupV1`** (`core/schema/setupV1.ts`, Zod `jitless` via le point d'entrée unique `core/schema/zod.ts`) : conforme à ADR-3D-02, avec ces précisions :
+  - `desk.materials` ajouté (surcharges par slot, comme les objets) : le bureau a lui aussi des slots (`top`, `legs`).
+  - Champs de la vision long terme **présents mais fermés** en v1 : `product: null`, `environment.room: null`, `environment.lighting: "neutral"` seulement. Les ouvrir (R3, R5) sera une migration v1 → v2, pas une refonte.
+  - Bornes structurelles : coordonnées ±10 000 mm (un objet peut déborder, c'est une alerte), `rotationY` dans [-360, 360], nom et libellé 1 à 80 caractères sans caractère de contrôle, ≤ 24 paramètres, ≤ 8 surcharges de matériau, ≤ 32 clés dans `extensions`, profondeur JSON ≤ 16, 50 objets.
+- **`parseSetup(text, catalog, { declaredBytes })`** (`core/io`) : seule voie de lecture d'un setup (SR-01). Ordre : taille déclarée puis taille UTF-8 (≤ 1 Mio) → retrait d'un BOM UTF-8 initial (un seul) → `JSON.parse` → garde structurelle itérative (clés `__proto__`/`constructor`/`prototype`, profondeur, prototype non standard) → enveloppe et version → migrations → schéma strict → contrôles sémantiques contre le catalogue (entrée connue et du bon type, `catalogVersion`, paramètres connus et dans les bornes, enums, matériaux et slots, ids uniques, `mount` sans parent manquant ni cycle, style connu) → normalisation (paramètres absents = défauts du catalogue) → document gelé. Erreurs = `{ code, path }` : 19 codes traduits par `errors:import.<code>`, chemin assaini (segments non identifiants remplacés par `?`, 120 caractères max) ; jamais de contenu du fichier. `checkDeclaredSize(File.size)` est exposé pour refuser avant lecture.
+- **Catalogue** (`core/catalog`) : `validateCatalog(files)` valide tous les fichiers de `assets/catalog` (schémas stricts, sauf les blocs descriptifs de `studio.json`), puis `min ≤ défaut ≤ max`, défauts d'enum, presets dans les bornes, `formats` alignés sur l'enum `format`, ids uniques, toutes les références (matériaux des slots et des styles, types des styles, bureau du studio) ; renvoie **toutes** les anomalies. **Plafonds GPU** (`core/catalog/limits.ts`, M-04) : ≤ 10 000 triangles et ≤ 8 draw calls par type, segments du cyclorama ≤ 64, shadow map ∈ {256…4096}, ≤ 32 échantillons de flou, budgets de scène ≤ ADR-3D-08. Ports `CatalogSource` et `SetupRepository` déclarés dans `core/ports`.
+- **Catalogue embarqué hors de `core/`** : l'adapter `embeddedCatalogSource` (`persistence/catalog/embeddedCatalogSource.ts`) charge les JSON par `import.meta.glob` (un nouveau type = un fichier JSON du TA, sans code), les valide avec `validateCatalog` (une fois, mémoïsé) et les expose via le port `CatalogSource` ; `app/` l'instanciera (ADR-APP-09). Il est dans `persistence/` (adapters, ADR-APP-07) et non dans `core/`, car il dépend du bundler : `core/` reste exécutable tel quel côté serveur ou en Node. Les tests de `core/` valident le catalogue lu sur disque (`tests/unit/helpers/fixtures.ts`).
+- **Frontières de couches et texte en dur** : appliquées **avec les règles natives d'ESLint**, vérifiées par un test (`tests/unit/lint-rules.test.ts`) :
+  - `core/` (tous les fichiers `src/core/**/*.{ts,tsx,mts,cts}`) : **liste blanche** d'imports (`no-restricted-imports`) : seulement des modules relatifs de `core/`, `zod` uniquement dans `core/schema/zod.ts`, `vitest`/`fast-check` uniquement dans ses tests ; un chemin relatif ne peut viser ni `node_modules`, ni les autres couches, ni `src/locales`, `tests/` (sauf depuis les tests de `core/`, pour les fixtures partagées) et `src/main` (motif `(^|/)(locales|tests|main)(/|\.|$)`) ; `no-restricted-syntax` interdit l'import dynamique, les types `import("x").T`, `import.meta` (pas `new.target`), `require` et le JSX (le runtime automatique importe `react/jsx-runtime` sans import visible ; `tsconfig.core.json` le refuse aussi avec `"jsx": "preserve"`, erreur TS7026) ; `no-restricted-globals` interdit le DOM et les E/S (dont `globalThis`, `self`, `crypto`, `process`) en complément du compilateur.
+  - **Pureté vérifiée par le compilateur** : `tsconfig.core.json` (`lib: ["ES2023"]` sans DOM, `types: []`) type-check le code de production de `core/` dans `pnpm typecheck` (donc `pnpm check` et la CI) ; toute API du navigateur ou de Node y est une erreur de compilation.
+  - autres couches : `no-restricted-imports` par motifs regex (ADR-APP-07).
+  - texte en dur dans `ui/` et `app/` : `no-restricted-syntax` sur le texte JSX, les chaînes et gabarits (`TemplateLiteral`) enfants d'un élément ou d'un fragment, et les attributs `alt`/`aria-label`/`title`/`placeholder`… (littéral ou expression) ; les autres attributs (`className={"x"}`) ne sont pas signalés. **Limites connues** (acceptables tant qu'aucun écran n'existe, à lever en US-005) : ne sont pas détectés le texte dans un ternaire (`{c ? "Yes" : "No"}`), une expression logique (`{c && "Yes"}`), une concaténation (`{"Hello" + "!"}`) ni une constante définie ailleurs (`const M = "Hello"; … {M}`). US-005 adopte `eslint-plugin-i18next/no-literal-string` (modes `jsx-text-only` + `jsx-attributes`) ou étend le sélecteur aux `ConditionalExpression`, `LogicalExpression` et `BinaryExpression`. `eslint-plugin-boundaries` et `eslint-plugin-i18next` ne sont **pas** ajoutés : zéro dépendance pour le même résultat sur notre arborescence ; à réévaluer si les règles se compliquent (ex. exceptions par fichier).
+- **i18n** : `ui/i18n/config.ts` crée une instance i18next synchrone (ressources `src/locales/en/*.json` embarquées, `escapeValue: false`), clés typées par augmentation de module (`ui/i18n/i18next.d.ts`) ; `main.tsx` fournit l'instance et synchronise `<html lang>`.
+- **Tests** : Vitest en deux projets (`node` pour `src/core/**` et `tests/unit/**`, `jsdom` pour le reste) ; fixtures `tests/fixtures/setups/v1/{valid,invalid,malicious}` (les fichiers malveillants sont exclus de Prettier pour rester octet pour octet) ; fuzzing fast-check de `parseSetup` (jamais d'exception, clés interdites injectées partout rejetées, aller-retour `serialize → parse` sur des setups valides générés depuis le catalogue). Seuils de couverture en cliquet sur `src/core/**` : lignes/instructions/fonctions 95 %, branches 90 % ; sur `src/persistence/**` : 90 % partout (ADR-APP-08). `src/state/**` (vide aujourd'hui) reçoit le même seuil avec son premier module. Le seuil global (80 %) sera posé avec la première UI (US-005).
+
+**Conséquences.**
+- (+) US-004 lit le bureau et le studio dans un catalogue déjà validé ; US-018 n'a plus qu'à brancher `parseSetup` sur `localStorage` et l'import de fichier.
+- (+) Garde-fous de couches et d'i18n actifs dès maintenant, sans dépendance supplémentaire.
+- (−) Les règles natives sont moins expressives que `eslint-plugin-boundaries` (pas de graphe de dépendances) ; un import transitif via un barrel reste possible et relève de la revue. Les motifs portent sur le texte du chemin, pas sur le chemin résolu : un chemin relatif qui remonte hors de `src/core` vers un dossier non listé n'est pas détecté par le lint (le compilateur `tsconfig.core.json` reste le garde-fou pour le DOM et Node). Un `require` aliasé (`const r = require; r("x")`) n'est pas détecté non plus (sans portée pratique : `require` n'existe pas dans le bundle ESM et n'est pas typé dans `tsconfig.core.json`).
+- (−) `fast-check` ajouté en dépendance de développement (4.10.2, publiée le 2026-09-19, `pnpm audit` sans vulnérabilité) : prévu par ADR-APP-08.
+
+**Alternatives écartées.**
+1. **`eslint-plugin-boundaries` + `eslint-plugin-i18next` dès US-003** : deux dépendances de plus pour des règles que l'arborescence actuelle permet d'exprimer nativement.
+2. **Clamp silencieux des valeurs hors bornes à l'import** : contraire à ADR-APP-03 (l'utilisateur doit savoir ce qui a changé).
+3. **Validation du catalogue seulement en test** : le catalogue embarqué est aussi validé à l'exécution (une fois, mémoïsé) ; coût négligeable et défense en profondeur si un fichier du TA est altéré.
+
+---
+
 ### Sécurité transverse de l'application (entrée pour le threat model US-002)
 
 - Entrées non fiables : stockage local, fichier importé, plus tard URL de partage et API. Toutes passent par `parseSetup` (taille ≤ 1 Mio, ≤ 50 objets, schéma strict, bornes, pas de clés de prototype).
 - Aucun `eval`, `new Function` (Zod jitless), `dangerouslySetInnerHTML` ni `innerHTML` (règles ESLint `no-eval`, `react/no-danger`).
-- CSP cible (posée par le devops à l'hébergement) : `default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' blob: data:; connect-src 'self'; worker-src 'self' blob:; object-src 'none'; base-uri 'none'; frame-ancestors 'none'`.
+- CSP cible (posée par le devops à l'hébergement) : `default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' blob: data:; connect-src 'self'; worker-src 'self' blob:; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; upgrade-insecure-requests`. **Valeur identique à celle d'ADR-OPS-06, qui fait référence** ; la seule source de vérité exécutable sera `config/security-headers.mjs` (SEC-03a). Toute modification se fait d'abord dans ADR-OPS-06 puis dans ce fichier, jamais ici seule.
 - Pas de dépendance chargée depuis un CDN tiers à l'exécution (cohérent avec ADR-3D-04).
 - Aucun secret côté client, ni au MVP ni après (les clés d'API futures vivent côté serveur).
 
@@ -692,7 +728,7 @@ Principes : (1) une commande locale `pnpm check` rejoue exactement ce que fait l
 |---|---|---|---|
 | `quality` | install, `format:check`, `lint`, `typecheck` | – | – |
 | `unit` | `test:cov` (Vitest, seuils en cliquet ADR-APP-08) | – | rapport de couverture (lcov + HTML), 14 j |
-| `build` | `build` de production, `check:bundle` (budget JS initial : 3D ≤ 300 Ko gz, ADR-3D-08 ; app shell budget propre fixé en US-005), **garde-fou « pas de hooks de test en prod »** (le bundle ne contient ni `__p152test` ni `__p152perf`), génération des en-têtes | – | `dist/` (7 j), rapport de tailles |
+| `build` | `build` de production, `check:bundle` (budget JS initial : 3D ≤ 300 Ko gz, ADR-3D-08 ; app shell budget propre fixé en US-005), **garde-fou « pas de hooks de test en prod »** (le bundle ne contient ni `__p152test` ni `__p152perf`), génération des en-têtes (`dist/_headers` depuis `config/security-headers.mjs`) : **revient à SEC-03a, pas encore livrée** (Sprint 2, avant le premier push) ; d'ici là le contrôle `dist/_headers` de `sec-build-hardening` échouerait, il ne s'exécute qu'au premier push | – | `dist/` (7 j), rapport de tailles |
 | `assets` | checkout avec LFS, `check:assets` : budgets du technical-artist (triangles, poids, textures), validation glTF, **licence présente** dans `docs/design/3d/licences-assets.md`, **aucun fichier > 1 Mo hors LFS**. S'exécute si `assets/**` ou le script change (filtre de chemins), toujours sur `main` | – | rapport JSON |
 | `e2e` *(emplacement qa-tester)* | télécharge `dist-e2e` (build avec `VITE_E2E=true`), lance `vite preview` avec les **mêmes en-têtes CSP**, Playwright (Chromium d'abord) dans l'image officielle épinglée (ADR-OPS-05), échec si violation CSP ou erreur console | `quality`, `unit` | rapport HTML, traces, captures, vidéos en cas d'échec (14 j) |
 | `security` *(emplacement secdevops)* | bloc réservé et commenté `# SECDEVOPS-SLOT` : SAST (CodeQL ou Semgrep), audit des dépendances (`pnpm audit` / OSV-Scanner + `dependency-review-action` sur PR), scan de secrets (gitleaks), scan de conteneur si un jour une image est publiée | – | rapports SARIF |
@@ -763,8 +799,8 @@ Principes : (1) une commande locale `pnpm check` rejoue exactement ce que fait l
 - Déploiement **piloté par la CI** (workflow `deploy.yml`, job séparé, `wrangler pages deploy dist` via action épinglée) plutôt que par l'intégration Git de Cloudflare : on déploie l'artefact **déjà testé** (`dist`), avec LFS résolu et budgets vérifiés. Secrets (`CLOUDFLARE_API_TOKEN` à portée minimale « Pages : édition », `CLOUDFLARE_ACCOUNT_ID`) uniquement dans les secrets GitHub, jamais en clair. **Création du compte, du projet et du premier déploiement : sur ordre du PO uniquement.**
 - **Source unique des en-têtes** : `config/security-headers.mjs`. Elle génère `dist/_headers` au build, et configure `server.headers` / `preview.headers` de Vite pour les E2E (même CSP testée que celle servie). Le serveur de dev n'applique pas la CSP stricte (le HMR de Vite exige du script inline) : la CSP est vérifiée sur le build de preview.
 - **En-têtes** :
-  - `Content-Security-Policy` = la CSP cible de la section « Sécurité transverse » : `default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' blob: data:; connect-src 'self'; worker-src 'self' blob:; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; upgrade-insecure-requests`. **Aucun `unsafe-eval` ni `unsafe-inline`** : le build Vite produit des `<script type="module" src>` et des CSS extraits (aucun script/style en ligne dans `index.html`, à vérifier par un test sur `dist/index.html`). Les `style=""` posés par React/R3F via le DOM (`element.style`, CSSOM) ne sont pas bloqués ; seuls les attributs `style` présents dans du HTML analysé le seraient.
-  - `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer`, `Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()` (R8 ajoutera `xr-spatial-tracking=(self)`), `Cross-Origin-Opener-Policy: same-origin`, `X-Frame-Options` inutile (couvert par `frame-ancestors`).
+  - `Content-Security-Policy` (valeur de référence, reprise à l'identique dans « Sécurité transverse ») : `default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' blob: data:; connect-src 'self'; worker-src 'self' blob:; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; upgrade-insecure-requests`. **Aucun `unsafe-eval` ni `unsafe-inline`** : le build Vite produit des `<script type="module" src>` et des CSS extraits (aucun script/style en ligne dans `index.html`, à vérifier par un test sur `dist/index.html`). Les `style=""` posés par React/R3F via le DOM (`element.style`, CSSOM) ne sont pas bloqués ; seuls les attributs `style` présents dans du HTML analysé le seraient.
+  - `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer`, `Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()` (R8 ajoutera `xr-spatial-tracking=(self)`), `Cross-Origin-Opener-Policy: same-origin`, `Strict-Transport-Security: max-age=31536000` (`includeSubDomains` et `preload` seulement avec un domaine du PO, SEC-37 ; sur `*.pages.dev` le TLD `.dev` est déjà préchargé HSTS, l'en-tête reste utile si l'app change d'hôte), `X-Frame-Options` inutile (couvert par `frame-ancestors`).
   - Cache : `/assets/*` (fichiers hachés) `public, max-age=31536000, immutable` ; `index.html` et `/_headers`-hors-assets `no-cache` ; modèles/textures du catalogue hachés comme les autres.
 - **Réponse au developer (CSP et hooks de test)** :
   1. **CSP stricte validée sans `unsafe-eval`**, car Zod est en mode jitless (ADR-APP-03) et le MVP n'utilise ni WASM ni worker de décodage. **Point d'attention pour R2/R4** : le décodeur meshopt et le transcodeur Basis (KTX2) sont du **WebAssembly** et nécessitent **`'wasm-unsafe-eval'`** dans `script-src` (ce n'est pas `unsafe-eval`, il n'autorise que la compilation WASM). Il sera ajouté par un ADR au moment de la première story qui charge un GLB meshopt/KTX2, avec les workers servis localement (déjà couvert par `worker-src 'self' blob:`).
@@ -844,10 +880,11 @@ Principes : (1) une commande locale `pnpm check` rejoue exactement ce que fait l
 |---|---|---|
 | ADR-3D-01 à ADR-3D-09 | Accepté | 2026-10-19 |
 | ADR-APP-01 à ADR-APP-09 | Accepté | 2026-10-19 |
+| ADR-APP-10 | Accepté (2026-10-20, revue US-003 APPROVE) | 2026-10-20 |
 | ADR-OPS-01 à ADR-OPS-07 | Accepté | 2026-10-19 |
 
 - **Hébergement du code** : GitHub, dépôt **public** (Actions illimité, CodeQL, rulesets avec `ci-ok` obligatoire possibles). Le dépôt distant n'est **pas encore créé** : création et premier push uniquement sur ordre explicite du PO.
 - **Hébergement de l'app** : Cloudflare Pages (`*.pages.dev`), **pas de domaine personnalisé** pour l'instant. Aucun déploiement avant ordre du PO (`deploy.yml` absent).
 - **Taille d'écran minimale supportée** : 1366×768 (desktop). Les budgets de perf et la QA se calent dessus.
 - **Dépôt public** : aucun secret ni donnée personnelle dans l'historique ; `.env` ignoré, `.env.example` documenté.
-- **Écart d'implémentation (US-001)** : `eslint-plugin-boundaries`, `eslint-plugin-i18next` et `commitlint` seront ajoutés avec les premières règles réelles (US-005) ; en attendant, ESLint recommended + react-hooks + jsx-a11y + no-eval, et `scripts/commit-msg.mjs` pour Conventional Commits. Versions d'outils choisies : ESLint 9.39, TypeScript 5.9, Vite 7, Vitest 3 (dernières majeures compatibles avec les ADR ; ESLint 10 / TS 7 / Vite 8 existent mais ne sont pas retenus).
+- **Écart d'implémentation (US-001)** : `eslint-plugin-boundaries`, `eslint-plugin-i18next` et `commitlint` seront ajoutés avec les premières règles réelles (US-005) *(mise à jour US-003 : frontières de couches et texte en dur appliqués par des règles ESLint natives, voir ADR-APP-10 ; les deux plugins ne sont plus nécessaires pour l'instant ; `eslint-plugin-i18next/no-literal-string` reste une option de US-005 pour couvrir les limites de la règle texte en dur)* ; en attendant, ESLint recommended + react-hooks + jsx-a11y + no-eval, et `scripts/commit-msg.mjs` pour Conventional Commits. Versions d'outils choisies : ESLint 9.39, TypeScript 5.9, Vite 7, Vitest 4.1 (4.1.12 depuis la revue US-001 ; dernières majeures compatibles avec les ADR ; ESLint 10 / TS 7 / Vite 8 existent mais ne sont pas retenus).

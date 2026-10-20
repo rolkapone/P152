@@ -1,0 +1,24 @@
+{
+  "import": {
+    "tooLarge": "This file is too large (1 MB max). Choose another file.",
+    "notJson": "This file isn't a valid setup. Choose another file.",
+    "forbiddenKey": "This file isn't a valid setup. Choose another file.",
+    "tooDeep": "This file isn't a valid setup. Choose another file.",
+    "notSetup": "This file isn't a valid setup. Choose another file.",
+    "newerVersion": "This file was made with a newer version of the app.",
+    "unsupportedVersion": "This file was made with an old version of the app that is no longer supported.",
+    "migrationFailed": "This file isn't a valid setup. Choose another file.",
+    "tooManyObjects": "This setup has more than 50 objects. Choose another file.",
+    "invalid": "This file isn't a valid setup. Choose another file.",
+    "unknownCatalogItem": "This file isn't a valid setup. Choose another file.",
+    "catalogVersionMismatch": "This file isn't a valid setup. Choose another file.",
+    "typeMismatch": "This file isn't a valid setup. Choose another file.",
+    "unknownParam": "This file isn't a valid setup. Choose another file.",
+    "invalidParam": "This file isn't a valid setup. Choose another file.",
+    "duplicateId": "This file isn't a valid setup. Choose another file.",
+    "invalidMount": "This file isn't a valid setup. Choose another file.",
+    "invalidMaterial": "This file isn't a valid setup. Choose another file.",
+    "unknownStyle": "This file isn't a valid setup. Choose another file."
+  },
+  "importDetail": "Problem at {{path}}."
+}
