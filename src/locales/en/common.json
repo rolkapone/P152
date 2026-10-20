@@ -3,6 +3,43 @@
     "name": "P152"
   },
   "scene": {
-    "viewportLabel": "3D view of your desk. Use arrow keys to turn the view, plus and minus to zoom."
+    "viewportLabel": "3D view of your desk. Use arrow keys to turn the view, plus and minus to zoom.",
+    "loading": "Loading 3D scene…",
+    "ready": "3D view ready. Desk {{width}} by {{depth}} cm.",
+    "toolbar": {
+      "label": "View",
+      "reset": "Reset view",
+      "top": "Top",
+      "front": "Front",
+      "resetHint": "Reset view (0)",
+      "topHint": "View from above (1)",
+      "frontHint": "View from the front (2)"
+    },
+    "announce": {
+      "reset": "View reset.",
+      "top": "Top view.",
+      "front": "Front view.",
+      "turnLeft": "View turned {{degrees}} degrees left.",
+      "turnRight": "View turned {{degrees}} degrees right.",
+      "turnUp": "View turned {{degrees}} degrees up.",
+      "turnDown": "View turned {{degrees}} degrees down.",
+      "zoomIn": "Zoomed in.",
+      "zoomOut": "Zoomed out.",
+      "zoomLimit": "Zoom limit reached.",
+      "moved": "View moved.",
+      "viewLimit": "View limit reached."
+    },
+    "tip": {
+      "text": "Drag to turn the view, scroll to zoom, right-drag to move the view.",
+      "dismiss": "Got it",
+      "hide": "Hide tip"
+    },
+    "error": {
+      "unsupportedTitle": "The 3D view can't start",
+      "unsupportedBody": "Your browser or device doesn't support 3D graphics (WebGL 2). Try updating your browser, turning on hardware acceleration, or opening this page in Chrome, Edge, Firefox or Safari.",
+      "contextLostTitle": "The 3D view stopped",
+      "contextLostBody": "The graphics connection was lost. Try again to restore your desk.",
+      "retry": "Try again"
+    }
   }
 }
