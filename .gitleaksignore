@@ -1,4 +1,4 @@
 # Faux positifs gitleaks vérifiés par secdevops (une empreinte par ligne, justification obligatoire).
 # Rapport US-001 ligne 26 : description du canari de validation (valeur factice "changeme" suivie d un accent grave, non couverte par l allowlist). Voir docs/security/scans/US-002.md.
-e5c2254a2986e6a9822eebc0f477a033f25e54ce:docs/security/scans/US-001.md:p152-public-vite-secret:26
+d14b21237cffe71450b32303b577229436ea35cb:docs/security/scans/US-001.md:p152-public-vite-secret:26
 docs/security/scans/US-001.md:p152-public-vite-secret:26
