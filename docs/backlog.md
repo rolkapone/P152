@@ -11,7 +11,7 @@
 | Vitesse moyenne | **16 pts/sprint** (1 sprint terminé, 16 pts livrés ; prévision prudente de 15 pts conservée pour le planning) |
 | Sprint en cours | **Sprint 2** (ouvert le 2026-10-20) : SEC-03a 2 + US-005 5 + US-006 5 + SEC-02 1 = **13 pts engagés**, marge 2 pts ; après le Sprint 2, livrés prévus 29 / 96 (30,2 %), restants 67 |
 | Sprints restants estimés avant MVP | **5 y compris le Sprint 2** (80 pts restants / 16 = 5,0 ; 6 si la vitesse retombe à 15) ; 4 après le Sprint 2 si 13 pts livrés (67 / 16 = 4,2, soit 5 avec arrondi prudent) |
-| Dernière mise à jour | 2026-10-20 (ouverture du Sprint 2 ; plan dans `docs/sprints/sprint-2.md`). Les SHA de commits cités dans ce document sont périmés (historique réécrit) : voir `git log --merges --oneline main` |
+| Dernière mise à jour | 2026-10-20 (SEC-03a DONE, mergée 42c15cd ; Sprint 2 : 2 / 13 pts engagés livrés ; ouverture du Sprint 2 ; plan dans `docs/sprints/sprint-2.md`). Les SHA de commits cités dans ce document sont périmés (historique réécrit) : voir `git log --merges --oneline main` |
 
 Détail du recalcul : 83 pts (kickoff) + SEC-01 (3) + SEC-02 (1) + SEC-03a (2 depuis la fin du Sprint 1) + SEC-03b (1) + SEC-04 (1) + SEC-05 (1) + US-024 (2, réglages d'alertes) + US-025 (2, Help et préférences d'affichage) = **96**. Les autres éléments issus de US-004 (dette, mineurs QA) sont des critères ajoutés à des stories existantes ou à SEC-06 (Could), sans point supplémentaire ; à réestimer au planning du Sprint 2 s'ils pèsent.
 Hypothèse : le premier déploiement public n'a lieu qu'à la fin du MVP (SEC-03a avant le premier push, SEC-03b avant ce déploiement, SEC-05 juste avant la release).
@@ -109,12 +109,13 @@ Critères d'acceptation :
 Notes techniques / dépendances : devops. **Les réglages du compte/dépôt GitHub ne sont appliqués qu'avec l'accord explicite du PO** (le PO réalise ou valide chaque action). Dépend de US-001 et de la création du dépôt distant.
 
 ### SEC-03a — Génération des en-têtes de sécurité (`_headers`, CSP) et CSP de React Aria  [Must, avant le premier push | 2 pts]
+**État au 2026-10-20 : DONE.** Mergée dans `main` (42c15cd). Revue APPROVE au cycle 1/3 (`docs/reviews/SEC-03a.md`) ; secdevops PASS (`docs/security/scans/SEC-03a.md`, Semgrep via Docker, 0 ERROR ; finding MEDIUM de US-004 clos). Les LOW et suggestions sont tracés dans SEC-06 et SEC-03b.
 En tant qu'équipe, je veux que le build produise les en-têtes de sécurité afin que le contrôle `build-hardening` passe et que le premier push n'échoue pas.
 Critères d'acceptation :
-- [ ] Étant donné `config/security-headers.mjs` (source unique), quand on lance le build, alors `public/_headers` est généré et `dist/_headers` existe avec CSP stricte sans `unsafe-inline`/`unsafe-eval`, `nosniff`, `Referrer-Policy`, `Permissions-Policy`, COOP, HSTS.
-- [ ] Un test unitaire vérifie que le contenu de `dist/_headers` correspond à `config/security-headers.mjs` ; le contrôle `dist/_headers` de `sec-build-hardening` (ci.yml) est vert, sans avertissement toléré.
-- [ ] Le preview/E2E servi avec ces en-têtes ne produit aucune violation CSP en console.
-- [ ] *(finding MEDIUM du scan US-004)* React Aria `usePress` injecte un `<style>` inline au runtime, ce qui viole `style-src` d'ADR-OPS-06. Correction : `index.html` contient `<link rel="stylesheet" id="react-aria-pressable-style" href="/react-aria-pressable.css">`, le fichier `public/react-aria-pressable.css` existe (même contenu que le style injecté), **jamais `'unsafe-inline'`** ; un test E2E sous CSP de production échoue sur tout `securitypolicyviolation` et sur toute erreur console CSP, et vérifie qu'aucun `<style>` injecté par React Aria n'est présent.
+- [x] Étant donné `config/security-headers.mjs` (source unique), quand on lance le build, alors `public/_headers` est généré et `dist/_headers` existe avec CSP stricte sans `unsafe-inline`/`unsafe-eval`, `nosniff`, `Referrer-Policy`, `Permissions-Policy`, COOP, HSTS.
+- [x] Un test unitaire vérifie que le contenu de `dist/_headers` correspond à `config/security-headers.mjs` ; le contrôle `dist/_headers` de `sec-build-hardening` (ci.yml) est vert, sans avertissement toléré.
+- [x] Le preview/E2E servi avec ces en-têtes ne produit aucune violation CSP en console.
+- [x] *(finding MEDIUM du scan US-004)* React Aria `usePress` injecte un `<style>` inline au runtime, ce qui viole `style-src` d'ADR-OPS-06. Correction : `index.html` contient `<link rel="stylesheet" id="react-aria-pressable-style" href="/react-aria-pressable.css">`, le fichier `public/react-aria-pressable.css` existe (même contenu que le style injecté), **jamais `'unsafe-inline'`** ; un test E2E sous CSP de production échoue sur tout `securitypolicyviolation` et sur toute erreur console CSP, et vérifie qu'aucun `<style>` injecté par React Aria n'est présent.
 Notes techniques / dépendances : devops + secdevops (+ developer pour le correctif React Aria). **Sprint 2, en tête, avant tout push** (décision secdevops : contrôle bloquant). Dépend de US-001 (DONE). Débloque SEC-01 (jobs) et US-022 (E2E sous CSP).
 
 ### SEC-03b — Déploiement sécurisé sur Cloudflare Pages  [Must avant le premier déploiement | 1 pt]
@@ -124,6 +125,8 @@ Critères d'acceptation :
 - [ ] Jeton Cloudflare à portée « Pages : Edit » sur le seul compte ; MFA Cloudflare ; procédure de rotation écrite dans `docs/security/`.
 - [ ] Après chaque déploiement, un contrôle automatique lit les en-têtes de l'URL réelle et échoue si un en-tête diffère de `config/security-headers.mjs`.
 - [ ] Les previews portent `X-Robots-Tag: noindex` et ne sont jamais construites depuis un fork.
+- [ ] *(suivi SEC-03a)* `Cross-Origin-Resource-Policy: same-origin` ajouté dans `config/security-headers.mjs` en passant par **ADR-OPS-06** (mise à jour de l'ADR, test d'en-têtes et contrôle CI alignés).
+- [ ] *(suivi SEC-03a)* Vérifier que la règle `/index.html` des en-têtes est bien opérante sur Cloudflare Pages (elle est inopérante en local/preview) ; corriger ou retirer sinon.
 Notes techniques / dépendances : devops + secdevops. Dépend de SEC-03a et SEC-02. À livrer avant le premier déploiement, sur ordre du PO. Pas de domaine personnalisé (`*.pages.dev`).
 
 ### SEC-06 — Durcissement CI (findings LOW du scan US-001)  [Could | 2 pts, priorité basse]
@@ -142,9 +145,17 @@ Critères d'acceptation :
 - [ ] Les échecs de `security-scheduled.yml` déclenchent un agrégateur ou une notification (lien avec SEC-02).
 - [ ] *(au premier push)* `upload-sarif` fonctionne dans le conteneur semgrep et `security-events: write` est géré pour les PR de forks.
 - [ ] *(dette de test)* Un test sur 190 a échoué une fois dans `pnpm check` sous charge, puis est passé 6 fois : identifier le test instable (candidat probable : fuzz fast-check, timeout ou seed), le stabiliser (seed fixe ou timeout explicite) et le vérifier par 10 exécutions consécutives sous charge. Instabilité déjà tracée de `parseSetup.fuzz`.
-- [ ] *(dette de test, US-004)* Les `waitForTimeout` restants de `tests/e2e/scene.spec.ts` (l.37, 39, 50, 53) sont remplacés par des attentes sur un état observable ou `page.clock` ; `open()` de `scene-ui.spec.ts` n'est plus sensible à la charge (attente d'un signal de scène prête). Règle : aucun test E2E ne dépend du temps réel. Vérifié par 10 exécutions consécutives de `pnpm test:e2e` sous charge (CPU saturé) sans échec (juste après le merge US-004, le devops avait vu 1 à 4 échecs sur 3 runs ; 40/40 deux fois ensuite).
+- [ ] *(dette de test, US-004)* Les `waitForTimeout` restants de `tests/e2e/scene.spec.ts` (l.37, 39, 50, 53) sont remplacés par des attentes sur un état observable ou `page.clock` ; `open()` de `scene-ui.spec.ts` n'est plus sensible à la charge (attente d'un signal de scène prête). Règle : aucun test E2E ne dépend du temps réel. Vérifié selon la règle reformulée (référence CI 4 CPU / 8 Go, `--repeat-each=10` sans charge ; voir plus bas) au lieu de « CPU saturé » (juste après le merge US-004, le devops avait vu 1 à 4 échecs sur 3 runs ; 40/40 deux fois ensuite).
 - [ ] *(LOW, scan US-004)* `@react-three/drei` est installé mais inutilisé, et ses helpers chargent des ressources depuis un CDN (contraire à la CSP). Soit la dépendance est retirée de `package.json` / lockfile, soit une règle de lint interdit ses imports qui chargent depuis un CDN (test de la règle dans `tests/unit/lint-rules.test.ts`).
-Notes techniques / dépendances : devops + secdevops. Source : `docs/security/scans/US-001.md` et scan SEC-01. Hors total MVP (Could).
+- [ ] *(LOW, scan SEC-03a)* Test de non-divergence du CSS React Aria : `public/react-aria-pressable.css` est comparé au style que la version installée de React Aria injecterait (échec à la mise à jour de la dépendance si divergence).
+- [ ] *(LOW, scan SEC-03a)* Les chemins de `.semgrep/p152.yml` sont ancrés (pas de motif qui déborde sur d'autres dossiers) ; test de la règle.
+- [ ] *(LOW, scan SEC-03a)* Le contrôle CI des en-têtes (`sec-build-hardening`) est étendu à `style-src`, `connect-src` et `worker-src`.
+- [ ] *(suggestion revue SEC-03a)* Note dans le README sur la preview : `upgrade-insecure-requests` et HSTS (comportement en `http://localhost`, Safari, HSTS mémorisé).
+- [ ] *(suggestion revue SEC-03a)* Le test `skipIf` de `security-headers` ne peut plus masquer un échec (il échoue si `dist/` est absent en CI) ; `apply: () => true` du plugin est justifié ou remplacé par une condition explicite.
+- [ ] *(suggestion revue SEC-03a)* `csp.spec` utilise `waitForScene` (signal de scène prête) au lieu d'une attente implicite.
+- [ ] *(suivi SEC-03a, à traiter par la première story qui ajoute une modale ou un popover)* `usePreventScroll` de React Aria (overlays, modales) injecte un `<style>` au runtime, contraire à `style-src` : la story concernée doit prévoir le même correctif (feuille statique) ou une alternative, avec test E2E sous CSP. Non traité ici faute de composant concerné.
+- [ ] *(règle « 10 runs E2E sous charge », reformulée)* La règle « 10 exécutions sous charge CPU sans limite » est abandonnée (impossible à tenir par construction). Définition de `docs/reviews/SEC-03a.md` : (1) référence CI : 10 runs `CI=1 pnpm test:e2e` dans l'image Playwright épinglée limitée à `--cpus=4 --memory=8g`, 0 échec ; (2) stress local informatif : charge à 50 % des threads logiques, 4 workers, 10 runs, 0 échec dû à une assertion ou à une attente de test ; (3) contrôle de conception : `--repeat-each=10` vert sans charge et aucun `waitForTimeout` dans `tests/e2e`. Remplace le critère de 10 runs sous charge ci-dessus.
+Notes techniques / dépendances : devops + secdevops. Source : `docs/security/scans/US-001.md`, scan SEC-01, scan et revue SEC-03a. Hors total MVP (Could).
 
 ### SEC-04 — Mention « vos données restent dans ce navigateur »  [UI] [Should | 1 pt]
 En tant qu'utilisateur, je veux savoir où sont stockées mes données afin de décider en confiance.
@@ -455,7 +466,7 @@ Critères d'acceptation :
 - [ ] Des captures sont archivées comme artefacts.
 - [ ] *(sécurité)* L'E2E échoue sur tout événement `securitypolicyviolation` ou erreur console CSP, sur `dist-e2e` servi avec les en-têtes de production.
 - [ ] *(suivi US-004, qualité auto)* Bascule automatique du palier de qualité (ADR-3D-08) : si le FPS mesuré reste sous le seuil pendant N secondes, le rendu passe au palier inférieur (pixel ratio, ombres) sans action de l'utilisateur ; test unitaire de la logique de bascule et E2E avec un FPS simulé bas. (Peut être pris par US-021 si le tactile est engagé avant.)
-- [ ] *(suivi US-004, fiabilité)* Les tests E2E sont fiables sous la charge de la CI : aucun `waitForTimeout`, aucune attente sur du temps réel (voir SEC-06), 10 exécutions consécutives sous charge sans échec.
+- [ ] *(suivi US-004, fiabilité)* Les tests E2E sont fiables sous la charge de la CI : aucun `waitForTimeout`, aucune attente sur du temps réel (voir SEC-06), et la règle reformulée de `docs/reviews/SEC-03a.md` : référence CI = 10 runs `CI=1` dans l'image Playwright limitée à 4 CPU et 8 Go, 0 échec ; stress local informatif à 50 % des threads ; `--repeat-each=10` sans charge vert.
 - [ ] *(suivi US-004, navigateurs)* Le parcours E2E de référence est exécuté aussi sur Firefox (non testé en US-004) ; les écarts sont consignés.
 Notes techniques / dépendances : qa-tester + devops. Dépend de US-012, US-017, US-018, SEC-03a (en-têtes). Ossature Playwright déjà présente (`tests/e2e/`).
 

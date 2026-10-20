@@ -30,7 +30,7 @@ Reports du Sprint 1 : US-001 T6 (CI distante), SEC-01 T5/T6 (PR de test, SARIF) 
 
 | # | Action | Consigne concrète pour ce sprint | Responsable |
 |---|---|---|---|
-| 1 | Aucun test dépendant du temps réel | Ni `waitForTimeout` ni délai réel : `page.clock` ou attente d'un état observable (signal « scène prête »). Le reviewer vérifie la règle à chaque revue. Critère de sortie de toute story qui ajoute des tests E2E (US-005, US-006, SEC-03a) : **10 exécutions consécutives de `pnpm test:e2e` sous charge CPU, 0 échec**, consignées dans le rapport QA. Même critère pour les tests unitaires ajoutés (fuzz : graine fixe). | developer, qa-tester, reviewer |
+| 1 | Aucun test dépendant du temps réel | Ni `waitForTimeout` ni délai réel : `page.clock` ou attente d'un état observable (signal « scène prête »). Le reviewer vérifie la règle à chaque revue. Critère de sortie de toute story qui ajoute des tests E2E (**US-005, US-006**) : règle **reformulée le 2026-10-20** (décision technique de l'orchestrateur, sur recommandation du reviewer ; la règle d'origine « 10 runs sous charge CPU » était mal posée : une charge sans limite la rend impossible à tenir par construction). Définition de `docs/reviews/SEC-03a.md`, consignée dans le rapport QA : (1) **référence CI** : 10 runs `CI=1 pnpm test:e2e` dans l'image Playwright épinglée limitée à `--cpus=4 --memory=8g`, 0 échec ; (2) **stress local informatif** : charge à 50 % des threads logiques, 4 workers, 10 runs, 0 échec dû à une assertion ou à une attente de test ; (3) **contrôle de conception** : `--repeat-each=10` vert sans charge et aucun `waitForTimeout` dans `tests/e2e`. Reportée dans SEC-06 et US-022 (backlog). Pour les tests unitaires ajoutés : graine fixe (fuzz). | developer, qa-tester, reviewer |
 | 2 | CSP de production dès SEC-03a | `preview` et `dist-e2e` servent les en-têtes générés par `config/security-headers.mjs`. Tous les E2E échouent sur `securitypolicyviolation` ou erreur console CSP. Aucun `'unsafe-inline'`. US-005 (polices Inter, verre) et US-006 sont donc testées sous CSP stricte. | devops, secdevops |
 | 3 | Règles de lint relues avant le code | Première tâche de US-005 : écrire les règles (`boundaries`, `i18next`/ternaire-logique-concaténation) et leur test dans `tests/unit/lint-rules.test.ts`, les **commiter seules** ; le reviewer les relit avant tout code applicatif (revue courte, hors décompte des 3 cycles de la story si possible, à confirmer par l'orchestrateur). Même principe pour le seuil de couverture de `src/state` (US-005/US-006). Dette de lint `from ".."` de `core` corrigée dans cette tâche. | developer, reviewer |
 | 4 | Environnement | Orchestrateur : Docker Desktop vérifié démarré avant SEC-03a (Semgrep) ; chaque agent recharge le PATH machine+user au démarrage (Node 24, pnpm 10.34.7). | orchestrateur |
@@ -64,15 +64,15 @@ Critères UX ajoutés aux stories dans le backlog le 2026-10-20. Le développeme
 ## Stories et tâches
 
 ### 1. SEC-03a — En-têtes de sécurité, CSP, correctif React Aria [devops + secdevops + developer] — 2 pts
-Branche : `feature/SEC-03a-headers-csp`. **IN PROGRESS** (implémenteur devops avec secdevops).
-- [ ] T1 (devops) Script de build qui génère `public/_headers` depuis `config/security-headers.mjs` ; `dist/_headers` présent après build (CSP stricte, `nosniff`, Referrer-Policy, Permissions-Policy, COOP, HSTS).
-- [ ] T2 (devops) Test unitaire : contenu de `dist/_headers` = sortie de `config/security-headers.mjs` ; contrôle `dist/_headers` de `sec-build-hardening` vert, sans avertissement toléré.
-- [ ] T3 (devops) `preview` et `dist-e2e` servent ces en-têtes (action 2).
-- [ ] T4 (developer) Correctif React Aria : `<link rel="stylesheet" id="react-aria-pressable-style" href="/react-aria-pressable.css">` dans `index.html`, `public/react-aria-pressable.css`, jamais `'unsafe-inline'`.
-- [ ] T5 (qa-tester / developer) Test E2E sous CSP de production : échec sur `securitypolicyviolation` et erreur console CSP ; aucun `<style>` injecté par React Aria ; 10 runs consécutifs sous charge (action 1).
-- [ ] T6 (secdevops) Scan (dont Semgrep via Docker), clôture du finding MEDIUM du scan US-004.
-- [ ] T7 (devops) Retirer l'override `rollup: 4.64.7` si possible (R8, dès le 2026-10-23), sinon le noter.
-Cycle : revue, secdevops, merge `--no-ff`. Pas de contrôle design ; QA seulement pour le E2E CSP.
+Branche : `feature/SEC-03a-headers-csp`. **DONE** : mergée dans `main` (42c15cd), revue APPROVE au cycle 1/3 (`docs/reviews/SEC-03a.md`), secdevops PASS (`docs/security/scans/SEC-03a.md`, Semgrep via Docker, 0 ERROR, finding MEDIUM de US-004 clos). Critères d'acceptation 1 à 4 cochés dans le backlog.
+- [x] T1 (devops) Script de build qui génère `public/_headers` depuis `config/security-headers.mjs` ; `dist/_headers` présent après build (CSP stricte, `nosniff`, Referrer-Policy, Permissions-Policy, COOP, HSTS).
+- [x] T2 (devops) Test unitaire : contenu de `dist/_headers` = sortie de `config/security-headers.mjs` ; contrôle `dist/_headers` de `sec-build-hardening` vert, sans avertissement toléré.
+- [x] T3 (devops) `preview` et `dist-e2e` servent ces en-têtes (action 2).
+- [x] T4 (developer) Correctif React Aria : `<link rel="stylesheet" id="react-aria-pressable-style" href="/react-aria-pressable.css">` dans `index.html`, `public/react-aria-pressable.css`, jamais `'unsafe-inline'`.
+- [x] T5 (qa-tester / developer) Test E2E sous CSP de production : échec sur `securitypolicyviolation` et erreur console CSP ; aucun `<style>` injecté par React Aria. Runs sous charge : règle reformulée et reportée (SEC-06 / US-022).
+- [x] T6 (secdevops) Scan (dont Semgrep via Docker), clôture du finding MEDIUM du scan US-004.
+- [ ] T7 (devops) Retirer l'override `rollup: 4.64.7` si possible (R8, dès le 2026-10-23), sinon le noter. *(non fait : reste ouverte, voir R8)*
+Findings LOW et suggestions : reportés dans SEC-06 ; CORP `same-origin` et règle `/index.html` : SEC-03b.
 
 ### 2. US-005 — Shell de l'application en anglais [UI] [developer] — 5 pts
 Branche : `feature/US-005-shell-app`. Après design validé. Implémenteur : developer.
@@ -108,20 +108,27 @@ Branche : `feature/SEC-02-durcissement-depot` (fichiers du dépôt : `SECURITY.m
 - [ ] T5 (devops, secdevops) Reports Sprint 1 : US-001 T6, SEC-01 T5 (PR de test distante, 4 cas) et T6 (SARIF dans Code scanning) ; consignés dans `docs/ci/`.
 
 ### Marge (2 pts, non engagés)
-Par ordre : (a) SEC-06 dette de test (parseSetup.fuzz instable, `waitForTimeout` restants de `scene.spec.ts`, `open()` de `scene-ui.spec.ts`, 10 runs sous charge) ; (b) ~~ombre de contact~~ (déplacée dans US-006) ; (c) SEC-03b, seulement si SEC-02 est terminée (pas de déploiement prévu). Aucune n'est prise avant que SEC-03a, US-005 et US-006 soient en revue.
+**Priorité n° 1 de la marge : tâche « Stabiliser `parseSetup.fuzz` »** (developer, 0 pt, prise sur la marge), à faire **juste après le premier push, ou avant**, et au plus tard au début de US-005. Constat : `parseSetup.fuzz.test.ts` est instable (2 échecs sur 5 dans `pnpm check` sur la branche SEC-03a ; seed reproductible `-577722299`). Une fois sur GitHub, la CI rougirait au hasard. Sortie : cause identifiée et corrigée (le bug éventuel est dans `parseSetup`, pas masqué par un timeout), seed `-577722299` rejouée en test de non-régression, graine fixe pour la CI, `pnpm check` vert 10 fois (`--repeat`/boucle, sans charge artificielle).
+Ensuite, par ordre : (a) SEC-06 dette de test (`waitForTimeout` restants de `scene.spec.ts`, `open()` de `scene-ui.spec.ts`, LOW de SEC-03a) ; (b) ~~ombre de contact~~ (déplacée dans US-006) ; (c) SEC-03b (dont CORP `same-origin` via ADR-OPS-06), seulement si SEC-02 est terminée (pas de déploiement prévu). Aucune n'est prise avant que US-005 et US-006 soient en revue, hormis la stabilisation de `parseSetup.fuzz`.
 
 ## Moment du premier push
 
-1. SEC-03a mergée dans `main` (build-hardening local vert, scan secdevops PASS).
-2. SEC-02 T1 prête, MFA du PO faite, réglages validés par le PO.
-3. Le scrum-master signale ces conditions à l'orchestrateur ; **l'orchestrateur demande l'accord explicite du PO à ce moment-là** ; le devops pousse `main` seulement ensuite. Vérification préalable : aucun commit ne contient l'ancienne adresse, `git log` en noreply.
+Conditions restantes (selon le secdevops) :
+- (a) SEC-03a mergée : **FAIT** (42c15cd, scan PASS).
+- (b) gitleaks exécuté sur **tout l'historique juste avant le push** (0 finding).
+- (c) MFA GitHub du PO activée.
+- (d) sur `rolkapone/P152` : secret scanning et push protection, private vulnerability reporting, Dependabot alerts activés.
+- Vérification préalable : aucun commit ne contient l'ancienne adresse, `git log` en noreply.
+- Le scrum-master signale ces conditions à l'orchestrateur ; **l'orchestrateur demande l'accord explicite du PO à ce moment-là** ; le devops pousse `main` seulement ensuite.
+Après le push : **SEC-02** (ruleset, CODEOWNERS, SECURITY.md, réglages Actions), puis la **PR de test de SEC-01** (US-001 T6, SEC-01 T5/T6). Puis la tâche « Stabiliser `parseSetup.fuzz` » si elle n'a pas été faite avant.
 Le push est prévu en cours de sprint (pas à la fin) afin que la CI distante tourne sur US-005 et US-006.
 
 ## Board
 
 | Story | Statut (TODO / IN PROGRESS / IN REVIEW / SECURITY / DONE / BLOCKED) | Cycles de review | Notes |
 |---|---|---|---|
-| SEC-03a | IN PROGRESS | 0 / 3 | Branche `feature/SEC-03a-headers-csp` ; devops + secdevops ; conditionne le push |
+| SEC-03a | DONE | 1 / 3 | Mergée 42c15cd ; revue APPROVE cycle 1 ; secdevops PASS (Semgrep Docker, 0 ERROR, MEDIUM US-004 clos) ; LOW -> SEC-06, CORP -> SEC-03b ; T7 rollup ouverte |
+| Stabiliser `parseSetup.fuzz` | TODO | n/a | Tâche developer (0 pt, marge prioritaire) ; avant ou juste après le premier push, au plus tard au début de US-005 ; seed `-577722299` |
 | US-005 | TODO | 0 / 3 | Design validé par le PO (2026-10-20) ; T0 règles de lint relues avant le code |
 | US-006 | TODO | 0 / 3 | Design validé ; catalogue commité (cd27e44) ; T1b correction de `validate.test.ts` ; dépend de US-005 |
 | SEC-02 | TODO | 0 / 3 | Réglages avec le PO ; suppose le push |
