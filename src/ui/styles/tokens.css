@@ -1,0 +1,293 @@
+/* ==========================================================================
+   P152 design tokens, consumed by the app (imported once by src/main.tsx).
+   GENERATED COPY, DO NOT EDIT: source of truth = docs/design/ui/tokens.css (ui-designer),
+   from its "BEGIN SYNCED" line to the end. tests/unit/tokens-sync.test.ts fails if the two
+   differ. Not reformatted by Prettier (.prettierignore) so the copy stays byte for byte.
+   The Inter @font-face of the source (self-hosted font file) is added with US-005; until
+   then --font-sans falls back to the system stack.
+   ========================================================================== */
+
+/* ======================= BEGIN SYNCED (tokens.css <-> index.html) ======================= */
+:root {
+  /* ---- Typographie ---- */
+  --font-sans: "Inter", system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, "Cascadia Mono", Consolas, Menlo, monospace;
+  --text-sm: 0.875rem;   /* 14 px - minimum de l'UI */
+  --text-md: 1rem;       /* 16 px - corps */
+  --text-lg: 1.125rem;   /* 18 px */
+  --text-xl: 1.375rem;   /* 22 px */
+  --text-2xl: 1.75rem;   /* 28 px */
+  --text-3xl: 2.25rem;   /* 36 px - Welcome uniquement */
+  --leading-tight: 1.2;
+  --leading-normal: 1.5;
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --tracking-tight: -0.011em;   /* titres >= 22 px */
+  --tracking-overline: 0.06em;
+
+  /* ---- Espacements (base 4 px, plus genereux : panneaux 20, sections 32) ---- */
+  --space-0: 0;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --panel-pad: 20px;
+  --float-inset: 12px;   /* marge des panneaux flottants au bord du viewport */
+
+  /* ---- Rayons : echelle 6 / 10 / 16 / 24 / pill. Rayon interne = externe - padding ---- */
+  --radius-sm: 6px;      /* puces, tooltips, vignettes */
+  --radius-md: 10px;     /* boutons, champs */
+  --radius-lg: 16px;     /* cartes, alertes, toasts */
+  --radius-xl: 24px;     /* panneaux et barres flottants, modales */
+  --radius-pill: 999px;  /* verdict, barre de scene, segments */
+
+  /* ---- Tailles ---- */
+  --control-sm: 32px;
+  --control-md: 36px;
+  --control-lg: 44px;
+  --topbar-h: 56px;
+  --panel-left-w: 248px;
+  --panel-right-w: 312px;
+  --focus-width: 3px;
+  --focus-offset: 2px;
+  --border-width: 1px;
+
+  /* ---- Motion : durees ---- */
+  --duration-fast: 120ms;     /* survol, appui */
+  --duration-base: 200ms;     /* menus, toasts, fondus */
+  --duration-slow: 320ms;     /* panneaux, barres, modales */
+  --duration-camera: 480ms;   /* transitions de camera 3D */
+  /* ---- Motion : courbes ---- */
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);       /* changements d'etat */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);         /* entrees, deplacements */
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);     /* camera */
+  --ease-spring: cubic-bezier(0.34, 1.3, 0.64, 1);   /* ressort leger (depassement ~3 %) */
+  --press-scale: 0.97;                               /* appui bouton */
+
+  /* ---- Verre ---- */
+  --glass-blur: 24px;
+  --glass-saturate: 180%;
+  --glass-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  --glass-filter-soft: blur(12px) saturate(140%);    /* voile des modales */
+
+  /* ---- Z-index ---- */
+  --z-panel: 10;
+  --z-floating: 20;
+  --z-menu: 30;
+  --z-modal: 40;
+  --z-toast: 50;
+}
+
+/* ============================ THEME CLAIR ============================ */
+:root,
+[data-theme="light"] {
+  color-scheme: light;
+
+  --color-bg: #F3F4F7;
+  --color-surface: #FFFFFF;
+  --color-surface-2: #EEF0F4;
+  --color-overlay: rgba(16, 20, 28, 0.42);
+  --color-border: #DDE0E7;          /* decoratif (separateurs) */
+  --color-border-strong: #7A8394;   /* contours de champs : 3.8:1 sur surface */
+
+  --color-text: #1B1F27;            /* 16.3:1 */
+  --color-text-muted: #545D6C;      /* 6.7:1 sur surface, 5.8:1 sur surface-2 */
+  --color-text-disabled: #8B93A1;   /* desactive : exempte */
+
+  --color-accent: #1F5FD1;          /* UNE couleur d'accent. 5.8:1 sur surface */
+  --color-accent-hover: #1A4FB0;
+  --color-accent-active: #153F8F;
+  --color-on-accent: #FFFFFF;       /* 5.8:1 sur accent */
+  --color-accent-subtle: #E6EEFB;
+  --color-accent-subtle-text: #1A4FB0;  /* 6.9:1 sur accent-subtle */
+  --color-focus: #1F5FD1;
+
+  /* Statuts : semantiques, jamais decoratifs */
+  --color-success: #137A3F;
+  --color-success-bg: #E3F4EA;
+  --color-error: #B42318;
+  --color-error-bg: #FDECEA;
+  --color-warning: #8A4B00;         /* texte : 6.8:1 */
+  --color-warning-icon: #B86E00;    /* icone : 4.0:1 */
+  --color-warning-bg: #FFF3DC;
+  --color-info: #0B6B8A;
+  --color-info-bg: #E3F3F8;
+  --color-danger-solid: #B42318;
+  --color-on-danger: #FFFFFF;
+
+  /* Ombres douces multicouches */
+  --shadow-1: 0 1px 1px rgba(16,20,28,.04), 0 2px 4px rgba(16,20,28,.04), 0 4px 12px rgba(16,20,28,.05);
+  --shadow-2: 0 0 0 1px rgba(16,20,28,.04), 0 2px 4px rgba(16,20,28,.05), 0 8px 16px rgba(16,20,28,.07), 0 16px 32px rgba(16,20,28,.07);
+  --shadow-3: 0 0 0 1px rgba(16,20,28,.05), 0 4px 8px rgba(16,20,28,.06), 0 16px 32px rgba(16,20,28,.10), 0 40px 80px rgba(16,20,28,.14);
+
+  /* Verre : teinte opaque a 86 % (calcul de contraste sur le pire fond : noir pur, design-system.md 5) */
+  --glass-tint: rgba(255, 255, 255, 0.86);
+  --glass-border: rgba(255, 255, 255, 0.65);
+  --glass-shadow: 0 0 0 1px rgba(16,20,28,.05), 0 2px 4px rgba(16,20,28,.05), 0 8px 16px rgba(16,20,28,.08), 0 24px 48px rgba(16,20,28,.12), inset 0 1px 0 rgba(255,255,255,.7);
+  --glass-link: #1A4FB0;            /* lien sur verre : >= 5.4:1 sur le pire fond */
+
+  /* Scene 3D : studio clair neutre (photo produit), ne favorise aucun style */
+  --scene-bg-top: #FAFAFC;
+  --scene-bg-bottom: #DFE2E8;
+  --scene-floor: #EEF0F3;
+  --scene-shadow: rgba(40, 48, 64, 0.28);
+  --scene-desk: #D9CBB2;
+  --scene-desk-edge: #B2A283;
+  --scene-object: #8E97A6;
+  --scene-object-edge: #5F6878;
+  --scene-outline-inner: #FFFFFF;   /* contour a 2 tons : lisible sur sol clair ET sombre */
+  --scene-outline-outer: #1B1F27;
+  --scene-selection: #1F5FD1;
+  --scene-error: #B42318;
+  --scene-warning: #B86E00;
+}
+
+/* ============================ THEME SOMBRE ============================ */
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  --color-bg: #0E1115;
+  --color-surface: #171B22;
+  --color-surface-2: #212630;
+  --color-overlay: rgba(0, 0, 0, 0.55);
+  --color-border: #2C323D;
+  --color-border-strong: #7D8798;   /* 4.8:1 sur surface */
+
+  --color-text: #E8EBF0;            /* 14:1 */
+  --color-text-muted: #A3ACBA;      /* 6.8:1 sur surface-2 */
+  --color-text-disabled: #6B7482;
+
+  --color-accent: #6C9CFF;          /* 6.4:1 sur surface */
+  --color-accent-hover: #8AB2FF;
+  --color-accent-active: #A6C4FF;
+  --color-on-accent: #0B1220;       /* 7:1 sur accent */
+  --color-accent-subtle: #18284A;
+  --color-accent-subtle-text: #A6C4FF;
+  --color-focus: #8AB2FF;
+
+  --color-success: #4CC38A;
+  --color-success-bg: #12301F;
+  --color-error: #FF8A80;
+  --color-error-bg: #3A1714;
+  --color-warning: #F2B04A;
+  --color-warning-icon: #F2B04A;
+  --color-warning-bg: #33260D;
+  --color-info: #5CC4E0;
+  --color-info-bg: #0F2A33;
+  --color-danger-solid: #C4302B;    /* 5.5:1 avec texte blanc */
+  --color-on-danger: #FFFFFF;
+
+  --shadow-1: 0 1px 1px rgba(0,0,0,.30), 0 2px 4px rgba(0,0,0,.25), 0 0 0 1px rgba(255,255,255,.04);
+  --shadow-2: 0 0 0 1px rgba(255,255,255,.06), 0 2px 4px rgba(0,0,0,.30), 0 8px 16px rgba(0,0,0,.35), 0 16px 32px rgba(0,0,0,.35);
+  --shadow-3: 0 0 0 1px rgba(255,255,255,.08), 0 4px 8px rgba(0,0,0,.35), 0 16px 32px rgba(0,0,0,.45), 0 40px 80px rgba(0,0,0,.5);
+
+  --glass-tint: rgba(28, 32, 40, 0.86);
+  --glass-border: rgba(255, 255, 255, 0.14);
+  --glass-shadow: 0 0 0 1px rgba(255,255,255,.06), 0 2px 4px rgba(0,0,0,.30), 0 8px 16px rgba(0,0,0,.35), 0 24px 48px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.08);
+  --glass-link: #8AB2FF;
+
+  --scene-bg-top: #3A414D;
+  --scene-bg-bottom: #12161C;
+  --scene-floor: #1C2129;
+  --scene-shadow: rgba(0, 0, 0, 0.5);
+  --scene-desk: #8C7B62;
+  --scene-desk-edge: #6A5B46;
+  --scene-object: #8E97A6;
+  --scene-object-edge: #C3CAD6;
+  --scene-outline-inner: #FFFFFF;
+  --scene-outline-outer: #0B0E12;
+  --scene-selection: #8AB2FF;
+  --scene-error: #FF8A80;
+  --scene-warning: #F2B04A;
+}
+
+/* Preference systeme si aucun choix explicite (defaut = systeme) */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    color-scheme: dark;
+    --color-bg: #0E1115; --color-surface: #171B22; --color-surface-2: #212630;
+    --color-overlay: rgba(0,0,0,.55); --color-border: #2C323D; --color-border-strong: #7D8798;
+    --color-text: #E8EBF0; --color-text-muted: #A3ACBA; --color-text-disabled: #6B7482;
+    --color-accent: #6C9CFF; --color-accent-hover: #8AB2FF; --color-accent-active: #A6C4FF;
+    --color-on-accent: #0B1220; --color-accent-subtle: #18284A; --color-accent-subtle-text: #A6C4FF;
+    --color-focus: #8AB2FF;
+    --color-success: #4CC38A; --color-success-bg: #12301F;
+    --color-error: #FF8A80; --color-error-bg: #3A1714;
+    --color-warning: #F2B04A; --color-warning-icon: #F2B04A; --color-warning-bg: #33260D;
+    --color-info: #5CC4E0; --color-info-bg: #0F2A33;
+    --color-danger-solid: #C4302B; --color-on-danger: #FFFFFF;
+    --shadow-1: 0 1px 1px rgba(0,0,0,.30), 0 2px 4px rgba(0,0,0,.25), 0 0 0 1px rgba(255,255,255,.04);
+    --shadow-2: 0 0 0 1px rgba(255,255,255,.06), 0 2px 4px rgba(0,0,0,.30), 0 8px 16px rgba(0,0,0,.35), 0 16px 32px rgba(0,0,0,.35);
+    --shadow-3: 0 0 0 1px rgba(255,255,255,.08), 0 4px 8px rgba(0,0,0,.35), 0 16px 32px rgba(0,0,0,.45), 0 40px 80px rgba(0,0,0,.5);
+    --glass-tint: rgba(28,32,40,.86); --glass-border: rgba(255,255,255,.14);
+    --glass-shadow: 0 0 0 1px rgba(255,255,255,.06), 0 2px 4px rgba(0,0,0,.30), 0 8px 16px rgba(0,0,0,.35), 0 24px 48px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.08);
+    --glass-link: #8AB2FF;
+    --scene-bg-top: #3A414D; --scene-bg-bottom: #12161C; --scene-floor: #1C2129; --scene-shadow: rgba(0,0,0,.5);
+    --scene-desk: #8C7B62; --scene-desk-edge: #6A5B46; --scene-object: #8E97A6;
+    --scene-object-edge: #C3CAD6; --scene-outline-inner: #FFFFFF; --scene-outline-outer: #0B0E12;
+    --scene-selection: #8AB2FF; --scene-error: #FF8A80; --scene-warning: #F2B04A;
+  }
+}
+
+/* ============ VERRE : primitive + replis (opaque si non supporte / transparence reduite) ============
+   A appliquer aux panneaux et barres qui flottent au-dessus de la scene 3D.
+   Regle : tout texte sur verre reste >= 4.5:1 sur le PIRE fond (noir pur sous verre clair,
+   blanc pur sous verre sombre) parce que la teinte est a 86 %. Ne jamais descendre sous 86 %. */
+.glass {
+  background: var(--glass-tint);
+  -webkit-backdrop-filter: var(--glass-filter);
+  backdrop-filter: var(--glass-filter);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+}
+/* Voile des modales : flou leger de la scene derriere */
+.scrim {
+  background: var(--color-overlay);
+  -webkit-backdrop-filter: var(--glass-filter-soft);
+  backdrop-filter: var(--glass-filter-soft);
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass { background: var(--color-surface); border-color: var(--color-border); }
+  .scrim { background: var(--color-overlay); }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .glass { background: var(--color-surface); -webkit-backdrop-filter: none; backdrop-filter: none; border-color: var(--color-border); }
+  .scrim { -webkit-backdrop-filter: none; backdrop-filter: none; }
+}
+/* Simulation / option utilisateur : ajouter .no-glass sur <html> ou un conteneur */
+.no-glass .glass, .glass.no-glass { background: var(--color-surface); -webkit-backdrop-filter: none; backdrop-filter: none; border-color: var(--color-border); }
+.no-glass .scrim { -webkit-backdrop-filter: none; backdrop-filter: none; }
+
+/* Motion reduit : tout est neutralise (WCAG 2.3.3) */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-fast: 0ms;
+    --duration-base: 0ms;
+    --duration-slow: 0ms;
+    --duration-camera: 0ms;
+    --press-scale: 1;
+  }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Focus visible commun (wrappers : [data-focus-visible] de React Aria) */
+.focus-ring,
+:where(button, a, input, select, textarea, [tabindex]):focus-visible,
+[data-focus-visible] {
+  outline: var(--focus-width) solid var(--color-focus);
+  outline-offset: var(--focus-offset);
+  box-shadow: 0 0 0 calc(var(--focus-offset) + 1px) var(--color-surface);
+}
+/* ======================= END SYNCED ======================= */

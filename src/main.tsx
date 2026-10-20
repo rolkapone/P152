@@ -3,6 +3,8 @@ import { createRoot } from "react-dom/client";
 import { I18nextProvider } from "react-i18next";
 import { App } from "./app/App";
 import { createI18n, DEFAULT_LANGUAGE } from "./ui/i18n/config";
+import "./ui/styles/tokens.css";
+import "./ui/styles/global.css";
 
 const root = document.getElementById("root");
 if (!root) throw new Error("Root element not found");
