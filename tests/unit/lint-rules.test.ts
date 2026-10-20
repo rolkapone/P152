@@ -1,4 +1,5 @@
 // Checks that the guard-rail lint rules of ADR-APP-05/07/10 really fire (eslint.config.js).
+import { readFileSync } from "node:fs";
 import { ESLint } from "eslint";
 import { describe, expect, it } from "vitest";
 
@@ -28,6 +29,48 @@ describe("layer boundaries (ADR-APP-07)", () => {
   });
 
   it.each([
+    ['import { a } from "../../../node_modules/zustand";', "node_modules by relative path"],
+    ['import { a } from "../../locales/en/errors.json";', "src/locales"],
+    ['import { a } from "../../locales";', "src/locales entry"],
+    ['import { a } from "../../../tests/unit/helpers/fixtures";', "tests/"],
+    ['import { a } from "../../main";', "src/main"],
+    ['import { a } from "../../main.tsx";', "src/main.tsx"],
+  ])("core/ rejects the relative path %s (%s)", async (code) => {
+    expect(await ruleIds(`${code}\nexport { a };\n`, "src/core/io/x.ts")).toContain(
+      "no-restricted-imports",
+    );
+  });
+
+  it("core/ tests may import the shared fixtures of tests/, not node_modules nor locales", async () => {
+    const fixtures = 'import { a } from "../../../tests/unit/helpers/fixtures";\nexport { a };\n';
+    expect(await ruleIds(fixtures, "src/core/io/x.test.ts")).toEqual([]);
+    for (const path of ["../../../node_modules/three", "../../locales/en/errors.json"]) {
+      const code = `import { a } from "${path}";\nexport { a };\n`;
+      expect(await ruleIds(code, "src/core/io/x.test.ts")).toContain("no-restricted-imports");
+    }
+  });
+
+  it.each([
+    ["export const C = () => <div>hi</div>;", "JSX element (automatic runtime)"],
+    ["export const C = () => <>hi</>;", "JSX fragment"],
+  ])("core/ rejects %s (%s)", async (code) => {
+    expect(await ruleIds(`${code}\n`, "src/core/x.tsx")).toContain("no-restricted-syntax");
+  });
+
+  it("tsconfig.core.json also refuses JSX in core/ (no implicit jsx-runtime import)", () => {
+    const config = JSON.parse(readFileSync("tsconfig.core.json", "utf8")) as {
+      compilerOptions: { jsx?: string; types?: string[] };
+    };
+    expect(config.compilerOptions.jsx).toBe("preserve");
+    expect(config.compilerOptions.types).toEqual([]);
+  });
+
+  it("core/ accepts new.target (only import.meta is a meta-property to refuse)", async () => {
+    const code = "export function f() {\n  return new.target;\n}\n";
+    expect(await ruleIds(code, "src/core/x.ts")).toEqual([]);
+  });
+
+  it.each([
     ["src/core/x.tsx", 'import { useState } from "react";'],
     ["src/core/x.mts", 'import { Mesh } from "three";'],
     ["src/core/x.cts", 'import { create } from "zustand";'],
@@ -39,6 +82,7 @@ describe("layer boundaries (ADR-APP-07)", () => {
     ['export const load = () => import("three");', "dynamic import"],
     ["export const env = import.meta.url;", "import.meta"],
     ['export const lib: unknown = require("react");', "require"],
+    ['export type FC = import("react").FC;', "import type expression"],
   ])("core/ rejects %s (%s), in .ts and .tsx", async (code) => {
     expect(await ruleIds(`${code}\n`, "src/core/x.ts")).toContain("no-restricted-syntax");
     expect(await ruleIds(`${code}\n`, "src/core/x.tsx")).toContain("no-restricted-syntax");

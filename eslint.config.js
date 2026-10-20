@@ -15,13 +15,20 @@ const boundary = (...patterns) => ["error", { patterns }];
 
 // core/ uses a whitelist (ADR-APP-10): relative core/ modules only, plus zod through
 // core/schema/zod.ts and the test tools in its own tests. Any other bare import fails.
-const coreImports = (allowedBare) => [
+// Relative paths may not reach node_modules, the other layers, nor src/locales, tests/ and
+// src/main (core/ tests only may import the shared fixtures of tests/).
+const coreImports = (allowedBare, { isTest = false } = {}) => [
   forbid(
     `^(?!\\.{1,2}/${allowedBare.map((name) => `|${name}$`).join("")})`,
     "core/ imports only core/ modules; zod only through core/schema/zod.ts (ADR-APP-07, ADR-APP-03).",
   ),
   forbid(
     layers("app", "ui", "render", "state", "persistence", "assets"),
+    "core/ imports only core/ (ADR-APP-07).",
+  ),
+  forbid("(^|/)node_modules(/|$)", "core/ imports packages by name only (ADR-APP-10)."),
+  forbid(
+    `(^|/)(locales|${isTest ? "" : "tests|"}main)(/|\\.|$)`,
     "core/ imports only core/ (ADR-APP-07).",
   ),
 ];
@@ -31,12 +38,20 @@ const CORE_FORBIDDEN_GLOBALS = [
   ...["indexedDB", "fetch", "XMLHttpRequest", "File", "Blob", "FileReader"],
   ...["globalThis", "self", "crypto", "process"],
 ].map((name) => ({ name, message: "core/ has no DOM nor I/O (ADR-APP-07)." }));
-// Dynamic import, import.meta (bundler-specific) and require would bypass the import rules.
+// Dynamic import, `import("x").T` types, import.meta (bundler-specific) and require would
+// bypass the import rules.
+// JSX compiles to an implicit react/jsx-runtime import (also refused by tsconfig.core.json).
+// Known limit: an aliased require (`const r = require; r("x")`) is not caught (ADR-APP-10).
 const CORE_FORBIDDEN_SYNTAX = [
   "error",
   { selector: "ImportExpression", message: "core/ has no dynamic import (ADR-APP-07)." },
-  { selector: "MetaProperty", message: "core/ does not depend on the bundler (ADR-APP-07)." },
+  { selector: "TSImportType", message: "core/ imports only core/ (ADR-APP-07)." },
+  {
+    selector: "MetaProperty[meta.name='import']",
+    message: "core/ does not depend on the bundler (ADR-APP-07).",
+  },
   { selector: "CallExpression[callee.name='require']", message: "core/ has no require." },
+  { selector: "JSXElement, JSXFragment", message: "core/ has no JSX nor React (ADR-APP-07)." },
 ];
 const CORE_FILES = "src/core/**/*.{ts,tsx,mts,cts}";
 const CORE_TESTS = "src/core/**/*.test.{ts,tsx,mts,cts}";
@@ -101,7 +116,9 @@ export default tseslint.config(
   },
   {
     files: [CORE_TESTS],
-    rules: { "no-restricted-imports": boundary(...coreImports(["vitest", "fast-check"])) },
+    rules: {
+      "no-restricted-imports": boundary(...coreImports(["vitest", "fast-check"], { isTest: true })),
+    },
   },
   {
     files: ["src/core/schema/zod.ts"],
