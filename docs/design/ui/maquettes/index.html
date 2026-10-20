@@ -57,6 +57,11 @@
   --topbar-h: 56px;
   --panel-left-w: 248px;
   --panel-right-w: 312px;
+  --drawer-max-w: 360px;   /* tiroir (panneau replie < 1024 px) : largeur max */
+  --toggle-size: 40px;     /* bascules de panneau, pastille de verdict */
+  --row-min-h: 56px;       /* ligne de liste de choix (bureaux) */
+  --thumb-w: 56px;         /* vignette de bureau (plan de dessus, echelle commune) */
+  --thumb-h: 44px;
   --focus-width: 3px;
   --focus-offset: 2px;
   --border-width: 1px;
@@ -85,6 +90,7 @@
   --z-menu: 30;
   --z-modal: 40;
   --z-toast: 50;
+  --z-skip: 60;            /* liens d'evitement : au-dessus de tout */
 }
 
 /* ============================ THEME CLAIR ============================ */
@@ -569,7 +575,7 @@ th,td{text-align:left;padding:var(--space-2) var(--space-3);border-bottom:1px so
 <p class="small muted" style="margin-top:var(--space-3)">Theme cycles System / Light / Dark (default: System). "Glass fallback" simulates the opaque fallback used when <code>backdrop-filter</code> is unsupported or <code>prefers-reduced-transparency: reduce</code>. To check reduced motion, enable "Reduce motion" in your OS.</p>
 
 <nav aria-label="Page sections" class="row small" style="margin-top:var(--space-4);gap:var(--space-4)">
-  <a href="#colors">Colors</a> <a href="#type">Type</a> <a href="#space">Space, radii, elevation</a> <a href="#glass">Glass</a> <a href="#icons">Icons</a> <a href="#states">States</a> <a href="#comps">Components</a> <a href="#studio">Studio mockup</a> <a href="#welcome">Welcome mockup</a> <a href="#motion">Motion</a> <a href="US-004.html">US-004 3D scene mockup</a>
+  <a href="#colors">Colors</a> <a href="#type">Type</a> <a href="#space">Space, radii, elevation</a> <a href="#glass">Glass</a> <a href="#icons">Icons</a> <a href="#states">States</a> <a href="#comps">Components</a> <a href="#studio">Studio mockup</a> <a href="#welcome">Welcome mockup</a> <a href="#motion">Motion</a> <a href="US-004.html">US-004 3D scene mockup</a> <a href="US-005.html">US-005 Studio shell mockup</a> <a href="US-006.html">US-006 Desk picker mockup</a>
 </nav>
 
 <h2 id="colors">1. Colors</h2>
@@ -651,9 +657,9 @@ th,td{text-align:left;padding:var(--space-2) var(--space-3);border-bottom:1px so
 
 <h3>NumberField (mm)</h3>
 <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(240px,1fr))">
-  <div class="nf"><label class="label" for="nf1">Width</label><div class="nf-box"><button aria-label="Decrease width"><svg class="i sm"><use href="#minus"/></svg></button><input id="nf1" value="1400" inputmode="numeric" aria-describedby="h1"><span class="unit">mm</span><button aria-label="Increase width"><svg class="i sm"><use href="#plus"/></svg></button></div><div class="help" id="h1">Allowed: 600–3000 mm</div></div>
+  <div class="nf"><label class="label" for="nf1">Width</label><div class="nf-box"><button aria-label="Decrease width"><svg class="i sm"><use href="#minus"/></svg></button><input id="nf1" value="1400" inputmode="numeric" aria-describedby="h1"><span class="unit">mm</span><button aria-label="Increase width"><svg class="i sm"><use href="#plus"/></svg></button></div><div class="help" id="h1">Allowed: 800–2400 mm</div></div>
   <div class="nf"><label class="label" for="nf2">Width (focus)</label><div class="nf-box is-focus"><button aria-label="Decrease width"><svg class="i sm"><use href="#minus"/></svg></button><input id="nf2" value="1400"><span class="unit">mm</span><button aria-label="Increase width"><svg class="i sm"><use href="#plus"/></svg></button></div></div>
-  <div class="nf error"><label class="label" for="nf3">Width (error)</label><div class="nf-box"><button aria-label="Decrease width"><svg class="i sm"><use href="#minus"/></svg></button><input id="nf3" value="4000" aria-invalid="true" aria-describedby="e3"><span class="unit">mm</span><button aria-label="Increase width"><svg class="i sm"><use href="#plus"/></svg></button></div><div class="err-msg" id="e3"><svg class="i sm"><use href="#x-circle"/></svg>Enter a width between 600 and 3000 mm.</div></div>
+  <div class="nf error"><label class="label" for="nf3">Width (error)</label><div class="nf-box"><button aria-label="Decrease width"><svg class="i sm"><use href="#minus"/></svg></button><input id="nf3" value="4000" aria-invalid="true" aria-describedby="e3"><span class="unit">mm</span><button aria-label="Increase width"><svg class="i sm"><use href="#plus"/></svg></button></div><div class="err-msg" id="e3"><svg class="i sm"><use href="#x-circle"/></svg>Enter a width between 800 and 2400 mm.</div></div>
   <div class="nf"><label class="label" for="nf4">Height (disabled)</label><div class="nf-box disabled"><button disabled aria-label="Decrease height"><svg class="i sm"><use href="#minus"/></svg></button><input id="nf4" value="740" disabled><span class="unit">mm</span><button disabled aria-label="Increase height"><svg class="i sm"><use href="#plus"/></svg></button></div></div>
   <div class="nf"><label class="label" for="nf5">Diagonal</label><div class="nf-box"><button aria-label="Decrease diagonal"><svg class="i sm"><use href="#minus"/></svg></button><input id="nf5" value="34"><span class="unit">in</span><button aria-label="Increase diagonal"><svg class="i sm"><use href="#plus"/></svg></button></div><div class="help">about 864 mm</div></div>
   <div><label class="label" for="tx1">Setup name (text field)</label><input class="input" id="tx1" value="My desk setup"></div>

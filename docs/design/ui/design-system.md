@@ -1,6 +1,6 @@
-# Design system — P152 (nom provisoire : "Deskfit", à valider par le PO)
+# Design system — P152 (nom affiché : "Deskfit", validé par le PO au kickoff du Sprint 2)
 
-> v0.2 (retour PO : direction inspirée du langage d'Apple, sans rien copier de protégé). UI en anglais, WCAG 2.2 AA, desktop d'abord (min 1366x768), thème par défaut = système. Valeurs : `tokens.css` (source consommée) et `tokens.json` (miroir). Catalogue visuel : `maquettes/index.html`.
+> v0.3 (Sprint 2 : shell US-005 §15, choix du bureau US-006 §16, 6 tokens de mise en page ajoutés ; info-bulle immédiate au focus clavier). v0.2 (retour PO : direction inspirée du langage d'Apple, sans rien copier de protégé). UI en anglais, WCAG 2.2 AA, desktop d'abord (min 1366x768), thème par défaut = système. Valeurs : `tokens.css` (source consommée) et `tokens.json` (miroir). Catalogue visuel : `maquettes/index.html`.
 
 ## 1. Direction visuelle : **Épuré · Aéré · Précis**
 - **Épuré** : neutres (clair/sombre) + **une seule couleur d'accent** (bleu). Aucun dégradé décoratif, aucune illustration. Les couleurs vives sont réservées au statut (verdict, alertes) et à la sélection.
@@ -69,7 +69,7 @@ Graisses 400 / 500 / 600 ; interligne 1.5 (corps), 1.2 (titres) ; titres ≥ 22 
 - Contrôles : hauteur 36 (défaut), 32 (compact, dans panneaux/barres), 44 (actions principales de modale/Welcome). Cible minimale 32 × 32 (≥ 24 exigé par 2.5.8).
 
 ## 6. Icônes
-**Lucide** (https://lucide.dev), licence **ISC** (libre, usage commercial, fichier de licence conservé), paquet `lucide-react`. Trait 1.75 px, 20 px (16 px en dense), `currentColor`. Jamais d'icône seule sans nom accessible (`aria-label` + Tooltip) ; dans la bibliothèque et les menus, icône + libellé. La page maquette utilise des tracés inline équivalents ; l'implémentation utilise les Lucide homonymes : `check-circle-2`, `x-circle`, `alert-triangle`, `info`, `undo-2`, `redo-2`, `help-circle`, `pencil`, `chevron-down`, `rotate-ccw`, `rotate-cw`, `copy`, `trash-2`, `magnet`, `monitor`, `keyboard`, `mouse`, `speaker`, `lamp-desk`, `cpu`, `panel-left`, `panel-right`, `x`, `file`, `upload`, `download`.
+**Lucide** (https://lucide.dev), licence **ISC** (libre, usage commercial, fichier de licence conservé), paquet `lucide-react`. Trait 1.75 px, 20 px (16 px en dense), `currentColor`. Jamais d'icône seule sans nom accessible (`aria-label` + Tooltip) ; dans la bibliothèque et les menus, icône + libellé. La page maquette utilise des tracés inline équivalents ; l'implémentation utilise les Lucide homonymes : `check-circle-2`, `x-circle`, `alert-triangle`, `info`, `undo-2`, `redo-2`, `help-circle`, `pencil`, `chevron-down`, `rotate-ccw`, `rotate-cw`, `copy`, `trash-2`, `magnet`, `monitor`, `keyboard`, `mouse`, `speaker`, `lamp-desk`, `cpu`, `panel-left`, `panel-right`, `panel-left-close` / `panel-left-open` / `panel-right-close` / `panel-right-open` (bascules de panneau), `circle-dashed` (verdict vide), `x`, `file`, `upload`, `download`.
 
 ## 7. États (tous composants interactifs)
 | État | Traitement |
@@ -80,7 +80,7 @@ Graisses 400 / 500 / 600 ; interligne 1.5 (corps), 1.2 (titres) ; titres ≥ 22 
 | **Focus visible** | anneau 3 px `--color-focus`, décalage 2 px + halo `surface` ; uniquement au clavier (`:focus-visible`/`[data-focus-visible]`) ; jamais masqué par un panneau flottant (`scroll-padding`) |
 | Sélectionné / actif | fond `accent-subtle` + texte `accent-subtle-text` + indicateur (coche, graisse 600, contour accent) |
 | Désactivé | texte `text-disabled`, `cursor: not-allowed`, `aria-disabled` ; pas d'info critique seulement en désactivé |
-| Erreur de champ | contour 2 px `error`, icône croix, message sous le champ relié par `aria-describedby` ("Enter a width between 600 and 3000 mm.") |
+| Erreur de champ | contour 2 px `error`, icône croix, message sous le champ relié par `aria-describedby` ("Enter a width between 800 and 2400 mm.", bornes injectées depuis le catalogue) |
 | Warning / Info | bandeau : fond `*-bg`, icône, mot de gravité, rayon `lg` |
 | Chargement | "Loading 3D scene…" + barre `role="progressbar"` ; panneaux visibles ; statique en reduced motion |
 
@@ -94,17 +94,18 @@ Graisses 400 / 500 / 600 ; interligne 1.5 (corps), 1.2 (titres) ; titres ≥ 22 
 Mise en page : la scène remplit tout le viewport sous la top bar ; **top bar, panneaux gauche et droit, barre de scène sont des panneaux de verre flottants** (marge 12, rayon `xl`). Aucune mise en page tierce reprise : structure issue de nos wireframes UX.
 | Composant | Base RAC | Contenu / règles clés |
 |---|---|---|
-| App bar (verre) | `Toolbar` + `MenuTrigger` | Hauteur 56, pill-rectangle rayon `xl`. Gauche : mot-symbole, nom du setup éditable, "Saved in this browser", Undo/Redo, File ▼. Droite : **Verdict**, Help. Lien "Skip to 3D view" avant tout. |
-| **Verdict** | `role="status"` (+ `aria-live="polite"`) | Pastille 40 px, 18 px/600, fond `*-bg` opaque. "It fits", "It fits · 2 tips", "Doesn't fit · 2 issues". Change avec un léger ressort. Toujours visible, jamais replié. |
-| Panneau gauche (verre) | `Tabs` | 248 px, repliable. Onglets en **contrôle segmenté** (Desk / Objects) ; cartes de bureau (contour accent 2 px + coche si actif) ; bibliothèque en `GridList` (icône + libellé). |
-| Panneau droit (verre) | `Disclosure` / sections | 312 px, repliable, défile en interne. Properties puis Alerts. |
+| App bar (verre) | `Toolbar` + `MenuTrigger` | Hauteur 56 mini, rayon `xl`. Gauche : mot-symbole, nom du setup, puis (quand la fonction existe) "Saved in this browser", Undo/Redo, File ▼. Droite : **Verdict**, Help. Liens "Skip to 3D view" / "Skip to alerts" avant tout. **US-005 : seuls le mot-symbole, le nom (lecture seule) et le verdict vide sont rendus** (voir §15). |
+| **Verdict** | `role="status"` (+ `aria-live="polite"`) | Pastille 40 px, 18 px/600, fond `*-bg` opaque. "It fits", "It fits · 2 tips", "Doesn't fit · 2 issues". **État vide (US-005) : "Nothing to check yet", fond `surface-2`, contour `border-strong`, icône `circle-dashed`.** Change avec un léger ressort. Toujours visible, jamais replié (passe sur une 2e ligne en dessous de ~400 px). |
+| Panneau gauche (verre) | `Tabs` | 248 px, repliable. Onglets en **contrôle segmenté** (Desk / Objects) sur la même ligne que la bascule ; **lignes de bureau** en `RadioGroup` (vignette à l'échelle commune, contour accent 2 px + coche si actif : §16) ; bibliothèque en `GridList` (icône + libellé). |
+| Panneau droit (verre) | sections | 312 px, repliable, défile en interne. Properties puis Alerts (§15). |
+| Bascule de panneau | `Button` + `Tooltip` | 40 px, premier enfant du panneau, même coin replié ou non ; replié = pastille de verre de 56 px. Tiroir sous 1024 px (§15). |
 | **NumberField mm** | `NumberField` | Label visible, valeur alignée à droite (tabulaire), suffixe "mm", boutons −/+ (pas 10, Maj 1, Ctrl 100), plage en aide. États : normal, focus, erreur, désactivé. |
 | Liste d'alertes | `ListBox` | Groupées par gravité ; icône + mot + texte actionnable (quoi, combien, que faire) + "Show". |
 | Barre flottante de scène (verre) | `Toolbar` | Bas-centre, pill. Vues : Reset view · Top · Front (`aria-pressed`) ; Snap. Barre contextuelle : Rotate −15°/+15° · Duplicate · Delete. |
 | Modales | `Modal` + `Dialog` | **Opaques**, rayon `xl`, shadow-3, voile flouté (`.scrim`). 480 px (Welcome 640). Focus piégé, Échap ferme. |
 | Toasts | `ToastRegion` | Bas-droite, rayon `lg`, shadow-2, 5 s (≥ 6 s avec action), pause au survol/focus, "Undo" plutôt que confirmation. |
 | Bandeau d'erreur | `role="alert"` | Haut du Studio, fond `error-bg`, icône + texte + actions. |
-| Tooltip | `Tooltip` | Fond `text` inversé, 14 px, délai 400 ms, aussi au focus. |
+| Tooltip | `Tooltip` | Fond `text` inversé, 14 px, **400 ms au survol, immédiate au focus clavier** (comportement React Aria, accepté au contrôle design US-004), Échap la ferme sans quitter le focus. |
 
 ## 10. Accessibilité (rappels)
 Focus jamais masqué par les panneaux flottants ; ordre Tab top bar > gauche > scène > droite ; tout drag a son alternative (champs X/Y mm, flèches) ; annonces `aria-live` regroupées ; cibles ≥ 32 px ; texte ≥ 14 px ; reflow à 200 % ; jamais d'info par la couleur seule ; fonctionne sans verre (`prefers-reduced-transparency`) et sans animation (`prefers-reduced-motion`).
@@ -125,7 +126,24 @@ Onglets Style / Ambience / Decor, Material, Day/Night, Shopping list : mêmes co
 Toute nouvelle inspiration est jugée sur ce critère : on reprend un principe, jamais une œuvre.
 
 ## 14. Scène 3D et barre de vue (US-004)
-Maquette : `maquettes/US-004.html` (section 7 = consignes développeur, aucun nouveau token). Barre de vue = pill de verre, boutons pill 36 px (icône + libellé 14 px), Reset view sans état, Top/Front en `aria-pressed` (fond `accent-subtle` opaque + contour 2 px accent + coche remplaçant l'icône, sans décalage). Astuce = bandeau de verre `radius-xl`, "Got it" + X. Chargement : fond `--scene-floor` + `progressbar`. WebGL indisponible / contexte perdu : carte opaque `radius-xl`, `role="alert"`, "Try again". Info-bulles : fond `text` inversé, 400 ms, aussi au focus. Transition de vue : `--duration-camera` / `--ease-in-out`, 0 ms en reduced motion.
+Maquette : `maquettes/US-004.html` (section 7 = consignes développeur, aucun nouveau token). Barre de vue = pill de verre, boutons pill 36 px (icône + libellé 14 px), Reset view sans état, Top/Front en `aria-pressed` (fond `accent-subtle` opaque + contour 2 px accent + coche remplaçant l'icône, sans décalage). Astuce = bandeau de verre `radius-xl`, "Got it" + X. Chargement : fond `--scene-floor` + `progressbar`. WebGL indisponible / contexte perdu : carte opaque `radius-xl`, `role="alert"`, "Try again". Info-bulles : fond `text` inversé, **400 ms au survol, immédiate au focus clavier** (maquette US-004 mise à jour au Sprint 2). Transition de vue : `--duration-camera` / `--ease-in-out`, 0 ms en reduced motion.
+
+## 15. Shell du Studio (US-005)
+Maquette : `maquettes/US-005.html` (consignes développeur en bas de page). **Nouveaux tokens (Sprint 2)** : `--drawer-max-w` 360 px, `--toggle-size` 40 px, `--row-min-h` 56 px, `--thumb-w` / `--thumb-h` 56 × 44 px, `--z-skip` 60 ; aucun autre.
+- **Structure** : grille (marges et gap `--float-inset`), lignes `auto 1fr` ; DOM = ordre de tabulation (skip links, `header`, `aside` gauche, `main`, `aside` droit) ; la scène occupe tout le cadre sous les autres (z : scène 1, panneaux 2, barre du haut 3, skip links 60). La page ne défile jamais, les panneaux défilent en interne. Mise en page pilotée par la **largeur du conteneur** ; seuil de bascule en tiroirs : **1024 px**.
+- **Barre du haut** : verre, rayon `xl`, hauteur mini 56, passe à la ligne si besoin (le verdict descend, calé à droite). Mot-symbole `h1` "Deskfit" 18/600 + pastille accent CSS ; nom du setup en 16/500 tronqué. **Pas de Undo/Redo, File, Help, "Saved" tant que la fonction n'existe pas** (aucun bouton mort) ; variante Undo/Redo désactivés montrée en attente de validation du PO.
+- **Verdict vide** : voir §9. **Panneaux** : bascule en coin (gauche : haut-gauche ; droit : haut-droit), icônes `panel-*-close` / `-open`, nom accessible constant, `aria-expanded`, info-bulle "Hide panel" / "Show panel". Replié : la même bascule dans une pastille de verre de 56 px, contenu `visibility: hidden` après le fondu (hors Tab et hors arbre d'accessibilité). Transition 320 ms `out`, 0 en reduced motion. Le repli ne déplace jamais caméra ni dock.
+- **Tiroirs (< 1024 px)** : mêmes composants, fermés au chargement, un seul ouvert, largeur `min(--drawer-max-w, 100% − 64px)` (la pastille de l'autre panneau reste visible), jamais sur la barre du haut, non modaux, Échap ferme et rend le focus à la bascule.
+- **Onglets** (contrôle segmenté, pill) : sélectionné = fond `accent-subtle` + texte `accent-subtle-text` + graisse 600 + contour accent 2 px. Titres de section (`h2`) en style overline ; états vides : titre 16/600 + explication 14 `text-muted`.
+- **Skip links** : pastilles opaques `surface`, 40 px, `shadow-3`, visibles au focus seulement, au-dessus de tout.
+- **États de scène** : chargement (barre **indéterminée**, segment 40 % qui glisse, statique et centrée en reduced motion), `unsupported`, **`failed`** ("The 3D view didn't load", bouton "Try again", plus "Reload page" au 2e échec), `contextLost` : carte opaque `role="alert"`, boutons empilés. Dock et cadrage dans la **zone libre** entre les panneaux ouverts au chargement.
+
+## 16. Choix du bureau (US-006)
+Maquette : `maquettes/US-006.html`. `RadioGroup` nommé "Desk model", une ligne (56 px mini, rayon `lg`) par modèle, ordre du catalogue.
+- **Ligne** : vignette 56 × 44 (plan de dessus, **échelle commune** = ajustée au plus grand modèle du catalogue, dessinée en SVG par l'UI, `aria-hidden`), "L × P cm" 16/600, nom 14 `text-muted`, coche à droite (réservée, jamais de décalage). Repos : fond `surface-2`. Survol : fond `border`, −1 px, `shadow-1`. **Actif** : contour accent 2 px (bordure transparente de 2 px réservée) + fond `accent-subtle` + coche + nom en 600. Focus : anneau standard (distinct du contour actif). Appui : `scale(0.97)`.
+- **Résumé "Selected"** sous la liste (nom + cm, mm, légende), non interactif. Pas de "Custom size" (US-007).
+- **Erreur de catalogue** : bandeau `error-bg` dans le panneau, "Desks couldn't load" + "Reload page" (`role="alert"`).
+- Clavier : un seul arrêt de Tab ; flèches = déplacement **et** application ; annonce regroupée 400 ms après le dernier changement ; recadrage dans la zone libre avec marge ≥ 24 px, 480 ms.
 
 ## 13. Questions pour le PO
 1. Nom **Deskfit** acceptable (provisoire) ?
