@@ -112,6 +112,9 @@ test("Top / Front are pressed toggles, released by a drag and by Reset view (UX-
 test("keyboard on the scene: 0 / 1 / 2 and one announcement 600 ms after the steps (UX-8)", async ({
   page,
 }) => {
+  // Fake page clock in this test only (independent of the machine load): the time flows
+  // normally until pauseAt, then moves only when the test advances it.
+  await page.clock.install();
   await open(page);
   await region(page).focus();
   await page.keyboard.press("2");
@@ -120,11 +123,15 @@ test("keyboard on the scene: 0 / 1 / 2 and one announcement 600 ms after the ste
   await page.keyboard.press("0");
   await expect(live(page)).toHaveText("View reset.");
 
+  const now = await page.evaluate(() => Date.now());
+  await page.clock.pauseAt(now + 1_000);
   await page.keyboard.press("ArrowRight");
   await page.keyboard.press("ArrowRight");
-  await page.waitForTimeout(300);
+  await page.clock.runFor(599);
   await expect(live(page)).toHaveText("View reset."); // not yet: the user is still turning
+  await page.clock.runFor(1);
   await expect(live(page)).toHaveText("View turned 30 degrees right.");
+  await page.clock.resume();
 
   await page.keyboard.press("+");
   await expect(live(page)).toHaveText(/^Zoomed in\.$|^Zoom limit reached\.$/);
