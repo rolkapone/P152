@@ -1,6 +1,7 @@
 // Checks that the guard-rail lint rules of ADR-APP-05/07/10 really fire (eslint.config.js).
-import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { ESLint } from "eslint";
+import ts from "typescript";
 import { describe, expect, it } from "vitest";
 
 const eslint = new ESLint();
@@ -8,6 +9,36 @@ const eslint = new ESLint();
 async function ruleIds(code: string, filePath: string): Promise<string[]> {
   const [result] = await eslint.lintText(code, { filePath });
   return (result?.messages ?? []).map((message) => message.ruleId ?? "fatal");
+}
+
+const coreConfig = ts.getParsedCommandLineOfConfigFile(
+  resolve("tsconfig.core.json"),
+  {},
+  { ...ts.sys, onUnRecoverableConfigFileDiagnostic: () => {} },
+);
+const libFiles = new Map<string, ts.SourceFile | undefined>();
+
+/** Error codes of `tsc -p tsconfig.core.json` on an in-memory module of src/core/. */
+function coreCompileErrors(code: string, extension: "ts" | "tsx"): number[] {
+  if (!coreConfig) throw new Error("tsconfig.core.json unreadable");
+  const options = coreConfig.options;
+  const host = ts.createCompilerHost(options, true);
+  const file = resolve(`src/core/__compile_probe__.${extension}`).replaceAll("\\", "/");
+  const probeHost: ts.CompilerHost = {
+    ...host,
+    fileExists: (name) => name === file || host.fileExists(name),
+    readFile: (name) => (name === file ? code : host.readFile(name)),
+    getSourceFile: (name, language, ...rest) => {
+      if (name === file) return ts.createSourceFile(name, code, language);
+      if (!libFiles.has(name)) libFiles.set(name, host.getSourceFile(name, language, ...rest));
+      return libFiles.get(name);
+    },
+  };
+  const program = ts.createProgram({ rootNames: [file], options, host: probeHost });
+  return ts
+    .getPreEmitDiagnostics(program)
+    .filter((diagnostic) => diagnostic.category === ts.DiagnosticCategory.Error)
+    .map((diagnostic) => diagnostic.code);
 }
 
 describe("layer boundaries (ADR-APP-07)", () => {
@@ -41,6 +72,40 @@ describe("layer boundaries (ADR-APP-07)", () => {
     );
   });
 
+  it.each([
+    ['import { a } from "..";', "src/core/catalog/x.ts", "parent index inside core/"],
+    ['import { a } from "../..";', "src/core/catalog/sub/x.ts", "grand-parent inside core/"],
+    ['import { a } from "../";', "src/core/catalog/x.ts", "parent with a trailing slash"],
+    ['import { a } from ".";', "src/core/catalog/x.ts", "own folder index"],
+    ['import { a } from "./../io";', "src/core/catalog/x.ts", "non-normalized, stays in core/"],
+    ['export { a } from "..";', "src/core/catalog/x.ts", "re-export from the parent"],
+    ['export * from "../io";', "src/core/catalog/x.ts", "export * from a sibling"],
+  ])("core/ accepts the relative path %s in %s (%s)", async (code, filePath) => {
+    const source = code.startsWith("export") ? `${code}\n` : `${code}\nexport { a };\n`;
+    expect(await ruleIds(source, filePath)).toEqual([]);
+  });
+
+  it.each([
+    ['import { a } from "..";', "src/core/x.ts", "parent of core/ is src/"],
+    ['import { a } from "../..";', "src/core/catalog/x.ts", "src/ through '../..'"],
+    ['import { a } from "./../..";', "src/core/catalog/x.ts", "non-normalized escape"],
+    ['import { a } from "../io/../../..";', "src/core/catalog/x.ts", "escape after a segment"],
+    ['import { a } from "../../config/security-headers.mjs";', "src/core/x.ts", "unlisted dir"],
+    ['export { a } from "..";', "src/core/x.ts", "re-export from outside core/"],
+    ['export * from "../..";', "src/core/catalog/x.ts", "export * from outside core/"],
+  ])("core/ rejects the relative path %s in %s (%s)", async (code, filePath) => {
+    const source = code.startsWith("export") ? `${code}\n` : `${code}\nexport { a };\n`;
+    expect(await ruleIds(source, filePath)).toContain("p152/core-relative-imports");
+  });
+
+  it("core/ tests may leave core/ only towards tests/", async () => {
+    const fixtures = 'import { a } from "../../../tests/unit/helpers/fixtures";\nexport { a };\n';
+    expect(await ruleIds(fixtures, "src/core/io/x.test.ts")).toEqual([]);
+    const config = 'import { a } from "../../../config/security-headers.mjs";\nexport { a };\n';
+    expect(await ruleIds(config, "src/core/io/x.test.ts")).toContain("p152/core-relative-imports");
+    expect(await ruleIds(fixtures, "src/core/io/x.ts")).toContain("p152/core-relative-imports");
+  });
+
   it("core/ tests may import the shared fixtures of tests/, not node_modules nor locales", async () => {
     const fixtures = 'import { a } from "../../../tests/unit/helpers/fixtures";\nexport { a };\n';
     expect(await ruleIds(fixtures, "src/core/io/x.test.ts")).toEqual([]);
@@ -57,12 +122,21 @@ describe("layer boundaries (ADR-APP-07)", () => {
     expect(await ruleIds(`${code}\n`, "src/core/x.tsx")).toContain("no-restricted-syntax");
   });
 
-  it("tsconfig.core.json also refuses JSX in core/ (no implicit jsx-runtime import)", () => {
-    const config = JSON.parse(readFileSync("tsconfig.core.json", "utf8")) as {
-      compilerOptions: { jsx?: string; types?: string[] };
-    };
-    expect(config.compilerOptions.jsx).toBe("preserve");
-    expect(config.compilerOptions.types).toEqual([]);
+  describe("tsconfig.core.json compiles core/ as pure TypeScript (real compilation)", () => {
+    it("refuses JSX: error TS7026, no implicit react/jsx-runtime import", () => {
+      const codes = coreCompileErrors("export const C = () => <div>hi</div>;\n", "tsx");
+      expect(codes).toContain(7026);
+    });
+
+    it("refuses DOM globals (no DOM lib nor ambient types)", () => {
+      expect(coreCompileErrors("export const t = document.title;\n", "ts")).not.toEqual([]);
+    });
+
+    it("compiles plain TypeScript without error (the harness itself works)", () => {
+      const code = "export const n: number = [1, 2].at(-1) ?? 0;\n";
+      expect(coreCompileErrors(code, "ts")).toEqual([]);
+      expect(coreCompileErrors(code, "tsx")).toEqual([]);
+    });
   });
 
   it("core/ accepts new.target (only import.meta is a meta-property to refuse)", async () => {
@@ -159,8 +233,62 @@ describe("no hard-coded UI text (ADR-APP-05)", () => {
     ['export const A = () => <button aria-label={"Close"} />;', "aria-label expression"],
     ["export const A = () => <input placeholder={`Search`} />;", "placeholder template"],
     ['export const A = () => <img alt="Desk" src="x.png" />;', "alt"],
+    ['export const A = ({ c }: { c: boolean }) => <p>{c ? "Yes" : "No"}</p>;', "ternary"],
+    ["export const A = ({ c }: { c: boolean }) => <p>{c ? t() : `No`}</p>;", "ternary template"],
+    ['export const A = ({ c }: { c: boolean }) => <p>{c && "Yes"}</p>;', "&&"],
+    ['export const A = ({ s }: { s?: string }) => <p>{s || "None"}</p>;', "||"],
+    ['export const A = ({ s }: { s?: string }) => <p>{s ?? "None"}</p>;', "??"],
+    ['export const A = ({ n }: { n: number }) => <p>{"Total: " + n}</p>;', "concatenation"],
+    ['export const A = ({ n }: { n: number }) => <p>{n + " items"}</p>;', "concatenation right"],
+    ['export const A = () => <p>{"Hello" as string}</p>;', "type assertion"],
+    ['export const A = ({ c }: { c: boolean }) => <p>{`${c ? "on" : "off"}`}</p>;', "in template"],
+    [
+      'export const A = ({ a, b }: { a: boolean; b: boolean }) => <p>{a ? t() : b ? "B" : t()}</p>;',
+      "nested ternary",
+    ],
+    [
+      'export const A = ({ c }: { c: boolean }) => <img alt={c ? "On" : "Off"} src="x" />;',
+      "alt ternary",
+    ],
+    [
+      'export const A = ({ s }: { s?: string }) => <button aria-label={s ?? "Close"} />;',
+      "aria ??",
+    ],
+    ['export const A = ({ n }: { n: number }) => <button title={"Item " + n} />;', "title concat"],
   ])("rejects %s (%s)", async (code) => {
-    expect(await ruleIds(`${code}\n`, "src/ui/studio/A.tsx")).toContain("no-restricted-syntax");
+    const source = `declare const t: () => string;\nexport { t };\n${code}\n`;
+    expect(await ruleIds(source, "src/ui/studio/A.tsx")).toContain("p152/no-literal-text");
+    expect(await ruleIds(source, "src/app/A.tsx")).toContain("p152/no-literal-text");
+  });
+
+  it.each([
+    [
+      'export const A = ({ c }: { c: boolean }) => <p>{c === "open" ? t() : t()}</p>;',
+      "test of a ternary",
+    ],
+    [
+      'export const A = ({ s }: { s: string }) => <p>{s === "ready" && t()}</p>;',
+      "condition of &&",
+    ],
+    [
+      'export const A = ({ c }: { c: boolean }) => <p className={c ? "on" : "off"}>{t()}</p>;',
+      "className ternary",
+    ],
+    [
+      'export const A = ({ n }: { n: number }) => <p data-id={"row-" + n}>{n - 1}</p>;',
+      "data-* concat, minus",
+    ],
+    ["export const A = ({ c }: { c: boolean }) => <p>{c ? t() : null}</p>;", "translated ternary"],
+    ['export const A = ({ n }: { n: number }) => <p>{n + " / " + n}</p>;', "punctuation only"],
+    ['export const A = () => <img alt="" src="x.png" />;', "decorative image (empty alt)"],
+  ])("accepts %s (%s)", async (code) => {
+    const source = `declare const t: () => string;\nexport { t };\n${code}\n`;
+    expect(await ruleIds(source, "src/ui/studio/A.tsx")).toEqual([]);
+  });
+
+  it("does not apply to component tests", async () => {
+    const code = "export const A = () => <p>Hello</p>;\n";
+    expect(await ruleIds(code, "src/ui/studio/A.test.tsx")).not.toContain("p152/no-literal-text");
   });
 
   it("accepts translated text and non-text attributes", async () => {

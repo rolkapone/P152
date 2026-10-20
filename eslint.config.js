@@ -4,6 +4,7 @@ import jsxA11y from "eslint-plugin-jsx-a11y";
 import reactHooks from "eslint-plugin-react-hooks";
 import globals from "globals";
 import tseslint from "typescript-eslint";
+import p152 from "./config/eslint-plugin-p152.mjs";
 
 // Layer boundaries (ADR-APP-07), enforced with core ESLint rules (no extra plugin):
 // core -> core only; state, persistence -> core; render -> core, state; ui -> core, state,
@@ -21,11 +22,13 @@ const RENDER_MATH_FORBIDDEN =
 
 // core/ uses a whitelist (ADR-APP-10): relative core/ modules only, plus zod through
 // core/schema/zod.ts and the test tools in its own tests. Any other bare import fails.
-// Relative paths may not reach node_modules, the other layers, nor src/locales, tests/ and
-// src/main (core/ tests only may import the shared fixtures of tests/).
+// Relative paths ("./x", "../x", "." and "..") are checked on their resolved path by
+// p152/core-relative-imports: they must stay in src/core (core/ tests may also reach the
+// shared fixtures of tests/). The text patterns below are a second line of defence:
+// relative paths may not name node_modules, the other layers, src/locales, tests/, src/main.
 const coreImports = (allowedBare, { isTest = false } = {}) => [
   forbid(
-    `^(?!\\.{1,2}/${allowedBare.map((name) => `|${name}$`).join("")})`,
+    `^(?!\\.{1,2}(/|$)${allowedBare.map((name) => `|${name}$`).join("")})`,
     "core/ imports only core/ modules; zod only through core/schema/zod.ts (ADR-APP-07, ADR-APP-03).",
   ),
   forbid(
@@ -62,26 +65,12 @@ const CORE_FORBIDDEN_SYNTAX = [
 const CORE_FILES = "src/core/**/*.{ts,tsx,mts,cts}";
 const CORE_TESTS = "src/core/**/*.test.{ts,tsx,mts,cts}";
 
-// Visible UI text goes through i18n (ADR-APP-05). Core-rule substitute for
-// eslint-plugin-i18next/no-literal-string until that plugin is adopted.
-const TEXT_ATTRIBUTES =
-  "alt|aria-label|aria-description|aria-placeholder|aria-roledescription|aria-valuetext|label|placeholder|title";
-const TEXT_MESSAGE = "Visible text must come from i18n: use t('key') (ADR-APP-05).";
-const ACCESSIBLE_TEXT_MESSAGE = "Accessible text must come from i18n: use t('key') (ADR-APP-05).";
-// Only element children are visible text: `className={"foo"}` is not reported.
-const JSX_CHILD = ":matches(JSXElement, JSXFragment) > JSXExpressionContainer";
-const TEXT_ATTRIBUTE = `JSXAttribute[name.name=/^(${TEXT_ATTRIBUTES})$/]`;
-const LETTERS = "/[A-Za-z]/";
-const TEXT_LITERAL = `:matches(Literal[value=${LETTERS}], TemplateLiteral:has(TemplateElement[value.raw=${LETTERS}]))`;
-const noLiteralText = [
-  "error",
-  { selector: `JSXText[value=${LETTERS}]`, message: TEXT_MESSAGE },
-  { selector: `${JSX_CHILD} > ${TEXT_LITERAL}`, message: TEXT_MESSAGE },
-  { selector: `${TEXT_ATTRIBUTE} > Literal`, message: ACCESSIBLE_TEXT_MESSAGE },
-  {
-    selector: `${TEXT_ATTRIBUTE} > JSXExpressionContainer > ${TEXT_LITERAL}`,
-    message: ACCESSIBLE_TEXT_MESSAGE,
-  },
+// Visible UI text goes through i18n (ADR-APP-05): local rule p152/no-literal-text
+// (ADR-APP-10). Element children and these attributes are text, also through a ternary,
+// `&&`, `||`, `??` or a `+` concatenation; other attributes (`className={"foo"}`) are free.
+const TEXT_ATTRIBUTES = [
+  ...["alt", "aria-label", "aria-description", "aria-placeholder", "aria-roledescription"],
+  ...["aria-valuetext", "label", "placeholder", "title"],
 ];
 
 export default tseslint.config(
@@ -114,7 +103,9 @@ export default tseslint.config(
   { files: ["**/*.tsx"], ...jsxA11y.flatConfigs.recommended },
   {
     files: [CORE_FILES],
+    plugins: { p152 },
     rules: {
+      "p152/core-relative-imports": "error",
       "no-restricted-imports": boundary(...coreImports([])),
       "no-restricted-globals": ["error", ...CORE_FORBIDDEN_GLOBALS],
       "no-restricted-syntax": CORE_FORBIDDEN_SYNTAX,
@@ -123,6 +114,7 @@ export default tseslint.config(
   {
     files: [CORE_TESTS],
     rules: {
+      "p152/core-relative-imports": ["error", { allowOutside: ["tests"] }],
       "no-restricted-imports": boundary(...coreImports(["vitest", "fast-check"], { isTest: true })),
     },
   },
@@ -184,7 +176,8 @@ export default tseslint.config(
   {
     files: ["src/ui/**/*.tsx", "src/app/**/*.tsx"],
     ignores: ["**/*.test.tsx"],
-    rules: { "no-restricted-syntax": noLiteralText },
+    plugins: { p152 },
+    rules: { "p152/no-literal-text": ["error", { textAttributes: TEXT_ATTRIBUTES }] },
   },
   { files: ["**/*.{js,mjs}"], languageOptions: { globals: globals.node } },
   prettier,
