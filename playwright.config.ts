@@ -19,10 +19,14 @@ export default defineConfig({
   // machine and time out (US-004, measured with 16 workers on 24 threads). Same idea as CI.
   workers: isCI ? 2 : 4,
   reporter: isCI ? [["list"], ["html", { open: "never" }]] : [["list"]],
-  timeout: 30_000,
+  // Runner CI (2 vCPU, SwiftShader) : chaque chargement de la scène prend ~15 s (4-5 s en local),
+  // un test à plusieurs actions dépasse 30 s (docs/qa/ci-e2e-runner.md). Délais élargis, sans retry
+  // et sans assouplir d'assertion ; les tests longs sont découpés.
+  timeout: isCI ? 90_000 : 30_000,
   // Loads the 3D view once before the workers start (cold start, see global-setup.ts).
   globalSetup: "./tests/e2e/global-setup.ts",
   expect: {
+    timeout: isCI ? 15_000 : 5_000,
     // Rendu WebGL logiciel (SwiftShader) : anti-crénelage légèrement variable.
     toHaveScreenshot: { maxDiffPixelRatio: 0.02, threshold: 0.2, animations: "disabled" },
   },
