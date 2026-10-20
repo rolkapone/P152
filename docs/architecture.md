@@ -6,7 +6,7 @@
 ## Sommaire
 1. Vue d'ensemble et découpage en couches
 2. Scène 3D (ADR-3D-01 à ADR-3D-09)
-3. Application (ADR-APP-01 à ADR-APP-09)
+3. Application (ADR-APP-01 à ADR-APP-10)
 4. Build, CI et hébergement (ADR-OPS-01 à ADR-OPS-07)
 
 ---
@@ -92,7 +92,8 @@ Règles de dépendance (à faire respecter par lint, ex. `eslint-plugin-boundari
   "units": "mm",
   "desk": {
     "catalogId": "desk.rect", "catalogVersion": 1,
-    "params": { "width": 1400, "depth": 700, "height": 740 }   // L-shape : params dédiés
+    "params": { "width": 1400, "depth": 700, "height": 740 },  // L-shape : params dédiés
+    "materials": {}             // surcharges par slot (top, legs), ajout US-003 (ADR-APP-10)
   },
   "objects": [{
     "id": "uuid", "type": "monitor", "catalogId": "monitor.generic", "catalogVersion": 1,
@@ -601,6 +602,36 @@ Tests unitaires et de composants **colocalisés** (`*.test.ts(x)` à côté du f
 
 ---
 
+### ADR-APP-10 — Socle `core/` livré en US-003 : contrats du schéma v1, du catalogue et des garde-fous
+
+> Statut : **Proposé** (US-003, 2026-10-20), à valider en revue. Précise ADR-3D-02, ADR-APP-03/05/07/08 sans les contredire.
+
+**Contexte.** US-003 livre le premier code de `src/core/` (schéma, catalogue, pipeline d'import) avant toute UI et toute scène. Plusieurs points laissés ouverts par les ADR doivent être fixés pour que US-004 (scène), US-005 (shell) et US-018 (persistance) s'appuient dessus sans refonte.
+
+**Décision.**
+- **Schéma `SetupV1`** (`core/schema/setupV1.ts`, Zod `jitless` via le point d'entrée unique `core/schema/zod.ts`) : conforme à ADR-3D-02, avec ces précisions :
+  - `desk.materials` ajouté (surcharges par slot, comme les objets) : le bureau a lui aussi des slots (`top`, `legs`).
+  - Champs de la vision long terme **présents mais fermés** en v1 : `product: null`, `environment.room: null`, `environment.lighting: "neutral"` seulement. Les ouvrir (R3, R5) sera une migration v1 → v2, pas une refonte.
+  - Bornes structurelles : coordonnées ±10 000 mm (un objet peut déborder, c'est une alerte), `rotationY` dans [-360, 360], nom et libellé 1 à 80 caractères sans caractère de contrôle, ≤ 24 paramètres, ≤ 8 surcharges de matériau, ≤ 32 clés dans `extensions`, profondeur JSON ≤ 16, 50 objets.
+- **`parseSetup(text, catalog, { declaredBytes })`** (`core/io`) : seule voie de lecture d'un setup (SR-01). Ordre : taille déclarée puis taille UTF-8 (≤ 1 Mio) → `JSON.parse` → garde structurelle itérative (clés `__proto__`/`constructor`/`prototype`, profondeur, prototype non standard) → enveloppe et version → migrations → schéma strict → contrôles sémantiques contre le catalogue (entrée connue et du bon type, `catalogVersion`, paramètres connus et dans les bornes, enums, matériaux et slots, ids uniques, `mount` sans parent manquant ni cycle, style connu) → normalisation (paramètres absents = défauts du catalogue) → document gelé. Erreurs = `{ code, path }` : 19 codes traduits par `errors:import.<code>`, chemin assaini (segments non identifiants remplacés par `?`, 120 caractères max) ; jamais de contenu du fichier. `checkDeclaredSize(File.size)` est exposé pour refuser avant lecture.
+- **Catalogue** (`core/catalog`) : `validateCatalog(files)` valide tous les fichiers de `assets/catalog` (schémas stricts, sauf les blocs descriptifs de `studio.json`), puis `min ≤ défaut ≤ max`, défauts d'enum, presets dans les bornes, `formats` alignés sur l'enum `format`, ids uniques, toutes les références (matériaux des slots et des styles, types des styles, bureau du studio) ; renvoie **toutes** les anomalies. **Plafonds GPU** (`core/catalog/limits.ts`, M-04) : ≤ 10 000 triangles et ≤ 8 draw calls par type, segments du cyclorama ≤ 64, shadow map ∈ {256…4096}, ≤ 32 échantillons de flou, budgets de scène ≤ ADR-3D-08. Le catalogue embarqué est chargé par `import.meta.glob` (un nouveau type = un fichier JSON du TA, sans code) et gelé. Port `CatalogSource` et `SetupRepository` déclarés dans `core/ports`.
+- **Frontières de couches et texte en dur** : appliquées **avec les règles natives d'ESLint** (`no-restricted-imports` par motifs regex, `no-restricted-globals` pour le DOM et les E/S dans `core/`, `no-restricted-syntax` sur le texte JSX et les attributs `alt`/`aria-label`/`title`/`placeholder`… dans `ui/` et `app/`), vérifiées par un test (`tests/unit/lint-rules.test.ts`). `eslint-plugin-boundaries` et `eslint-plugin-i18next` ne sont **pas** ajoutés : zéro dépendance pour le même résultat sur notre arborescence ; à réévaluer si les règles se compliquent (ex. exceptions par fichier).
+- **i18n** : `ui/i18n/config.ts` crée une instance i18next synchrone (ressources `src/locales/en/*.json` embarquées, `escapeValue: false`), clés typées par augmentation de module (`ui/i18n/i18next.d.ts`) ; `main.tsx` fournit l'instance et synchronise `<html lang>`.
+- **Tests** : Vitest en deux projets (`node` pour `src/core/**` et `tests/unit/**`, `jsdom` pour le reste) ; fixtures `tests/fixtures/setups/v1/{valid,invalid,malicious}` (les fichiers malveillants sont exclus de Prettier pour rester octet pour octet) ; fuzzing fast-check de `parseSetup` (jamais d'exception, clés interdites injectées partout rejetées, aller-retour `serialize → parse` sur des setups valides générés depuis le catalogue). Seuils de couverture en cliquet sur `src/core/**` : lignes/instructions/fonctions 95 %, branches 90 %. Le seuil global (80 %) sera posé avec la première UI (US-005).
+
+**Conséquences.**
+- (+) US-004 lit le bureau et le studio dans un catalogue déjà validé ; US-018 n'a plus qu'à brancher `parseSetup` sur `localStorage` et l'import de fichier.
+- (+) Garde-fous de couches et d'i18n actifs dès maintenant, sans dépendance supplémentaire.
+- (−) Les règles natives sont moins expressives que `eslint-plugin-boundaries` (pas de graphe de dépendances) ; un import transitif via un barrel reste possible et relève de la revue.
+- (−) `fast-check` ajouté en dépendance de développement (4.10.2, publiée le 2026-09-19, `pnpm audit` sans vulnérabilité) : prévu par ADR-APP-08.
+
+**Alternatives écartées.**
+1. **`eslint-plugin-boundaries` + `eslint-plugin-i18next` dès US-003** : deux dépendances de plus pour des règles que l'arborescence actuelle permet d'exprimer nativement.
+2. **Clamp silencieux des valeurs hors bornes à l'import** : contraire à ADR-APP-03 (l'utilisateur doit savoir ce qui a changé).
+3. **Validation du catalogue seulement en test** : le catalogue embarqué est aussi validé à l'exécution (une fois, mémoïsé) ; coût négligeable et défense en profondeur si un fichier du TA est altéré.
+
+---
+
 ### Sécurité transverse de l'application (entrée pour le threat model US-002)
 
 - Entrées non fiables : stockage local, fichier importé, plus tard URL de partage et API. Toutes passent par `parseSetup` (taille ≤ 1 Mio, ≤ 50 objets, schéma strict, bornes, pas de clés de prototype).
@@ -844,10 +875,11 @@ Principes : (1) une commande locale `pnpm check` rejoue exactement ce que fait l
 |---|---|---|
 | ADR-3D-01 à ADR-3D-09 | Accepté | 2026-10-19 |
 | ADR-APP-01 à ADR-APP-09 | Accepté | 2026-10-19 |
+| ADR-APP-10 | Proposé (US-003) | 2026-10-20 |
 | ADR-OPS-01 à ADR-OPS-07 | Accepté | 2026-10-19 |
 
 - **Hébergement du code** : GitHub, dépôt **public** (Actions illimité, CodeQL, rulesets avec `ci-ok` obligatoire possibles). Le dépôt distant n'est **pas encore créé** : création et premier push uniquement sur ordre explicite du PO.
 - **Hébergement de l'app** : Cloudflare Pages (`*.pages.dev`), **pas de domaine personnalisé** pour l'instant. Aucun déploiement avant ordre du PO (`deploy.yml` absent).
 - **Taille d'écran minimale supportée** : 1366×768 (desktop). Les budgets de perf et la QA se calent dessus.
 - **Dépôt public** : aucun secret ni donnée personnelle dans l'historique ; `.env` ignoré, `.env.example` documenté.
-- **Écart d'implémentation (US-001)** : `eslint-plugin-boundaries`, `eslint-plugin-i18next` et `commitlint` seront ajoutés avec les premières règles réelles (US-005) ; en attendant, ESLint recommended + react-hooks + jsx-a11y + no-eval, et `scripts/commit-msg.mjs` pour Conventional Commits. Versions d'outils choisies : ESLint 9.39, TypeScript 5.9, Vite 7, Vitest 4.1 (4.1.12 depuis la revue US-001 ; dernières majeures compatibles avec les ADR ; ESLint 10 / TS 7 / Vite 8 existent mais ne sont pas retenus).
+- **Écart d'implémentation (US-001)** : `eslint-plugin-boundaries`, `eslint-plugin-i18next` et `commitlint` seront ajoutés avec les premières règles réelles (US-005) *(mise à jour US-003 : frontières de couches et texte en dur appliqués par des règles ESLint natives, voir ADR-APP-10 ; les deux plugins ne sont plus nécessaires pour l'instant)* ; en attendant, ESLint recommended + react-hooks + jsx-a11y + no-eval, et `scripts/commit-msg.mjs` pour Conventional Commits. Versions d'outils choisies : ESLint 9.39, TypeScript 5.9, Vite 7, Vitest 4.1 (4.1.12 depuis la revue US-001 ; dernières majeures compatibles avec les ADR ; ESLint 10 / TS 7 / Vite 8 existent mais ne sont pas retenus).
