@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 import { measurePerf, PERF_BUDGET, readPerf, STUDIO_BUDGET } from "./helpers/perf";
 
 // US-004: base studio scene (desk only). The reference scene of ADR-3D-08 (desk + 20 objects)

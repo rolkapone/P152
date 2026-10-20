@@ -1,5 +1,5 @@
 import AxeBuilder from "@axe-core/playwright";
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Page } from "./fixtures";
 import { waitForScene } from "./helpers/perf";
 
 // US-004 (developer part): view bar, tip, announcements, loading and error screens.

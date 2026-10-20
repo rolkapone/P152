@@ -1,5 +1,5 @@
 import AxeBuilder from "@axe-core/playwright";
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 test("home page has no serious or critical accessibility violations (WCAG 2.2 AA)", async ({
   page,
