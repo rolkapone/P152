@@ -4,7 +4,8 @@
  *
  * - The focusable region (`role="group"`, `tabindex=0`, label given by the UI through i18n)
  *   receives the view keys (arrows, + / -, Shift+arrows, 0 / 1 / 2) only when it has the
- *   focus itself (WCAG 2.1.4); Tab is never captured.
+ *   focus itself (WCAG 2.1.4); Tab is never captured. It is focusable and announces the keys
+ *   only while there is a scene (loading or ready): never on an error screen.
  * - The canvas size is reserved before it loads (no layout shift); the studio background
  *   colour fills the region meanwhile.
  * - Status (loading, ready, unsupported, failed, contextLost) is in `useSceneView`; the
@@ -67,8 +68,10 @@ export function Viewport({ studio, materials, label, className, children }: View
   const attempt = useSceneView((state) => state.attempt);
   const theme = useTheme();
 
-  // Checked again on "Try again" (attempt), before the 3D code is downloaded.
-  const webgl2 = useMemo(() => attempt >= 0 && detectWebGL2(), [attempt]);
+  // Checked once per attempt, before the 3D code is downloaded: "Try again" increments
+  // `attempt`, which is the only reason to check again (hence the extra dependency).
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const webgl2 = useMemo(() => detectWebGL2(), [attempt]);
   useEffect(() => {
     if (!webgl2) useSceneView.getState().setStatus("unsupported");
   }, [webgl2, attempt]);
@@ -81,6 +84,7 @@ export function Viewport({ studio, materials, label, className, children }: View
     }
   };
 
+  // Focusable, labelled with the keys and drawn only while there is a scene.
   const showScene = webgl2 && (status === "loading" || status === "ready");
   return (
     // The 3D view is a focusable group (UX §5: role="application" is avoided on purpose):
@@ -88,9 +92,9 @@ export function Viewport({ studio, materials, label, className, children }: View
     // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
     <div
       role="group"
-      aria-label={label}
+      aria-label={showScene ? label : undefined}
       // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- focusable 3D view (UX §5)
-      tabIndex={0}
+      tabIndex={showScene ? 0 : undefined}
       className={className}
       data-scene-status={status}
       style={{ ...REGION_STYLE, background: studio.backdrop[theme].background }}

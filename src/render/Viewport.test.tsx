@@ -7,6 +7,9 @@ import { MaterialsFileSchema, StudioSceneSchema, toStudioConfig } from "../core"
 import { useSceneView } from "../state";
 import { Viewport } from "./Viewport";
 
+// The 3D code itself is not loaded in jsdom (tests where WebGL 2 is faked).
+vi.mock("./scene/SceneCanvas", () => ({ default: () => null }));
+
 declare global {
   var IS_REACT_ACT_ENVIRONMENT: boolean;
 }
@@ -44,7 +47,7 @@ function render(children?: React.ReactNode) {
       </Viewport>,
     ),
   );
-  const region = container.querySelector<HTMLElement>('[role="group"]');
+  const region = container.querySelector<HTMLElement>("[data-scene-status]");
   if (region === null) throw new Error("no region");
   return region;
 }
@@ -57,13 +60,45 @@ function press(target: HTMLElement, key: string, init: KeyboardEventInit = {}) {
   return event;
 }
 
+/** Fakes a WebGL 2 context for detectWebGL2 (the scene itself is mocked above). */
+function withWebGL2() {
+  vi.mocked(HTMLCanvasElement.prototype.getContext).mockReturnValue({
+    getExtension: () => null,
+  } as unknown as WebGL2RenderingContext);
+}
+
 describe("Viewport", () => {
   it("is a focusable, labelled group with the studio background (size reserved)", () => {
+    withWebGL2();
     const region = render();
-    expect(region.tabIndex).toBe(0);
+    expect(useSceneView.getState().status).toBe("loading");
+    expect(region.getAttribute("role")).toBe("group");
+    expect(region.getAttribute("tabindex")).toBe("0");
+    expect(region.getAttribute("aria-label")).toBe("3D view of your desk");
+    act(() => useSceneView.getState().setStatus("ready"));
+    expect(region.getAttribute("tabindex")).toBe("0");
     expect(region.getAttribute("aria-label")).toBe("3D view of your desk");
     expect(region.style.width).toBe("100%");
     expect(region.style.background).not.toBe("");
+  });
+
+  it.each(["failed", "contextLost"] as const)(
+    "is neither focusable nor announces the keys without a scene (%s)",
+    (status) => {
+      withWebGL2();
+      const region = render();
+      act(() => useSceneView.getState().setStatus(status));
+      expect(region.dataset["sceneStatus"]).toBe(status);
+      expect(region.hasAttribute("tabindex")).toBe(false);
+      expect(region.hasAttribute("aria-label")).toBe(false);
+    },
+  );
+
+  it("is neither focusable nor announces the keys without WebGL 2 (unsupported)", () => {
+    const region = render();
+    expect(region.dataset["sceneStatus"]).toBe("unsupported");
+    expect(region.hasAttribute("tabindex")).toBe(false);
+    expect(region.hasAttribute("aria-label")).toBe(false);
   });
 
   it("reports a browser without WebGL 2 and does not load the 3D code", () => {
