@@ -31,10 +31,11 @@ import {
 } from "../../state";
 import {
   cameraLimits,
-  clampCameraPosition,
-  clampPose,
-  interpolatePose,
+  clampPoseInto,
+  createPose,
+  interpolatePoseInto,
   maxPolarForHeight,
+  safeCameraY,
   stepPose,
   viewPose,
   lensShiftFor,
@@ -127,6 +128,9 @@ export class ViewRig implements ViewController {
   private tween: Tween | null = null;
   private readonly target = new Vector3();
   private readonly spherical = new Spherical();
+  /** Work objects of `frame()` and `applyPose()`: nothing is allocated per frame. */
+  private readonly framePose = createPose();
+  private readonly safePose = createPose();
   private readonly listeners: [string, () => void][];
 
   constructor(options: ViewRigOptions) {
@@ -193,14 +197,19 @@ export class ViewRig implements ViewController {
 
   /** Pose the controls are heading to (end values, after damping). */
   endPose(): Pose {
-    this.controls.getTarget(this.target, true);
-    this.controls.getSpherical(this.spherical, true);
+    this.readEnd();
     return {
       target: [this.target.x, this.target.y, this.target.z],
       radius: this.spherical.radius,
       polar: this.spherical.phi,
       azimuth: this.spherical.theta,
     };
+  }
+
+  /** Writes the end target and orbit into `this.target` / `this.spherical`. */
+  private readEnd(): void {
+    this.controls.getTarget(this.target, true);
+    this.controls.getSpherical(this.spherical, true);
   }
 
   viewPose(view: "reset" | "top" | "front"): Pose {
@@ -235,27 +244,26 @@ export class ViewRig implements ViewController {
     const tween = this.tween;
     if (tween !== null) {
       const t = Math.min((this.now() - tween.start) / tween.duration, 1);
-      this.applyPose(interpolatePose(tween.from, tween.to, EASE_IN_OUT(t)), false);
+      this.applyPose(
+        interpolatePoseInto(this.framePose, tween.from, tween.to, EASE_IN_OUT(t)),
+        false,
+      );
       if (t >= 1) this.tween = null;
     } else {
       // Zooming in lowers the largest tilt that keeps the camera above minCameraY.
-      const end = this.endPose();
-      const maxPolar = maxPolarForHeight(
-        end.target[1],
-        end.radius,
-        limits.minCameraY,
-        limits.maxPolar,
-      );
+      this.readEnd();
+      const { radius, phi } = this.spherical;
+      const maxPolar = maxPolarForHeight(this.target.y, radius, limits.minCameraY, limits.maxPolar);
       controls.maxPolarAngle = maxPolar;
-      if (end.polar > maxPolar + 1e-6) void controls.rotatePolarTo(maxPolar, !this.reducedMotion);
+      if (phi > maxPolar + 1e-6) void controls.rotatePolarTo(maxPolar, !this.reducedMotion);
     }
     const moving = controls.update(Math.min(deltaSeconds, MAX_DELTA_S));
     this.updateLensShift();
     // Last guard on the rendered camera (damping may overshoot by a few millimetres).
     const { position } = this.camera;
-    const safe = clampCameraPosition([position.x, position.y, position.z], limits);
-    if (safe[1] !== position.y) {
-      position.y = safe[1];
+    const safeY = safeCameraY(position.x, position.y, position.z, limits);
+    if (safeY !== position.y) {
+      position.y = safeY;
       this.camera.lookAt(controls.getTarget(this.target, false));
     }
     if (moving || this.tween !== null) this.invalidate();
@@ -285,7 +293,7 @@ export class ViewRig implements ViewController {
 
   private applyPose(pose: Pose, smooth: boolean): void {
     const { controls, limits } = this;
-    const safe = clampPose(pose, limits);
+    const safe = clampPoseInto(this.safePose, pose, limits);
     controls.maxPolarAngle = Math.max(
       safe.polar,
       maxPolarForHeight(safe.target[1], safe.radius, limits.minCameraY, limits.maxPolar),
