@@ -7,10 +7,10 @@
 | Points MVP (Must + Should) | **95** (Must 85, Should 10) |
 | Dont stories sécurité (SEC-01 à SEC-05) | 8 (Must 7, Should 1) |
 | Points « Could » MVP (hors total, bonus) | 9 (US-021, US-023, SEC-06) |
-| Points livrés | 3 (US-001 DONE le 2026-10-19 ; US-002 en cours) |
+| Points livrés | 5 (US-001 DONE le 2026-10-19 ; US-002 DONE le 2026-10-20) |
 | Vitesse moyenne | 15 pts/sprint (par défaut, pas d'historique ; recalcul en fin de Sprint 1) |
 | Sprints restants estimés avant MVP | **7** (92 pts restants / 15 = 6,1 arrondi à 7) |
-| Dernière mise à jour | 2026-10-19 (Sprint 1 en cours : US-001 DONE, US-002 IN PROGRESS) |
+| Dernière mise à jour | 2026-10-20 (Sprint 1 en cours : US-001 et US-002 DONE, US-003 IN PROGRESS) |
 
 Détail du recalcul : 83 pts (kickoff) + SEC-01 (3) + SEC-02 (1) + SEC-03a (1) + SEC-03b (1) + SEC-04 (1) + SEC-05 (1) + US-024 (2, réglages d'alertes) + US-025 (2, Help et préférences d'affichage) = **95**.
 Hypothèse : le premier déploiement public n'a lieu qu'à la fin du MVP (SEC-03a avant le premier push, SEC-03b avant ce déploiement, SEC-05 juste avant la release).
@@ -47,12 +47,12 @@ Notes techniques / dépendances : devops. Bloque toutes les autres stories. **Pr
 
 ### US-002 — Threat model initial  [Must | 2 pts]
 En tant que PO, je veux un threat model du produit afin d'anticiper les risques de sécurité dès la conception.
-**État au 2026-10-19 : IN PROGRESS** (branche `feature/US-002-threat-model`, implémenteur secdevops). Livrable produit au kickoff (`docs/security/threat-model.md` v1.0, `docs/security/ci-security.md`, brouillons `docs/security/ci/`), commité directement sur `main` (304e3f9). Reste pour la DoD : (1) relecture et mise à jour par secdevops selon les décisions PO (dépôt public, Cloudflare Pages, pas de push au Sprint 1, Vitest 4.1) et les findings du scan US-001 (`docs/security/scans/US-001.md`, dont `_headers` bloquant et findings LOW de SEC-06) ; (2) revue formelle reviewer sur le diff de la branche contre `main` (story documentaire : ni contrôle design ni QA) ; (3) merge `--no-ff` par le devops.
+**État au 2026-10-20 : DONE.** Mergée dans `main` (55a93a6). Revue APPROVE au cycle 2/3 (`docs/reviews/US-002.md` ; cycle 1 : critères SEC-10 à SEC-50 perdus, remis dans le backlog). Secdevops PASS (`docs/security/scans/US-002.md` ; ajout de `.gitleaksignore` pour un faux positif). Les corrections de `docs/architecture.md` demandées par la revue sont rattachées à US-003.
 Critères d'acceptation :
 - [x] Étant donné l'architecture MVP, quand le threat model est rédigé, alors `docs/security/threat-model.md` liste actifs, surfaces d'attaque (import de fichiers, stockage local, dépendances) et mesures.
 - [x] Les scans SAST, dépendances et secrets sont définis pour la CI (`docs/security/ci-security.md`).
-- [ ] Le threat model et `ci-security.md` sont cohérents avec les décisions PO et le scan US-001 (SEC-03a avant le premier push, findings LOW tracés en SEC-06, Vitest 4.1), avec liens exacts et aucun secret.
-- [ ] Revue APPROVE du reviewer (3 cycles max) et merge `--no-ff` dans `main` (DoD).
+- [x] Le threat model et `ci-security.md` sont cohérents avec les décisions PO et le scan US-001 (SEC-03a avant le premier push, findings LOW tracés en SEC-06, Vitest 4.1), avec liens exacts et aucun secret.
+- [x] Revue APPROVE du reviewer (3 cycles max) et merge `--no-ff` dans `main` (DoD).
 Notes techniques / dépendances : secdevops. À réviser avant R6 (comptes) et R7 (import). Les stories SEC-01 à SEC-05 en sont issues.
 
 ### US-003 — Architecture socle et modèle de données du setup  [Must | 3 pts]
@@ -63,7 +63,8 @@ Critères d'acceptation :
 - [ ] Le catalogue d'objets est décrit par des données (`assets/catalog/`), indépendamment du code de la scène.
 - [ ] Les textes de l'interface passent par un système i18n (anglais par défaut ; le français reste une option ultérieure non engagée).
 - [ ] *(sécurité)* Le catalogue est validé par schéma en test (clés de prototype rejetées, bornes cohérentes `min ≤ défaut ≤ max`).
-Notes techniques / dépendances : developer + graphics-engineer + devops. Dépend de US-001. Le catalogue du technical-artist existe déjà (10 fichiers JSON, matériaux, styles) : la story le charge et le valide.
+- [ ] *(corrections docs issues de la revue US-002, à faire avant SEC-03a)* Dans `docs/architecture.md` : la CSP de « Sécurité transverse » (~l.608) est identique à celle d'ADR-OPS-06 (`form-action 'none'`, `upgrade-insecure-requests`) ; HSTS est ajouté à ADR-OPS-06 ; ADR-OPS-03 indique que la génération des en-têtes revient à SEC-03a (pas encore faite) ; « Vitest 3 » devient « Vitest 4.1 » (~l.853). Vérifiable par `grep` : plus aucune occurrence de « Vitest 3 », une seule CSP.
+Notes techniques / dépendances : developer + graphics-engineer + devops. Dépend de US-001. **État au 2026-10-20 : IN PROGRESS** (branche `feature/US-003-architecture-socle`). Le catalogue du technical-artist existe déjà (10 fichiers JSON, matériaux, styles) : la story le charge et le valide.
 
 ### SEC-01 — Pipeline sécurité en CI  [Must | 3 pts]
 En tant qu'équipe, je veux que chaque PR soit scannée (secrets, SAST, dépendances, licences, workflows, build) afin qu'aucune vulnérabilité CRITICAL/HIGH ni aucun secret n'atteigne `main`.

@@ -15,7 +15,7 @@
 | US-004 | Scène 3D de base et caméra orbitale | [UI][3D] | Must | 5 | **engagement conditionnel** (voir risques) |
 | **Total** | | | | **16** | capacité par défaut : 15 |
 
-Le total dépasse la capacité de 1 point : US-001 et US-002 sont déjà largement produites (CI et threat model écrits), leur reste à faire est de la vérification. Si US-001 est retardé par l'installation de Node/pnpm, **US-004 est la première story retirée du sprint** (retour dans le backlog, sans impact sur les autres). US-005 (shell, 5 pts) ouvre le Sprint 2, avec US-006, SEC-02 et SEC-03.
+Le total dépasse la capacité de 1 point : US-001 et US-002 sont déjà largement produites (CI et threat model écrits), leur reste à faire est de la vérification. Si US-001 est retardé par l'installation de Node/pnpm, **US-004 est la première story retirée du sprint** (retour dans le backlog, sans impact sur les autres). US-005 (shell, 5 pts) ouvre le Sprint 2, avec US-006, SEC-02, SEC-03a et SEC-03b.
 
 Vitesse : aucun historique, 15 pts/sprint par défaut. Plan de release : 95 pts MVP, 7 sprints estimés (`docs/backlog.md`).
 
@@ -23,7 +23,8 @@ Vitesse : aucun historique, 15 pts/sprint par défaut. Plan de release : 95 pts 
 
 1. **Levé** : Node v24.20.0 et pnpm 10.34.7 installés (le PATH des shells déjà ouverts peut être périmé ; les agents rechargent le PATH machine+user).
 2. Git LFS : à vérifier par le devops en US-001 T5 (`git lfs install`).
-3. **Dépôt GitHub et push : NON pendant ce sprint (décision PO, 2026-10-19, sprint validé).** US-001 T6 et SEC-01 T5/T6 sont **reportées au Sprint 2**. **Écart consigné** : tant que le push n'est pas fait, la « CI verte » de la DoD se vérifie **en local** avec les mêmes commandes que les jobs CI (`pnpm check`, build, E2E, scans disponibles). US-001 T6 et SEC-01 T5/T6 (exécution réelle de la CI, SARIF, PR de test) restent ouvertes jusqu'à l'accord ; si non obtenu avant la fin du sprint, elles sont reportées au Sprint 2 et signalées en revue.
+3. **Conditions avant le premier push (décision PO à prendre, finding LOW du scan US-002)** : les commits contiennent l'e-mail nominatif de l'auteur dans leurs métadonnées, qui sera publié avec le dépôt public. Choisir : (a) le garder ; (b) passer à une adresse noreply GitHub et réécrire l'historique avant le push. À trancher avant tout push (SEC-03a également requis avant).
+3bis. **Dépôt GitHub et push : NON pendant ce sprint (décision PO, 2026-10-19, sprint validé).** US-001 T6 et SEC-01 T5/T6 sont **reportées au Sprint 2**. **Écart consigné** : tant que le push n'est pas fait, la « CI verte » de la DoD se vérifie **en local** avec les mêmes commandes que les jobs CI (`pnpm check`, build, E2E, scans disponibles). US-001 T6 et SEC-01 T5/T6 (exécution réelle de la CI, SARIF, PR de test) restent ouvertes jusqu'à l'accord ; si non obtenu avant la fin du sprint, elles sont reportées au Sprint 2 et signalées en revue.
 4. **Décisions par défaut confirmées tacitement** : bornes du bureau = catalogue du technical-artist (800–2400 mm). **Révisé le 2026-10-19 (décision secdevops, scan US-001)** : le contrôle `dist/_headers` de `build-hardening` reste **bloquant** (plus d'avertissement) ; SEC-03 est découpée et SEC-03a (génération de `public/_headers`, CSP, 1 pt) est livrée en tête du Sprint 2, avant le premier push.
 
 ## Revue du design avant développement (règle CLAUDE.md)
@@ -54,15 +55,16 @@ Branche : `feature/US-001-repo-build-ci` (implémenteur : devops). Démarrée le
 Références : ADR-OPS-01/02/03 dans `docs/architecture.md`.
 
 ### US-002 — Threat model initial [secdevops] — 2 pts
-Branche : `feature/US-002-threat-model` (docs uniquement).
-Démarrée le 2026-10-19, implémenteur : secdevops. Le threat model a été commité directement sur `main` au kickoff (304e3f9) ; la branche porte les mises à jour.
+Branche : `feature/US-002-threat-model` (docs uniquement). **DONE**, mergée dans `main` (55a93a6).
+Démarrée le 2026-10-19, implémenteur : secdevops. Le threat model a été commité directement sur `main` au kickoff (304e3f9) ; la branche portait les mises à jour.
 - [x] T1 Threat model et définition des scans produits (`docs/security/`).
-- [ ] T2 Relecture/MAJ par secdevops selon les décisions PO (dépôt public, Cloudflare Pages, pas de push au Sprint 1, `_headers` bloquant / SEC-03a avant push, Vitest 4.1) et le scan US-001 (`docs/security/scans/US-001.md`, findings LOW → SEC-06) ; cohérence avec `architecture.md` ; aucun secret, liens exacts.
-- [ ] T3 Revue formelle reviewer du diff contre `main` : APPROVE / CHANGES_REQUESTED (3 cycles max).
-- [ ] T4 Merge `--no-ff` par le devops. Pas de contrôle design ni QA (aucun écran, aucune scène).
+- [x] T2 Relecture/MAJ par secdevops selon les décisions PO et le scan US-001 ; cohérence, aucun secret, liens exacts.
+- [x] T3 Revue reviewer : APPROVE au cycle 2/3.
+- [x] T4 Merge `--no-ff` par le devops. Pas de contrôle design ni QA.
 
 ### US-003 — Architecture socle et modèle de données du setup [developer + graphics-engineer] — 3 pts
-Branche : `feature/US-003-architecture-schema`.
+Branche : `feature/US-003-architecture-socle`. Implémenteur : developer (graphics-engineer si une tâche touche à la scène). Démarrée le 2026-10-20.
+- [ ] T0 **Avant SEC-03a** : corrections de `docs/architecture.md` demandées par la revue US-002 : CSP de « Sécurité transverse » (~l.608) alignée sur ADR-OPS-06 (`form-action 'none'`, `upgrade-insecure-requests`) ; HSTS ajouté à ADR-OPS-06 ; ADR-OPS-03 : génération des en-têtes par SEC-03a (pas encore faite) ; « Vitest 3 » → « Vitest 4.1 » (~l.853).
 - [ ] T1 Créer l'ossature `src/core/` (`schema`, `catalog`, `io`) conforme aux règles de dépendance (ADR-APP-07).
 - [ ] T2 Schéma Zod `SetupV1` (jitless) et types dérivés ; `parseSetup` minimal (taille, JSON, enveloppe, validation stricte).
 - [ ] T3 Chargement et validation du catalogue `assets/catalog/` par schéma (clés de prototype rejetées, `min ≤ défaut ≤ max`) + tests.
@@ -101,8 +103,8 @@ Décisions UX **VALIDÉES par le PO le 2026-10-19** : astuce masquée définitiv
 | Story | Statut (TODO / IN PROGRESS / IN REVIEW / SECURITY / DONE / BLOCKED) | Cycles de review | Notes |
 |---|---|---|---|
 | US-001 | DONE | 2 / 3 | Mergée dans `main` (merge `--no-ff` dfdfcfe). Revue APPROVE au cycle 2 (`docs/reviews/US-001.md` ; cycle 1 bloqué sur l'audit tinypool/vitest, corrigé par Vitest 4.1.12). Secdevops PASS (`docs/security/scans/US-001.md`). Checks locaux verts ; CI distante (T6) reportée au Sprint 2 (décision PO). |
-| US-002 | IN PROGRESS | 0 / 3 | Branche `feature/US-002-threat-model`, implémenteur : secdevops. Reste : MAJ selon décisions PO et scan US-001, revue reviewer, merge devops. |
-| US-003 | TODO | 0 / 3 | Démarre après US-001 T3 (`pnpm check` vert). |
+| US-002 | DONE | 2 / 3 | Mergée dans `main` (55a93a6). Revue APPROVE au cycle 2 (cycle 1 : critères SEC-10 à SEC-50 perdus, remis dans le backlog). Secdevops PASS (`docs/security/scans/US-002.md`, `.gitleaksignore` pour un faux positif). Finding LOW : e-mail nominatif dans les commits, décision PO avant push. |
+| US-003 | IN PROGRESS | 0 / 3 | Branche `feature/US-003-architecture-socle`, developer (+ graphics-engineer si besoin). T0 = corrections architecture.md de la revue US-002, avant SEC-03a. |
 | SEC-01 | TODO | 0 / 3 | Implémenteurs : devops + secdevops. Démarre après US-001 T3 ; `dist/_headers` absent = erreur bloquante de `sec-build-hardening` (ci.yml:270), maintenue (décision secdevops) : SEC-03a doit précéder le premier push ; T5/T6 dépendent du push. |
 | US-004 | TODO | 0 / 3 | Graphics-engineer (+ developer pour la barre). Conditionnelle (capacité). Design requis d'abord (voir section). Dépend de US-001 et US-003. |
 
