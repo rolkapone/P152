@@ -4,16 +4,16 @@
 
 | Indicateur | Valeur |
 |---|---|
-| Points MVP (Must + Should) | **96** (Must 86, Should 10) ; +1 pt : SEC-03a passe de 1 à 2 pts (correctif CSP React Aria, finding MEDIUM US-004) |
+| Points MVP (Must + Should) | **99** (Must 89, Should 10) ; +1 pt : SEC-03a passe de 1 à 2 pts (correctif CSP React Aria, finding MEDIUM US-004) ; **+3 pts le 2026-10-20 : US-005 passe de 5 à 8 pts** (design natif v0.4, décision 32) |
 | Dont stories sécurité (SEC-01 à SEC-05) | 9 (Must 8, Should 1) |
 | Points « Could » MVP (hors total, bonus) | 9 (US-021, US-023, SEC-06) |
-| Points livrés | **16 / 96 = 16,7 %** (Sprint 1 : US-001 3, US-002 2, US-003 3, SEC-01 3, US-004 5, toutes DONE) |
+| Points livrés | **16 / 99 = 16,2 %** (Sprint 1 : US-001 3, US-002 2, US-003 3, SEC-01 3, US-004 5, toutes DONE) |
 | Vitesse moyenne | **16 pts/sprint** (1 sprint terminé, 16 pts livrés ; prévision prudente de 15 pts conservée pour le planning) |
-| Sprint en cours | **Sprint 2** (ouvert le 2026-10-20) : SEC-03a 2 + US-005 5 + US-006 5 + SEC-02 1 = **13 pts engagés**, marge 2 pts ; après le Sprint 2, livrés prévus 29 / 96 (30,2 %), restants 67 |
-| Sprints restants estimés avant MVP | **5 y compris le Sprint 2** (80 pts restants / 16 = 5,0 ; 6 si la vitesse retombe à 15) ; 4 après le Sprint 2 si 13 pts livrés (67 / 16 = 4,2, soit 5 avec arrondi prudent) |
+| Sprint en cours | **Sprint 2** (ouvert le 2026-10-20) : SEC-03a 2 + US-005 **8** + US-006 5 + SEC-02 1 = **16 pts engagés** (capacité prudente 15 : dépassement de 1 pt, marge 0 ; SEC-02 peut glisser au Sprint 3) ; après le Sprint 2, livrés prévus 32 / 99 (32,3 %), restants 67 |
+| Sprints restants estimés avant MVP | **6 y compris le Sprint 2** (83 pts restants / 16 = 5,2 ; 6 si la vitesse retombe à 15) ; 5 après le Sprint 2 (67 / 16 = 4,2, arrondi prudent) |
 | Dernière mise à jour | 2026-10-20 (SEC-03a DONE, mergée 42c15cd ; Sprint 2 : 2 / 13 pts engagés livrés ; ouverture du Sprint 2 ; plan dans `docs/sprints/sprint-2.md`). Les SHA de commits cités dans ce document sont périmés (historique réécrit) : voir `git log --merges --oneline main` |
 
-Détail du recalcul : 83 pts (kickoff) + SEC-01 (3) + SEC-02 (1) + SEC-03a (2 depuis la fin du Sprint 1) + SEC-03b (1) + SEC-04 (1) + SEC-05 (1) + US-024 (2, réglages d'alertes) + US-025 (2, Help et préférences d'affichage) = **96**. Les autres éléments issus de US-004 (dette, mineurs QA) sont des critères ajoutés à des stories existantes ou à SEC-06 (Could), sans point supplémentaire ; à réestimer au planning du Sprint 2 s'ils pèsent.
+Détail du recalcul : 83 pts (kickoff) + SEC-01 (3) + SEC-02 (1) + SEC-03a (2 depuis la fin du Sprint 1) + SEC-03b (1) + SEC-04 (1) + SEC-05 (1) + US-024 (2, réglages d'alertes) + US-025 (2, Help et préférences d'affichage) = 96, puis +3 (US-005 5 → 8, restylage natif v0.4) = **99**. Les autres éléments issus de US-004 (dette, mineurs QA) sont des critères ajoutés à des stories existantes ou à SEC-06 (Could), sans point supplémentaire ; à réestimer au planning du Sprint 2 s'ils pèsent.
 Hypothèse : le premier déploiement public n'a lieu qu'à la fin du MVP (SEC-03a avant le premier push, SEC-03b avant ce déploiement, SEC-05 juste avant la release).
 
 Légende : priorité MoSCoW, estimation en points (1, 2, 3, 5, 8). Tags `[UI]` = écran, `[3D]` = scène/rendu/assets.
@@ -213,7 +213,8 @@ Décisions UX **VALIDÉES par le PO le 2026-10-19** :
 Notes techniques / dépendances : graphics-engineer + technical-artist ; ux-designer/ui-designer pour la barre flottante de scène. Dépend de US-001, US-003. Références : maquette `docs/design/ui/maquettes/index.html` (barre de scène), `docs/design/3d/apercu/index.html`, `docs/design/3d/direction-artistique.md` §3 et §10, wireframe W2.
 Références de design US-004 : UX `docs/design/ux/stories/US-004.md` ; maquette `docs/design/ui/maquettes/US-004.html` (**section 7 = consignes developer**, `docs/design/ui/design-system.md` §14) ; paramètres de scène `assets/catalog/scene/studio.json` ; spécification 3D `docs/design/3d/US-004-scene.md` (transition caméra 480 ms, cible (0 ; 0,72 ; 0), caméra jamais sous Y = 0,9 m ni dans le bureau).
 
-### US-005 — Shell de l'application en anglais  [UI] [Must | 5 pts]
+### US-005 — Shell de l'application en anglais  [UI] [Must | 8 pts]
+> **Réestimée de 5 à 8 pts le 2026-10-20** (décision 32) : la direction v0.4 « Natif · Premium · Précis » ajoute la fenêtre macOS (barre d'outils unifiée, barre latérale, inspecteur), le repli iPadOS/iOS, 4 matériaux translucides, l'échelle typographique Apple en Inter et le restylage de la barre de vue, de l'astuce et des écrans de US-004. **Les critères « panneaux flottants », « verre 86 % » et « 758 px » ci-dessous sont remplacés par ceux de la rubrique v0.4** (le critère v0.4 prime en cas de conflit). Redécoupage envisageable si le developer le demande (ex. restylage de US-004 en story à part).
 En tant qu'utilisateur, je veux une interface claire en anglais (zone 3D, panneau d'objets, panneau de propriétés, alertes) afin de m'y repérer sans aide.
 Critères d'acceptation :
 - [ ] Étant donné l'app, quand elle se charge, alors la mise en page (wireframe W2) affiche la scène plein viewport avec top bar, panneau gauche (onglets Desk / Objects), panneau droit (Properties puis Alerts) et astuce en pied, en panneaux flottants ; les deux panneaux latéraux sont repliables.
@@ -255,6 +256,12 @@ Critères d'acceptation :
   - UX-22 Focus dans un panneau ou la top bar : 0, 1, 2, flèches, + et - ne déplacent pas la caméra.
 - [ ] *(suivi US-004, ui-designer)* La maquette `docs/design/ui/maquettes/US-004.html` et `design-system.md` §9 et §14 sont mis à jour : l'info-bulle s'affiche **immédiatement** au focus clavier (le délai ~400 ms ne vaut que pour le survol souris), conformément au comportement livré et à UX-4.
 - [ ] *(budget de taille, suivi US-004)* Un budget est fixé et vérifié par `check:bundle` (ou un script dédié) : mesures actuelles = chunk principal 153,8 Ko gz, chunk 3D 266 Ko gz ; le seuil (valeur proposée par le developer et le graphics-engineer, validée par le PO) fait échouer le build en cas de dépassement ; le chunk 3D reste chargé en `lazy()`.
+- [ ] **Design v0.4 « Natif · Premium · Précis » (décision PO 32)** — références : `docs/design/ui/design-system.md` v0.4 (§12, §15, §16, §18 impact code), maquettes `US-004.html`, `US-005.html`, `US-006.html` :
+  - Fenêtre macOS : barre d'outils unifiée, barre latérale (gauche) et inspecteur (droite) ; repli iPadOS puis iOS ; 4 matériaux translucides avec repli opaque (`.no-glass`, `prefers-reduced-transparency`, sans `backdrop-filter`) ; échelle typographique de type Apple en Inter ; icônes Lucide ; **ni SF Pro, ni SF Symbols, ni logo Apple**.
+  - **Bascules des deux volets dans la barre d'outils** (écart UX validé) ; **UX-5 adapté** : l'ordre de Tab place la bascule droite **juste après** la bascule gauche (Skip to 3D view, Skip to alerts, bascule gauche, bascule droite, onglet sélectionné, contenu de l'onglet, viewport, Reset view, Top, Front, (Got it, Hide tip)).
+  - **Restylage des écrans de US-004 selon §18** : barre de vue, astuce, états vide / chargement / erreur ; bouton principal en `--color-accent-solid` ; **coche à la place du contour 2 px** pour l'élément actif ; **zone libre de 806 px à 1366** (remplace 758 px dans UX-8/UX-21 et UX-1 : les largeurs des volets suivent §15). Tests E2E et marges de cadrage (≥ 24 px) à ajuster.
+  - Contrastes AA vérifiés sur chaque matériau, clair et sombre ; contrôle design contre les maquettes v0.4.
+  - La **Liquid Glass** n'est pas dans cette story (voir US-025).
 Références de design US-005 : UX `docs/design/ux/stories/US-005.md` ; maquette `docs/design/ui/maquettes/US-005.html` ; `docs/design/ui/design-system.md` §15 (shell), §9 et §14 (mis à jour). Le graphics-engineer ajuste le cadrage à la zone libre (UX-8, marge de vue en pixels).
 Notes techniques / dépendances : ux-designer, ui-designer, developer. Dépend de US-001. Références : maquette `docs/design/ui/maquettes/index.html`, `docs/design/ui/design-system.md` §2–§5 et §9, wireframes W2 et W11. Les ESLint `boundaries` et `i18next` arrivent avec cette story (écart ADR consigné).
 
@@ -270,6 +277,7 @@ Critères d'acceptation :
 - [ ] Bornes du catalogue (décision PO 30) : rectangulaire largeur 800–2400, profondeur 500–1000, hauteur 600–1300 mm ; angle 1200–2400 × 1000–2000 mm. Le catalogue est validé par le schéma (`min ≤ défaut ≤ max`) et **le test « a catalog without any desk » de `validate.test.ts` est corrigé** par le developer (les données desk.json v2 et desk-corner.json, commit cd27e44 de la branche, le font échouer).
 - [ ] **Ombre de contact allégée** (décision PO 29, ex-marge) : opacité 0,24 ; empreinte = bureau − 200×140 mm, **dérivée du bureau choisi** (pas de valeur fixe) ; le keep-out de la caméra est aussi dérivé du bureau choisi (graphics-engineer).
 - [ ] Aucun « Custom size » (US-007), aucune modale (US-020), aucun champ de saisie ni bouton mort n'est présent dans l'onglet à US-006.
+- [ ] *(design v0.4, décision PO 32 ; `design-system.md` §16, maquette `US-006.html`)* **La liste des bureaux est un groupe unique avec filets de séparation** (écart UX validé) : lignes sans cartes séparées ni espacement de 8 px entre elles ; **ligne active = coche** (plus de contour accent 2 px). UX-1 (espace ≥ 8 px entre lignes), UX-6 (contour 2 px) et UX-13 à adapter en conséquence : hauteur de ligne ≥ 56 px conservée, filet visible ≥ 3:1 non requis (décoratif), état actif non porté par la couleur seule.
 - [ ] **Critères UX testables (ux-designer, `docs/design/ux/stories/US-006.md` §10, UX-1 à UX-17)** :
   - UX-1 Titre « Choose your desk », aide, 7 lignes ; chaque ligne : vignette, « L × P cm », nom ; hauteur ≥ 56 px, espace ≥ 8 px.
   - UX-2 `role="radiogroup"` nommé « Desk model » ; exactement une ligne `aria-checked="true"` en permanence ; un seul arrêt de Tab.
@@ -456,6 +464,7 @@ Critères d'acceptation :
 - [ ] Une option **"Reduce transparency"** (bascule) dans Help applique la classe `.no-glass` (fond opaque, sans flou) en plus de la préférence système `prefers-reduced-transparency` ; le choix est mémorisé (préférences locales) et s'applique sans rechargement.
 - [ ] Un choix de thème "System / Light / Dark" (défaut = System) dans Help ; `data-theme` prime sur la préférence système.
 - [ ] Modale opaque, focus piégé, Échap ferme, libellés accessibles, AA.
+- [ ] *(décision PO 32, optionnel — Should/Could, à arbitrer ; ne change pas les 2 pts tant qu'il n'est pas engagé)* **Apparence « Liquid Glass »** : choix optionnel d'apparence (Standard / Liquid Glass) dans Help, désactivé par défaut, sans effet sur la mise en page, repli sur le matériau standard avec `.no-glass` / `prefers-reduced-transparency` ; exploration : `docs/design/ui/maquettes/explorations/liquid-glass.html`. Si le travail pèse, créer une story dédiée en R2/R3 (« Apparence Liquid Glass », ≈ 3 pts, [UI]).
 Notes techniques / dépendances : developer, ui-designer. Dépend de US-005. Référence : wireframe W10, design system §2 et §5. Reçoit la mention de confidentialité de SEC-04.
 
 ### US-022 — Budgets de performance et tests E2E de référence  [Must | 3 pts]
@@ -662,6 +671,13 @@ Prérequis : threat model upload, quotas.
 29. **Shell (US-005)** : Undo/Redo masqués jusqu'à US-019 ; verdict vide « Nothing to check yet » ; onglet Objects visible avec état vide ; nom affiché « Deskfit » ; texte `failed` neutre avec « Reload page » au 2e échec ; `tooManyObjects` reformulé ; `tooLarge` gardé en « 1 MB ». → US-005, US-018.
 30. **Bureaux (US-006)** : catalogue de 7 bureaux (5 rectangulaires 100×60, 120×60, 140×70, 160×80, 180×80 ; 2 d'angle 160×140 et 180×160) ; angle orienté à droite ce sprint et sans « Custom size » ; flèches du clavier appliquent directement le bureau ; vignettes SVG dessinées par l'UI ; bornes rect 800–2400 × 500–1000 × 600–1300 mm, angle 1200–2400 × 1000–2000 mm. → US-006, US-007.
 31. **Ombre de contact allégée** : opacité 0,24, empreinte = bureau − 200×140 mm, dérivée du bureau ; keep-out de la caméra dérivé du bureau. → US-006 (et non US-008).
+
+## Design natif et workflow (validé le 2026-10-20)
+32. **Design « app native Apple premium » v0.4 « Natif · Premium · Précis » VALIDÉ** (le v0.3 ne convenait pas) : fenêtre macOS (barre d'outils unifiée, barre latérale, inspecteur), repli iPadOS et iOS, 4 matériaux translucides, échelle typographique Apple avec Inter, Lucide ; toujours sans SF Pro, SF Symbols ni logo Apple. Écarts UX validés : bascules de volets dans la barre d'outils (Tab : droite juste après gauche) ; liste des bureaux en groupe unique avec filets. **US-005 réestimée à 8 pts** (restylage de US-004 inclus). → US-005, US-006.
+33. **Liquid Glass** : apparence optionnelle plus tard, rattachée à US-025 (ou story R2/R3) ; exploration `docs/design/ui/maquettes/explorations/liquid-glass.html`. → US-025.
+34. **Ordre produit inchangé** : le MVP reste sur « ça rentre ? » ; le design suit en R2 (styles, matières), R3 (ambiance), R4 (modèles 3D libres CC0/CC-BY). Blender servira en R4 (préparation des modèles) ; **le PO sera prévenu avant**.
+35. **Workflow GitHub** : chaque story = branche poussée + **Pull Request ouverte par le devops** (description : story, critères, liens vers les rapports de revue / design / QA / sécurité) ; la CI tourne sur la PR ; **merge via la PR (commit de merge)**.
+36. **Jamais versionnés** : `.claude/`, `CLAUDE.md`, `LISEZMOI-EQUIPE.md` (purge de l'historique et force-push de `main` en cours). Premier push fait ; première CI : 12 jobs verts, e2e rouge (timeouts du runner, correction par le qa-tester sur `fix/ci-e2e-runner-timeouts`).
 
 ## Questions encore ouvertes (long terme, non bloquantes)
 - Affiliation compatible avec la neutralité de la marque (R5, threat model §12 q.1).
