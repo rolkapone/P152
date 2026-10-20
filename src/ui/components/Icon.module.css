@@ -1,0 +1,24 @@
+.icon {
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Icon sizes follow the spacing scale: 16 / 20 / 24 px. */
+.sm {
+  width: var(--space-4);
+  height: var(--space-4);
+}
+
+.md {
+  width: var(--space-5);
+  height: var(--space-5);
+}
+
+.lg {
+  width: var(--space-6);
+  height: var(--space-6);
+}
