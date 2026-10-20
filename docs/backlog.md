@@ -7,10 +7,10 @@
 | Points MVP (Must + Should) | **95** (Must 85, Should 10) |
 | Dont stories sécurité (SEC-01 à SEC-05) | 8 (Must 7, Should 1) |
 | Points « Could » MVP (hors total, bonus) | 9 (US-021, US-023, SEC-06) |
-| Points livrés | 8 (US-001 DONE le 2026-10-19 ; US-002 et US-003 DONE le 2026-10-20) |
+| Points livrés | 11 (US-001 DONE le 2026-10-19 ; US-002, US-003 et SEC-01 DONE le 2026-10-20) |
 | Vitesse moyenne | 15 pts/sprint (par défaut, pas d'historique ; recalcul en fin de Sprint 1) |
-| Sprints restants estimés avant MVP | **6** (87 pts restants / 15 = 5,8 arrondi à 6) |
-| Dernière mise à jour | 2026-10-20 (Sprint 1 en cours : US-001, US-002, US-003 DONE ; SEC-01 IN PROGRESS) |
+| Sprints restants estimés avant MVP | **6** (84 pts restants / 15 = 5,6 arrondi à 6 ; US-004, 5 pts, IN PROGRESS comprise dans les restants) |
+| Dernière mise à jour | 2026-10-20 (Sprint 1 en cours : US-001, US-002, US-003, SEC-01 DONE ; US-004 IN PROGRESS, sprint à 16 pts pour 15, accepté) |
 
 Détail du recalcul : 83 pts (kickoff) + SEC-01 (3) + SEC-02 (1) + SEC-03a (1) + SEC-03b (1) + SEC-04 (1) + SEC-05 (1) + US-024 (2, réglages d'alertes) + US-025 (2, Help et préférences d'affichage) = **95**.
 Hypothèse : le premier déploiement public n'a lieu qu'à la fin du MVP (SEC-03a avant le premier push, SEC-03b avant ce déploiement, SEC-05 juste avant la release).
@@ -75,14 +75,14 @@ Notes techniques / dépendances : developer + graphics-engineer + devops. Dépen
 
 ### SEC-01 — Pipeline sécurité en CI  [Must | 3 pts]
 En tant qu'équipe, je veux que chaque PR soit scannée (secrets, SAST, dépendances, licences, workflows, build) afin qu'aucune vulnérabilité CRITICAL/HIGH ni aucun secret n'atteigne `main`.
-**État au 2026-10-20 : IN PROGRESS** (branche `feature/SEC-01-pipeline-securite`, devops + secdevops). Les jobs sont déjà dans `ci.yml` depuis le kickoff (304e3f9) ; le sprint 1 porte la vérification locale. CI distante, SARIF et PR de test reportés au Sprint 2 (décision PO, pas de push).
+**État au 2026-10-20 : DONE.** Mergée dans `main` (360a597). Revue APPROVE au cycle 1/3 ; secdevops PASS. La PR de test distante et le SARIF sont reportés au Sprint 2 (décision PO, pas de push) ; les findings restants sont tracés dans SEC-06.
 Critères d'acceptation :
-- [ ] Le slot `# SECDEVOPS-SLOT` de `ci.yml` contient les jobs de `docs/security/ci-security.md` (gitleaks, CodeQL, Semgrep, zizmor, SCA + licences, `build-hardening`) et un job agrégateur `security` requis par `ci-ok`.
+- [x] Le slot `# SECDEVOPS-SLOT` de `ci.yml` contient les jobs de `docs/security/ci-security.md` (gitleaks, CodeQL, Semgrep, zizmor, SCA + licences, `build-hardening`) et un job agrégateur `security` requis par `ci-ok`.
 - [ ] *(reporté au Sprint 2 : exige le dépôt distant, décision PO 2026-10-19)* Une PR de test contenant un faux secret, un `innerHTML`, une dépendance vulnérable HIGH, et un `dist` contenant `__p152test` fait échouer la CI (4 cas vérifiés puis annulés).
-- [ ] `.gitleaks.toml`, `.semgrep/p152.yml`, `scripts/check-licenses.mjs`, `.github/dependabot.yml` et le workflow hebdomadaire sont en place ; actions et images épinglées par SHA/digest.
-- [ ] *(vérification locale, Sprint 1)* Chaque job de sécurité est exécuté en local avec la même commande que dans `ci.yml` (gitleaks, SCA + licences, zizmor, `build-hardening` hors contrôle `_headers`, Semgrep) et le résultat est consigné dans `docs/ci/local-run-SEC-01.md` ; ce qui n'est pas exécutable en local (CodeQL, Semgrep si Docker est arrêté) est listé comme non vérifié, jamais comme vert.
-- [ ] *(vérification locale)* Les 4 cas négatifs (faux secret, `innerHTML`, dépendance HIGH, `__p152test` dans `dist`) sont rejoués en local sur une copie jetable, chacun fait échouer la commande du job correspondant, puis tout est annulé (arbre propre) ; les cas non faisables sont consignés.
-- [ ] `docs/security/ci/` porte un bandeau « obsolète : les fichiers actifs sont à la racine / dans `.github/` » (finding de la revue US-002).
+- [x] `.gitleaks.toml`, `.semgrep/p152.yml`, `scripts/check-licenses.mjs`, `.github/dependabot.yml` et le workflow hebdomadaire sont en place ; actions et images épinglées par SHA/digest.
+- [x] *(vérification locale, Sprint 1)* Chaque job de sécurité est exécuté en local avec la même commande que dans `ci.yml` (gitleaks, SCA + licences, zizmor, `build-hardening` hors contrôle `_headers`, Semgrep) et le résultat est consigné dans `docs/ci/local-run-SEC-01.md` ; ce qui n'est pas exécutable en local (CodeQL, Semgrep si Docker est arrêté) est listé comme non vérifié, jamais comme vert.
+- [x] *(vérification locale)* Les 4 cas négatifs (faux secret, `innerHTML`, dépendance HIGH, `__p152test` dans `dist`) sont rejoués en local sur une copie jetable, chacun fait échouer la commande du job correspondant, puis tout est annulé (arbre propre) ; les cas non faisables sont consignés.
+- [x] `docs/security/ci/` porte un bandeau « obsolète : les fichiers actifs sont à la racine / dans `.github/` » (finding de la revue US-002).
 - [ ] *(reporté au Sprint 2 : exige le dépôt distant)* Les rapports SARIF remontent dans l'onglet Code scanning.
 Notes techniques / dépendances : devops + secdevops. Dépend de US-001 (CI exécutée au moins une fois). Le contrôle `dist/_headers` de `build-hardening` **reste bloquant** (décision secdevops, scan US-001) : il n'y a pas d'avertissement toléré. La génération de `public/_headers` est donc livrée par SEC-03a **avant le premier push** (Sprint 2, en tête). Les findings LOW du scan US-001 sont regroupés dans SEC-06.
 
@@ -123,7 +123,13 @@ Critères d'acceptation :
 - [ ] Dependabot (`docker-compose`) suit les digests des images semgrep et playwright, ou une procédure de mise à jour documentée les remplace.
 - [x] L'agrégateur `security` de `ci.yml` traite un job `skipped` comme un échec (aujourd'hui seuls `failure` et `cancelled` font échouer l'agrégation ; aligner sur `ci-ok`, qui exige `success`). *(fait dans SEC-01, branche non mergée)*
 - [ ] Migration d'ESLint 9 (déprécié) vers la version supportée, ADR consigné, `pnpm check` vert.
-Notes techniques / dépendances : devops + secdevops. Source : `docs/security/scans/US-001.md`. Hors total MVP (Could).
+- [ ] *(MEDIUM, scan SEC-01)* `ci.yml:117` : `--config .gitleaks.toml` obligatoire sur la commande gitleaks ; un `CODEOWNERS` couvre `.gitleaks.toml` et `.github/` (voir aussi SEC-02).
+- [ ] L'en-tête « Brouillon » de `scripts/check-licenses.mjs` et des brouillons de `docs/security/ci/` est retiré ou corrigé ; coquille « n est » corrigée.
+- [ ] `docs/ci/local-run-SEC-01.md` est exact : persona auditor (7 low) et formulation « extraites sauf écarts signalés » corrigées.
+- [ ] Les échecs de `security-scheduled.yml` déclenchent un agrégateur ou une notification (lien avec SEC-02).
+- [ ] *(au premier push)* `upload-sarif` fonctionne dans le conteneur semgrep et `security-events: write` est géré pour les PR de forks.
+- [ ] *(dette de test)* Un test sur 190 a échoué une fois dans `pnpm check` sous charge, puis est passé 6 fois : identifier le test instable (candidat probable : fuzz fast-check, timeout ou seed), le stabiliser (seed fixe ou timeout explicite) et le vérifier par 10 exécutions consécutives sous charge.
+Notes techniques / dépendances : devops + secdevops. Source : `docs/security/scans/US-001.md` et scan SEC-01. Hors total MVP (Could).
 
 ### SEC-04 — Mention « vos données restent dans ce navigateur »  [UI] [Should | 1 pt]
 En tant qu'utilisateur, je veux savoir où sont stockées mes données afin de décider en confiance.
@@ -144,6 +150,7 @@ Notes techniques / dépendances : secdevops. Dernière story du MVP ; dépend de
 
 ### US-004 — Scène 3D de base et caméra orbitale  [UI][3D] [Must | 5 pts]
 En tant qu'utilisateur, je veux tourner, zoomer et me déplacer autour de ma scène afin de voir mon setup sous tous les angles.
+**État au 2026-10-20 : IN PROGRESS.** Branche `feature/US-004-scene-3d-camera` ; graphics-engineer (scène, caméra) puis developer (barre de vue, astuce, états UI) sur la même branche.
 Critères d'acceptation :
 - [ ] Étant donné la scène, quand je fais glisser la souris (clic gauche sur le vide), alors la caméra tourne autour du bureau.
 - [ ] Quand j'utilise la molette, alors la caméra zoome entre une distance min et max sans traverser le bureau ni passer sous le plateau.
