@@ -1,14 +1,21 @@
 /**
  * Catalog embedded in the bundle (ADR-APP-09 `CatalogSource`, MVP adapter): the
- * technical-artist JSON files of assets/catalog, picked up at build time. A new
+ * technical-artist JSON files of assets/catalog, picked up at build time by Vite. A new
  * object type is added by dropping a file in assets/catalog/object-types/, no code change.
+ * Lives in persistence/ because it depends on the bundler (`import.meta.glob`); the pure
+ * validation stays in core/catalog (ADR-APP-10).
  */
 import materials from "../../../assets/catalog/materials/materials.json";
 import studio from "../../../assets/catalog/scene/studio.json";
 import styles from "../../../assets/catalog/styles/styles.json";
-import type { CatalogSource } from "../ports";
-import type { Result } from "../result";
-import { validateCatalog, type Catalog, type CatalogFiles, type CatalogIssue } from "./validate";
+import {
+  validateCatalog,
+  type Catalog,
+  type CatalogFiles,
+  type CatalogIssue,
+  type CatalogSource,
+  type Result,
+} from "../../core";
 
 const objectTypeModules: Record<string, unknown> = import.meta.glob(
   "../../../assets/catalog/object-types/*.json",
