@@ -21,7 +21,7 @@ Les critères UX/UI de ce document viennent de `docs/design/ux/principes.md`, `d
 
 ## Questions pour le PO
 
-Questions de fin de Sprint 1 (détail dans `docs/sprints/sprint-1.md`, section « Questions pour le PO ») : A. dépôt GitHub et premier push ; B. e-mail nominatif ou noreply dans les commits ; C. Docker pour Semgrep ; D. ombre de contact ; E. texte de l'état `failed` ; F. contenu du Sprint 2 ; G. questions long terme.
+Questions A à F de fin de Sprint 1 : **répondues le 2026-10-20** (voir « Décisions du PO » en fin de document, n° 22 à 28) ; G reste ouverte. Détail dans `docs/sprints/sprint-1.md`, section « Questions pour le PO ») : A. dépôt GitHub et premier push ; B. e-mail nominatif ou noreply dans les commits ; C. Docker pour Semgrep ; D. ombre de contact ; E. texte de l'état `failed` ; F. contenu du Sprint 2 ; G. questions long terme.
 
 1. **Bornes du bureau (non bloquant avant US-006/US-007)** : US-007 et le wireframe W3 annoncent largeur 600–3000 mm, mais le catalogue du technical-artist définit largeur 800–2400, profondeur 500–1000, hauteur 600–1300 mm. Quelles bornes retenir ? Par défaut, l'équipe applique les bornes du catalogue (source de vérité exécutable) et corrige les textes UX.
 
@@ -587,6 +587,15 @@ Prérequis : threat model upload, quotas.
 19. **Nom provisoire « Deskfit »**.
 20. **Thème par défaut = système** (clair/sombre). → US-005, US-025.
 21. **Rendu 3D « photo produit en studio »**. → US-004.
+
+## Fin du Sprint 1 (validées le 2026-10-20)
+22. **Sprint 1 validé** par le PO.
+23. **Dépôt GitHub public** sur le compte personnel du PO (le privé bloquerait CodeQL, SARIF, dependency-review et la protection de branche en plan gratuit). Le PO crée le dépôt vide et donne l'URL. Premier push après SEC-03a et MFA activée (threat model §14). → SEC-02, SEC-03a.
+24. **E-mail professionnel jamais utilisé.** Avant le premier push : historique réécrit avec l'adresse noreply GitHub du PO, `user.email` configuré localement. Condition bloquante.
+25. **Docker autorisé** pour Semgrep.
+26. **Ombre de contact à alléger** (avec le technical-artist). → US-004 / DA 3D.
+27. **Texte neutre de l'état `failed`** accepté. → US-005.
+28. **Sprint 2 accepté** : SEC-03a, US-005, US-006, SEC-02 (+ marge SEC-06 ou SEC-03b). **MVP à 96 points** confirmé.
 
 ## Questions encore ouvertes (long terme, non bloquantes)
 - Affiliation compatible avec la neutralité de la marque (R5, threat model §12 q.1).

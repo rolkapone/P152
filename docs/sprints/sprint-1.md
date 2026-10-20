@@ -190,7 +190,19 @@ Prérequis : Node 24 et pnpm 10 (si une commande est « introuvable », ouvrir u
 4. **Environnement** : demander au PO d'ouvrir Docker Desktop au début du sprint (Semgrep), et faire recharger le PATH par chaque agent au démarrage. Responsable : orchestrateur.
 5. **Découper le travail des agents en tâches courtes**, avec commit après chaque tâche, pour résister aux interruptions par limite d'usage. Responsable : orchestrateur / scrum-master.
 
-## Questions pour le PO
+## Décisions du PO (2026-10-20) — Sprint 1 validé
+
+Le PO a validé le Sprint 1 et répondu aux questions A à G (texte d'origine conservé ci-dessous).
+
+- **A, dépôt GitHub** : sur le compte personnel GitHub du PO, dépôt **public**. Le PO préférait le privé mais l'accepte public : en plan gratuit un dépôt privé n'a ni CodeQL, ni upload SARIF, ni dependency-review (pas de GitHub Advanced Security), ni protection de branche. Public est conforme aux ADR existants. Le PO crée le dépôt vide et fournit l'URL. **Premier push seulement après SEC-03a** (en-têtes et CSP, correctif React Aria compris) **et MFA activée** (threat model §14).
+- **B, e-mail** : l'e-mail professionnel ne doit **jamais** être utilisé. **Condition explicite avant le premier push** : réécrire l'historique avec l'adresse noreply GitHub du PO et configurer `user.email` localement dans le dépôt ; vérifier ensuite qu'aucun commit ne contient l'ancienne adresse.
+- **C, Semgrep** : Docker peut être utilisé.
+- **D, ombre de contact** : à alléger, avec le technical-artist.
+- **E, état `failed`** : texte neutre accepté (US-005).
+- **F, Sprint 2** : proposition acceptée (SEC-03a, US-005, US-006, SEC-02 ; marge pour la dette de test SEC-06 ou SEC-03b). MVP à **96 points** (SEC-03a à 2 points) accepté. Sprint 2 non ouvert.
+- **G, questions long terme** : restent ouvertes.
+
+## Questions pour le PO (réponses ci-dessus)
 
 A. **Premier push et dépôt GitHub** : créer le dépôt public et pousser maintenant (après SEC-03a et le correctif CSP React Aria, en tête du Sprint 2) ? Sans accord, la CI distante, le SARIF et SEC-02 restent bloqués.
 B. **E-mail dans les commits** : garder l'e-mail nominatif (public avec le dépôt) ou passer à une adresse noreply GitHub avec réécriture de l'historique avant le push ? À trancher avant le push.
