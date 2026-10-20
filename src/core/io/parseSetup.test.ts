@@ -241,6 +241,18 @@ describe("parseSetup: size limit (1 MiB)", () => {
     expect(checkDeclaredSize(0)).toBeNull();
   });
 
+  it("accepts a leading UTF-8 BOM, but only once and only at the start", () => {
+    const valid = fixture("valid", "minimal");
+    const withBom = parseSetup(`\uFEFF${valid}`, catalog);
+    expect(withBom.ok).toBe(true);
+    expect(withBom).toEqual(parseSetup(valid, catalog));
+    expect(parseSetup(`\uFEFF\uFEFF${valid}`, catalog).ok).toBe(false);
+    expect(parseSetup(`${valid}\uFEFF`, catalog)).toEqual({
+      ok: false,
+      error: { code: "notJson", path: "" },
+    });
+  });
+
   it("rejects non-string input defensively", () => {
     expect(parseSetup(42 as unknown as string, catalog)).toEqual({
       ok: false,

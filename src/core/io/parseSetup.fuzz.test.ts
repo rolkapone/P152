@@ -174,7 +174,7 @@ describe("parseSetup fuzzing", () => {
             JSON.stringify(key),
           );
           const result = parseSetup(text, catalog);
-          expect(result.ok).toBe(false);
+          expect(result.ok ? null : result.error.code).toBe("forbiddenKey");
           expect(({} as Record<string, unknown>)["polluted"]).toBeUndefined();
         },
       ),
