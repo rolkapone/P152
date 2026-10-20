@@ -29,6 +29,8 @@ export default defineConfig({
       // Ratchet (ADR-APP-08): never lowered. Global threshold added with the first UI (US-005).
       thresholds: {
         "src/core/**": { lines: 95, statements: 95, functions: 95, branches: 90 },
+        // state/ gets the same threshold with its first module (architecture.md, ADR-APP-08).
+        "src/persistence/**": { lines: 90, statements: 90, functions: 90, branches: 90 },
       },
     },
   },
