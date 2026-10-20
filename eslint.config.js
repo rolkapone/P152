@@ -12,6 +12,12 @@ const THREE_PACKAGES = "^(three|@react-three/[^/]+)(/|$)";
 const layers = (...names) => `(^|/)(${names.join("|")})(/|$)`;
 const forbid = (regex, message) => ({ regex, message });
 const boundary = (...patterns) => ["error", { patterns }];
+const RENDER_BOUNDARY = forbid(
+  layers("app", "ui", "persistence"),
+  "render/ imports core/ and state/ only (ADR-APP-07).",
+);
+const RENDER_MATH_FORBIDDEN =
+  "^(three|react|react-dom|@react-three/[^/]+|camera-controls)(/|$)|(^|/)render/scene(/|$)|^\\.\\./scene(/|$)";
 
 // core/ uses a whitelist (ADR-APP-10): relative core/ modules only, plus zod through
 // core/schema/zod.ts and the test tools in its own tests. Any other bare import fails.
@@ -150,11 +156,17 @@ export default tseslint.config(
   },
   {
     files: ["src/render/**/*.{ts,tsx}"],
+    rules: { "no-restricted-imports": boundary(RENDER_BOUNDARY) },
+  },
+  {
+    // render/math is pure (ADR-3D-07): tested in Node, no three.js, React nor camera-controls.
+    files: ["src/render/math/**/*.{ts,tsx,mts,cts}"],
     rules: {
       "no-restricted-imports": boundary(
+        RENDER_BOUNDARY,
         forbid(
-          layers("app", "ui", "persistence"),
-          "render/ imports core/ and state/ only (ADR-APP-07).",
+          RENDER_MATH_FORBIDDEN,
+          "render/math/ is pure: no three.js, React nor camera-controls.",
         ),
       ),
     },
