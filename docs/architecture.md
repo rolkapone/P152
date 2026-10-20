@@ -604,7 +604,7 @@ Tests unitaires et de composants **colocalisés** (`*.test.ts(x)` à côté du f
 
 ### ADR-APP-10 — Socle `core/` livré en US-003 : contrats du schéma v1, du catalogue et des garde-fous
 
-> Statut : **Proposé** (US-003) — accepté à l'APPROVE de la revue. Précise ADR-3D-02, ADR-APP-03/05/07/08 sans les contredire.
+> Statut : **Accepté** (2026-10-20, revue US-003 APPROVE). Précise ADR-3D-02, ADR-APP-03/05/07/08 sans les contredire.
 
 **Contexte.** US-003 livre le premier code de `src/core/` (schéma, catalogue, pipeline d'import) avant toute UI et toute scène. Plusieurs points laissés ouverts par les ADR doivent être fixés pour que US-004 (scène), US-005 (shell) et US-018 (persistance) s'appuient dessus sans refonte.
 
@@ -880,7 +880,7 @@ Principes : (1) une commande locale `pnpm check` rejoue exactement ce que fait l
 |---|---|---|
 | ADR-3D-01 à ADR-3D-09 | Accepté | 2026-10-19 |
 | ADR-APP-01 à ADR-APP-09 | Accepté | 2026-10-19 |
-| ADR-APP-10 | Proposé (US-003), accepté à l'APPROVE de la revue | 2026-10-20 |
+| ADR-APP-10 | Accepté (2026-10-20, revue US-003 APPROVE) | 2026-10-20 |
 | ADR-OPS-01 à ADR-OPS-07 | Accepté | 2026-10-19 |
 
 - **Hébergement du code** : GitHub, dépôt **public** (Actions illimité, CodeQL, rulesets avec `ci-ok` obligatoire possibles). Le dépôt distant n'est **pas encore créé** : création et premier push uniquement sur ordre explicite du PO.
