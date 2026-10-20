@@ -8,3 +8,5 @@ _claude-setup
 *.md
 # Byte-exact attack inputs (US-003, US-018): never reformatted
 tests/fixtures/setups/**/malicious
+# Generated copy of docs/design/ui/tokens.css (byte for byte, tests/unit/tokens-sync.test.ts)
+src/ui/styles/tokens.css
