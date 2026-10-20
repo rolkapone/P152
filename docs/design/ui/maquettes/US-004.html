@@ -56,6 +56,11 @@
   --topbar-h: 56px;
   --panel-left-w: 248px;
   --panel-right-w: 312px;
+  --drawer-max-w: 360px;   /* tiroir (panneau replie < 1024 px) : largeur max */
+  --toggle-size: 40px;     /* bascules de panneau, pastille de verdict */
+  --row-min-h: 56px;       /* ligne de liste de choix (bureaux) */
+  --thumb-w: 56px;         /* vignette de bureau (plan de dessus, echelle commune) */
+  --thumb-h: 44px;
   --focus-width: 3px;
   --focus-offset: 2px;
   --border-width: 1px;
@@ -84,6 +89,7 @@
   --z-menu: 30;
   --z-modal: 40;
   --z-toast: 50;
+  --z-skip: 60;            /* liens d'evitement : au-dessus de tout */
 }
 
 /* ============================ THEME CLAIR ============================ */
@@ -427,7 +433,7 @@ ul.dev{margin:0 0 var(--space-3);padding-left:var(--space-5)}ul.dev li{margin-bo
   </div>
 
   <h2 class="sec" id="ready">1. Scene ready (nominal, tip visible)</h2>
-  <p class="muted small">Try it: click Top / Front / Reset view, hover or Tab to a button for its tooltip (400 ms, Esc closes), click "Got it" or X (focus moves to Reset view), drag the scene (the pressed button clears), focus the scene (Tab) and press 0, 1 or 2. Fade over 480 ms (<code>--duration-camera</code>, <code>--ease-in-out</code>) stands in for the real camera move.</p>
+  <p class="muted small">Try it: click Top / Front / Reset view, hover a button for its tooltip (400 ms) or Tab to it (immediate; Esc closes), click "Got it" or X (focus moves to Reset view), drag the scene (the pressed button clears), focus the scene (Tab) and press 0, 1 or 2. Fade over 480 ms (<code>--duration-camera</code>, <code>--ease-in-out</code>) stands in for the real camera move.</p>
   <div id="m-ready"></div>
   <div class="mobiles" id="m-ready-mob"></div>
 
@@ -457,7 +463,7 @@ ul.dev{margin:0 0 var(--space-3);padding-left:var(--space-5)}ul.dev li{margin-bo
   <ul class="dev">
     <li><strong>SceneToolbar</strong> (RAC <code>Toolbar</code>, <code>role="toolbar"</code> <code>aria-label="View"</code>): <code>.glass</code> pill, padding <code>--space-2</code> (6 px under 420 px), gap <code>--space-2</code>, bottom-centre at <code>--float-inset</code> from the edge. Buttons: <code>--control-md</code> (36 px) high, pill, icon 20 px + visible label 14 px/500 (no aria-label needed: the text is the name). <strong>Reset view</strong> has no <code>aria-pressed</code>; <strong>Top</strong> and <strong>Front</strong> are toggle buttons (<code>aria-pressed</code>), at most one pressed, cleared by any manual view change and by Reset view.</li>
     <li><strong>Pressed</strong> = <code>--color-accent-subtle</code> fill (opaque) + <code>--color-accent-subtle-text</code> + 2 px <code>--color-accent</code> contour + check icon replacing the view icon (same slot, so no layout shift) + weight 600. With focus: keep the contour, add the standard focus ring.</li>
-    <li><strong>Tooltip</strong>: inverted (<code>--color-text</code> background, <code>--color-surface</code> text), <code>--text-sm</code>, <code>--radius-sm</code>, delay 400 ms on hover and on focus, Esc closes without moving focus, linked with <code>aria-describedby</code>. Align left on the first button, right on the last, to stay inside the scene at 375 px.</li>
+    <li><strong>Tooltip</strong>: inverted (<code>--color-text</code> background, <code>--color-surface</code> text), <code>--text-sm</code>, <code>--radius-sm</code>, delay 400 ms on hover, <strong>immediate on keyboard focus</strong> (updated after the US-004 design check), Esc closes without moving focus, linked with <code>aria-describedby</code>. Align left on the first button, right on the last, to stay inside the scene at 375 px.</li>
     <li><strong>Tip</strong>: <code>.glass</code>, <code>--radius-xl</code>, padding <code>--space-3</code>/<code>--space-4</code>, 14 px, info icon <code>--color-info</code>; "Got it" = secondary <code>Button sm</code>, X = ghost icon button <code>sm</code> (32 px, <code>aria-label="Hide tip"</code>). Below 560 px width the buttons wrap under the text. Max width 720 px, centred above the bar, gap <code>--space-2</code>.</li>
     <li><strong>Loading</strong>: background <code>--scene-floor</code>, text 16/500, <code>role="progressbar"</code> 8 px high (track <code>--color-border</code> + 1 px <code>--color-border-strong</code> inset, fill <code>--color-accent</code>), message in a polite <code>aria-live</code> region. Static under reduced motion.</li>
     <li><strong>Error panel</strong> (WebGL / context lost): opaque card (<code>--color-surface</code>, <code>--radius-xl</code>, <code>--shadow-3</code>, max 520 px), 48 px badge <code>--color-error-bg</code> + <code>--color-error</code> triangle icon, title <code>--text-xl</code>/600 with <code>tabindex="-1"</code> to receive focus, body 16 px <code>--color-text</code>, primary <code>Button</code> "Try again" (<code>.btn.primary</code>, <code>--control-md</code>).</li>
@@ -469,7 +475,7 @@ ul.dev{margin:0 0 var(--space-3);padding-left:var(--space-5)}ul.dev li{margin-bo
     <li>Colour: <code>--color-text</code>, <code>--color-surface</code>, <code>--color-surface-2</code> (hover), <code>--color-accent*</code>, <code>--color-info</code>, <code>--color-error</code>, <code>--color-error-bg</code>, <code>--color-border</code>, <code>--color-border-strong</code>, <code>--color-focus</code>; scene: <code>--scene-bg-top/bottom</code>, <code>--scene-floor</code>. 3D colours of the studio itself come from <code>studio.json</code>.</li>
     <li>Shape and size: <code>--radius-pill</code> (bar, buttons), <code>--radius-xl</code> (tip, error card), <code>--radius-sm</code> (tooltip), <code>--control-md</code>, <code>--control-sm</code>, <code>--control-lg</code>, <code>--space-2/3/4/6/8</code>, <code>--float-inset</code>, <code>--focus-width</code>, <code>--focus-offset</code>.</li>
     <li>Motion: <code>--duration-fast</code> (hover/press), <code>--duration-slow</code> + <code>--ease-spring</code> (bar and tip entrance), <code>--duration-camera</code> + <code>--ease-in-out</code> (view change; 0 ms under reduced motion, which also drops the inertia), <code>--press-scale</code>.</li>
-    <li>No new token was needed.</li>
+    <li>No new token was needed (the tokens added in Sprint 2 for the shell, <code>--toggle-size</code> etc., are not used here).</li>
   </ul>
   <h3>Contrast (WCAG 2.2 AA)</h3>
   <table>
@@ -531,7 +537,7 @@ function errorPanel(o,title,body){
   return '<div class="stage plain '+o.size+'" data-theme="'+o.theme+'" data-kind="error"><div class="gl"><div class="err" role="alert"><span class="badge">'+ico('alert-triangle')+'</span>'+
     '<h2 tabindex="-1">'+title+'</h2><p>'+body+'</p><button class="btn primary" type="button" data-act="retry">Try again</button></div></div></div>';
 }
-var W3=function(o){return errorPanel(o,"The 3D view can't start","Your browser or device doesn't support 3D graphics (WebGL 2). Try updating your browser, turning on hardware acceleration, or opening Deskfit in Chrome, Edge, Firefox or Safari.")};
+var W3=function(o){return errorPanel(o,"The 3D view can't start","Your browser or device doesn't support 3D graphics (WebGL 2). Try updating your browser, turning on hardware acceleration, or opening this page in Chrome, Edge, Firefox or Safari.")};
 var LOST=function(o){return errorPanel(o,'The 3D view stopped','The graphics connection was lost. Try again to restore your desk.')};
 
 function fig(label,html){return '<figure class="fig"><span class="chip">'+label+'</span>'+html+'</figure>'}
@@ -570,7 +576,8 @@ function statesBench(t){
 
 /* ---- interactions (delegated) ---- */
 var ttTimer=new WeakMap();
-function showTT(btn){var tt=btn.parentNode.querySelector('.tt');if(!tt)return;clearTimeout(ttTimer.get(btn));ttTimer.set(btn,setTimeout(function(){tt.classList.add('show')},400))}
+/* Hover: 400 ms. Keyboard focus (:focus-visible): immediate (React Aria behaviour, accepted at the US-004 design check). */
+function showTT(btn,now){var tt=btn.parentNode.querySelector('.tt');if(!tt)return;clearTimeout(ttTimer.get(btn));if(now){tt.classList.add('show');return}ttTimer.set(btn,setTimeout(function(){tt.classList.add('show')},400))}
 function hideTT(btn){var tt=btn.parentNode.querySelector('.tt');clearTimeout(ttTimer.get(btn));if(tt)tt.classList.remove('show')}
 function stageOf(el){return el.closest('.stage')}
 function announce(st,msg){var c=st.nextElementSibling;if(c){var s=c.querySelector('.ann');if(s)s.textContent=msg}}
@@ -586,7 +593,7 @@ function manual(st){
 }
 document.addEventListener('mouseover',function(e){var b=e.target.closest&&e.target.closest('.vb');if(b&&!b.closest('.bench'))showTT(b)});
 document.addEventListener('mouseout',function(e){var b=e.target.closest&&e.target.closest('.vb');if(b&&!b.closest('.bench'))hideTT(b)});
-document.addEventListener('focusin',function(e){var b=e.target.closest&&e.target.closest('.vb');if(b&&!b.closest('.bench'))showTT(b)});
+document.addEventListener('focusin',function(e){var b=e.target.closest&&e.target.closest('.vb');if(b&&!b.closest('.bench')&&b.matches(':focus-visible'))showTT(b,true)});
 document.addEventListener('focusout',function(e){var b=e.target.closest&&e.target.closest('.vb');if(b&&!b.closest('.bench'))hideTT(b)});
 document.addEventListener('keydown',function(e){
   if(e.key==='Escape'){document.querySelectorAll('.tt.show').forEach(function(t){t.classList.remove('show')});return}

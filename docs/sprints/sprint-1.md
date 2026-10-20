@@ -1,5 +1,7 @@
 # Sprint 1 — Fondations et premier rendu
 
+> **Note du 2026-10-20 : SHA périmés.** L'historique git a été réécrit (remplacement de l'e-mail pro par l'adresse noreply GitHub). Tous les SHA de commits cités dans ce document, dans `docs/backlog.md`, `docs/reviews/*.md`, `docs/security/scans/*.md` et `docs/ci/*.md` sont **périmés**. Source de vérité : `git log --merges --oneline main`. Le scrum-master n'a pas d'outil d'exécution git : les SHA de merge du board ne sont pas actualisés (à faire par l'orchestrateur ou le devops, ou à lire dans `git log`).
+
 **Dates** : démarrage le 2026-10-19 (lancement `/sprint 1` par le PO). Premier sprint, aucune rétro précédente.
 **Ordre de priorité** : 1. US-001 (débloque tout) ; 2. US-002 (parallélisable, docs seulement) ; 3. US-003 ; 4. SEC-01 (après US-001 T3, parallélisable avec US-003) ; 5. US-004 (conditionnelle, après US-001 et US-003).
 **Objectif du sprint** : disposer d'une chaîne de livraison vérifiée (build, CI, sécurité, threat model, architecture et schéma de données) et afficher une première scène 3D navigable avec un bureau, en studio.

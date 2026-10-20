@@ -9,8 +9,9 @@
 | Points « Could » MVP (hors total, bonus) | 9 (US-021, US-023, SEC-06) |
 | Points livrés | **16 / 96 = 16,7 %** (Sprint 1 : US-001 3, US-002 2, US-003 3, SEC-01 3, US-004 5, toutes DONE) |
 | Vitesse moyenne | **16 pts/sprint** (1 sprint terminé, 16 pts livrés ; prévision prudente de 15 pts conservée pour le planning) |
-| Sprints restants estimés avant MVP | **5** (80 pts restants / 16 = 5,0 ; 6 si la vitesse retombe à 15) |
-| Dernière mise à jour | 2026-10-20 (fin du Sprint 1 : 5 stories DONE, 16 pts ; revue et rétro dans `docs/sprints/sprint-1.md`) |
+| Sprint en cours | **Sprint 2** (ouvert le 2026-10-20) : SEC-03a 2 + US-005 5 + US-006 5 + SEC-02 1 = **13 pts engagés**, marge 2 pts ; après le Sprint 2, livrés prévus 29 / 96 (30,2 %), restants 67 |
+| Sprints restants estimés avant MVP | **5 y compris le Sprint 2** (80 pts restants / 16 = 5,0 ; 6 si la vitesse retombe à 15) ; 4 après le Sprint 2 si 13 pts livrés (67 / 16 = 4,2, soit 5 avec arrondi prudent) |
+| Dernière mise à jour | 2026-10-20 (ouverture du Sprint 2 ; plan dans `docs/sprints/sprint-2.md`). Les SHA de commits cités dans ce document sont périmés (historique réécrit) : voir `git log --merges --oneline main` |
 
 Détail du recalcul : 83 pts (kickoff) + SEC-01 (3) + SEC-02 (1) + SEC-03a (2 depuis la fin du Sprint 1) + SEC-03b (1) + SEC-04 (1) + SEC-05 (1) + US-024 (2, réglages d'alertes) + US-025 (2, Help et préférences d'affichage) = **96**. Les autres éléments issus de US-004 (dette, mineurs QA) sont des critères ajoutés à des stories existantes ou à SEC-06 (Could), sans point supplémentaire ; à réestimer au planning du Sprint 2 s'ils pèsent.
 Hypothèse : le premier déploiement public n'a lieu qu'à la fin du MVP (SEC-03a avant le premier push, SEC-03b avant ce déploiement, SEC-05 juste avant la release).

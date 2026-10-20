@@ -55,6 +55,11 @@
   --topbar-h: 56px;
   --panel-left-w: 248px;
   --panel-right-w: 312px;
+  --drawer-max-w: 360px;   /* tiroir (panneau replie < 1024 px) : largeur max */
+  --toggle-size: 40px;     /* bascules de panneau, pastille de verdict */
+  --row-min-h: 56px;       /* ligne de liste de choix (bureaux) */
+  --thumb-w: 56px;         /* vignette de bureau (plan de dessus, echelle commune) */
+  --thumb-h: 44px;
   --focus-width: 3px;
   --focus-offset: 2px;
   --border-width: 1px;
@@ -83,6 +88,7 @@
   --z-menu: 30;
   --z-modal: 40;
   --z-toast: 50;
+  --z-skip: 60;            /* liens d'evitement : au-dessus de tout */
 }
 
 /* ============================ THEME CLAIR ============================ */
