@@ -15,7 +15,9 @@ export default defineConfig({
   forbidOnly: isCI,
   // Pas de retry : un test instable est un bug à signaler, pas à masquer (règle QA).
   retries: 0,
-  ...(isCI ? { workers: 2 } : {}),
+  // The 3D view renders with SwiftShader (CPU): more than a few parallel pages saturate the
+  // machine and time out (US-004, measured with 16 workers on 24 threads). Same idea as CI.
+  workers: isCI ? 2 : 4,
   reporter: isCI ? [["list"], ["html", { open: "never" }]] : [["list"]],
   timeout: 30_000,
   expect: {
