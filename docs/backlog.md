@@ -4,15 +4,15 @@
 
 | Indicateur | Valeur |
 |---|---|
-| Points MVP (Must + Should) | **95** (Must 85, Should 10) |
-| Dont stories sécurité (SEC-01 à SEC-05) | 8 (Must 7, Should 1) |
+| Points MVP (Must + Should) | **96** (Must 86, Should 10) ; +1 pt : SEC-03a passe de 1 à 2 pts (correctif CSP React Aria, finding MEDIUM US-004) |
+| Dont stories sécurité (SEC-01 à SEC-05) | 9 (Must 8, Should 1) |
 | Points « Could » MVP (hors total, bonus) | 9 (US-021, US-023, SEC-06) |
-| Points livrés | 11 (US-001 DONE le 2026-10-19 ; US-002, US-003 et SEC-01 DONE le 2026-10-20) |
-| Vitesse moyenne | 15 pts/sprint (par défaut, pas d'historique ; recalcul en fin de Sprint 1) |
-| Sprints restants estimés avant MVP | **6** (84 pts restants / 15 = 5,6 arrondi à 6 ; US-004, 5 pts, IN PROGRESS comprise dans les restants) |
-| Dernière mise à jour | 2026-10-20 (Sprint 1 en cours : US-001, US-002, US-003, SEC-01 DONE ; US-004 IN PROGRESS, sprint à 16 pts pour 15, accepté) |
+| Points livrés | **16 / 96 = 16,7 %** (Sprint 1 : US-001 3, US-002 2, US-003 3, SEC-01 3, US-004 5, toutes DONE) |
+| Vitesse moyenne | **16 pts/sprint** (1 sprint terminé, 16 pts livrés ; prévision prudente de 15 pts conservée pour le planning) |
+| Sprints restants estimés avant MVP | **5** (80 pts restants / 16 = 5,0 ; 6 si la vitesse retombe à 15) |
+| Dernière mise à jour | 2026-10-20 (fin du Sprint 1 : 5 stories DONE, 16 pts ; revue et rétro dans `docs/sprints/sprint-1.md`) |
 
-Détail du recalcul : 83 pts (kickoff) + SEC-01 (3) + SEC-02 (1) + SEC-03a (1) + SEC-03b (1) + SEC-04 (1) + SEC-05 (1) + US-024 (2, réglages d'alertes) + US-025 (2, Help et préférences d'affichage) = **95**.
+Détail du recalcul : 83 pts (kickoff) + SEC-01 (3) + SEC-02 (1) + SEC-03a (2 depuis la fin du Sprint 1) + SEC-03b (1) + SEC-04 (1) + SEC-05 (1) + US-024 (2, réglages d'alertes) + US-025 (2, Help et préférences d'affichage) = **96**. Les autres éléments issus de US-004 (dette, mineurs QA) sont des critères ajoutés à des stories existantes ou à SEC-06 (Could), sans point supplémentaire ; à réestimer au planning du Sprint 2 s'ils pèsent.
 Hypothèse : le premier déploiement public n'a lieu qu'à la fin du MVP (SEC-03a avant le premier push, SEC-03b avant ce déploiement, SEC-05 juste avant la release).
 
 Légende : priorité MoSCoW, estimation en points (1, 2, 3, 5, 8). Tags `[UI]` = écran, `[3D]` = scène/rendu/assets.
@@ -20,6 +20,8 @@ Convention de langue : documents en français ; textes visibles dans l'app en **
 Les critères UX/UI de ce document viennent de `docs/design/ux/principes.md`, `docs/design/ux/wireframes-mvp.md` (W1 à W11) et `docs/design/ui/design-system.md`. Maquettes : `docs/design/ui/maquettes/index.html` ; DA 3D : `docs/design/3d/direction-artistique.md` ; catalogue : `docs/design/3d/assets-mvp.md` et `assets/catalog/`.
 
 ## Questions pour le PO
+
+Questions de fin de Sprint 1 (détail dans `docs/sprints/sprint-1.md`, section « Questions pour le PO ») : A. dépôt GitHub et premier push ; B. e-mail nominatif ou noreply dans les commits ; C. Docker pour Semgrep ; D. ombre de contact ; E. texte de l'état `failed` ; F. contenu du Sprint 2 ; G. questions long terme.
 
 1. **Bornes du bureau (non bloquant avant US-006/US-007)** : US-007 et le wireframe W3 annoncent largeur 600–3000 mm, mais le catalogue du technical-artist définit largeur 800–2400, profondeur 500–1000, hauteur 600–1300 mm. Quelles bornes retenir ? Par défaut, l'équipe applique les bornes du catalogue (source de vérité exécutable) et corrige les textes UX.
 
@@ -73,6 +75,15 @@ Notes techniques / dépendances : developer + graphics-engineer + devops. Dépen
 - **US-018** : libellés `tooLarge` ("1 MB" alors que la limite est 1 Mio) et `tooManyObjects` à valider par l'ux-designer ; `NO_CONTROL_CHARS` laisse passer les caractères C1 et bidi (risque d'usurpation visuelle des noms) ; restriction d'import de `zod` étendue à tout `src/` et E2E CSP sur le vrai `dist` (le jitless de Zod dépend de l'ordre d'import).
 - **US-004, US-008, US-009** : `z.looseObject` dans `StudioSceneSchema` ; les générateurs ne doivent lire que des champs validés (test dédié).
 
+### Dette et suivi issus de US-004 (revue, scan MEDIUM/LOW, QA) — rattachés aux stories indiquées
+- **SEC-03a** : correctif MEDIUM CSP React Aria (voir critère dans SEC-03a).
+- **SEC-06** : drei (LOW) et dette de test (voir critères ajoutés à SEC-06).
+- **US-005** : texte neutre de l'état `failed`, mise à jour maquette / design-system §9 et §14 (info-bulle immédiate au focus clavier), budget de taille du shell (voir critères ajoutés à US-005).
+- **US-022** : bascule automatique du palier de qualité, fiabilité des E2E sous charge, mesure Firefox (voir critères ajoutés à US-022). Le palier de qualité peut aussi être pris par US-021 si le tactile est engagé avant.
+- **Mineur QA, prochaine story qui touche `src/` caméra (US-012 ou US-017)** : Reset après Top en mode animé laisse 35 à 43 pixels différents de la vue par défaut (imperceptible) ; lisser la convergence dans `viewRig.ts` (graphics-engineer) ; critère : après Top puis Reset, la capture diffère de la vue par défaut de 0 pixel.
+- **Mineur QA, avec US-008 (premiers objets)** : l'ombre de contact est jugée lourde sous un bureau vide ; à montrer au technical-artist et au PO avant d'ajuster `assets/catalog/scene/studio.json` (question PO).
+- **Mesures à prévoir** : FPS sur un vrai smartphone (l'émulation Pixel 7 n'est pas une mesure ; rattaché à US-021, ou ponctuellement avant la release MVP) et E2E / rendu sur Firefox (US-022).
+
 ### SEC-01 — Pipeline sécurité en CI  [Must | 3 pts]
 En tant qu'équipe, je veux que chaque PR soit scannée (secrets, SAST, dépendances, licences, workflows, build) afin qu'aucune vulnérabilité CRITICAL/HIGH ni aucun secret n'atteigne `main`.
 **État au 2026-10-20 : DONE.** Mergée dans `main` (360a597). Revue APPROVE au cycle 1/3 ; secdevops PASS. La PR de test distante et le SARIF sont reportés au Sprint 2 (décision PO, pas de push) ; les findings restants sont tracés dans SEC-06.
@@ -96,13 +107,14 @@ Critères d'acceptation :
 - [ ] `CODEOWNERS` couvre `.github/`, `config/security-headers.mjs`, `package.json`, `pnpm-lock.yaml`, `pnpm-workspace.yaml`, `.npmrc`, `.gitleaks.toml`, `.semgrep/`.
 Notes techniques / dépendances : devops. **Les réglages du compte/dépôt GitHub ne sont appliqués qu'avec l'accord explicite du PO** (le PO réalise ou valide chaque action). Dépend de US-001 et de la création du dépôt distant.
 
-### SEC-03a — Génération des en-têtes de sécurité (`_headers`, CSP)  [Must, avant le premier push | 1 pt]
+### SEC-03a — Génération des en-têtes de sécurité (`_headers`, CSP) et CSP de React Aria  [Must, avant le premier push | 2 pts]
 En tant qu'équipe, je veux que le build produise les en-têtes de sécurité afin que le contrôle `build-hardening` passe et que le premier push n'échoue pas.
 Critères d'acceptation :
 - [ ] Étant donné `config/security-headers.mjs` (source unique), quand on lance le build, alors `public/_headers` est généré et `dist/_headers` existe avec CSP stricte sans `unsafe-inline`/`unsafe-eval`, `nosniff`, `Referrer-Policy`, `Permissions-Policy`, COOP, HSTS.
 - [ ] Un test unitaire vérifie que le contenu de `dist/_headers` correspond à `config/security-headers.mjs` ; le contrôle `dist/_headers` de `sec-build-hardening` (ci.yml) est vert, sans avertissement toléré.
 - [ ] Le preview/E2E servi avec ces en-têtes ne produit aucune violation CSP en console.
-Notes techniques / dépendances : devops + secdevops. **Sprint 2, en tête, avant tout push** (décision secdevops : contrôle bloquant). Dépend de US-001 (DONE). Débloque SEC-01 (jobs) et US-022 (E2E sous CSP).
+- [ ] *(finding MEDIUM du scan US-004)* React Aria `usePress` injecte un `<style>` inline au runtime, ce qui viole `style-src` d'ADR-OPS-06. Correction : `index.html` contient `<link rel="stylesheet" id="react-aria-pressable-style" href="/react-aria-pressable.css">`, le fichier `public/react-aria-pressable.css` existe (même contenu que le style injecté), **jamais `'unsafe-inline'`** ; un test E2E sous CSP de production échoue sur tout `securitypolicyviolation` et sur toute erreur console CSP, et vérifie qu'aucun `<style>` injecté par React Aria n'est présent.
+Notes techniques / dépendances : devops + secdevops (+ developer pour le correctif React Aria). **Sprint 2, en tête, avant tout push** (décision secdevops : contrôle bloquant). Dépend de US-001 (DONE). Débloque SEC-01 (jobs) et US-022 (E2E sous CSP).
 
 ### SEC-03b — Déploiement sécurisé sur Cloudflare Pages  [Must avant le premier déploiement | 1 pt]
 En tant qu'équipe, je veux un déploiement protégé afin qu'aucun bundle altéré n'atteigne les utilisateurs.
@@ -128,7 +140,9 @@ Critères d'acceptation :
 - [ ] `docs/ci/local-run-SEC-01.md` est exact : persona auditor (7 low) et formulation « extraites sauf écarts signalés » corrigées.
 - [ ] Les échecs de `security-scheduled.yml` déclenchent un agrégateur ou une notification (lien avec SEC-02).
 - [ ] *(au premier push)* `upload-sarif` fonctionne dans le conteneur semgrep et `security-events: write` est géré pour les PR de forks.
-- [ ] *(dette de test)* Un test sur 190 a échoué une fois dans `pnpm check` sous charge, puis est passé 6 fois : identifier le test instable (candidat probable : fuzz fast-check, timeout ou seed), le stabiliser (seed fixe ou timeout explicite) et le vérifier par 10 exécutions consécutives sous charge.
+- [ ] *(dette de test)* Un test sur 190 a échoué une fois dans `pnpm check` sous charge, puis est passé 6 fois : identifier le test instable (candidat probable : fuzz fast-check, timeout ou seed), le stabiliser (seed fixe ou timeout explicite) et le vérifier par 10 exécutions consécutives sous charge. Instabilité déjà tracée de `parseSetup.fuzz`.
+- [ ] *(dette de test, US-004)* Les `waitForTimeout` restants de `tests/e2e/scene.spec.ts` (l.37, 39, 50, 53) sont remplacés par des attentes sur un état observable ou `page.clock` ; `open()` de `scene-ui.spec.ts` n'est plus sensible à la charge (attente d'un signal de scène prête). Règle : aucun test E2E ne dépend du temps réel. Vérifié par 10 exécutions consécutives de `pnpm test:e2e` sous charge (CPU saturé) sans échec (juste après le merge US-004, le devops avait vu 1 à 4 échecs sur 3 runs ; 40/40 deux fois ensuite).
+- [ ] *(LOW, scan US-004)* `@react-three/drei` est installé mais inutilisé, et ses helpers chargent des ressources depuis un CDN (contraire à la CSP). Soit la dépendance est retirée de `package.json` / lockfile, soit une règle de lint interdit ses imports qui chargent depuis un CDN (test de la règle dans `tests/unit/lint-rules.test.ts`).
 Notes techniques / dépendances : devops + secdevops. Source : `docs/security/scans/US-001.md` et scan SEC-01. Hors total MVP (Could).
 
 ### SEC-04 — Mention « vos données restent dans ce navigateur »  [UI] [Should | 1 pt]
@@ -150,34 +164,34 @@ Notes techniques / dépendances : secdevops. Dernière story du MVP ; dépend de
 
 ### US-004 — Scène 3D de base et caméra orbitale  [UI][3D] [Must | 5 pts]
 En tant qu'utilisateur, je veux tourner, zoomer et me déplacer autour de ma scène afin de voir mon setup sous tous les angles.
-**État au 2026-10-20 : IN PROGRESS.** Branche `feature/US-004-scene-3d-camera` ; graphics-engineer (scène, caméra) puis developer (barre de vue, astuce, états UI) sur la même branche.
+**État au 2026-10-20 : DONE.** Mergée dans `main` (ded254f). Revue APPROVE au cycle 2/3 (`docs/reviews/US-004.md` ; cycle 1 : test E2E UX-8 dépendant du temps réel, corrigé avec `page.clock`). Contrôle design : ECARTS MINEURS acceptés (`docs/design/ui/controles/US-004.md`). QA PASS (`docs/qa/US-004.md`) : 60 FPS sur GPU matériel (RTX 5070) à 1366 et 1920, 9 draw calls, 2 636 triangles, axe sans violation. Secdevops PASS (`docs/security/scans/US-004.md`, finding MEDIUM CSP React Aria et LOW drei tracés dans « Dette et suivi issus de US-004 »). E2E rejoués sur `main` : 40/40 deux fois. **Réserves** : FPS smartphone non vérifié sur un vrai appareil (émulation Pixel 7 à 60 FPS seulement) et Firefox non testé, reportés (US-021, US-022).
 Critères d'acceptation :
-- [ ] Étant donné la scène, quand je fais glisser la souris (clic gauche sur le vide), alors la caméra tourne autour du bureau.
-- [ ] Quand j'utilise la molette, alors la caméra zoome entre une distance min et max sans traverser le bureau ni passer sous le plateau.
-- [ ] Quand je fais un clic droit glissé, alors la scène se déplace (pan) dans des limites définies.
-- [ ] Un bouton "Reset view" restaure la vue par défaut ; des boutons "Top" et "Front" (décision PO) placent la vue de dessus / de face (`aria-pressed` sur la vue active, info-bulle sur chacun, accessibles au clavier).
-- [ ] Les libellés visibles n'emploient pas de jargon 3D ("orbit", "pan", "mesh") ; une astuce "Drag to turn the view, scroll to zoom, right-drag to move the view" est affichée (masquable).
-- [ ] Les transitions de caméra (480 ms, courbe `in-out`) sont désactivées sous `prefers-reduced-motion` (saut direct à la vue).
-- [ ] Le rendu est de type « photo produit en studio » (fond clair continu, éclairage doux, ombres de contact douces) ; les tokens `--scene-*` donnent un studio clair en thème clair et anthracite en thème sombre.
-- [ ] Le rendu tient ≥ 60 FPS sur desktop milieu de gamme avec une scène vide et un bureau, à 1366×768 minimum. Unités : mètre, origine au sol.
-- [ ] Les entrées utilisent les Pointer Events (préparation du tactile, US-021).
+- [x] Étant donné la scène, quand je fais glisser la souris (clic gauche sur le vide), alors la caméra tourne autour du bureau.
+- [x] Quand j'utilise la molette, alors la caméra zoome entre une distance min et max sans traverser le bureau ni passer sous le plateau.
+- [x] Quand je fais un clic droit glissé, alors la scène se déplace (pan) dans des limites définies.
+- [x] Un bouton "Reset view" restaure la vue par défaut ; des boutons "Top" et "Front" (décision PO) placent la vue de dessus / de face (`aria-pressed` sur la vue active, info-bulle sur chacun, accessibles au clavier).
+- [x] Les libellés visibles n'emploient pas de jargon 3D ("orbit", "pan", "mesh") ; une astuce "Drag to turn the view, scroll to zoom, right-drag to move the view" est affichée (masquable).
+- [x] Les transitions de caméra (480 ms, courbe `in-out`) sont désactivées sous `prefers-reduced-motion` (saut direct à la vue).
+- [x] Le rendu est de type « photo produit en studio » (fond clair continu, éclairage doux, ombres de contact douces) ; les tokens `--scene-*` donnent un studio clair en thème clair et anthracite en thème sombre.
+- [x] Le rendu tient ≥ 60 FPS sur desktop milieu de gamme avec une scène vide et un bureau, à 1366×768 minimum. Unités : mètre, origine au sol. *(Mesuré à 60 FPS sur GPU matériel RTX 5070 à 1366 et 1920 ; pas de mesure sur GPU milieu de gamme ni sur vrai smartphone.)*
+- [x] Les entrées utilisent les Pointer Events (préparation du tactile, US-021).
 
 Critères UX testables (source : `docs/design/ux/stories/US-004.md` §7) :
-- [ ] UX-1 Au chargement, "Loading 3D scene…" est visible avec `role="progressbar"` ; à la fin, "3D view ready. Desk 140 by 70 cm." est annoncé dans la zone `aria-live="polite"` et le canvas occupe la même place sans décalage de mise en page.
-- [ ] UX-2 La barre de vue (`role="toolbar"`, `aria-label="View"`) affiche, avec libellés visibles et icônes, "Reset view", "Top", "Front" ; chaque bouton mesure ≥ 32 px de haut (jamais < 24 px) et sa zone de clic est séparée de ≥ 8 px de la suivante.
-- [ ] UX-3 Tab atteint dans l'ordre : scène → Reset view → Top → Front → "Got it" → "Hide tip" ; aucun piège clavier ; l'anneau de focus est visible (contraste ≥ 3:1) sur fond clair et sombre, et n'est pas masqué par l'astuce.
-- [ ] UX-4 Chaque bouton de vue affiche une info-bulle après ~400 ms au survol **et** au focus clavier ("Reset view (0)", "View from above (1)", "View from the front (2)") ; Échap la ferme sans quitter le focus.
-- [ ] UX-5 Après clic ou Entrée/Espace sur Top, `aria-pressed="true"` sur Top uniquement, coche + contour visibles (pas la couleur seule) ; annonce "Top view." ; après un glisser, un zoom ou Reset view, plus aucun bouton n'est pressé.
-- [ ] UX-6 Reset view ramène exactement la vue par défaut depuis n'importe quelle vue, y compris après des limites atteintes ; Top montre le plateau entier, à plat, bord arrière en haut ; Front montre le bureau entier de face.
-- [ ] UX-7 Clic gauche glissé sur le vide tourne la vue ; molette zoome ; clic droit glissé déplace la vue, sans menu contextuel du navigateur ; la vue ne passe jamais sous le plateau/sol ; le zoom ne traverse jamais le bureau ; au zoom max (éloigné) le bureau reste visible et le déplacement ne le sort jamais complètement du cadre.
-- [ ] UX-8 Au clavier, viewport focalisé : flèches tournent (15° gauche/droite, 10° haut/bas), + / - zooment (pas de 10 %), Maj+flèches déplacent, 0/1/2 activent Reset/Top/Front ; ces touches n'agissent pas hors du viewport ; une annonce unique est émise après 600 ms d'inactivité, aucune pendant un glisser souris.
-- [ ] UX-9 Une transition de vue dure 480 ms (courbe `in-out`) ; une action de l'utilisateur pendant la transition l'interrompt sans à-coup.
-- [ ] UX-10 Avec `prefers-reduced-motion: reduce`, Reset/Top/Front sautent à la vue sans animation, sans inertie ; la barre de chargement est statique.
-- [ ] UX-11 L'astuce "Drag to turn the view, scroll to zoom, right-drag to move the view." est visible à la première visite ; "Got it" ou "Hide tip" la masque, le focus passe sur Reset view, et elle ne réapparaît pas après rechargement (préférence locale).
-- [ ] UX-12 Barre et astuce sont en verre ≥ 86 % d'opacité avec repli opaque (sans `backdrop-filter`, avec `prefers-reduced-transparency`) ; texte ≥ 4,5:1 et icônes ≥ 3:1 sur studio clair et sombre ; texte ≥ 14 px.
-- [ ] UX-13 Si WebGL 2 est indisponible, le message "The 3D view can't start" (`role="alert"`, focus sur le titre) et "Try again" remplacent la scène ; aucune barre de vue ; aucune exception non gérée en console ; "Try again" relance l'initialisation. Contexte perdu : "The 3D view stopped".
-- [ ] UX-14 L'interface de la scène reste utilisable à 200 % de zoom navigateur et à 1366×768 : la barre ne recouvre pas le bureau au cadrage par défaut ; l'astuce reste lisible sans masquer la barre.
-- [ ] UX-15 Aucun libellé visible, info-bulle ou annonce ne contient "orbit", "pan", "mesh" ou "camera".
+- [x] UX-1 Au chargement, "Loading 3D scene…" est visible avec `role="progressbar"` ; à la fin, "3D view ready. Desk 140 by 70 cm." est annoncé dans la zone `aria-live="polite"` et le canvas occupe la même place sans décalage de mise en page.
+- [x] UX-2 La barre de vue (`role="toolbar"`, `aria-label="View"`) affiche, avec libellés visibles et icônes, "Reset view", "Top", "Front" ; chaque bouton mesure ≥ 32 px de haut (jamais < 24 px) et sa zone de clic est séparée de ≥ 8 px de la suivante.
+- [x] UX-3 Tab atteint dans l'ordre : scène → Reset view → Top → Front → "Got it" → "Hide tip" ; aucun piège clavier ; l'anneau de focus est visible (contraste ≥ 3:1) sur fond clair et sombre, et n'est pas masqué par l'astuce.
+- [x] UX-4 *(livré : ~400 ms au survol, immédiate au focus clavier ; maquette et design-system à aligner, voir US-005)* Chaque bouton de vue affiche une info-bulle après ~400 ms au survol **et** au focus clavier ("Reset view (0)", "View from above (1)", "View from the front (2)") ; Échap la ferme sans quitter le focus.
+- [x] UX-5 Après clic ou Entrée/Espace sur Top, `aria-pressed="true"` sur Top uniquement, coche + contour visibles (pas la couleur seule) ; annonce "Top view." ; après un glisser, un zoom ou Reset view, plus aucun bouton n'est pressé.
+- [x] UX-6 Reset view ramène exactement la vue par défaut depuis n'importe quelle vue, y compris après des limites atteintes ; Top montre le plateau entier, à plat, bord arrière en haut ; Front montre le bureau entier de face.
+- [x] UX-7 Clic gauche glissé sur le vide tourne la vue ; molette zoome ; clic droit glissé déplace la vue, sans menu contextuel du navigateur ; la vue ne passe jamais sous le plateau/sol ; le zoom ne traverse jamais le bureau ; au zoom max (éloigné) le bureau reste visible et le déplacement ne le sort jamais complètement du cadre.
+- [x] UX-8 Au clavier, viewport focalisé : flèches tournent (15° gauche/droite, 10° haut/bas), + / - zooment (pas de 10 %), Maj+flèches déplacent, 0/1/2 activent Reset/Top/Front ; ces touches n'agissent pas hors du viewport ; une annonce unique est émise après 600 ms d'inactivité, aucune pendant un glisser souris.
+- [x] UX-9 Une transition de vue dure 480 ms (courbe `in-out`) ; une action de l'utilisateur pendant la transition l'interrompt sans à-coup.
+- [x] UX-10 Avec `prefers-reduced-motion: reduce`, Reset/Top/Front sautent à la vue sans animation, sans inertie ; la barre de chargement est statique.
+- [x] UX-11 L'astuce "Drag to turn the view, scroll to zoom, right-drag to move the view." est visible à la première visite ; "Got it" ou "Hide tip" la masque, le focus passe sur Reset view, et elle ne réapparaît pas après rechargement (préférence locale).
+- [x] UX-12 Barre et astuce sont en verre ≥ 86 % d'opacité avec repli opaque (sans `backdrop-filter`, avec `prefers-reduced-transparency`) ; texte ≥ 4,5:1 et icônes ≥ 3:1 sur studio clair et sombre ; texte ≥ 14 px.
+- [x] UX-13 Si WebGL 2 est indisponible, le message "The 3D view can't start" (`role="alert"`, focus sur le titre) et "Try again" remplacent la scène ; aucune barre de vue ; aucune exception non gérée en console ; "Try again" relance l'initialisation. Contexte perdu : "The 3D view stopped".
+- [x] UX-14 L'interface de la scène reste utilisable à 200 % de zoom navigateur et à 1366×768 : la barre ne recouvre pas le bureau au cadrage par défaut ; l'astuce reste lisible sans masquer la barre.
+- [x] UX-15 Aucun libellé visible, info-bulle ou annonce ne contient "orbit", "pan", "mesh" ou "camera".
 
 Décisions UX **VALIDÉES par le PO le 2026-10-19** :
 - Astuce masquée : reste masquée définitivement tant que Help (US-025) n'existe pas ; rouvrable via Help en US-025.
@@ -201,6 +215,9 @@ Critères d'acceptation :
 - [ ] **Inter auto-hébergée** : fichier `public/fonts/inter-latin-wght-normal.woff2` servi en same-origin (`font-src 'self'`, aucune requête tierce), `@font-face` avec `font-display: swap` et repli système, précharge dans `index.html` ; **licence SIL OFL 1.1 consignée** (`public/fonts/OFL.txt` + entrée dans `docs/design/3d/licences-assets.md`/`THIRD_PARTY_LICENSES`). Icônes Lucide (ISC, licence conservée) ; aucune police ni icône Apple.
 - [ ] Les états vide, chargement ("Loading 3D scene…", barre `role="progressbar"`, shell visible) et erreur / navigateur sans WebGL (W11) sont définis.
 - [ ] Le nom provisoire « Deskfit » est un mot-symbole texte (pas d'asset logo).
+- [ ] *(suivi US-004, ux-designer)* L'état `failed` de la scène (hors WebGL indisponible) affiche un texte neutre qui n'accuse pas le navigateur (aujourd'hui « unsupported ») : titre, message et action "Try again" définis par l'ux-designer, texte dans les fichiers i18n, test du texte et du `role="alert"`. Texte à valider par le PO.
+- [ ] *(suivi US-004, ui-designer)* La maquette `docs/design/ui/maquettes/US-004.html` et `design-system.md` §9 et §14 sont mis à jour : l'info-bulle s'affiche **immédiatement** au focus clavier (le délai ~400 ms ne vaut que pour le survol souris), conformément au comportement livré et à UX-4.
+- [ ] *(budget de taille, suivi US-004)* Un budget est fixé et vérifié par `check:bundle` (ou un script dédié) : mesures actuelles = chunk principal 153,8 Ko gz, chunk 3D 266 Ko gz ; le seuil (valeur proposée par le developer et le graphics-engineer, validée par le PO) fait échouer le build en cas de dépassement ; le chunk 3D reste chargé en `lazy()`.
 Notes techniques / dépendances : ux-designer, ui-designer, developer. Dépend de US-001. Références : maquette `docs/design/ui/maquettes/index.html`, `docs/design/ui/design-system.md` §2–§5 et §9, wireframes W2 et W11. Les ESLint `boundaries` et `i18next` arrivent avec cette story (écart ADR consigné).
 
 ## Epic C — Bureau
@@ -387,6 +404,9 @@ Critères d'acceptation :
 - [ ] Une mesure de FPS est enregistrée sur une scène de 20 objets avec seuil d'échec configurable (viewport minimal 1366×768).
 - [ ] Des captures sont archivées comme artefacts.
 - [ ] *(sécurité)* L'E2E échoue sur tout événement `securitypolicyviolation` ou erreur console CSP, sur `dist-e2e` servi avec les en-têtes de production.
+- [ ] *(suivi US-004, qualité auto)* Bascule automatique du palier de qualité (ADR-3D-08) : si le FPS mesuré reste sous le seuil pendant N secondes, le rendu passe au palier inférieur (pixel ratio, ombres) sans action de l'utilisateur ; test unitaire de la logique de bascule et E2E avec un FPS simulé bas. (Peut être pris par US-021 si le tactile est engagé avant.)
+- [ ] *(suivi US-004, fiabilité)* Les tests E2E sont fiables sous la charge de la CI : aucun `waitForTimeout`, aucune attente sur du temps réel (voir SEC-06), 10 exécutions consécutives sous charge sans échec.
+- [ ] *(suivi US-004, navigateurs)* Le parcours E2E de référence est exécuté aussi sur Firefox (non testé en US-004) ; les écarts sont consignés.
 Notes techniques / dépendances : qa-tester + devops. Dépend de US-012, US-017, US-018, SEC-03a (en-têtes). Ossature Playwright déjà présente (`tests/e2e/`).
 
 ### US-021 — Utilisation tactile et mobile  [UI] [Could | 5 pts]
@@ -394,6 +414,7 @@ En tant qu'utilisateur mobile, je veux manipuler la scène au doigt afin de cons
 Critères d'acceptation :
 - [ ] Orbite à un doigt, zoom en pincement, déplacement d'un objet au doigt.
 - [ ] Mise en page adaptée en largeur 360 px ; ≥ 30 FPS sur smartphone récent.
+- [ ] *(suivi US-004)* Le FPS est **mesuré sur un vrai smartphone** (l'émulation Pixel 7 de US-004 à 60 FPS n'en tient pas lieu), modèle et résultat consignés dans le rapport QA.
 Notes techniques / dépendances : desktop d'abord (décision PO, min 1366×768), tactile en Could. Pointer events dès US-004.
 
 ### US-023 — Capture d'écran du setup  [UI][3D] [Could | 2 pts]
@@ -403,7 +424,7 @@ Critères d'acceptation :
 - [ ] *(sécurité)* La capture PNG ne contient que le canvas (aucune donnée de l'interface ni métadonnée).
 Notes techniques / dépendances : prépare le partage (R6).
 
-**Récapitulatif MVP** : Must 85 pts (US-001 à 006, 008 à 018, 022, 024, 025, SEC-01, 02, 03a, 03b, 05) ; Should 10 pts (US-007, 019, 020, SEC-04) ; Could 9 pts (US-021, 023, SEC-06, hors total). Total MVP : **95 pts**.
+**Récapitulatif MVP** : Must 86 pts (US-001 à 006, 008 à 018, 022, 024, 025, SEC-01, 02, 03a, 03b, 05) ; Should 10 pts (US-007, 019, 020, SEC-04) ; Could 9 pts (US-021, 023, SEC-06, hors total). Total MVP : **96 pts** (SEC-03a passée à 2 pts).
 
 ---
 

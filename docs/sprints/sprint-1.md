@@ -89,7 +89,7 @@ Périmètre du sprint 1 (décision PO : pas de push) : les jobs sont déjà dans
 Références : `docs/security/ci-security.md`, `docs/security/ci/`.
 
 ### US-004 — Scène 3D de base et caméra orbitale [UI][3D] [graphics-engineer + technical-artist] — 5 pts
-Branche : `feature/US-004-scene-3d-camera`. **IN PROGRESS** (lancée le 2026-10-20). Implémenteurs sur la même branche : graphics-engineer (scène, caméra : T1 à T4, T7) puis developer (barre de vue, astuce, états en UI : T5, T6, écran WebGL). Dépend de US-001 et US-003 (DONE). Capacité : 11/15 pts livrés, US-004 (5 pts) porte le sprint à 16 pts, dépassement accepté au planning.
+Branche : `feature/US-004-scene-3d-camera`. **DONE**, mergée dans `main` (ded254f) ; les tâches T1 à T8 ci-dessous sont réalisées (revue 2/3, design, QA et secdevops passés). Implémenteurs sur la même branche : graphics-engineer (scène, caméra : T1 à T4, T7) puis developer (barre de vue, astuce, états en UI : T5, T6, écran WebGL). Dépend de US-001 et US-003 (DONE). Capacité : 11/15 pts livrés, US-004 (5 pts) porte le sprint à 16 pts, dépassement accepté au planning.
 - [ ] T1 Canvas R3F en `lazy()` derrière l'écran de chargement ; `frameloop="demand"` ; renderer WebGL2.
 - [ ] T2 Bureau par défaut généré depuis `assets/catalog/object-types/desk.json` (140×70, plateau + pieds, mètres, origine au sol).
 - [ ] T3 Studio : sol, fond continu, éclairage doux neutre, ombres de contact douces, tokens `--scene-*` (clair / sombre).
@@ -111,7 +111,7 @@ Décisions UX **VALIDÉES par le PO le 2026-10-19** : astuce masquée définitiv
 | US-002 | DONE | 2 / 3 | Mergée dans `main` (55a93a6). Revue APPROVE au cycle 2 (cycle 1 : critères SEC-10 à SEC-50 perdus, remis dans le backlog). Secdevops PASS (`docs/security/scans/US-002.md`, `.gitleaksignore` pour un faux positif). Finding LOW : e-mail nominatif dans les commits, décision PO avant push. |
 | US-003 | DONE | 3 / 3 | Mergée dans `main` (10af92a). Revue APPROVE au cycle 3 (`docs/reviews/US-003.md` ; cycles 1 et 2 : frontières de couches du lint). Secdevops PASS (`docs/security/scans/US-003.md`, findings LOW). Dette tracée dans le backlog. |
 | SEC-01 | DONE | 1 / 3 | Mergée dans `main` (360a597). Revue APPROVE au cycle 1 ; secdevops PASS. PR de test distante et SARIF reportés au Sprint 2 (décision PO). `dist/_headers` absent = erreur bloquante maintenue : SEC-03a avant le premier push. Findings à traiter tracés dans SEC-06. |
-| US-004 | IN PROGRESS | 0 / 3 | Branche `feature/US-004-scene-3d-camera`. Graphics-engineer (scène, caméra) puis developer (barre de vue, astuce, états UI) sur la même branche. Sprint à 16 pts pour 15, accepté. |
+| US-004 | DONE | 2 / 3 | Mergée dans `main` (ded254f). Revue APPROVE au cycle 2 (cycle 1 : test E2E UX-8 dépendant du temps réel, corrigé avec `page.clock`). Design ECARTS MINEURS acceptés ; QA PASS (60 FPS RTX 5070 à 1366 et 1920, 9 draw calls, 2 636 triangles, axe sans violation) ; secdevops PASS (MEDIUM CSP React Aria, LOW drei, tracés au backlog). Réserves : pas de vrai smartphone, pas de Firefox. |
 
 ## Risques
 
@@ -130,12 +130,91 @@ Décisions UX **VALIDÉES par le PO le 2026-10-19** : astuce masquée définitiv
 Critères d'acceptation vérifiés, tests verts sans baisse de couverture, revue APPROVE (3 cycles maximum, puis escalade au PO), contrôle design CONFORME et QA PASS pour US-004, aucun finding CRITICAL/HIGH ouvert, CI verte, merge `--no-ff` dans `main`.
 
 ## Revue du sprint
-*(à rédiger en fin de sprint : livré / non livré, démonstration au PO)*
+
+**Objectif atteint** : chaîne de livraison vérifiée en local et première scène 3D navigable avec un bureau.
+
+### Livré (16 pts sur 16 engagés, 5 stories sur 5)
+
+| Story | Pts | Cycles de review | Livré |
+|---|---|---|---|
+| US-001 Setup repo, build et CI | 3 | 2 | build, lint, tests, CI écrite ; checks locaux verts |
+| US-002 Threat model initial | 2 | 2 | threat model et définition des scans |
+| US-003 Architecture socle et modèle de données | 3 | 3 (limite) | `src/core` (schéma Zod, catalogue, i18n), ADR |
+| SEC-01 Pipeline sécurité en CI | 3 | 1 | jobs sécurité, vérification locale, 4 cas négatifs |
+| US-004 Scène 3D de base et caméra [UI][3D] | 5 | 2 | scène studio, bureau 140×70, caméra, barre Reset/Top/Front, astuce |
+
+### Non livré (reporté, tâches, pas des stories)
+- US-001 T6 et SEC-01 T5/T6 (critères associés) : exécution de la CI distante, PR de test, SARIF. Raison : pas de dépôt ni de push (décision PO). Reporté au Sprint 2 après SEC-03a.
+- Pas de story abandonnée ; aucun point retiré.
+
+### Réserves de qualité (US-004)
+FPS mesuré sur GPU matériel RTX 5070 seulement (pas de GPU milieu de gamme) ; émulation Pixel 7 à 60 FPS mais **pas de vrai smartphone** ; Firefox non testé ; Semgrep non exécuté (Docker arrêté) et CodeQL non exécutable en local : consignés « non vérifié ». Finding MEDIUM ouvert (CSP React Aria, à corriger avant le premier push) et LOW (drei).
+
+### Démo au PO (Windows, PowerShell, dossier `F:\P152`)
+Prérequis : Node 24 et pnpm 10 (si une commande est « introuvable », ouvrir un nouveau terminal pour recharger le PATH).
+1. `cd F:\P152` puis `pnpm install`.
+2. Mode développement : `pnpm dev`, puis ouvrir **http://localhost:5173**. Ou version de production : `pnpm build` puis `pnpm preview`, ouvrir **http://localhost:4173** (ports par défaut de Vite ; si le port est pris, Vite affiche celui qu'il a choisi). Remarque : le preview ne sert pas encore les en-têtes de sécurité (SEC-03a au Sprint 2).
+3. Parcours pas à pas :
+   - La page affiche « Loading 3D scene… » puis le bureau 140×70 cm sur un fond de studio clair.
+   - Glisser avec le clic gauche dans le vide : la vue tourne. Molette : zoom borné (on ne traverse pas le bureau). Clic droit glissé : déplacement de la vue.
+   - Barre flottante : **Top** (vue de dessus), **Front** (de face), **Reset view** ; le bouton actif est marqué (coche) ; survoler ou tabuler un bouton affiche l'info-bulle.
+   - Clavier : cliquer dans la scène ou y tabuler, puis flèches (tourner), + / - (zoom), Maj+flèches (déplacer), 0 / 1 / 2 (Reset / Top / Front).
+   - Astuce « Drag to turn the view… » : cliquer « Got it » ; recharger : elle ne revient pas.
+   - Thème sombre : passer le système (ou le navigateur) en mode sombre, le studio devient anthracite.
+   - Mouvement réduit : activer « Réduire les animations » dans Windows, les vues sautent sans transition.
+   - Sans WebGL (ex. `chrome://flags`, désactiver l'accélération matérielle) : message « The 3D view can't start » + « Try again ».
+4. Vérifications automatiques (optionnel) : `pnpm check` ; E2E : `pnpm build:e2e` puis `pnpm test:e2e` (40 tests attendus verts, ~1 min ; première fois `pnpm exec playwright install chromium`).
 
 ## Rétro
-*(à rédiger en fin de sprint : ce qui a marché, ce qui a coincé, 1 à 3 actions pour le Sprint 2)*
 
-Notes en cours :
+### Ce qui a bien marché
+- 5 stories sur 5 livrées, 16 pts (dépassement de 1 pt accepté par le PO) ; US-004 a tenu 60 FPS mesurés sur GPU matériel avec un budget de rendu très bas (9 draw calls, 2 636 triangles).
+- Design en amont (UX, maquette, DA 3D) montré au PO en une fois : décisions UX validées avant le code, aucun aller-retour de périmètre sur US-004.
+- Les revues et scans ont trouvé de vrais problèmes avant le merge (audit tinypool, critères perdus, frontières de lint, test E2E dépendant du temps, CSP React Aria) : le workflow à étapes joue son rôle. SEC-01 APPROVE dès le cycle 1.
+- Décisions rapides du PO (pas de push, CI vérifiée en local, SEC-03 découpée) qui ont évité un blocage.
+
+### Ce qui a moins bien marché
+- **US-003 : 3 cycles de review** (limite atteinte) sur les frontières de couches du lint ; US-001, US-002 et US-004 : 2 cycles chacune.
+- **Tests dépendants du temps réel** : cycle 1 de US-004 (UX-8), `waitForTimeout` restants, `open()` sensible à la charge, `parseSetup.fuzz` instable ; le devops a vu 1 à 4 échecs E2E sur 3 runs juste après le merge (sous charge), alors que 40/40 deux fois ensuite.
+- **Limites d'usage** qui ont interrompu des agents en cours de tâche (reprise et perte de contexte).
+- **PATH périmé** dans les shells ouverts après l'installation de Node/pnpm.
+- **Docker arrêté** : Semgrep jamais exécuté (« non vérifié »), CodeQL non exécutable en local.
+- **CI distante absente** : la « CI verte » est une vérification locale, l'écart reste ouvert (US-001 T6, SEC-01 T5/T6).
+- Un finding MEDIUM (CSP vs React Aria) découvert tard, parce que la CSP de production n'est pas encore servie dans le preview/E2E.
+- Mesures de perf limitées à un GPU haut de gamme.
+
+### Actions pour le Sprint 2
+1. **Règle de test** : aucun test E2E ni unitaire ne dépend du temps réel (`page.clock`, attentes sur un état observable) ; le reviewer la vérifie ; critère de sortie : 10 exécutions consécutives sous charge sans échec (SEC-06, US-022). Responsable : developer / qa-tester.
+2. **Servir la CSP de production dès SEC-03a** dans `preview` et E2E (`dist-e2e`), pour que toute violation CSP soit vue à la story qui l'introduit ; corriger React Aria avant le premier push. Responsable : devops / secdevops.
+3. **Règles de lint et de frontières écrites avant le code** : le reviewer relit les règles et leur test dès le premier commit de la story (cause des 3 cycles de US-003). Responsable : developer / reviewer.
+4. **Environnement** : demander au PO d'ouvrir Docker Desktop au début du sprint (Semgrep), et faire recharger le PATH par chaque agent au démarrage. Responsable : orchestrateur.
+5. **Découper le travail des agents en tâches courtes**, avec commit après chaque tâche, pour résister aux interruptions par limite d'usage. Responsable : orchestrateur / scrum-master.
+
+## Questions pour le PO
+
+A. **Premier push et dépôt GitHub** : créer le dépôt public et pousser maintenant (après SEC-03a et le correctif CSP React Aria, en tête du Sprint 2) ? Sans accord, la CI distante, le SARIF et SEC-02 restent bloqués.
+B. **E-mail dans les commits** : garder l'e-mail nominatif (public avec le dépôt) ou passer à une adresse noreply GitHub avec réécriture de l'historique avant le push ? À trancher avant le push.
+C. **Docker pour Semgrep** : accord pour démarrer Docker Desktop pendant le sprint afin d'exécuter Semgrep en local ?
+D. **Ombre de contact** : jugée lourde sous un bureau vide ; la garder, l'alléger ou la reporter à l'arrivée des objets (US-008) ? À montrer au technical-artist et au PO.
+E. **Texte de l'état `failed`** de la scène : aujourd'hui « unsupported » accuse le navigateur ; l'ux-designer propose un texte neutre, validation du PO.
+F. **Contenu du Sprint 2** (liste préparée, sprint non ouvert) : voir ci-dessous.
+G. **Questions long terme** (non bloquantes) : affiliation et neutralité des marques, âge minimum des comptes, hébergement UE (`docs/backlog.md`), plus les bornes du bureau (question 1 du backlog).
+
+### Proposition pour le Sprint 2 (non ouvert, en attente du PO)
+Vitesse de référence 16 pts, capacité prudente 15.
+
+| Ordre | Story | Pts | Remarque |
+|---|---|---|---|
+| 1 | SEC-03a (en-têtes, CSP, correctif React Aria) | 2 | avant tout push |
+| 2 | Reports : US-001 T6, SEC-01 T5/T6 | 0 | après accord du PO sur le push (A, B) |
+| 3 | US-005 Shell [UI] (+ texte `failed`, maquette §9/§14, budget de taille) | 5 | à ux/ui-designer d'abord |
+| 4 | US-006 Choisir un bureau [UI][3D] | 5 | dépend de US-005 |
+| 5 | SEC-02 Durcissement du dépôt | 1 | après le dépôt distant |
+| 6 | SEC-03b Déploiement sécurisé | 1 | seulement avant le premier déploiement (peut attendre) |
+| 7 | SEC-06 (dette de test, drei) | tâches | en complément si de la place |
+Total proposé : SEC-03a 2 + US-005 5 + US-006 5 + SEC-02 1 = **13 pts**, + 2 pts de marge (dette de test de SEC-06 ou SEC-03b). Alternative : sans accord de push, retirer SEC-02 et ajouter US-007 (3 pts, Should).
+
+Notes en cours (Sprint 1) :
 - **US-003 a atteint la limite de 3 cycles de review** (cycles 1 et 2 sur les frontières de couches du lint, cycle 3 APPROVE). Point à creuser en rétro : définir les règles de lint des frontières avant le code, ou les faire relire plus tôt par le reviewer.
 - US-001 et US-002 ont chacune pris 2 cycles ; SEC-01 a été APPROVE dès le cycle 1.
 - Dette de test à identifier : un test sur 190 a échoué une fois dans `pnpm check` sous charge, puis est passé 6 fois (voir SEC-06 dans le backlog).
