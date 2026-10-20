@@ -6,9 +6,12 @@ import {
   cameraLimits,
   clampCameraPosition,
   clampPose,
+  clampPoseInto,
+  createPose,
   deskBox,
   fitRadius,
   interpolatePose,
+  interpolatePoseInto,
   intersectBoxes,
   isInside,
   lensShiftFor,
@@ -16,6 +19,7 @@ import {
   poseFromLookAt,
   positionOf,
   posesEqual,
+  safeCameraY,
   screenAxes,
   stepPose,
   viewPose,
@@ -256,6 +260,51 @@ describe("interpolatePose", () => {
       expect(azimuth).toBeGreaterThanOrEqual(limits.minAzimuth);
       expect(azimuth).toBeLessThanOrEqual(limits.maxAzimuth);
     }
+  });
+});
+
+describe("allocation-free variants of the render loop (…Into, safeCameraY)", () => {
+  const arbitraryT = fc.double({ min: 0, max: 1, noNaN: true });
+  const arbitraryPosition = fc.tuple(
+    fc.double({ min: -3, max: 3, noNaN: true }),
+    fc.double({ min: -1, max: 3, noNaN: true }),
+    fc.double({ min: -3, max: 3, noNaN: true }),
+  );
+
+  it("clampPoseInto writes clampPose into the given object, even when it is the input", () => {
+    const out = createPose();
+    fc.assert(
+      fc.property(arbitraryPose, (pose) => {
+        const expected = clampPose(pose, limits);
+        expect(clampPoseInto(out, pose, limits)).toBe(out);
+        expect(out).toEqual(expected);
+        const copy = { ...pose, target: [...pose.target] as [number, number, number] };
+        expect(clampPoseInto(copy, copy, limits)).toEqual(expected);
+      }),
+    );
+  });
+
+  it("interpolatePoseInto writes interpolatePose into the given object", () => {
+    const out = createPose();
+    fc.assert(
+      fc.property(arbitraryPose, arbitraryPose, arbitraryT, (from, to, t) => {
+        expect(interpolatePoseInto(out, from, to, t)).toBe(out);
+        expect(out).toEqual(interpolatePose(from, to, t));
+      }),
+    );
+  });
+
+  it("safeCameraY is the height of clampCameraPosition (lifted, then out of the desk)", () => {
+    fc.assert(
+      fc.property(arbitraryPosition, ([x, y, z]) => {
+        const lifted = Math.max(y, limits.minCameraY);
+        const expected = isInside([x, lifted, z], limits.keepOut) ? limits.keepOut.max[1] : lifted;
+        expect(safeCameraY(x, y, z, limits)).toBe(expected);
+        expect(clampCameraPosition([x, y, z], limits)).toEqual([x, expected, z]);
+      }),
+    );
+    const low = { ...limits, minCameraY: 0 };
+    expect(safeCameraY(0, 0.5, 0, low)).toBeCloseTo(0.84);
   });
 });
 

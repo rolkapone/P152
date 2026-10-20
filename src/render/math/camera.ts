@@ -16,6 +16,19 @@ export interface Pose {
   readonly azimuth: number;
 }
 
+/** Writable pose, for the `…Into(out)` variants used in the render loop (no allocation). */
+export interface MutablePose {
+  target: [number, number, number];
+  radius: number;
+  polar: number;
+  azimuth: number;
+}
+
+/** A new writable pose (work object of the render loop). */
+export function createPose(): MutablePose {
+  return { target: [0, 0, 0], radius: 0, polar: 0, azimuth: 0 };
+}
+
 export interface Box {
   readonly min: Vec3;
   readonly max: Vec3;
@@ -185,20 +198,28 @@ export function maxPolarForHeight(
   return Math.min(maxPolar, Math.acos(cos));
 }
 
-const clampVec = (v: Vec3, box: Box): Vec3 => [
-  clamp(v[0], box.min[0], box.max[0]),
-  clamp(v[1], box.min[1], box.max[1]),
-  clamp(v[2], box.min[2], box.max[2]),
-];
-
 /** The closest pose that respects every limit (target box, distance, angles, height). */
 export function clampPose(pose: Pose, limits: CameraLimits): Pose {
-  const target = clampVec(pose.target, limits.pan);
+  return clampPoseInto(createPose(), pose, limits);
+}
+
+/** `clampPose` written into `out` (may be `pose` itself), without allocation. */
+export function clampPoseInto(out: MutablePose, pose: Pose, limits: CameraLimits): MutablePose {
+  const { pan } = limits;
+  const tx = clamp(pose.target[0], pan.min[0], pan.max[0]);
+  const ty = clamp(pose.target[1], pan.min[1], pan.max[1]);
+  const tz = clamp(pose.target[2], pan.min[2], pan.max[2]);
   const radius = clamp(pose.radius, limits.minDistance, limits.maxDistance);
   const azimuth = clamp(pose.azimuth, limits.minAzimuth, limits.maxAzimuth);
-  const maxPolar = maxPolarForHeight(target[1], radius, limits.minCameraY, limits.maxPolar);
+  const maxPolar = maxPolarForHeight(ty, radius, limits.minCameraY, limits.maxPolar);
   const polar = clamp(pose.polar, Math.min(limits.minPolar, maxPolar), maxPolar);
-  return { target, radius, polar, azimuth };
+  out.target[0] = tx;
+  out.target[1] = ty;
+  out.target[2] = tz;
+  out.radius = radius;
+  out.polar = polar;
+  out.azimuth = azimuth;
+  return out;
 }
 
 export function isInside(point: Vec3, box: Box): boolean {
@@ -210,10 +231,16 @@ export function isInside(point: Vec3, box: Box): boolean {
  * `minCameraY`, never inside the desk keep-out box (pushed above it).
  */
 export function clampCameraPosition(position: Vec3, limits: CameraLimits): Vec3 {
-  let y = Math.max(position[1], limits.minCameraY);
-  const lifted: Vec3 = [position[0], y, position[2]];
-  if (isInside(lifted, limits.keepOut)) y = limits.keepOut.max[1];
-  return [position[0], y, position[2]];
+  return [position[0], safeCameraY(position[0], position[1], position[2], limits), position[2]];
+}
+
+/** Height given by `clampCameraPosition` (x and z never change), without allocation. */
+export function safeCameraY(x: number, y: number, z: number, limits: CameraLimits): number {
+  const lifted = Math.max(y, limits.minCameraY);
+  const { min, max } = limits.keepOut;
+  const inside =
+    x > min[0] && x < max[0] && lifted > min[1] && lifted < max[1] && z > min[2] && z < max[2];
+  return inside ? max[1] : lifted;
 }
 
 function corners(box: Box): Vec3[] {
@@ -292,16 +319,23 @@ const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
  * (an interval narrower than a turn), so the whole path stays inside them too.
  */
 export function interpolatePose(from: Pose, to: Pose, t: number): Pose {
-  return {
-    target: [
-      lerp(from.target[0], to.target[0], t),
-      lerp(from.target[1], to.target[1], t),
-      lerp(from.target[2], to.target[2], t),
-    ],
-    radius: lerp(from.radius, to.radius, t),
-    polar: lerp(from.polar, to.polar, t),
-    azimuth: lerp(from.azimuth, to.azimuth, t),
-  };
+  return interpolatePoseInto(createPose(), from, to, t);
+}
+
+/** `interpolatePose` written into `out`, without allocation. */
+export function interpolatePoseInto(
+  out: MutablePose,
+  from: Pose,
+  to: Pose,
+  t: number,
+): MutablePose {
+  out.target[0] = lerp(from.target[0], to.target[0], t);
+  out.target[1] = lerp(from.target[1], to.target[1], t);
+  out.target[2] = lerp(from.target[2], to.target[2], t);
+  out.radius = lerp(from.radius, to.radius, t);
+  out.polar = lerp(from.polar, to.polar, t);
+  out.azimuth = lerp(from.azimuth, to.azimuth, t);
+  return out;
 }
 
 export function posesEqual(a: Pose, b: Pose, epsilon = EPSILON): boolean {
@@ -313,7 +347,7 @@ export function posesEqual(a: Pose, b: Pose, epsilon = EPSILON): boolean {
   );
 }
 
-/** One keyboard step, in scene units (see `stepFor` in render/scene/viewCommands.ts). */
+/** One keyboard step, in scene units (see `stepFor` in render/scene/viewRig.ts). */
 export type ViewStep =
   | { readonly kind: "turn"; readonly azimuth: number; readonly polar: number }
   | { readonly kind: "zoom"; readonly factor: number }
