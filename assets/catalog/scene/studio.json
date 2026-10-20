@@ -137,9 +137,9 @@
     "views": {
       "reset": { "position": [1.75, 1.5, 2.7], "target": [0, 0.72, 0] },
       "top": {
-        "position": [0, 3.4, 0.001],
+        "position": [0, 3.4, 0.051],
         "target": [0, 0.74, 0.05],
-        "notes": "0.001 m z offset avoids gimbal degeneracy"
+        "notes": "camera 0.001 m in front of the target (user side, +Z): avoids gimbal degeneracy and keeps the back edge at the top of the screen (US-004 graphics-engineer fix: 0.001 put the camera behind the target, azimuth 180 deg, outside the +-109 deg limits)"
       },
       "front": { "position": [0, 1.1, 3.3], "target": [0, 0.72, 0] }
     },
