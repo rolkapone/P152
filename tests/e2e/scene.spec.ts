@@ -55,8 +55,7 @@ test("view keys act only when the 3D view has the focus", async ({ page }) => {
 
   await page.getByRole("group", { name: /3D view of your desk/ }).focus();
   await page.keyboard.press("1"); // Top view (instant: reduced motion in the E2E config)
-  await page.waitForTimeout(300);
-  expect(await frames()).toBeGreaterThan(idle);
+  await expect.poll(frames).toBeGreaterThan(idle); // a new frame, however loaded the machine
   await expect(status(page)).toHaveAttribute("data-scene-status", "ready");
 });
 
