@@ -24,7 +24,7 @@ Vitesse : aucun historique, 15 pts/sprint par défaut. Plan de release : 95 pts 
 1. **Levé** : Node v24.20.0 et pnpm 10.34.7 installés (le PATH des shells déjà ouverts peut être périmé ; les agents rechargent le PATH machine+user).
 2. Git LFS : à vérifier par le devops en US-001 T5 (`git lfs install`).
 3. **Dépôt GitHub et push : NON pendant ce sprint (décision PO, 2026-10-19, sprint validé).** US-001 T6 et SEC-01 T5/T6 sont **reportées au Sprint 2**. **Écart consigné** : tant que le push n'est pas fait, la « CI verte » de la DoD se vérifie **en local** avec les mêmes commandes que les jobs CI (`pnpm check`, build, E2E, scans disponibles). US-001 T6 et SEC-01 T5/T6 (exécution réelle de la CI, SARIF, PR de test) restent ouvertes jusqu'à l'accord ; si non obtenu avant la fin du sprint, elles sont reportées au Sprint 2 et signalées en revue.
-4. **Décisions par défaut confirmées tacitement** : bornes du bureau = catalogue du technical-artist (800–2400 mm) . **Révisé le 2026-10-19 (décision secdevops, scan US-001)** : le contrôle `dist/_headers` de `build-hardening` reste **bloquant** (plus d'avertissement) ; SEC-03 est découpée et SEC-03a (génération de `public/_headers`, CSP, 1 pt) est livrée en tête du Sprint 2, avant le premier push.
+4. **Décisions par défaut confirmées tacitement** : bornes du bureau = catalogue du technical-artist (800–2400 mm). **Révisé le 2026-10-19 (décision secdevops, scan US-001)** : le contrôle `dist/_headers` de `build-hardening` reste **bloquant** (plus d'avertissement) ; SEC-03 est découpée et SEC-03a (génération de `public/_headers`, CSP, 1 pt) est livrée en tête du Sprint 2, avant le premier push.
 
 ## Revue du design avant développement (règle CLAUDE.md)
 
@@ -103,7 +103,7 @@ Décisions UX **VALIDÉES par le PO le 2026-10-19** : astuce masquée définitiv
 | US-001 | DONE | 2 / 3 | Mergée dans `main` (merge `--no-ff` dfdfcfe). Revue APPROVE au cycle 2 (`docs/reviews/US-001.md` ; cycle 1 bloqué sur l'audit tinypool/vitest, corrigé par Vitest 4.1.12). Secdevops PASS (`docs/security/scans/US-001.md`). Checks locaux verts ; CI distante (T6) reportée au Sprint 2 (décision PO). |
 | US-002 | IN PROGRESS | 0 / 3 | Branche `feature/US-002-threat-model`, implémenteur : secdevops. Reste : MAJ selon décisions PO et scan US-001, revue reviewer, merge devops. |
 | US-003 | TODO | 0 / 3 | Démarre après US-001 T3 (`pnpm check` vert). |
-| SEC-01 | TODO | 0 / 3 | Implémenteurs : devops + secdevops. Démarre après US-001 T3 ; `dist/_headers` absent = erreur bloquante de `sec-build-hardening` (ci.yml:251), maintenue (décision secdevops) : SEC-03a doit précéder le premier push ; T5/T6 dépendent du push. |
+| SEC-01 | TODO | 0 / 3 | Implémenteurs : devops + secdevops. Démarre après US-001 T3 ; `dist/_headers` absent = erreur bloquante de `sec-build-hardening` (ci.yml:270), maintenue (décision secdevops) : SEC-03a doit précéder le premier push ; T5/T6 dépendent du push. |
 | US-004 | TODO | 0 / 3 | Graphics-engineer (+ developer pour la barre). Conditionnelle (capacité). Design requis d'abord (voir section). Dépend de US-001 et US-003. |
 
 ## Risques

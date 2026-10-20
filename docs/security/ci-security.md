@@ -1,6 +1,6 @@
 # Sécurité en CI — P152
 
-> Story : US-002 (définition des scans) ; intégration : SEC-01 (devops + secdevops). Auteur : secdevops. **Version 1.1 du 2026-10-19** (v1.0 au kickoff ; historique en §9).
+> Story : US-002 (définition des scans) ; intégration : SEC-01 (devops + secdevops). Auteur : secdevops. **Version 1.2 du 2026-10-20** (v1.0 au kickoff ; historique en §9).
 > Cadre : ADR-OPS-01 (pnpm, `onlyBuiltDependencies`, `minimumReleaseAge`), ADR-OPS-03 (GitHub Actions, slot `# SECDEVOPS-SLOT`, `ci-ok`), ADR-OPS-06 (Cloudflare Pages, CSP stricte, hooks `VITE_E2E`), ADR-APP-03 (import) dans [`architecture.md`](../architecture.md) ; threat model [`threat-model.md`](threat-model.md) ; scan [`scans/US-001.md`](scans/US-001.md) ; exécution locale [`docs/ci/local-run-US-001.md`](../ci/local-run-US-001.md).
 > **Le devops intègre** : secdevops n'édite pas `.github/`. Depuis US-001, les jobs sont **intégrés** : la source de vérité du YAML est [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml) (bloc `SECDEVOPS-SLOT`) et [`.github/workflows/security-scheduled.yml`](../../.github/workflows/security-scheduled.yml). Ce document fixe la **politique** et l'**état** ; il ne duplique plus le YAML.
 > **Contexte Sprint 1 (décision PO)** : pas de dépôt distant ni de push. La CI n'a jamais tourné sur GitHub ; elle est vérifiée **en local** avec les mêmes commandes. Les contrôles propres à GitHub sont inactifs jusqu'au premier push (Sprint 2).
@@ -163,9 +163,10 @@ Le premier push publie d'un coup tout l'historique local. Ordre à respecter (re
 
 1. **SEC-03a mergée** dans `main` : `dist/_headers` généré ; `sec-build-hardening` rejoué en local et vert.
 2. **Scan final des secrets** sur toutes les branches locales : `gitleaks git --config .gitleaks.toml --log-opts=--all --redact .` sans fuite ; `git ls-files` ne contient aucun `.env` (seul `.env.example`).
-3. Création du dépôt **public** par le PO (vide). **Avant le push** : secret scanning et **push protection** actifs, Dependabot alerts, **private vulnerability reporting**.
-4. Recommandé (SEC-06, partie « avant push ») : `persist-credentials: false` sur tous les `checkout`, retrait de `id-token: write`, gitleaks hebdomadaire.
-5. Push ; puis réglages ci-dessous (§6.2) ; puis SEC-01 : PR de test avec 4 échecs volontaires (faux secret, `innerHTML`, dépendance HIGH, `__p152test` dans `dist`), SARIF visibles dans Code scanning.
+3. **MFA actif sur les comptes GitHub et Cloudflare du PO** (passkey ou clé de sécurité de préférence), avant la création du dépôt et du projet Pages.
+4. Création du dépôt **public** par le PO (vide). **Avant le push** : secret scanning et **push protection** actifs, Dependabot alerts, **private vulnerability reporting**.
+5. Recommandé (SEC-06, partie « avant push ») : `persist-credentials: false` sur tous les `checkout`, retrait de `id-token: write`, gitleaks hebdomadaire.
+6. Push ; puis réglages ci-dessous (§6.2) ; puis SEC-01 : PR de test avec 4 échecs volontaires (faux secret, `innerHTML`, dépendance HIGH, `__p152test` dans `dist`), SARIF visibles dans Code scanning.
 
 ### 6.2 Réglages
 
@@ -214,3 +215,4 @@ Points restant à confirmer au premier passage sur GitHub (confiance moyenne) : 
 |---|---|---|
 | 1.0 | 2026-10-19 | Spécification initiale (kickoff) avec YAML proposé pour le slot, `dependabot.yml` et workflow hebdomadaire |
 | 1.1 | 2026-10-19 | US-002 : état réel des contrôles et versions épinglées (§1, §1.1) ; YAML retiré au profit des workflows qui font foi (§4) ; décision `_headers` bloquant et SEC-03a ; ajout du contrôle HSTS avec SEC-03a ; findings LOW → SEC-06 (§8) ; Vitest 4.1.12 ; ordre du premier push (§6.1) ; état des vérifications locales (§7) |
+| 1.2 | 2026-10-20 | Revue US-002 cycle 1 : MFA GitHub et Cloudflare du PO avant la création du dépôt (§6.1) |
