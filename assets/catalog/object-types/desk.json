@@ -1,6 +1,6 @@
 {
   "id": "desk.rect",
-  "version": 1,
+  "version": 2,
   "type": "desk",
   "category": "furniture",
   "name": { "en": "Desk" },
@@ -17,8 +17,10 @@
   },
   "presets": [
     { "id": "compact", "params": { "width": 1000, "depth": 600 } },
+    { "id": "basic", "params": { "width": 1200, "depth": 600 } },
     { "id": "standard", "params": { "width": 1400, "depth": 700 } },
-    { "id": "large", "params": { "width": 1800, "depth": 800 } }
+    { "id": "large", "params": { "width": 1600, "depth": 800 } },
+    { "id": "gaming", "params": { "width": 1800, "depth": 800 } }
   ],
   "slots": [
     { "id": "top", "role": "top", "default": "mat.birch" },
@@ -26,5 +28,5 @@
   ],
   "budget": { "tris": 1500, "drawCalls": 2 },
   "placement": { "restsOn": ["floor"], "canSupport": ["*"] },
-  "notes": "Corner (L-shaped) desk is a separate catalog entry desk.corner with its own params (backlog)."
+  "notes": "US-006 card labels (EN, derived from the preset id until presets carry a name): Compact 100x60, Basic 120x60, Standard 140x70 (default), Large 160x80, Gaming 180x80 cm. All 740 mm high. 'large' changed from 1800x800 to 1600x800 and 'gaming' added at 1800x800 (US-006). Corner (L-shaped) desk is the separate entry desk.corner."
 }
