@@ -53,8 +53,8 @@ export default defineConfig({
         ]
       : []),
   ],
-  // Sert le build E2E (pnpm build:e2e doit avoir été exécuté). TODO (devops) : servir avec les mêmes
-  // en-têtes CSP que la production (ADR-OPS-03) quand dist/_headers existera.
+  // Sert le build E2E (pnpm build:e2e doit avoir été exécuté) avec les en-têtes de production
+  // (config/security-headers.mjs, via le plugin Vite : preview.headers, ADR-OPS-06).
   webServer: {
     command: `pnpm exec vite preview --outDir dist-e2e --port ${PORT} --strictPort`,
     url: `http://localhost:${PORT}`,
