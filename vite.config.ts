@@ -1,6 +1,7 @@
 /// <reference types="vitest/config" />
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
+import { securityHeadersPlugin } from "./config/security-headers.mjs";
 
 // Pure code (src/core, src/render/math, tests/unit) runs in Node, UI code in jsdom (ADR-APP-08).
 const NODE_TESTS = [
@@ -10,7 +11,7 @@ const NODE_TESTS = [
 ];
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), securityHeadersPlugin()],
   build: { target: "es2023", sourcemap: false },
   test: {
     projects: [
