@@ -22,3 +22,19 @@ export interface SetupRepository {
   saveCurrent(setup: SetupV1): Promise<Result<void, { readonly code: PersistenceErrorCode }>>;
   clear(): Promise<void>;
 }
+
+/** Display preferences of this browser: never in the setup, never in the history. */
+export interface UiPreferences {
+  /** The 3D view tip ("Drag to turn the view…") was dismissed (US-004, reopened by Help in US-025). */
+  readonly sceneTipDismissed: boolean;
+}
+
+/**
+ * Storage of the display preferences (MVP adapter: localStorage). Synchronous on purpose:
+ * read once at start-up, before the first render (no flash of the tip). Never throws: an
+ * unavailable or full storage falls back to the defaults and the app keeps working.
+ */
+export interface PreferencesRepository {
+  load(): UiPreferences;
+  save(preferences: UiPreferences): void;
+}

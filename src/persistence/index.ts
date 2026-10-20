@@ -4,3 +4,9 @@ export {
   embeddedCatalogSource,
   loadEmbeddedCatalog,
 } from "./catalog/embeddedCatalogSource";
+export {
+  createLocalPreferences,
+  DEFAULT_PREFERENCES,
+  PREFERENCE_KEYS,
+  type PreferenceStorage,
+} from "./preferences/localPreferences";
