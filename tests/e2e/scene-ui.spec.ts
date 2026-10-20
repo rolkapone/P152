@@ -58,15 +58,23 @@ test("Tab order: scene, Reset view, Top, Front, Got it, Hide tip (UX-3)", async 
 });
 
 test("tooltips after 400 ms, Escape closes them and keeps the focus (UX-4)", async ({ page }) => {
+  // Fake page clock in this test only, as in UX-8: the 400 ms delay is checked exactly.
+  await page.clock.install();
   await open(page);
+  const top = await viewButton(page, "Top").boundingBox();
+  if (!top) throw new Error("no button");
   // A real mouse moves over the scene before reaching a button (React Aria needs a pointer
   // move to know the mouse is in use; Playwright jumps straight onto the button otherwise).
   await page.mouse.move(10, 10);
   await page.mouse.move(20, 20);
-  await viewButton(page, "Top").hover();
-  await page.waitForTimeout(200);
+  const now = await page.evaluate(() => Date.now());
+  await page.clock.pauseAt(now + 1_000);
+  await page.mouse.move(top.x + top.width / 2, top.y + top.height / 2);
+  await page.clock.runFor(399);
   await expect(page.getByRole("tooltip")).toHaveCount(0);
+  await page.clock.runFor(1);
   await expect(page.getByRole("tooltip")).toHaveText("View from above (1)");
+  await page.clock.resume();
   await page.mouse.move(0, 0);
   await expect(page.getByRole("tooltip")).toHaveCount(0);
 
