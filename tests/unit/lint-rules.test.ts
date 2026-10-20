@@ -120,6 +120,29 @@ describe("layer boundaries (ADR-APP-07)", () => {
     expect(await ruleIds(`${code}\nexport { x };\n`, filePath)).toContain("no-restricted-imports");
   });
 
+  it.each([
+    ['import { Vector3 as x } from "three";', "three"],
+    ['import { MathUtils as x } from "three/src/math/MathUtils.js";', "three subpath"],
+    ['import { useMemo as x } from "react";', "react"],
+    ['import { useFrame as x } from "@react-three/fiber";', "R3F"],
+    ['import { Bounds as x } from "@react-three/drei";', "drei"],
+    ['import x from "camera-controls";', "camera-controls"],
+    ['import { ViewRig as x } from "../scene/viewRig";', "render/scene"],
+    ['import { x } from "../../ui/components";', "ui/ (render boundary kept)"],
+  ])("render/math/ stays pure: rejects %s (%s)", async (code) => {
+    expect(await ruleIds(`${code}\nexport { x };\n`, "src/render/math/x.ts")).toContain(
+      "no-restricted-imports",
+    );
+  });
+
+  it("render/math/ may import core/, state/ and its own modules; render/scene may use three", async () => {
+    const math =
+      'import { a } from "../../core";\nimport { b } from "./units";\nimport { c } from "../../state";\nexport { a, b, c };\n';
+    expect(await ruleIds(math, "src/render/math/x.ts")).toEqual([]);
+    const scene = 'import { Vector3 } from "three";\nexport { Vector3 };\n';
+    expect(await ruleIds(scene, "src/render/scene/x.ts")).toEqual([]);
+  });
+
   it("ui/ may import the public entry of render/ and core/", async () => {
     const code = 'import { a } from "../render";\nimport { b } from "../core";\nexport { a, b };\n';
     expect(await ruleIds(code, "src/ui/x.ts")).toEqual([]);

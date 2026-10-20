@@ -233,6 +233,30 @@ function checkStudioDesk(
   }
 }
 
+/** Ordered ranges of the studio scene (the schema checks each value alone). */
+function checkStudioRanges(studio: StudioScene, issues: CatalogIssue[]): void {
+  const { camera, cyclorama, shadow, backdrop } = studio;
+  const { limits } = camera;
+  const ranges: readonly (readonly [string, number, number])[] = [
+    ["camera.near", camera.near, camera.far],
+    ["camera.limits.minDistance", limits.minDistance, limits.maxDistance],
+    ["camera.limits.minPolarDeg", limits.minPolarDeg, limits.maxPolarDeg],
+    ["camera.limits.minAzimuthDeg", limits.minAzimuthDeg, limits.maxAzimuthDeg],
+    ["camera.limits.pan.x", limits.pan.x[0], limits.pan.x[1]],
+    ["camera.limits.pan.y", limits.pan.y[0], limits.pan.y[1]],
+    ["camera.limits.pan.z", limits.pan.z[0], limits.pan.z[1]],
+    ["cyclorama.curveStartZ", cyclorama.curveStartZ, cyclorama.floorEndZ],
+    ["cyclorama.radius", cyclorama.radius, cyclorama.wallHeight],
+    ["shadow.frustum.near", shadow.frustum.near, shadow.frustum.far],
+    ["backdrop.light.fog.near", backdrop.light.fog.near, backdrop.light.fog.far],
+    ["backdrop.dark.fog.near", backdrop.dark.fog.near, backdrop.dark.fog.far],
+  ];
+  for (const [path, min, max] of ranges) {
+    if (!(min < max))
+      issues.push({ source: "studio", path, code: "bounds", detail: "expected min < max" });
+  }
+}
+
 function indexById<T extends { readonly id: string }>(
   source: string,
   entries: readonly (readonly [string, T])[],
@@ -279,7 +303,10 @@ export function validateCatalog(files: CatalogFiles): Result<Catalog, readonly C
   checkStyles(styleList, materials, objectTypes, issues);
 
   const studio = parseFile("studio", files.studio, StudioSceneSchema, issues);
-  if (studio !== null) checkStudioDesk(studio, objectTypes, materials, issues);
+  if (studio !== null) {
+    checkStudioDesk(studio, objectTypes, materials, issues);
+    checkStudioRanges(studio, issues);
+  }
 
   if (issues.length > 0 || studio === null) return err(issues);
   return ok(Object.freeze({ objectTypes, materials, styles, studio }));

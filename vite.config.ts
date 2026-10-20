@@ -2,8 +2,12 @@
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 
-// Pure code (src/core, tests/unit) runs in Node, UI code in jsdom (ADR-APP-08).
-const NODE_TESTS = ["src/core/**/*.test.ts", "tests/unit/**/*.test.ts"];
+// Pure code (src/core, src/render/math, tests/unit) runs in Node, UI code in jsdom (ADR-APP-08).
+const NODE_TESTS = [
+  "src/core/**/*.test.ts",
+  "src/render/math/**/*.test.ts",
+  "tests/unit/**/*.test.ts",
+];
 
 export default defineConfig({
   plugins: [react()],
@@ -17,7 +21,7 @@ export default defineConfig({
           name: "dom",
           environment: "jsdom",
           include: ["src/**/*.test.{ts,tsx}"],
-          exclude: ["src/core/**"],
+          exclude: ["src/core/**", "src/render/math/**"],
         },
       },
     ],
@@ -29,8 +33,11 @@ export default defineConfig({
       // Ratchet (ADR-APP-08): never lowered. Global threshold added with the first UI (US-005).
       thresholds: {
         "src/core/**": { lines: 95, statements: 95, functions: 95, branches: 90 },
-        // state/ gets the same threshold with its first module (architecture.md, ADR-APP-08).
         "src/persistence/**": { lines: 90, statements: 90, functions: 90, branches: 90 },
+        // First state/ module in US-004 (US-003 debt): same threshold as persistence/.
+        "src/state/**": { lines: 90, statements: 90, functions: 90, branches: 90 },
+        // Pure maths of the 3D view (camera limits, views, generators): same as core/.
+        "src/render/math/**": { lines: 95, statements: 95, functions: 95, branches: 90 },
       },
     },
   },
