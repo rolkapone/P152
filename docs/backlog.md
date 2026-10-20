@@ -24,7 +24,7 @@ Les critères UX/UI de ce document viennent de `docs/design/ux/principes.md`, `d
 
 Questions A à F de fin de Sprint 1 : **répondues le 2026-10-20** (voir « Décisions du PO » en fin de document, n° 22 à 28) ; G reste ouverte. Détail dans `docs/sprints/sprint-1.md`, section « Questions pour le PO ») : A. dépôt GitHub et premier push ; B. e-mail nominatif ou noreply dans les commits ; C. Docker pour Semgrep ; D. ombre de contact ; E. texte de l'état `failed` ; F. contenu du Sprint 2 ; G. questions long terme.
 
-1. **Bornes du bureau (non bloquant avant US-006/US-007)** : US-007 et le wireframe W3 annoncent largeur 600–3000 mm, mais le catalogue du technical-artist définit largeur 800–2400, profondeur 500–1000, hauteur 600–1300 mm. Quelles bornes retenir ? Par défaut, l'équipe applique les bornes du catalogue (source de vérité exécutable) et corrige les textes UX.
+Aucune question ouverte pour le Sprint 2 : la question 1 (bornes du bureau) est **tranchée par le PO le 2026-10-20** (décision 30 : rectangulaire 800–2400 × 500–1000 × 600–1300 mm ; angle 1200–2400 × 1000–2000 mm).
 
 ### Questions ouvertes à long terme (non bloquantes pour le MVP, issues du threat model §12)
 - **Affiliation (R5)** : des liens d'affiliation sont-ils compatibles avec la promesse de neutralité vis-à-vis des marques ? Si oui, déclaration « affiliate links » et classement indépendant de la commission ?
@@ -215,10 +215,36 @@ Critères d'acceptation :
 - [ ] Ordre de tabulation : top bar → panneau gauche → scène → panneau droit ; liens "Skip to 3D view" et "Skip to alerts" en tête.
 - [ ] **Inter auto-hébergée** : fichier `public/fonts/inter-latin-wght-normal.woff2` servi en same-origin (`font-src 'self'`, aucune requête tierce), `@font-face` avec `font-display: swap` et repli système, précharge dans `index.html` ; **licence SIL OFL 1.1 consignée** (`public/fonts/OFL.txt` + entrée dans `docs/design/3d/licences-assets.md`/`THIRD_PARTY_LICENSES`). Icônes Lucide (ISC, licence conservée) ; aucune police ni icône Apple.
 - [ ] Les états vide, chargement ("Loading 3D scene…", barre `role="progressbar"`, shell visible) et erreur / navigateur sans WebGL (W11) sont définis.
-- [ ] Le nom provisoire « Deskfit » est un mot-symbole texte (pas d'asset logo).
-- [ ] *(suivi US-004, ux-designer)* L'état `failed` de la scène (hors WebGL indisponible) affiche un texte neutre qui n'accuse pas le navigateur (aujourd'hui « unsupported ») : titre, message et action "Try again" définis par l'ux-designer, texte dans les fichiers i18n, test du texte et du `role="alert"`. Texte à valider par le PO.
+- [ ] Le nom affiché « Deskfit » (`app.name` = "Deskfit", décision PO 29) est un mot-symbole texte (pas d'asset logo) ; titre de page « Deskfit - Plan your desk setup ».
+- [ ] *(suivi US-004, ux-designer ; texte validé par le PO)* L'état `failed` de la scène (hors WebGL indisponible) affiche le texte neutre : titre « The 3D view didn't load », corps « Something went wrong while starting it. Try again. If the problem continues, reload this page. », bouton "Try again", puis bouton "Reload page" **à partir du 2e échec consécutif** ; texte dans les fichiers i18n, test du texte exact et du `role="alert"`.
+- [ ] *(décisions PO 29, périmètre du shell)* Undo / Redo **ne sont pas rendus** jusqu'à US-019 (aucun bouton mort) ; le verdict vide affiche « Nothing to check yet » ; l'onglet "Objects" est visible avec l'état vide « No objects to add yet / The object library will appear here. » ; File, Help, "Saved in this browser" et "Alert settings" ne sont pas rendus.
+- [ ] *(messages d'import, dette US-003, rattachés à US-018)* `tooLarge` reste « This file is too large (1 MB max). Choose another file. » ; `tooManyObjects` devient « This setup has too many objects (50 max). Choose another file. » (UX-23, à vérifier dans US-018).
+- [ ] **Critères UX testables (ux-designer, `docs/design/ux/stories/US-005.md` §7, UX-1 à UX-22 ; UX-23 → US-018)** :
+  - UX-1 À 1366×768 : scène plein viewport, top bar 56 px, deux panneaux flottants (248 et 312 px, marges 12 px), aucune barre de défilement de page ; chaque panneau défile en interne.
+  - UX-2 Le `role="status"` « Nothing to check yet » est visible en haut à droite, de 320 à 1920 px CSS, panneaux repliés ou non, tiroir ouvert ou non, dans tous les états de la scène ; jamais icône seule ni rogné.
+  - UX-3 Exactement un `banner`, un `main`, deux `complementary` nommés ("Desk and objects", "Properties and alerts"), un `h1`, pas de saut de niveau ; `lang="en"` ; titre de page défini.
+  - UX-4 Les deux skip links sont les deux premiers arrêts de Tab, invisibles hors focus, non masqués au focus ; "Skip to 3D view" focalise le viewport ; "Skip to alerts" ouvre le panneau droit s'il est replié et focalise le titre "Alerts".
+  - UX-5 Ordre de Tab : Skip to 3D view, Skip to alerts, bascule gauche, onglet sélectionné, contenu de l'onglet, viewport, Reset view, Top, Front, (Got it, Hide tip), bascule droite ; aucun piège, aucun `tabindex` positif, focus visible ≥ 3:1 jamais masqué. (Undo/Redo absents, décision 29.)
+  - UX-6 Chaque bascule : `aria-expanded`, `aria-controls`, nom constant, cible ≥ 40 px ; le focus reste sur la bascule ; contenu replié retiré de Tab et de l'arbre d'accessibilité ; le choix survit au rechargement en mode large.
+  - UX-7 Replier/ouvrir un panneau ne déplace ni la caméra ni le dock.
+  - UX-8 À 1366×768 panneaux ouverts, après chargement et après "Reset view"/"Top"/"Front", le bureau entier est visible dans la zone libre (758 px) avec une marge ≥ 24 px de chaque côté (exigence graphics-engineer).
+  - UX-9 Sous 1024 px CSS (dont 1366×768 à 200 %) : tiroirs fermés au chargement, un seul ouvert à la fois, Échap ferme et renvoie le focus à la bascule, top bar et verdict jamais recouverts ; à 320 px pas de défilement horizontal, aucune commande coupée.
+  - UX-10 `tablist`/`tab`/`tabpanel` ; "Desk" sélectionné au chargement ; flèches gauche/droite changent d'onglet ; onglet actif distinct autrement que par la couleur.
+  - UX-11 Textes des états vides (Verdict, Properties, Alerts, Objects) conformes au §6 de l'UX, sans lien ni bouton mort.
+  - UX-12 Aucun élément "File", "Help", "Alert settings", "Saved…" ni crayon d'édition dans le DOM ; **Undo/Redo absents du DOM** (décision PO 29, à la place de « présents désactivés » de l'UX d'origine).
+  - UX-13 Shell visible pendant "Loading 3D scene…" (`role="progressbar"`), panneaux utilisables, CLS ≈ 0 sur la zone de scène.
+  - UX-14 État `failed` : titre et corps exacts dans `role="alert"`, focus sur le titre, "Try again" relance l'initialisation ; le texte ne contient ni "browser", "device", "support" ni "WebGL" ; pas de barre de vue ni d'astuce ; aucune exception non gérée.
+  - UX-15 "Reload page" absent au 1er échec, présent et fonctionnel dès le 2e échec consécutif, absent pour `unsupported` et `contextLost`.
+  - UX-16 `unsupported` et `contextLost` gardent exactement les textes d'US-004 ; `failed` n'affiche jamais le texte `unsupported`.
+  - UX-17 Tous les textes viennent de `src/locales/en/` ; aucun libellé ne contient "orbit", "pan", "mesh" ou "camera".
+  - UX-18 Verre ≥ 86 % avec repli opaque sans flou (sans `backdrop-filter`, `prefers-reduced-transparency`, `.no-glass`) ; contrastes ≥ 4,5:1 texte et ≥ 3:1 icônes/contours, clair et sombre ; texte ≥ 14 px ; cibles ≥ 32 px ; thème par défaut = système.
+  - UX-19 Sous `prefers-reduced-motion: reduce`, repli/ouverture instantanés et barre de chargement statique.
+  - UX-20 Info-bulle des bascules immédiate au focus clavier, ~400 ms au survol, Échap la ferme sans quitter le focus.
+  - UX-21 Barre de vue et astuce centrées dans la zone libre, jamais sous un panneau à 1366 px, comportement d'US-004 conservé.
+  - UX-22 Focus dans un panneau ou la top bar : 0, 1, 2, flèches, + et - ne déplacent pas la caméra.
 - [ ] *(suivi US-004, ui-designer)* La maquette `docs/design/ui/maquettes/US-004.html` et `design-system.md` §9 et §14 sont mis à jour : l'info-bulle s'affiche **immédiatement** au focus clavier (le délai ~400 ms ne vaut que pour le survol souris), conformément au comportement livré et à UX-4.
 - [ ] *(budget de taille, suivi US-004)* Un budget est fixé et vérifié par `check:bundle` (ou un script dédié) : mesures actuelles = chunk principal 153,8 Ko gz, chunk 3D 266 Ko gz ; le seuil (valeur proposée par le developer et le graphics-engineer, validée par le PO) fait échouer le build en cas de dépassement ; le chunk 3D reste chargé en `lazy()`.
+Références de design US-005 : UX `docs/design/ux/stories/US-005.md` ; maquette `docs/design/ui/maquettes/US-005.html` ; `docs/design/ui/design-system.md` §15 (shell), §9 et §14 (mis à jour). Le graphics-engineer ajuste le cadrage à la zone libre (UX-8, marge de vue en pixels).
 Notes techniques / dépendances : ux-designer, ui-designer, developer. Dépend de US-001. Références : maquette `docs/design/ui/maquettes/index.html`, `docs/design/ui/design-system.md` §2–§5 et §9, wireframes W2 et W11. Les ESLint `boundaries` et `i18next` arrivent avec cette story (écart ADR consigné).
 
 ## Epic C — Bureau
@@ -226,12 +252,34 @@ Notes techniques / dépendances : ux-designer, ui-designer, developer. Dépend d
 ### US-006 — Choisir un bureau dans un catalogue  [UI][3D] [Must | 5 pts]
 En tant qu'utilisateur, je veux choisir un bureau parmi des modèles aux dimensions réelles afin de partir de mon vrai mobilier.
 Critères d'acceptation :
-- [ ] Étant donné le panneau gauche, alors un onglet **"Desk"** (à côté de "Objects", contrôle segmenté, wireframe W3) liste au moins 5 bureaux types (ex. 120×60, 140×70, 160×80, 180×80 cm, bureau d'angle) sous forme de cartes avec dimensions en cm/mm.
-- [ ] Quand je clique une carte, alors le bureau est appliqué immédiatement (carte active : contour accent 2 px + coche, pas la couleur seule), il apparaît à l'échelle réelle (1 m = 1 unité) et le choix est annoncé aux lecteurs d'écran.
-- [ ] Quand je change de bureau, alors les objets déjà posés sont conservés et les alertes recalculées.
-- [ ] Le bureau a un plateau et des pieds lisibles ; hauteur standard 720-750 mm par défaut.
+- [ ] Étant donné le panneau gauche, alors un onglet **"Desk"** (à côté de "Objects", contrôle segmenté, wireframe W3) liste **7 bureaux** du catalogue (`desk.json` v2 et `desk-corner.json`) : rectangulaires 100×60, 120×60, 140×70, 160×80, 180×80 cm ; d'angle 160×140 et 180×160 cm (**orientés à droite pour ce sprint**), sous forme de **lignes** d'une colonne avec vignette, « L × P cm » et nom (cm dans la ligne, cm et mm dans le résumé).
+- [ ] Quand je clique une ligne, alors le bureau est appliqué immédiatement (ligne active : contour accent 2 px + coche, pas la couleur seule), il apparaît à l'échelle réelle (1 m = 1 unité) et le choix est annoncé aux lecteurs d'écran. Au clavier, **les flèches appliquent directement le bureau** (pas d'Entrée de validation).
+- [ ] Quand je change de bureau, alors les objets déjà posés sont conservés (aucun supprimé ni déplacé ; positions relatives au centre du bureau), les alertes recalculées (point d'appel seulement) et une erreur d'alerte remonte si un objet déborde (règles avec US-014 à US-016 ; test unitaire à ce stade).
+- [ ] Le bureau a un plateau et des pieds lisibles ; hauteur standard 720-750 mm par défaut ; bureau par défaut 140×70. Bureau d'angle : générateur de bureau en L (graphics-engineer), empreinte non rectangulaire connue du catalogue.
+- [ ] Bornes du catalogue (décision PO 30) : rectangulaire largeur 800–2400, profondeur 500–1000, hauteur 600–1300 mm ; angle 1200–2400 × 1000–2000 mm. Le catalogue est validé par le schéma (`min ≤ défaut ≤ max`) et **le test « a catalog without any desk » de `validate.test.ts` est corrigé** par le developer (les données desk.json v2 et desk-corner.json, commit cd27e44 de la branche, le font échouer).
+- [ ] **Ombre de contact allégée** (décision PO 29, ex-marge) : opacité 0,24 ; empreinte = bureau − 200×140 mm, **dérivée du bureau choisi** (pas de valeur fixe) ; le keep-out de la caméra est aussi dérivé du bureau choisi (graphics-engineer).
+- [ ] Aucun « Custom size » (US-007), aucune modale (US-020), aucun champ de saisie ni bouton mort n'est présent dans l'onglet à US-006.
+- [ ] **Critères UX testables (ux-designer, `docs/design/ux/stories/US-006.md` §10, UX-1 à UX-17)** :
+  - UX-1 Titre « Choose your desk », aide, 7 lignes ; chaque ligne : vignette, « L × P cm », nom ; hauteur ≥ 56 px, espace ≥ 8 px.
+  - UX-2 `role="radiogroup"` nommé « Desk model » ; exactement une ligne `aria-checked="true"` en permanence ; un seul arrêt de Tab.
+  - UX-3 Au chargement 140×70 actif ; scène et résumé à 140×70 cm (1400×700×740 mm).
+  - UX-4 Clic = application immédiate, sans bouton ni confirmation ; recliquer l'actif ne change rien et n'annonce rien.
+  - UX-5 Flèches : déplacent le focus et appliquent ; Début/Fin vont à la première/dernière ligne ; Espace applique ; le focus reste sur la ligne.
+  - UX-6 Ligne active : contour accent 2 px, coche, fond `accent-subtle`, nom en 600, contour ≥ 3:1 clair et sombre ; anneau de focus 3 px visible sur la ligne active.
+  - UX-7 Annonce `aria-live="polite"` « {{name}} selected. {{width}} by {{depth}} cm. » une seule fois, 400 ms après le dernier changement (rafale de 5 flèches comprise) ; aucune annonce si l'actif est recliqué.
+  - UX-8 Résumé « Selected » : nom, cm, mm, légende « Width × depth × height », mis à jour avec le choix.
+  - UX-9 Vignettes `aria-hidden`, **dessinées en SVG par l'UI** à l'échelle commune ; l'angle se reconnaît à sa forme en L sans la couleur.
+  - UX-10 Dimensions de la scène = dimensions de la ligne (1 mm) ; bureau entier visible dans la zone libre avec marge ≥ 24 px après chaque changement à 1366×768 ; orientation conservée ; Top/Front restent actifs.
+  - UX-11 Transition de cadrage 480 ms, interruptible ; instantanée sous `prefers-reduced-motion`.
+  - UX-12 Liste utilisable pendant le chargement, après `failed` et sans WebGL ; le choix survit à "Try again" ; aucune exception console.
+  - UX-13 À 1366×768, 7 bureaux et le résumé : la liste défile dans le panneau si besoin sans défilement horizontal (la hauteur de 6 lignes sans défilement de l'UX d'origine est à réévaluer avec 7 lignes) ; à 200 % et 320 px (tiroir), aucun texte rogné.
+  - UX-14 Texte ≥ 14 px ; nom accessible = texte visible ; description = hauteur (« Height 74 cm ») ; cibles ≥ 32 px ; verre ≥ 86 % avec repli opaque.
+  - UX-15 Aucun « Custom size », « Use this desk », champ de saisie ou bouton mort.
+  - UX-16 Changement avec objets (test unitaire) : aucun objet supprimé, déplacé ni confirmé ; positions relatives au centre ; recalcul des alertes déclenché une fois par changement.
+  - UX-17 Textes du §9 de l'UX reproduits depuis `src/locales/en/` ; aucun « preset », « catalog », « mesh », « orbit », « pan », « camera » dans les textes visibles ou annoncés.
 - [ ] Au tout premier lancement, le même sélecteur est proposé en modale ("Choose your desk", bouton "Use this desk") si la story US-020 est livrée ; sinon le Studio s'ouvre sur le bureau par défaut (140×70 cm).
-Notes techniques / dépendances : technical-artist (`assets/catalog/object-types/desk.json`, presets compact/standard/large existants ; le bureau d'angle `desk.corner` reste à produire), graphics-engineer, developer pour l'onglet. Dépend de US-004, US-005. Références : wireframe W3, maquettes du panneau gauche. Voir la question sur les bornes des dimensions.
+Notes techniques / dépendances : technical-artist (catalogue commité sur `feature/US-006-choix-bureau`, cd27e44 : `desk.json` v2, `desk-corner.json`), graphics-engineer (scène, générateur du bureau en L, ombre et keep-out caméra dérivés du bureau), developer (onglet, état, correction de `validate.test.ts`). Dépend de US-004, US-005.
+Références de design US-006 : UX `docs/design/ux/stories/US-006.md` ; maquette `docs/design/ui/maquettes/US-006.html` ; `docs/design/ui/design-system.md` §16 ; aperçu 3D `docs/design/3d/apercu-bureaux/` et spécification `docs/design/3d/US-006-bureaux.md`. Wireframe W3 (mis à jour : lignes, pas cartes). À réestimer en cours de sprint si le bureau en L pèse (risque R4).
 
 ### US-007 — Dimensions personnalisées du bureau  [UI] [Should | 3 pts]
 En tant qu'utilisateur, je veux saisir largeur, profondeur et hauteur de mon bureau afin de refléter exactement le mien.
@@ -240,7 +288,7 @@ Critères d'acceptation :
 - [ ] Les valeurs hors bornes sont refusées avec un message sous le champ, relié par `aria-describedby`, ex. "Enter a width between X and Y mm." (bornes = celles du catalogue, voir question PO) ; l'ancienne valeur est conservée et le focus revient au champ en erreur.
 - [ ] Les champs sont des NumberField avec libellé visible, suffixe "mm", pas 10 mm (Maj 1, Ctrl 100).
 - [ ] Les alertes sont recalculées après modification.
-Notes techniques / dépendances : dépend de US-006. Wireframes W3 et W7.
+Notes techniques / dépendances : dépend de US-006. Wireframes W3 et W7. Bornes (décision PO 30) : rectangulaire 800–2400 × 500–1000 × 600–1300 mm ; **le bureau d'angle n'a pas de "Custom size"** (angle 1200–2400 × 1000–2000 mm, hors saisie), à rouvrir si le PO le demande.
 
 ## Epic D — Objets paramétrables
 
@@ -371,6 +419,7 @@ Critères d'acceptation :
 - [ ] *(sécurité)* Fixtures malveillantes dans `tests/fixtures/setups/malicious/` (> 1 Mio, `__proto__`/`constructor` à tous les niveaux, 51 objets, `1e308`, chaîne de 1 Mo, `mount` cyclique, clé inconnue contenant du HTML, version future) toutes rejetées sans exception ; fuzzing fast-check « ne lève jamais » ; le message d'erreur n'affiche jamais le contenu du fichier ni de pile ; la relecture sur événement `storage` passe par `parseSetup`.
 - [ ] *(sécurité)* L'import de fichier appelle `checkDeclaredSize(file.size)` **avant** `file.text()` (un fichier > 1 Mio n'est jamais lu en mémoire), puis `parseSetup(text, catalog, { declaredBytes: file.size })`.
 - [ ] *(dette US-003)* Les messages `tooLarge` (limite 1 Mio, libellé exact) et `tooManyObjects` sont validés par l'ux-designer ; `NO_CONTROL_CHARS` rejette aussi les caractères C1 et bidi dans les noms (test) ; `zod` n'est importable que depuis le point d'entrée prévu dans tout `src/` (règle lint) et un E2E sur le vrai `dist` sous CSP vérifie que le mode jitless est actif.
+- [ ] *(UX-23 de US-005, validé par le PO, décision 29)* `src/locales/en/errors.json` contient `tooLarge` = "This file is too large (1 MB max). Choose another file." et `tooManyObjects` = "This setup has too many objects (50 max). Choose another file." ; affichés en `role="alert"`.
 Notes techniques / dépendances : dépend de US-003. L'import de fichier est une surface d'attaque (threat model M-01 à M-06).
 
 ### US-019 — Annuler / rétablir  [UI] [Should | 3 pts]
@@ -598,8 +647,12 @@ Prérequis : threat model upload, quotas.
 27. **Texte neutre de l'état `failed`** accepté. → US-005.
 28. **Sprint 2 accepté** : SEC-03a, US-005, US-006, SEC-02 (+ marge SEC-06 ou SEC-03b). **MVP à 96 points** confirmé.
 
+## Design du Sprint 2 (validé le 2026-10-20)
+29. **Shell (US-005)** : Undo/Redo masqués jusqu'à US-019 ; verdict vide « Nothing to check yet » ; onglet Objects visible avec état vide ; nom affiché « Deskfit » ; texte `failed` neutre avec « Reload page » au 2e échec ; `tooManyObjects` reformulé ; `tooLarge` gardé en « 1 MB ». → US-005, US-018.
+30. **Bureaux (US-006)** : catalogue de 7 bureaux (5 rectangulaires 100×60, 120×60, 140×70, 160×80, 180×80 ; 2 d'angle 160×140 et 180×160) ; angle orienté à droite ce sprint et sans « Custom size » ; flèches du clavier appliquent directement le bureau ; vignettes SVG dessinées par l'UI ; bornes rect 800–2400 × 500–1000 × 600–1300 mm, angle 1200–2400 × 1000–2000 mm. → US-006, US-007.
+31. **Ombre de contact allégée** : opacité 0,24, empreinte = bureau − 200×140 mm, dérivée du bureau ; keep-out de la caméra dérivé du bureau. → US-006 (et non US-008).
+
 ## Questions encore ouvertes (long terme, non bloquantes)
 - Affiliation compatible avec la neutralité de la marque (R5, threat model §12 q.1).
 - Âge minimum des comptes (R6, §12 q.2).
 - Hébergement des données dans l'UE (R6/R7, §12 q.3).
-- Bornes des dimensions du bureau (voir « Questions pour le PO », en tête de document ; à trancher avant US-006/US-007).

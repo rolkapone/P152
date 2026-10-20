@@ -16,7 +16,7 @@ Vitesse de référence : 16 pts (Sprint 1) ; capacité prudente 15 pts. Contenu 
 | **Total engagé** | | | | **13** | |
 | Marge | SEC-06 (dette de test) ou SEC-03b | | | 2 | prise seulement si de la place ; sinon reportée |
 
-Ombre de contact (décision 26) : technical-artist ; rattachée à US-008 (Sprint 3) ; traitée dans la marge de ce sprint **seulement si c'est trivial** (réglage de `assets/catalog/scene/studio.json`, aperçu au PO). Sinon reste au Sprint 3.
+Ombre de contact (décisions 26 et 31) : **rattachée à US-006** (plus à la marge ni à US-008) : opacité 0,24, empreinte = bureau − 200×140 mm dérivée du bureau choisi ; le keep-out de la caméra est aussi dérivé du bureau (graphics-engineer). Pas de point supplémentaire (inclus dans les 5 pts ; à réestimer si le bureau en L pèse).
 Reports du Sprint 1 : US-001 T6 (CI distante), SEC-01 T5/T6 (PR de test, SARIF) : après le push, 0 pt, tâches du devops/secdevops.
 
 ## Conditions et décisions du PO applicables
@@ -36,7 +36,20 @@ Reports du Sprint 1 : US-001 T6 (CI distante), SEC-01 T5/T6 (PR de test, SARIF) 
 | 4 | Environnement | Orchestrateur : Docker Desktop vérifié démarré avant SEC-03a (Semgrep) ; chaque agent recharge le PATH machine+user au démarrage (Node 24, pnpm 10.34.7). | orchestrateur |
 | 5 | Tâches courtes | Chaque tâche ci-dessous = un commit (Conventional Commits) ; un agent ne reçoit qu'une ou deux tâches à la fois ; en cas d'interruption, reprise depuis le dernier commit. | orchestrateur, scrum-master |
 
-## Design requis avant le développement (à montrer au PO en une fois)
+## Décisions du PO sur le design (validées le 2026-10-20)
+
+Design US-005 et US-006 **validé par le PO**, toutes décisions confirmées (backlog, décisions 29 à 31) :
+- Undo/Redo masqués jusqu'à US-019 ; verdict vide « Nothing to check yet » ; onglet Objects visible avec état vide ; nom affiché « Deskfit ».
+- Textes US-005 : `failed` neutre avec « Reload page » au 2e échec ; `tooManyObjects` reformulé ; `tooLarge` gardé en « 1 MB » (rattachés à US-018).
+- Catalogue de 7 bureaux (5 rectangulaires 100×60, 120×60, 140×70, 160×80, 180×80 ; 2 d'angle 160×140 et 180×160), angle orienté à droite ce sprint et sans « Custom size » ; flèches du clavier appliquent directement le bureau ; vignettes SVG dessinées par l'UI.
+- Bornes : rectangulaire 800–2400 × 500–1000 × 600–1300 mm ; angle 1200–2400 × 1000–2000 mm.
+- Ombre de contact allégée (0,24 ; bureau − 200×140 mm), dérivée du bureau, ainsi que le keep-out de la caméra → US-006.
+
+Rattachements : les données du catalogue (`desk.json` v2, `desk-corner.json`) sont commitées sur `feature/US-006-choix-bureau` (cd27e44) et font échouer le test « a catalog without any desk » de `validate.test.ts` : **le developer le corrige dans US-006**. Le générateur du bureau en L revient au graphics-engineer dans US-006.
+
+Références : UX `docs/design/ux/stories/US-005.md` et `US-006.md` ; maquettes `docs/design/ui/maquettes/US-005.html` et `US-006.html`, `design-system.md` §15 (shell) et §16 (bureaux) ; aperçu 3D `docs/design/3d/apercu-bureaux/` et `docs/design/3d/US-006-bureaux.md`. Les critères UX (US-005 UX-1 à UX-22 ; US-006 UX-1 à UX-17) sont dans le backlog ; UX-23 de US-005 est rattaché à US-018. Le développement peut commencer.
+
+## Design requis avant le développement (réalisé, voir ci-dessus)
 
 Pour US-005 et US-006 ; SEC-03a et SEC-02 n'en ont pas.
 
@@ -46,12 +59,12 @@ Pour US-005 et US-006 ; SEC-03a et SEC-02 n'en ont pas.
 - **ui-designer**, après l'ux-designer : maquettes HTML de US-005 (shell complet : verre 86 % avec repli, thèmes clair/sombre, reduced-motion, Inter auto-hébergée, icônes Lucide) ; mise à jour de `docs/design/ui/maquettes/US-004.html` et de `design-system.md` §9 et §14 (info-bulle immédiate au focus clavier) ; maquette du panneau Desk (cartes, états normal/survol/actif/focus) de US-006.
 - **technical-artist** (US-006 [3D]) : catalogue de bureaux d'au moins 5 modèles (120×60, 140×70, 160×80, 180×80 cm, **bureau d'angle `desk.corner` à produire**), presets dans `assets/catalog/object-types/desk.json`, plateau et pieds lisibles, hauteur 720-750 mm, budget de triangles, aperçu pour le PO ; **ombre de contact allégée** (proposition chiffrée sur `studio.json`, aperçu avant/après) ; aucun asset externe (procédural), sinon licence consignée.
 
-Après validation du PO, le scrum-master ajoute les critères UX aux stories dans le backlog. **Le développement de US-005 et US-006 ne commence qu'après cette validation** ; SEC-03a démarre immédiatement (pas de dépendance au design).
+Critères UX ajoutés aux stories dans le backlog le 2026-10-20. Le développement de US-005 et US-006 est autorisé ; SEC-03a est en cours (pas de dépendance au design).
 
 ## Stories et tâches
 
 ### 1. SEC-03a — En-têtes de sécurité, CSP, correctif React Aria [devops + secdevops + developer] — 2 pts
-Branche : `feature/SEC-03a-headers-csp`. Démarre en premier, en parallèle du design.
+Branche : `feature/SEC-03a-headers-csp`. **IN PROGRESS** (implémenteur devops avec secdevops).
 - [ ] T1 (devops) Script de build qui génère `public/_headers` depuis `config/security-headers.mjs` ; `dist/_headers` présent après build (CSP stricte, `nosniff`, Referrer-Policy, Permissions-Policy, COOP, HSTS).
 - [ ] T2 (devops) Test unitaire : contenu de `dist/_headers` = sortie de `config/security-headers.mjs` ; contrôle `dist/_headers` de `sec-build-hardening` vert, sans avertissement toléré.
 - [ ] T3 (devops) `preview` et `dist-e2e` servent ces en-têtes (action 2).
@@ -66,9 +79,9 @@ Branche : `feature/US-005-shell-app`. Après design validé. Implémenteur : dev
 - [ ] T0 (developer, reviewer) **Règles avant code (action 3)** : règles `boundaries` et `i18next` (texte en dur dans ternaire, `&&`/`||`/`??`, concaténation) + tests dans `tests/unit/lint-rules.test.ts` ; correction de `from ".."` dans `core` ; commit isolé, relu par le reviewer avant la suite.
 - [ ] T1 Tokens générés depuis `docs/design/ui/tokens.css`, thèmes clair/sombre (suit `prefers-color-scheme`), `lang="en"`, i18n complet.
 - [ ] T2 Inter auto-hébergée (`public/fonts/inter-latin-wght-normal.woff2`, `font-display: swap`, précharge, `OFL.txt`, licence consignée dans `docs/design/3d/licences-assets.md` / `THIRD_PARTY_LICENSES`) ; icônes Lucide (licence ISC).
-- [ ] T3 Mise en page W2 : top bar (mot-symbole), panneau gauche (onglets Desk / Objects), panneau droit (Properties, Alerts), astuce en pied ; panneaux repliables ; verre 86 % + repli opaque (`.no-glass`, `prefers-reduced-transparency`, sans `backdrop-filter`).
+- [ ] T3 Mise en page W2 : top bar (mot-symbole « Deskfit », nom du setup, verdict « Nothing to check yet » ; **sans Undo/Redo, File, Help ni « Saved »**), panneau gauche (onglets Desk / Objects, Objects en état vide), panneau droit (Properties, Alerts), astuce en pied ; panneaux repliables ; verre 86 % + repli opaque (`.no-glass`, `prefers-reduced-transparency`, sans `backdrop-filter`).
 - [ ] T4 Ordre de tabulation, liens "Skip to 3D view" / "Skip to alerts", focus visible, reflow 200 %, valide dès 1366×768, `prefers-reduced-motion`.
-- [ ] T5 États vide / chargement / erreur (W11), dont **texte neutre de `failed`** (i18n, test du texte et de `role="alert"`).
+- [ ] T5 États vide / chargement / erreur (W11), dont **texte neutre de `failed`** (i18n, test du texte et de `role="alert"`), « Reload page » au 2e échec seulement, `SceneError` à 3 `kind`. Messages d'import `errors.json` : rattachés à US-018.
 - [ ] T6 Premier module `src/state` : seuil de couverture de `src/state` dans la config Vitest (dette US-003).
 - [ ] T7 Budget de taille vérifié par `check:bundle` (seuil proposé par developer + graphics-engineer, validé par le PO ; chunk 3D en `lazy()`).
 - [ ] T8 (ui-designer) Mise à jour de la maquette US-004 et du design-system §9/§14 (info-bulle immédiate au focus clavier).
@@ -76,11 +89,13 @@ Branche : `feature/US-005-shell-app`. Après design validé. Implémenteur : dev
 
 ### 3. US-006 — Choisir un bureau dans un catalogue [UI][3D] [graphics-engineer puis developer] — 5 pts
 Branche : `feature/US-006-choix-bureau`. Après design et assets validés, et après le merge de US-005 (ou sur sa base). Même branche, deux implémenteurs.
-- [ ] T1 (technical-artist) Catalogue de bureaux (≥ 5, dont `desk.corner`), validé par le schéma de catalogue (bornes `min ≤ défaut ≤ max`).
-- [ ] T2 (graphics-engineer) Génération du bureau depuis le preset choisi (plateau + pieds, échelle 1 m = 1 unité, hauteur 720-750 mm), remplacement du bureau dans la scène, objets conservés ; tessellation bornée.
-- [ ] T3 (graphics-engineer) Test : bornes du bureau et boîte englobante = dimensions du preset (tolérance 1 mm) ; le cadrage caméra reste valide pour chaque bureau.
+- [x] T1 (technical-artist) Catalogue de 7 bureaux (5 rectangulaires, 2 d'angle) : **fait**, commité sur la branche (cd27e44), schéma de catalogue (`min ≤ défaut ≤ max`). Bornes rect 800–2400 × 500–1000 × 600–1300, angle 1200–2400 × 1000–2000.
+- [ ] T1b (developer) Corriger le test « a catalog without any desk » de `validate.test.ts` (échoue avec les nouvelles données), premier commit du developer.
+- [ ] T2 (graphics-engineer) Génération du bureau depuis le preset choisi (plateau + pieds, échelle 1 m = 1 unité, hauteur 720-750 mm), **générateur du bureau en L** (orienté à droite), remplacement du bureau dans la scène, objets conservés ; tessellation bornée.
+- [ ] T2b (graphics-engineer) **Ombre de contact allégée** (opacité 0,24, empreinte = bureau − 200×140 mm) et **keep-out de la caméra** dérivés du bureau choisi.
+- [ ] T3 (graphics-engineer) Test : bornes du bureau et boîte englobante = dimensions du preset (tolérance 1 mm) ; le cadrage caméra (zone libre, marge ≥ 24 px) reste valide pour chaque bureau, dont l'angle.
 - [ ] T4 (developer) État du bureau choisi dans `src/state` (couverture), sérialisation au schéma `SetupV1`, bureau par défaut 140×70.
-- [ ] T5 (developer) Onglet "Desk" (cartes, carte active contour + coche, clic = application immédiate, annonce `aria-live`) ; recalcul des alertes branché sur le changement (point d'appel seulement, les règles arrivent avec US-014 à US-016).
+- [ ] T5 (developer) Onglet "Desk" (7 lignes, vignettes SVG dessinées à l'échelle commune, ligne active contour + coche, clic et **flèches = application immédiate**, annonce `aria-live` regroupée à 400 ms, résumé « Selected », pas de « Custom size ») ; recalcul des alertes branché sur le changement (point d'appel seulement, les règles arrivent avec US-014 à US-016).
 - [ ] T6 Tests unitaires et E2E (sélection clavier/souris, annonce), 10 runs sous charge ; contrôle design ; QA (FPS 1366×768, captures) ; secdevops.
 - Hors sprint : modale "Choose your desk" au premier lancement (US-020).
 
@@ -93,7 +108,7 @@ Branche : `feature/SEC-02-durcissement-depot` (fichiers du dépôt : `SECURITY.m
 - [ ] T5 (devops, secdevops) Reports Sprint 1 : US-001 T6, SEC-01 T5 (PR de test distante, 4 cas) et T6 (SARIF dans Code scanning) ; consignés dans `docs/ci/`.
 
 ### Marge (2 pts, non engagés)
-Par ordre : (a) SEC-06 dette de test (parseSetup.fuzz instable, `waitForTimeout` restants de `scene.spec.ts`, `open()` de `scene-ui.spec.ts`, 10 runs sous charge) ; (b) ombre de contact si triviale ; (c) SEC-03b, seulement si SEC-02 est terminée (pas de déploiement prévu). Aucune n'est prise avant que SEC-03a, US-005 et US-006 soient en revue.
+Par ordre : (a) SEC-06 dette de test (parseSetup.fuzz instable, `waitForTimeout` restants de `scene.spec.ts`, `open()` de `scene-ui.spec.ts`, 10 runs sous charge) ; (b) ~~ombre de contact~~ (déplacée dans US-006) ; (c) SEC-03b, seulement si SEC-02 est terminée (pas de déploiement prévu). Aucune n'est prise avant que SEC-03a, US-005 et US-006 soient en revue.
 
 ## Moment du premier push
 
@@ -106,9 +121,9 @@ Le push est prévu en cours de sprint (pas à la fin) afin que la CI distante to
 
 | Story | Statut (TODO / IN PROGRESS / IN REVIEW / SECURITY / DONE / BLOCKED) | Cycles de review | Notes |
 |---|---|---|---|
-| SEC-03a | TODO | 0 / 3 | Démarre en premier ; conditionne le push |
-| US-005 | TODO | 0 / 3 | Attend le design validé par le PO ; T0 règles de lint relues avant le code |
-| US-006 | TODO | 0 / 3 | Attend design et catalogue de bureaux ; dépend de US-005 |
+| SEC-03a | IN PROGRESS | 0 / 3 | Branche `feature/SEC-03a-headers-csp` ; devops + secdevops ; conditionne le push |
+| US-005 | TODO | 0 / 3 | Design validé par le PO (2026-10-20) ; T0 règles de lint relues avant le code |
+| US-006 | TODO | 0 / 3 | Design validé ; catalogue commité (cd27e44) ; T1b correction de `validate.test.ts` ; dépend de US-005 |
 | SEC-02 | TODO | 0 / 3 | Réglages avec le PO ; suppose le push |
 
 ## Risques
@@ -118,8 +133,8 @@ Le push est prévu en cours de sprint (pas à la fin) afin que la CI distante to
 | R1 | Push différé (MFA, réglages) : CI distante, SARIF et SEC-02 T4/T5 bloqués | Moyenne / Moyen | SEC-02 T1 prête tôt ; demander au PO la MFA dès le début du sprint ; sinon SEC-02 glisse au Sprint 3 (1 pt) |
 | R2 | CSP stricte casse un comportement (Inter, verre, R3F, React Aria) | Moyenne / Moyen | Preview/E2E sous CSP dès SEC-03a (action 2) |
 | R3 | US-005 déborde (shell + Inter + verre + lint + budget = 5 pts chargés) | Moyenne / Moyen | T0 courte et isolée ; US-006 peut démarrer sa partie 3D (T1 à T3) en parallèle ; la marge sert de tampon |
-| R4 | Bureau d'angle : géométrie, empreinte et alertes futures (footprint non rectangulaire) | Moyenne / Moyen | Technical-artist précise la forme d'empreinte ; sinon livrer 5 bureaux rectangulaires et reporter l'angle (décision PO) |
-| R5 | Bornes du bureau (question 1) divergentes entre UX et catalogue | Faible / Faible | Bornes du catalogue appliquées par défaut ; textes UX corrigés |
+| R4 | Générateur du bureau en L (graphics-engineer) + ombre et keep-out dérivés : US-006 plus chargée | Moyenne / Moyen | Angle orienté à droite seulement, sans « Custom size » ; réestimer en cours de sprint ; la marge sert de tampon |
+| R5 | ~~Bornes du bureau~~ | Levé | Tranché par le PO (décision 30) |
 | R6 | Cycles de review (US-003 en a eu 3) | Moyenne / Moyen | Action 3 ; revue des règles avant le code |
 | R7 | Interruptions par limites d'usage | Moyenne / Faible | Action 5 : commits par tâche |
 | R8 | Override `rollup: 4.64.7` | Certaine / Faible | Retrait à partir du 2026-10-23 (SEC-03a T7) |
@@ -127,10 +142,10 @@ Le push est prévu en cours de sprint (pas à la fin) afin que la CI distante to
 
 ## Questions pour le PO
 
-1. **Bornes du bureau** (question 1 du backlog, avant US-006) : valider les bornes du catalogue (largeur 800–2400, profondeur 500–1000, hauteur 600–1300 mm) ? Défaut appliqué sans réponse.
-2. **Bureau d'angle** : si sa géométrie ou son empreinte non rectangulaire pèse trop, accepter 5 bureaux rectangulaires et reporter l'angle ?
-3. **Budget de taille du shell** : valider le seuil proposé par le developer et le graphics-engineer (mesures actuelles : 153,8 Ko gz principal, 266 Ko gz chunk 3D).
-4. **Premier push** : l'accord sera demandé quand SEC-03a sera mergée et la MFA faite ; le PO peut déjà confirmer la date de la MFA.
+Tranchées le 2026-10-20 : bornes du bureau, bureau d'angle (livré, sans « Custom size »), tous les textes et le design (décisions 29 à 31).
+
+1. **Budget de taille du shell** : valider le seuil proposé par le developer et le graphics-engineer (mesures actuelles : 153,8 Ko gz principal, 266 Ko gz chunk 3D).
+2. **Premier push** : l'accord sera demandé quand SEC-03a sera mergée et la MFA faite ; le PO peut déjà confirmer la date de la MFA.
 
 ## Revue du sprint
 (à rédiger en fin de sprint)
