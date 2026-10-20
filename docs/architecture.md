@@ -5,7 +5,7 @@
 
 ## Sommaire
 1. Vue d'ensemble et découpage en couches
-2. Scène 3D (ADR-3D-01 à ADR-3D-09)
+2. Scène 3D (ADR-3D-01 à ADR-3D-10)
 3. Application (ADR-APP-01 à ADR-APP-10)
 4. Build, CI et hébergement (ADR-OPS-01 à ADR-OPS-07)
 
@@ -306,6 +306,34 @@ Règles de dépendance (à faire respecter par lint, ex. `eslint-plugin-boundari
 
 ---
 
+### ADR-3D-10 — Scène de base (US-004) : studio validé champ par champ, vue contrainte en fonctions pures, état de la vue dans `state/`
+
+> Statut : **Proposé** (2026-10-20, US-004, graphics-engineer). Précise ADR-3D-01/03/07/08 et ADR-APP-02/07/10.
+
+**Contexte.** US-004 livre la première scène : studio, bureau 140×70 généré depuis le catalogue, caméra contrainte, vues Reset / Top / Front, clavier. La revue US-003 exige que les générateurs ne lisent que des champs validés (`StudioSceneSchema` est un `looseObject`). Le developer branche ensuite la barre de vue, l'astuce et les écrans d'erreur sans toucher à three.js.
+
+**Décision.**
+- **Studio validé puis projeté** : `StudioSceneSchema` valide désormais chaque valeur lue par le rendu (fonds clair/sombre, cyclo, lumières, environnement, ombres, caméra, limites, transition) avec des bornes (`limits.ts`) et des contrôles d'ordre (`min < max`, code `bounds`). Le rendu ne reçoit que `toStudioConfig(studio)` (`core/catalog/studio.ts`), copie champ par champ et gelée : un champ non validé ne peut pas l'atteindre. Un test injecte une clé inconnue dans chaque objet et remplace chaque feuille par une valeur absurde : soit le catalogue est rejeté, soit la projection est identique ; la liste des champs descriptifs non lus est figée dans le test.
+- **Chargement** : `render/Viewport.tsx` (chunk principal, sans three.js) vérifie WebGL 2 puis charge `scene/SceneCanvas.tsx` en `lazy()` (three + R3F + camera-controls dans un chunk séparé). `frameloop="demand"`, `NeutralToneMapping`, ombres VSM `autoUpdate=false` (recalcul seulement quand la scène change), palier de qualité au démarrage (`shadow.defaults` : desktop `high`, mobile `medium`, DPR plafonné par palier).
+- **Vue contrainte** : `camera-controls` 3.1.2 (même version que celle embarquée par drei, MIT) piloté par une classe `ViewRig` (`render/scene/viewRig.ts`) ; toutes les règles sont des **fonctions pures** de `render/math/camera.ts`, testées en Node (fast-check) : distance 0,8–4,5 m, angles du catalogue, caméra jamais sous `minCameraY` (0,9 m : l'inclinaison maximale baisse quand on zoome) ni dans le bureau gonflé de 100 mm, cible bornée à l'intersection de la boîte de déplacement du catalogue et du bureau (la cible, au centre de l'écran, est un point du bureau : le déplacement ne sort jamais le bureau du cadre). Les maths en mètres restent dans `render/math/` (pures, sans three.js) et non dans `core/` : la conversion mm → m n'a lieu qu'à la frontière du rendu (section 1).
+- **Cadrage** : chaque vue part de la pose du catalogue et recule si besoin pour que tout le bureau tienne dans la zone libre (marge 5 %, 10 % de hauteur réservés en bas pour la barre de vue). La cible est dessinée au-dessus du centre de l'écran par un décalage d'objectif (`setViewOffset`) qui suit l'inclinaison (0,1 vu de dessus, 0,3 de côté) : le bureau, qui pend sous la cible, est centré au-dessus de la barre sans changer l'orbite.
+- **Transitions** : Reset / Top / Front glissent sur un arc (interpolation sphérique, sans repli d'azimut) en 480 ms, courbe `cubic-bezier(0.65, 0, 0.35, 1)` (`--ease-in-out`), interrompues par tout geste ou touche ; saut direct et sans inertie sous `prefers-reduced-motion`.
+- **État de la vue dans `state/`** (`state/view/`, store Zustand de session) : statut (`loading`, `ready`, `unsupported`, `failed`, `contextLost`), vue active (`top` / `front` / aucune), dernier événement pour les annonces, `retry()`, taille du bureau. Le rendu enregistre un `ViewController` ; l'UI appelle `showView()` / `runViewCommand()` et ne voit jamais three.js. La correspondance touches → commandes (`viewCommandForKey`) est pure et testée.
+- **Mesure** : `window.__p152perf` (draw calls et triangles du pire frame, `measure(ms)` pour les FPS en rendu continu, mémoire GPU) n'existe que dans le build E2E (import dynamique éliminé du bundle de production, vérifié par `check:bundle`).
+
+**Conséquences.**
+- (+) Les limites de la vue, le cadrage et les pas du clavier sont prouvés par des tests unitaires, indépendamment du GPU ; l'E2E ne vérifie que l'intégration.
+- (+) Les stories suivantes (objets, sélection, tactile) réutilisent `ViewRig`, `cameraLimits(config, contenu)` et le store sans refonte.
+- (−) R3F importe tout three.js : chunk 3D ≈ 266 Ko gz (budget ADR-3D-08 : 300 Ko). À surveiller quand drei / postprocessing arriveront.
+- (−) Le décalage d'objectif fait pivoter la vue autour d'un point situé au-dessus du centre de l'écran ; c'est voulu (le bureau reste au centre de la zone libre).
+
+**Alternatives écartées.**
+1. **`<CameraControls>` de drei** : même moteur, mais les transitions de camera-controls sont des ressorts (`smoothTime`), pas une durée fixe de 480 ms avec une courbe donnée ; le contrôle direct de l'instance simplifie aussi les tests.
+2. **Valider le studio en `strictObject`** : refuserait les notes du technical-artist ; la projection explicite donne la même garantie sans contraindre le format.
+3. **Abaisser la cible des vues** pour centrer le bureau vide : contraire à la fiche du technical-artist (cible (0 ; 0,72 ; 0), pensée pour un bureau garni) ; le décalage d'objectif obtient le même cadrage.
+
+---
+
 ### Récapitulatif des choix 3D
 
 | Sujet | Choix | Écarté |
@@ -319,6 +347,7 @@ Règles de dépendance (à faire respecter par lint, ex. `eslint-plugin-boundari
 | Interactions | Pointer events, proxys, drag sur plan, camera-controls, commandes | TransformControls, OrbitControls, drag physique, picking GPU |
 | Perf | Rendu à la demande, budgets chiffrés, paliers adaptatifs | Boucle continue, lightmaps, ombres multi-lumières |
 | XR | Origine au sol, @react-three/xr, repli USDZ | model-viewer, SDK commercial, natif |
+| Scène de base (US-004) | Studio validé puis projeté, camera-controls + maths pures, état de vue dans `state/` | drei `<CameraControls>`, studio strict, cible abaissée |
 
 ### Points à trancher avec le developer (ADR applicatifs)
 - Framework UI et outil de build (préférence 3D : React + Vite + TypeScript strict).
@@ -469,6 +498,8 @@ Contraintes d'entrée : UI en anglais avec i18n prête pour une 2e langue, pas d
 ---
 
 ### ADR-APP-06 — Composants accessibles : React Aria Components (headless), stylés avec nos tokens
+
+> Précisé par ADR-APP-11 (région live propre à la scène, US-004).
 
 **Contexte.** WCAG 2.2 AA (principes UX) : navigation clavier complète, focus visible et non masqué, onglets, menus, modales sans piège clavier, champs numériques avec unité et erreurs liées, info-bulles sur les icônes, barres d'outils, annonces live, cibles ≥ 24 px, zoom 200 %. Le design system (ui-designer) impose ses propres styles : pas de thème imposé par une lib.
 
@@ -637,6 +668,32 @@ Tests unitaires et de composants **colocalisés** (`*.test.ts(x)` à côté du f
 
 ---
 
+### ADR-APP-11 — Première interface (US-004) : tokens copiés et vérifiés, préférences locales, région live propre à la scène
+
+> Statut : **Accepté** (2026-10-20, revue US-004 APPROVE). Précise ADR-APP-04/05/06/07/08 sans les contredire.
+
+**Contexte.** US-004 livre la première UI 2D (barre de vue, astuce, écrans de chargement et d'erreur de la scène) avant le shell US-005. Il faut fixer comment l'app consomme les tokens, où vit la préférence « astuce masquée », comment sont faites les annonces et comment on teste l'accessibilité des composants.
+
+**Décision.**
+- **Tokens** : `src/ui/styles/tokens.css` est une **copie octet pour octet** de `docs/design/ui/tokens.css` depuis la ligne `BEGIN SYNCED` (exclue de Prettier) ; `tests/unit/tokens-sync.test.ts` échoue si les deux divergent. Le `@font-face` Inter (fichier auto-hébergé) arrive avec US-005 : d'ici là, pile de repli de `--font-sans` (le test interdit tout `url()` pour éviter un 404). Styles en **CSS Modules** n'utilisant que des `var(--…)` ; les primitives globales `.glass` et `[data-focus-visible]` de tokens.css sont réutilisées telles quelles.
+- **Préférences d'affichage** : port synchrone `PreferencesRepository` (`core/ports`), adapter `persistence/preferences/localPreferences.ts` (une clé par drapeau, `p152:v1:pref:sceneTipDismissed = "1"`, aucune désérialisation, tout accès dans un `try/catch` : stockage bloqué ou plein = valeurs par défaut, l'app continue), store Zustand `state/preferences` branché par `app/`. Synchrone (et non asynchrone comme `SetupRepository`) pour lire la valeur avant le premier rendu (pas de clignotement de l'astuce).
+- **Composants** : wrappers React Aria dans `ui/components/` (`Button`, `ToolbarButton` / `ToolbarToggleButton`, `Tooltip`, `ProgressBar`, `Icon`). La barre de vue est un `div role="toolbar"` et **pas** le `Toolbar` de RAC : celui-ci fait de la barre un seul arrêt de tabulation, alors que l'UX exige Tab sur chaque bouton (UX-3) ; les flèches gauche/droite déplacent aussi le focus entre les boutons.
+- **Annonces** : une région `role="status" aria-live="polite"` propre à la scène (`ui/studio/scene/SceneAnnouncer.tsx`) plutôt que le `LiveAnnouncer` de React Aria prévu par ADR-APP-06 : l'UX demande une zone unique et vérifiable (UX-1, UX-8) et un regroupement à 600 ms ; chaque message est un nouveau nœud pour qu'une phrase répétée soit relue. Le regroupement est une fonction pure (`viewAnnouncements.ts`). Le service `announce()` global d'ADR-APP-06 reste à créer en US-005 et pourra reprendre ce composant.
+- **Tests de composants** : Testing Library (`@testing-library/react`, `/dom`, `/user-event`) et **`axe-core` appelé directement** (`tests/unit/helpers/ui.tsx`, contraste désactivé en jsdom, vérifié en E2E) au lieu de `vitest-axe` (dernière version 0.1.0, non maintenue) ; même version d'axe-core que `@axe-core/playwright`.
+
+**Conséquences.**
+- (+) Une modification des tokens par l'ui-designer casse la CI tant que la copie n'est pas refaite (pas de dérive silencieuse).
+- (+) L'app fonctionne sans stockage (navigation privée, iframe sandboxée) : l'astuce est alors masquée pour la session seulement.
+- (−) Chunk principal ≈ 154 Ko gz avec React Aria (budget du shell fixé en US-005).
+- (−) Deux mécanismes d'annonce coexisteront si US-005 choisit le `LiveAnnouncer` : à unifier alors.
+
+**Alternatives écartées.**
+1. **Importer `docs/design/ui/tokens.css` directement** : embarquerait le `@font-face` vers un fichier absent (404 en console) et ferait dépendre le build de `docs/`.
+2. **Générer tokens.css par un script de build** : plus d'outillage pour un fichier copié tel quel.
+3. **`Toolbar` de React Aria** : un seul arrêt de tabulation, contraire à UX-3.
+
+---
+
 ### Sécurité transverse de l'application (entrée pour le threat model US-002)
 
 - Entrées non fiables : stockage local, fichier importé, plus tard URL de partage et API. Toutes passent par `parseSetup` (taille ≤ 1 Mio, ≤ 50 objets, schéma strict, bornes, pas de clés de prototype).
@@ -654,7 +711,7 @@ Tests unitaires et de composants **colocalisés** (`*.test.ts(x)` à côté du f
 | zod | Schéma (APP-03) | Types dérivés, mode jitless ; Ajv exige `new Function` |
 | i18next, react-i18next | i18n (APP-05) | Standard, pluriels, chargement paresseux ; maison = réinventer |
 | react-aria-components | Accessibilité (APP-06) | Couvre NumberField et i18n des nombres ; Radix non |
-| vitest, @testing-library/react, @testing-library/user-event, jsdom, vitest-axe, fast-check | Tests (APP-08) | Un seul runner ; fuzzing de l'import |
+| vitest, @testing-library/react, @testing-library/dom, @testing-library/user-event, jsdom, axe-core, fast-check | Tests (APP-08) | Un seul runner ; fuzzing de l'import ; axe-core direct plutôt que vitest-axe non maintenu (ADR-APP-11) |
 | eslint-plugin-boundaries, eslint-plugin-i18next | Garde-fous (APP-07, APP-05) | Règles de couches et « pas de texte en dur » vérifiées en CI |
 
 ### Récapitulatif des choix applicatifs
@@ -881,6 +938,7 @@ Principes : (1) une commande locale `pnpm check` rejoue exactement ce que fait l
 | ADR-3D-01 à ADR-3D-09 | Accepté | 2026-10-19 |
 | ADR-APP-01 à ADR-APP-09 | Accepté | 2026-10-19 |
 | ADR-APP-10 | Accepté (2026-10-20, revue US-003 APPROVE) | 2026-10-20 |
+| ADR-APP-11 | Accepté (2026-10-20, revue US-004 APPROVE) | 2026-10-20 |
 | ADR-OPS-01 à ADR-OPS-07 | Accepté | 2026-10-19 |
 
 - **Hébergement du code** : GitHub, dépôt **public** (Actions illimité, CodeQL, rulesets avec `ci-ok` obligatoire possibles). Le dépôt distant n'est **pas encore créé** : création et premier push uniquement sur ordre explicite du PO.

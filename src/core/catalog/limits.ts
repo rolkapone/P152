@@ -17,3 +17,8 @@ export const MAX_SCENE_DRAW_CALLS = 150;
 export const MAX_SCENE_TRIANGLES = 300_000;
 export const MAX_EMISSIVE_INTENSITY = 10;
 export const MAX_LIGHT_INTENSITY = 10;
+/** Studio scene (US-004): coordinates in metres, footprints in mm, procedural softboxes. */
+export const MAX_SCENE_EXTENT_M = 100;
+export const MAX_FOOTPRINT_MM = 5000;
+export const MAX_SOFTBOXES = 8;
+export const MAX_TRANSITION_MS = 5000;

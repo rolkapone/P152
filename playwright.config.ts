@@ -15,9 +15,13 @@ export default defineConfig({
   forbidOnly: isCI,
   // Pas de retry : un test instable est un bug à signaler, pas à masquer (règle QA).
   retries: 0,
-  ...(isCI ? { workers: 2 } : {}),
+  // The 3D view renders with SwiftShader (CPU): more than a few parallel pages saturate the
+  // machine and time out (US-004, measured with 16 workers on 24 threads). Same idea as CI.
+  workers: isCI ? 2 : 4,
   reporter: isCI ? [["list"], ["html", { open: "never" }]] : [["list"]],
   timeout: 30_000,
+  // Loads the 3D view once before the workers start (cold start, see global-setup.ts).
+  globalSetup: "./tests/e2e/global-setup.ts",
   expect: {
     // Rendu WebGL logiciel (SwiftShader) : anti-crénelage légèrement variable.
     toHaveScreenshot: { maxDiffPixelRatio: 0.02, threshold: 0.2, animations: "disabled" },

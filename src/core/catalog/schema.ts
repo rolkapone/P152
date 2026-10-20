@@ -21,10 +21,14 @@ import {
   MAX_DRAW_CALLS_PER_OBJECT,
   MAX_EMISSIVE_INTENSITY,
   MAX_LIGHT_INTENSITY,
+  MAX_FOOTPRINT_MM,
   MAX_SCENE_DRAW_CALLS,
+  MAX_SCENE_EXTENT_M,
   MAX_SCENE_TRIANGLES,
   MAX_SHADOW_BLUR_SAMPLES,
   MAX_SHADOW_RADIUS,
+  MAX_SOFTBOXES,
+  MAX_TRANSITION_MS,
   MAX_TRIS_PER_OBJECT,
 } from "./limits";
 
@@ -188,9 +192,41 @@ const ShadowTierSchema = z.looseObject({
   radius: z.number().min(0).max(MAX_SHADOW_RADIUS),
   blurSamples: z.int().min(1).max(MAX_SHADOW_BLUR_SAMPLES),
   dprMax: z.number().min(0.5).max(MAX_DPR),
+  antialias: z.boolean(),
 });
 
-/** Base scene (US-004). Only values that drive GPU cost or reference the catalog are checked. */
+/** Scene coordinates of the studio, in metres (three.js units, Y up, Y = 0 floor). */
+const Metres = z.number().min(-MAX_SCENE_EXTENT_M).max(MAX_SCENE_EXTENT_M);
+const PositiveMetres = z.number().positive().max(MAX_SCENE_EXTENT_M);
+const Vec3 = z.tuple([Metres, Metres, Metres]);
+const Range = z.tuple([Metres, Metres]);
+const Intensity = z.number().min(0).max(MAX_LIGHT_INTENSITY);
+const Degrees = z.number().min(-180).max(180);
+const Millimetres = z.number().positive().max(MAX_FOOTPRINT_MM);
+const QualityTier = z.enum(["high", "medium", "low"]);
+
+const BackdropThemeSchema = z.looseObject({
+  background: Hex,
+  floor: Hex,
+  fog: z.looseObject({ color: Hex, near: PositiveMetres, far: PositiveMetres }),
+  envIntensity: Intensity,
+  exposure: z.number().min(0).max(4),
+});
+
+const LightSchema = z.looseObject({ color: Hex, intensity: Intensity, position: Vec3 });
+
+const SoftboxSchema = z.looseObject({
+  size: z.tuple([PositiveMetres, PositiveMetres]),
+  position: Vec3,
+  emissive: z.number().min(0).max(MAX_EMISSIVE_INTENSITY),
+});
+
+const CameraViewSchema = z.looseObject({ position: Vec3, target: Vec3 });
+
+/**
+ * Base scene (US-004). Unknown keys (TA notes) are tolerated, but every value the renderer
+ * reads is checked here and only reaches it through `toStudioConfig` (studio.ts).
+ */
 export const StudioSceneSchema = z.looseObject({
   format: z.literal("p152.scene-studio"),
   schemaVersion: z.literal(1),
@@ -203,18 +239,81 @@ export const StudioSceneSchema = z.looseObject({
     thicknessMm: Finite,
     legStyle: Slug,
     materials: z.record(Key, MaterialId),
+    edgeRadiusMm: z.number().min(0).max(50),
     budget: BudgetSchema,
   }),
+  backdrop: z.looseObject({ light: BackdropThemeSchema, dark: BackdropThemeSchema }),
   cyclorama: z.looseObject({
+    floorEndZ: Metres,
+    curveStartZ: Metres,
+    radius: PositiveMetres,
+    wallHeight: PositiveMetres,
+    halfWidthX: PositiveMetres,
     segments: z.int().min(1).max(MAX_CYCLORAMA_SEGMENTS),
+    roughness: Unit01,
     tris: z.int().min(1).max(MAX_TRIS_PER_OBJECT),
   }),
+  lighting: z.looseObject({
+    toneMapping: z.literal("NeutralToneMapping"),
+    hemisphere: z.looseObject({ sky: Hex, ground: Hex, intensity: Intensity }),
+    key: LightSchema.extend({ target: Vec3 }),
+    fill: LightSchema,
+    rim: LightSchema,
+    environment: z.looseObject({
+      kind: z.literal("procedural-pmrem"),
+      sigma: z.number().min(0).max(0.5),
+      room: z.looseObject({
+        size: z.tuple([PositiveMetres, PositiveMetres, PositiveMetres]),
+        centerY: Metres,
+        color: Hex,
+      }),
+      softboxes: z.array(SoftboxSchema).max(MAX_SOFTBOXES),
+      lookAt: Vec3,
+    }),
+    contactShadow: z.looseObject({
+      opacity: Unit01,
+      deskFootprintMm: z.tuple([Millimetres, Millimetres]),
+      liftY: z.number().min(0).max(0.01),
+    }),
+  }),
   shadow: z.looseObject({
+    type: z.literal("VSMShadowMap"),
+    frustum: z.looseObject({ half: PositiveMetres, near: PositiveMetres, far: PositiveMetres }),
+    bias: z.number().min(-0.01).max(0.01),
+    normalBias: z.number().min(0).max(0.1),
     tiers: z.strictObject({
       high: ShadowTierSchema,
       medium: ShadowTierSchema,
       low: ShadowTierSchema,
     }),
+    defaults: z.looseObject({ desktop: QualityTier, mobile: QualityTier }),
+  }),
+  camera: z.looseObject({
+    fovDeg: z.number().min(10).max(90),
+    near: PositiveMetres,
+    far: PositiveMetres,
+    views: z.looseObject({
+      reset: CameraViewSchema,
+      top: CameraViewSchema,
+      front: CameraViewSchema,
+    }),
+    limits: z.looseObject({
+      minDistance: PositiveMetres,
+      maxDistance: PositiveMetres,
+      minPolarDeg: z.number().min(0).max(180),
+      maxPolarDeg: z.number().min(0).max(180),
+      minAzimuthDeg: Degrees,
+      maxAzimuthDeg: Degrees,
+      minCameraY: Metres,
+      pan: z.looseObject({ x: Range, y: Range, z: Range }),
+      deskKeepOutMm: z.looseObject({
+        halfWidth: Millimetres,
+        halfDepth: Millimetres,
+        height: Millimetres,
+        margin: z.number().min(0).max(1000),
+      }),
+    }),
+    transition: z.looseObject({ durationMs: z.int().min(0).max(MAX_TRANSITION_MS) }),
   }),
   perf: z.looseObject({
     budget: z.looseObject({

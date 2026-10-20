@@ -10,3 +10,16 @@ export {
   type CatalogIssue,
   type CatalogIssueCode,
 } from "./validate";
+export {
+  toStudioConfig,
+  type QualityTier,
+  type Range,
+  type StudioBackdrop,
+  type StudioCameraView,
+  type StudioConfig,
+  type StudioLight,
+  type StudioShadowTier,
+  type ThemeName,
+  type Vec3,
+  type ViewName,
+} from "./studio";
