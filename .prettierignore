@@ -6,3 +6,5 @@ docs
 .claude
 _claude-setup
 *.md
+# Byte-exact attack inputs (US-003, US-018): never reformatted
+tests/fixtures/setups/**/malicious
