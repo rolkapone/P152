@@ -19,3 +19,8 @@ export {
   type ViewEvent,
   type ViewEventSource,
 } from "./view/sceneViewStore";
+export {
+  createPreferencesStore,
+  usePreferences,
+  type PreferencesState,
+} from "./preferences/preferencesStore";
