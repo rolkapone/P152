@@ -670,7 +670,7 @@ Tests unitaires et de composants **colocalisés** (`*.test.ts(x)` à côté du f
 
 ### ADR-APP-11 — Première interface (US-004) : tokens copiés et vérifiés, préférences locales, région live propre à la scène
 
-> Statut : **Proposé** (2026-10-20, US-004, developer). Précise ADR-APP-04/05/06/07/08 sans les contredire.
+> Statut : **Accepté** (2026-10-20, revue US-004 APPROVE). Précise ADR-APP-04/05/06/07/08 sans les contredire.
 
 **Contexte.** US-004 livre la première UI 2D (barre de vue, astuce, écrans de chargement et d'erreur de la scène) avant le shell US-005. Il faut fixer comment l'app consomme les tokens, où vit la préférence « astuce masquée », comment sont faites les annonces et comment on teste l'accessibilité des composants.
 
@@ -938,6 +938,7 @@ Principes : (1) une commande locale `pnpm check` rejoue exactement ce que fait l
 | ADR-3D-01 à ADR-3D-09 | Accepté | 2026-10-19 |
 | ADR-APP-01 à ADR-APP-09 | Accepté | 2026-10-19 |
 | ADR-APP-10 | Accepté (2026-10-20, revue US-003 APPROVE) | 2026-10-20 |
+| ADR-APP-11 | Accepté (2026-10-20, revue US-004 APPROVE) | 2026-10-20 |
 | ADR-OPS-01 à ADR-OPS-07 | Accepté | 2026-10-19 |
 
 - **Hébergement du code** : GitHub, dépôt **public** (Actions illimité, CodeQL, rulesets avec `ci-ok` obligatoire possibles). Le dépôt distant n'est **pas encore créé** : création et premier push uniquement sur ordre explicite du PO.
