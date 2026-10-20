@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Page } from "./fixtures";
 import { waitForScene } from "./helpers/perf";
 
 // US-004 (graphics-engineer part): the 3D view starts, renders on demand and answers the
