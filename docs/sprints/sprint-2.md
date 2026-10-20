@@ -10,11 +10,11 @@ Vitesse de référence : 16 pts (Sprint 1) ; capacité prudente 15 pts. Contenu 
 | Ordre | Story | Tags | Priorité | Points | Remarque |
 |---|---|---|---|---|---|
 | 1 | SEC-03a En-têtes de sécurité, CSP, correctif React Aria | | Must | 2 | en tête : conditionne le premier push |
-| 2 | US-005 Shell de l'application en anglais | [UI] | Must | 5 | design d'abord ; inclut texte `failed`, maquette §9/§14, budget de taille |
+| 2 | US-005 Shell de l'application en anglais | [UI] | Must | **8** (était 5) | design natif v0.4 (décision 32) : restylage de US-004 inclus ; inclut texte `failed`, maquette §9/§14, budget de taille |
 | 3 | US-006 Choisir un bureau dans un catalogue | [UI][3D] | Must | 5 | dépend de US-005 ; design + technical-artist (catalogue) |
 | 4 | SEC-02 Durcissement du dépôt GitHub public | | Must | 1 | suppose le push ; le PO réalise ou valide chaque réglage |
-| **Total engagé** | | | | **13** | |
-| Marge | SEC-06 (dette de test) ou SEC-03b | | | 2 | prise seulement si de la place ; sinon reportée |
+| **Total engagé** | | | | **16** (était 13) | capacité prudente 15, vitesse du Sprint 1 = 16 : dépassement de 1 pt, accepté au regard de la vitesse ; **à confirmer par le PO** |
+| Marge | SEC-06 (dette de test) ou SEC-03b | | | 0 | plus de marge ; SEC-02 (1 pt, suppose le push déjà fait) est la première à glisser au Sprint 3 si US-005 déborde |
 
 Ombre de contact (décisions 26 et 31) : **rattachée à US-006** (plus à la marge ni à US-008) : opacité 0,24, empreinte = bureau − 200×140 mm dérivée du bureau choisi ; le keep-out de la caméra est aussi dérivé du bureau (graphics-engineer). Pas de point supplémentaire (inclus dans les 5 pts ; à réestimer si le bureau en L pèse).
 Reports du Sprint 1 : US-001 T6 (CI distante), SEC-01 T5/T6 (PR de test, SARIF) : après le push, 0 pt, tâches du devops/secdevops.
@@ -49,6 +49,16 @@ Rattachements : les données du catalogue (`desk.json` v2, `desk-corner.json`) s
 
 Références : UX `docs/design/ux/stories/US-005.md` et `US-006.md` ; maquettes `docs/design/ui/maquettes/US-005.html` et `US-006.html`, `design-system.md` §15 (shell) et §16 (bureaux) ; aperçu 3D `docs/design/3d/apercu-bureaux/` et `docs/design/3d/US-006-bureaux.md`. Les critères UX (US-005 UX-1 à UX-22 ; US-006 UX-1 à UX-17) sont dans le backlog ; UX-23 de US-005 est rattaché à US-018. Le développement peut commencer.
 
+## Décisions du PO du 2026-10-20 (soir) : design natif, workflow GitHub (backlog, décisions 32 à 36)
+
+- **Design v0.4 « Natif · Premium · Précis » VALIDÉ** (le v0.3 ne convenait pas) : fenêtre macOS (barre d'outils unifiée, barre latérale, inspecteur), repli iPadOS et iOS, 4 matériaux translucides, échelle typographique Apple en Inter, Lucide ; sans SF Pro, SF Symbols ni logo Apple. Références : `design-system.md` v0.4 (§12, §15, §16, §18 impact code), maquettes `US-004.html`, `US-005.html`, `US-006.html`. Ceci **remplace** « panneaux flottants », « verre 86 % » et « zone libre 758 px » dans les tâches T3/T4 de US-005 (zone libre **806 px à 1366**).
+- **Écarts UX validés** : bascules de volets dans la barre d'outils (Tab : droite juste après gauche, UX-5 de US-005 adapté) ; liste des bureaux en groupe unique avec filets, coche pour la ligne active (US-006 adapté).
+- **US-005 réestimée à 8 pts** (restylage de la barre de vue, de l'astuce et des écrans de US-004 selon §18 : bouton principal en `--color-accent-solid`, coche au lieu du contour 2 px). Engagement 16 pts (voir tableau). Le developer peut demander le redécoupage du restylage de US-004 en story à part si T3 déborde.
+- **Liquid Glass** : apparence optionnelle plus tard, rattachée à US-025 (exploration `docs/design/ui/maquettes/explorations/liquid-glass.html`) ; hors Sprint 2.
+- **Ordre produit inchangé** : MVP = « ça rentre ? » ; design en R2 (styles, matières), R3 (ambiance), R4 (modèles 3D libres CC0/CC-BY) ; Blender en R4, le PO sera prévenu avant.
+- **Workflow GitHub** : chaque story = branche poussée + **PR ouverte par le devops** (description : story, critères, liens vers les rapports de revue, design, QA, sécurité) ; CI sur la PR ; merge **via la PR** (commit de merge). Les tâches devops ci-dessous sont mises à jour (étape « PR »). Le remote existe : le **premier push est fait** (`main` sur GitHub) ; première CI : 12 jobs verts, **e2e rouge** (timeouts du runner), correction par le qa-tester sur `fix/ci-e2e-runner-timeouts` (à merger via PR avant toute PR de story).
+- **Jamais versionnés** : `.claude/`, `CLAUDE.md`, `LISEZMOI-EQUIPE.md` (à inscrire dans `.gitignore` ; purge de l'historique et force-push de `main` en cours : **les SHA de ce document sont encore plus périmés**, source de vérité = `git log --merges --oneline main` / les PR).
+
 ## Design requis avant le développement (réalisé, voir ci-dessus)
 
 Pour US-005 et US-006 ; SEC-03a et SEC-02 n'en ont pas.
@@ -74,8 +84,10 @@ Branche : `feature/SEC-03a-headers-csp`. **DONE** : mergée dans `main` (42c15cd
 - [ ] T7 (devops) Retirer l'override `rollup: 4.64.7` si possible (R8, dès le 2026-10-23), sinon le noter. *(non fait : reste ouverte, voir R8)*
 Findings LOW et suggestions : reportés dans SEC-06 ; CORP `same-origin` et règle `/index.html` : SEC-03b.
 
-### 2. US-005 — Shell de l'application en anglais [UI] [developer] — 5 pts
-Branche : `feature/US-005-shell-app`. Après design validé. Implémenteur : developer.
+### 2. US-005 — Shell de l'application en anglais [UI] [developer] — 8 pts
+Branche : `feature/US-005-shell-app`. Design v0.4 validé. Implémenteur : developer. Workflow : branche poussée, **PR ouverte par le devops (T10)**, CI sur la PR, merge via la PR.
+- [ ] T3b (developer) **Design v0.4** (`design-system.md` §18) : fenêtre macOS (barre d'outils unifiée avec bascules des deux volets, barre latérale, inspecteur), repli iPadOS/iOS, 4 matériaux, échelle typographique Inter ; restylage de la barre de vue, de l'astuce et des écrans de US-004 (bouton principal `--color-accent-solid`, coche à la place du contour 2 px, zone libre 806 px à 1366) ; UX-5 adapté (bascule droite juste après la gauche). Ajuster tests E2E et cadrage (graphics-engineer).
+- [ ] T10 (devops) Après revue APPROVE, design CONFORME, QA PASS et secdevops PASS : push de la branche, **ouverture de la PR** (description : story, critères d'acceptation, liens vers `docs/reviews/US-005.md`, contrôle design, rapport QA, scan sécurité), CI verte sur la PR, merge via la PR (commit de merge).
 - [ ] T0 (developer, reviewer) **Règles avant code (action 3)** : règles `boundaries` et `i18next` (texte en dur dans ternaire, `&&`/`||`/`??`, concaténation) + tests dans `tests/unit/lint-rules.test.ts` ; correction de `from ".."` dans `core` ; commit isolé, relu par le reviewer avant la suite.
 - [ ] T1 Tokens générés depuis `docs/design/ui/tokens.css`, thèmes clair/sombre (suit `prefers-color-scheme`), `lang="en"`, i18n complet.
 - [ ] T2 Inter auto-hébergée (`public/fonts/inter-latin-wght-normal.woff2`, `font-display: swap`, précharge, `OFL.txt`, licence consignée dans `docs/design/3d/licences-assets.md` / `THIRD_PARTY_LICENSES`) ; icônes Lucide (licence ISC).
@@ -96,7 +108,9 @@ Branche : `feature/US-006-choix-bureau`. Après design et assets validés, et ap
 - [ ] T3 (graphics-engineer) Test : bornes du bureau et boîte englobante = dimensions du preset (tolérance 1 mm) ; le cadrage caméra (zone libre, marge ≥ 24 px) reste valide pour chaque bureau, dont l'angle.
 - [ ] T4 (developer) État du bureau choisi dans `src/state` (couverture), sérialisation au schéma `SetupV1`, bureau par défaut 140×70.
 - [ ] T5 (developer) Onglet "Desk" (7 lignes, vignettes SVG dessinées à l'échelle commune, ligne active contour + coche, clic et **flèches = application immédiate**, annonce `aria-live` regroupée à 400 ms, résumé « Selected », pas de « Custom size ») ; recalcul des alertes branché sur le changement (point d'appel seulement, les règles arrivent avec US-014 à US-016).
+- [ ] T5b (developer) Design v0.4 : liste en **groupe unique avec filets**, coche pour la ligne active (maquette `US-006.html`, §16) ; UX-1/UX-6/UX-13 adaptés.
 - [ ] T6 Tests unitaires et E2E (sélection clavier/souris, annonce), 10 runs sous charge ; contrôle design ; QA (FPS 1366×768, captures) ; secdevops.
+- [ ] T7 (devops) Après les verdicts (revue, design, QA, sécurité) : push de la branche, **ouverture de la PR** (story, critères, liens vers les rapports), CI verte sur la PR, merge via la PR (commit de merge).
 - Hors sprint : modale "Choose your desk" au premier lancement (US-020).
 
 ### 4. SEC-02 — Durcissement du dépôt GitHub public [devops] — 1 pt
@@ -104,7 +118,9 @@ Branche : `feature/SEC-02-durcissement-depot` (fichiers du dépôt : `SECURITY.m
 - [ ] T1 (devops) `SECURITY.md`, `CODEOWNERS` (`.github/`, `config/security-headers.mjs`, `package.json`, `pnpm-lock.yaml`, `pnpm-workspace.yaml`, `.npmrc`, `.gitleaks.toml`, `.semgrep/`) ; prêts avant le push.
 - [ ] T2 (PO) MFA activée sur le compte.
 - [ ] T3 (devops + PO) Liste pas à pas des réglages (ruleset `main`, `ci-ok` requis, Code scanning ≥ High bloquant, secret scanning + push protection, Dependabot alerts, private vulnerability reporting, `GITHUB_TOKEN` en lecture seule, approbation des workflows externes, épinglage SHA) ; le PO les applique ou les valide.
-- [ ] T4 (devops) **Premier push, après accord explicite du PO** (SEC-03a mergée, MFA faite, réglages validés) ; vérification que `ci.yml` et `ci-ok` passent.
+- [x] T4 (devops) Premier push **fait** (`main` sur GitHub, accord du PO). Première CI : 12 jobs verts, **e2e rouge** (timeouts du runner), correction en cours par le qa-tester sur `fix/ci-e2e-runner-timeouts` ; `ci-ok` à vérifier une fois e2e vert. Un force-push de `main` (purge de l'historique) est en cours.
+- [ ] T4b (devops) La branche `feature/SEC-02-durcissement-depot` suit le workflow PR (push, PR avec liens vers les rapports, CI sur la PR, merge via la PR). Ruleset `main` : PR obligatoire, `ci-ok` requis.
+- [ ] T4c (devops) `.gitignore` : `.claude/`, `CLAUDE.md`, `LISEZMOI-EQUIPE.md` ; vérifier qu'ils sont absents de l'historique après la purge (gitleaks/`git log --all -- <chemin>`).
 - [ ] T5 (devops, secdevops) Reports Sprint 1 : US-001 T6, SEC-01 T5 (PR de test distante, 4 cas) et T6 (SARIF dans Code scanning) ; consignés dans `docs/ci/`.
 
 ### Marge (2 pts, non engagés)
@@ -129,9 +145,10 @@ Le push est prévu en cours de sprint (pas à la fin) afin que la CI distante to
 |---|---|---|---|
 | SEC-03a | DONE | 1 / 3 | Mergée 42c15cd ; revue APPROVE cycle 1 ; secdevops PASS (Semgrep Docker, 0 ERROR, MEDIUM US-004 clos) ; LOW -> SEC-06, CORP -> SEC-03b ; T7 rollup ouverte |
 | Stabiliser `parseSetup.fuzz` | TODO | n/a | Tâche developer (0 pt, marge prioritaire) ; avant ou juste après le premier push, au plus tard au début de US-005 ; seed `-577722299` |
-| US-005 | TODO | 0 / 3 | Design validé par le PO (2026-10-20) ; T0 règles de lint relues avant le code |
-| US-006 | TODO | 0 / 3 | Design validé ; catalogue commité (cd27e44) ; T1b correction de `validate.test.ts` ; dépend de US-005 |
-| SEC-02 | TODO | 0 / 3 | Réglages avec le PO ; suppose le push |
+| Fix CI e2e (`fix/ci-e2e-runner-timeouts`) | IN PROGRESS | n/a | Tâche qa-tester (0 pt) ; e2e rouge sur le runner ; à merger via PR |
+| US-005 | TODO | 0 / 3 | **8 pts** (était 5) ; design v0.4 validé (2026-10-20) ; T0 règles de lint relues avant le code ; PR par le devops (T10) |
+| US-006 | TODO | 0 / 3 | Design v0.4 validé ; catalogue commité ; T1b correction de `validate.test.ts` ; liste en groupe unique (T5b) ; dépend de US-005 ; PR par le devops (T7) |
+| SEC-02 | TODO | 0 / 3 | Push fait ; réglages avec le PO ; T4b/T4c ; peut glisser au Sprint 3 (engagement 16 pts) |
 
 ## Risques
 
@@ -139,7 +156,8 @@ Le push est prévu en cours de sprint (pas à la fin) afin que la CI distante to
 |---|---|---|---|
 | R1 | Push différé (MFA, réglages) : CI distante, SARIF et SEC-02 T4/T5 bloqués | Moyenne / Moyen | SEC-02 T1 prête tôt ; demander au PO la MFA dès le début du sprint ; sinon SEC-02 glisse au Sprint 3 (1 pt) |
 | R2 | CSP stricte casse un comportement (Inter, verre, R3F, React Aria) | Moyenne / Moyen | Preview/E2E sous CSP dès SEC-03a (action 2) |
-| R3 | US-005 déborde (shell + Inter + verre + lint + budget = 5 pts chargés) | Moyenne / Moyen | T0 courte et isolée ; US-006 peut démarrer sa partie 3D (T1 à T3) en parallèle ; la marge sert de tampon |
+| R10 | Engagement à 16 pts pour une capacité prudente de 15 ; e2e rouge en CI ; purge d'historique en cours | Moyenne / Moyen | Pas de marge : SEC-02 glisse en premier ; fix e2e mergé avant les PR de stories ; ne rien baser sur d'anciens SHA |
+| R3 | US-005 déborde (shell + Inter + verre + lint + budget + restylage natif v0.4 = 8 pts) | Moyenne / Moyen | T0 courte et isolée ; US-006 peut démarrer sa partie 3D (T1 à T3) en parallèle ; la marge sert de tampon |
 | R4 | Générateur du bureau en L (graphics-engineer) + ombre et keep-out dérivés : US-006 plus chargée | Moyenne / Moyen | Angle orienté à droite seulement, sans « Custom size » ; réestimer en cours de sprint ; la marge sert de tampon |
 | R5 | ~~Bornes du bureau~~ | Levé | Tranché par le PO (décision 30) |
 | R6 | Cycles de review (US-003 en a eu 3) | Moyenne / Moyen | Action 3 ; revue des règles avant le code |
