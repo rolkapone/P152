@@ -332,6 +332,7 @@ Critères d'acceptation :
 - [ ] Une donnée corrompue ou d'une ancienne version est migrée ou ignorée avec un bandeau d'erreur ("We couldn't restore your last setup." + Start new / Import a file), sans planter.
 - [ ] Export/import JSON du setup (fichier validé par schéma, confirmation "Replace current setup?", import annulable par Ctrl+Z).
 - [ ] *(sécurité)* Fixtures malveillantes dans `tests/fixtures/setups/malicious/` (> 1 Mio, `__proto__`/`constructor` à tous les niveaux, 51 objets, `1e308`, chaîne de 1 Mo, `mount` cyclique, clé inconnue contenant du HTML, version future) toutes rejetées sans exception ; fuzzing fast-check « ne lève jamais » ; le message d'erreur n'affiche jamais le contenu du fichier ni de pile ; la relecture sur événement `storage` passe par `parseSetup`.
+- [ ] *(sécurité)* L'import de fichier appelle `checkDeclaredSize(file.size)` **avant** `file.text()` (un fichier > 1 Mio n'est jamais lu en mémoire), puis `parseSetup(text, catalog, { declaredBytes: file.size })`.
 Notes techniques / dépendances : dépend de US-003. L'import de fichier est une surface d'attaque (threat model M-01 à M-06).
 
 ### US-019 — Annuler / rétablir  [UI] [Should | 3 pts]
