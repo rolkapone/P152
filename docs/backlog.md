@@ -6,14 +6,14 @@
 |---|---|
 | Points MVP (Must + Should) | **95** (Must 85, Should 10) |
 | Dont stories sécurité (SEC-01 à SEC-05) | 8 (Must 7, Should 1) |
-| Points « Could » MVP (hors total, bonus) | 7 |
-| Points livrés | 0 (US-001 et US-002 partiellement produites, non DONE) |
-| Vitesse moyenne | 15 pts/sprint (par défaut, pas d'historique) |
-| Sprints restants estimés avant MVP | **7** (95 / 15 = 6,3 arrondi à 7) |
-| Dernière mise à jour | 2026-10-19 (fin du kickoff, préparation du Sprint 1) |
+| Points « Could » MVP (hors total, bonus) | 9 (US-021, US-023, SEC-06) |
+| Points livrés | 3 (US-001 DONE le 2026-10-19 ; US-002 en cours) |
+| Vitesse moyenne | 15 pts/sprint (par défaut, pas d'historique ; recalcul en fin de Sprint 1) |
+| Sprints restants estimés avant MVP | **7** (92 pts restants / 15 = 6,1 arrondi à 7) |
+| Dernière mise à jour | 2026-10-19 (Sprint 1 en cours : US-001 DONE, US-002 IN PROGRESS) |
 
-Détail du recalcul : 83 pts (kickoff) + SEC-01 (3) + SEC-02 (1) + SEC-03 (2) + SEC-04 (1) + SEC-05 (1) + US-024 (2, réglages d'alertes) + US-025 (2, Help et préférences d'affichage) = **95**.
-Hypothèse : le premier déploiement public n'a lieu qu'à la fin du MVP (SEC-03 avant ce déploiement, SEC-05 juste avant la release).
+Détail du recalcul : 83 pts (kickoff) + SEC-01 (3) + SEC-02 (1) + SEC-03a (1) + SEC-03b (1) + SEC-04 (1) + SEC-05 (1) + US-024 (2, réglages d'alertes) + US-025 (2, Help et préférences d'affichage) = **95**.
+Hypothèse : le premier déploiement public n'a lieu qu'à la fin du MVP (SEC-03a avant le premier push, SEC-03b avant ce déploiement, SEC-05 juste avant la release).
 
 Légende : priorité MoSCoW, estimation en points (1, 2, 3, 5, 8). Tags `[UI]` = écran, `[3D]` = scène/rendu/assets.
 Convention de langue : documents en français ; textes visibles dans l'app en **anglais** (libellés cités entre guillemets = texte UI anglais). Unités métriques (mm/cm), **sauf la diagonale d'écran affichée en pouces avec son équivalent en mm** (décision 8).
@@ -36,22 +36,23 @@ Les critères UX/UI de ce document viennent de `docs/design/ux/principes.md`, `d
 
 ### US-001 — Setup repo, build et CI  [Must | 3 pts]
 En tant qu'équipe, je veux un repo avec build, lint, tests et CI afin de livrer chaque story de façon fiable.
-**État au 2026-10-19 : partiellement fait.** Repo git local sur `main` (3 commits : outillage, jobs sécurité, ossature E2E Playwright) ; `ci.yml`, `security-scheduled.yml`, `dependabot.yml`, `.gitignore`, `.gitattributes` (LFS), `.env.example`, `.npmrc`, `vite.config.ts` (`sourcemap: false`) écrits. **Rien n'a été exécuté** : Node 24 et pnpm ne sont pas installés sur le poste du PO ; pas de lockfile ; pas de dépôt distant.
+**État au 2026-10-19 : DONE.** Mergée dans `main` (merge `--no-ff` dfdfcfe). Revue APPROVE au cycle 2/3 (`docs/reviews/US-001.md` ; cycle 1 bloqué sur l'audit tinypool/vitest, corrigé par Vitest 4.1.12). Secdevops PASS (`docs/security/scans/US-001.md`). Checks locaux verts (`docs/ci/local-run-US-001.md`). **Écart consigné** : la CI distante n'a pas été exécutée (décision PO : pas de dépôt ni de push au Sprint 1) ; son exécution réelle est reportée au Sprint 2 (SEC-01, SEC-02).
 Critères d'acceptation :
-- [ ] Étant donné un clone propre, quand on lance `pnpm install --frozen-lockfile` puis le build, alors il réussit sans erreur (premier `pnpm install && pnpm check` exécuté, `pnpm-lock.yaml` commité).
-- [ ] Étant donné les jobs de `ci.yml`, quand on lance en local les mêmes commandes que ceux-ci (lint, types, tests unitaires, build), alors tout est vert. *(Décision PO 2026-10-19 : pas de dépôt GitHub ni de push au Sprint 1 ; la vérification de l'exécution réelle de la CI sur une PR est reportée au Sprint 2.)*
-- [ ] Étant donné le repo, alors `.env` est dans `.gitignore` et `.env.example` existe (présent, à valider au premier run).
-- [ ] Les fichiers binaires > 1 Mo sont suivis par Git LFS (`.gitattributes` présent, `check:assets` vert).
-- [ ] *(sécurité)* `.npmrc`/`pnpm-workspace.yaml` avec `onlyBuiltDependencies` en liste blanche et `minimumReleaseAge` (3 jours) ; `.env` ignoré, `.env.example` factice ; `build.sourcemap` désactivé (ou `hidden` non déployé) pour le build de production.
+- [x] Étant donné un clone propre, quand on lance `pnpm install --frozen-lockfile` puis le build, alors il réussit sans erreur (premier `pnpm install && pnpm check` exécuté, `pnpm-lock.yaml` commité).
+- [x] Étant donné les jobs de `ci.yml`, quand on lance en local les mêmes commandes que ceux-ci (lint, types, tests unitaires, build), alors tout est vert. *(Décision PO 2026-10-19 : pas de dépôt GitHub ni de push au Sprint 1 ; la vérification de l'exécution réelle de la CI sur une PR est reportée au Sprint 2.)*
+- [x] Étant donné le repo, alors `.env` est dans `.gitignore` et `.env.example` existe.
+- [x] Les fichiers binaires > 1 Mo sont suivis par Git LFS (`.gitattributes` présent, `check:assets` vert).
+- [x] *(sécurité)* `.npmrc`/`pnpm-workspace.yaml` avec `onlyBuiltDependencies` en liste blanche et `minimumReleaseAge` (3 jours) ; `.env` ignoré, `.env.example` factice ; `build.sourcemap` désactivé (ou `hidden` non déployé) pour le build de production.
 Notes techniques / dépendances : devops. Bloque toutes les autres stories. **Prérequis PO** : installer Node 24 LTS et pnpm 10.34.7 ; accord explicite pour créer le dépôt GitHub public et pousser.
 
 ### US-002 — Threat model initial  [Must | 2 pts]
 En tant que PO, je veux un threat model du produit afin d'anticiper les risques de sécurité dès la conception.
-**État au 2026-10-19 : livrable produit** (`docs/security/threat-model.md` v1.0, `docs/security/ci-security.md`, brouillons `docs/security/ci/`). Reste à le passer par la boucle DoD : relecture reviewer (lecture seule, story documentaire, ni UI ni 3D donc ni contrôle design ni QA), validation secdevops, commit/merge par le devops sur branche `feature/US-002-threat-model`.
+**État au 2026-10-19 : IN PROGRESS** (branche `feature/US-002-threat-model`, implémenteur secdevops). Livrable produit au kickoff (`docs/security/threat-model.md` v1.0, `docs/security/ci-security.md`, brouillons `docs/security/ci/`), commité directement sur `main` (304e3f9). Reste pour la DoD : (1) relecture et mise à jour par secdevops selon les décisions PO (dépôt public, Cloudflare Pages, pas de push au Sprint 1, Vitest 4.1) et les findings du scan US-001 (`docs/security/scans/US-001.md`, dont `_headers` bloquant et findings LOW de SEC-06) ; (2) revue formelle reviewer sur le diff de la branche contre `main` (story documentaire : ni contrôle design ni QA) ; (3) merge `--no-ff` par le devops.
 Critères d'acceptation :
 - [x] Étant donné l'architecture MVP, quand le threat model est rédigé, alors `docs/security/threat-model.md` liste actifs, surfaces d'attaque (import de fichiers, stockage local, dépendances) et mesures.
 - [x] Les scans SAST, dépendances et secrets sont définis pour la CI (`docs/security/ci-security.md`).
-- [ ] Revue APPROVE du reviewer et merge dans `main` (DoD).
+- [ ] Le threat model et `ci-security.md` sont cohérents avec les décisions PO et le scan US-001 (SEC-03a avant le premier push, findings LOW tracés en SEC-06, Vitest 4.1), avec liens exacts et aucun secret.
+- [ ] Revue APPROVE du reviewer (3 cycles max) et merge `--no-ff` dans `main` (DoD).
 Notes techniques / dépendances : secdevops. À réviser avant R6 (comptes) et R7 (import). Les stories SEC-01 à SEC-05 en sont issues.
 
 ### US-003 — Architecture socle et modèle de données du setup  [Must | 3 pts]
@@ -71,7 +72,7 @@ Critères d'acceptation :
 - [ ] *(reporté au Sprint 2 : exige le dépôt distant, décision PO 2026-10-19)* Une PR de test contenant un faux secret, un `innerHTML`, une dépendance vulnérable HIGH, et un `dist` contenant `__p152test` fait échouer la CI (4 cas vérifiés puis annulés).
 - [ ] `.gitleaks.toml`, `.semgrep/p152.yml`, `scripts/check-licenses.mjs`, `.github/dependabot.yml` et le workflow hebdomadaire sont en place ; actions et images épinglées par SHA/digest.
 - [ ] *(reporté au Sprint 2 : exige le dépôt distant)* Les rapports SARIF remontent dans l'onglet Code scanning.
-Notes techniques / dépendances : devops + secdevops. Dépend de US-001 (CI exécutée au moins une fois). Le job `build-hardening` échouera tant que `dist/_headers` n'existe pas : la génération des en-têtes est livrée par SEC-03 (voir cette story) ; d'ici là le contrôle est en avertissement documenté pour cette seule vérification.
+Notes techniques / dépendances : devops + secdevops. Dépend de US-001 (CI exécutée au moins une fois). Le contrôle `dist/_headers` de `build-hardening` **reste bloquant** (décision secdevops, scan US-001) : il n'y a pas d'avertissement toléré. La génération de `public/_headers` est donc livrée par SEC-03a **avant le premier push** (Sprint 2, en tête). Les findings LOW du scan US-001 sont regroupés dans SEC-06.
 
 ### SEC-02 — Durcissement du dépôt GitHub public  [Must | 1 pt]
 En tant qu'équipe, je veux un dépôt public durci afin de réduire le risque de compromission de la chaîne de production.
@@ -83,15 +84,34 @@ Critères d'acceptation :
 - [ ] `CODEOWNERS` couvre `.github/`, `config/security-headers.mjs`, `package.json`, `pnpm-lock.yaml`, `pnpm-workspace.yaml`, `.npmrc`, `.gitleaks.toml`, `.semgrep/`.
 Notes techniques / dépendances : devops. **Les réglages du compte/dépôt GitHub ne sont appliqués qu'avec l'accord explicite du PO** (le PO réalise ou valide chaque action). Dépend de US-001 et de la création du dépôt distant.
 
-### SEC-03 — Déploiement sécurisé sur Cloudflare Pages  [Must avant le premier déploiement | 2 pts]
+### SEC-03a — Génération des en-têtes de sécurité (`_headers`, CSP)  [Must, avant le premier push | 1 pt]
+En tant qu'équipe, je veux que le build produise les en-têtes de sécurité afin que le contrôle `build-hardening` passe et que le premier push n'échoue pas.
+Critères d'acceptation :
+- [ ] Étant donné `config/security-headers.mjs` (source unique), quand on lance le build, alors `public/_headers` est généré et `dist/_headers` existe avec CSP stricte sans `unsafe-inline`/`unsafe-eval`, `nosniff`, `Referrer-Policy`, `Permissions-Policy`, COOP, HSTS.
+- [ ] Un test unitaire vérifie que le contenu de `dist/_headers` correspond à `config/security-headers.mjs` ; le contrôle `dist/_headers` de `sec-build-hardening` (ci.yml) est vert, sans avertissement toléré.
+- [ ] Le preview/E2E servi avec ces en-têtes ne produit aucune violation CSP en console.
+Notes techniques / dépendances : devops + secdevops. **Sprint 2, en tête, avant tout push** (décision secdevops : contrôle bloquant). Dépend de US-001 (DONE). Débloque SEC-01 (jobs) et US-022 (E2E sous CSP).
+
+### SEC-03b — Déploiement sécurisé sur Cloudflare Pages  [Must avant le premier déploiement | 1 pt]
 En tant qu'équipe, je veux un déploiement protégé afin qu'aucun bundle altéré n'atteigne les utilisateurs.
 Critères d'acceptation :
-- [ ] **Génération de `dist/_headers`** à partir de la source unique `config/security-headers.mjs` (CSP stricte sans `unsafe-inline`/`unsafe-eval`, `nosniff`, `Referrer-Policy`, `Permissions-Policy`, COOP, HSTS) : actuellement absente, ce qui fait échouer le job `build-hardening` ; le job passe au vert une fois la story livrée.
 - [ ] Environnement GitHub `production` : approbation du PO, déploiement depuis les tags `v*` uniquement ; secrets Cloudflare présents uniquement dans cet environnement (et `preview` séparé avec son propre jeton).
 - [ ] Jeton Cloudflare à portée « Pages : Edit » sur le seul compte ; MFA Cloudflare ; procédure de rotation écrite dans `docs/security/`.
 - [ ] Après chaque déploiement, un contrôle automatique lit les en-têtes de l'URL réelle et échoue si un en-tête diffère de `config/security-headers.mjs`.
 - [ ] Les previews portent `X-Robots-Tag: noindex` et ne sont jamais construites depuis un fork.
-Notes techniques / dépendances : devops + secdevops. La partie « génération de `_headers`/CSP » doit être livrée avant ou avec SEC-01 si on veut une CI entièrement verte ; le reste (Cloudflare, environnement `production`) avant le premier déploiement, sur ordre du PO. Pas de domaine personnalisé (`*.pages.dev`).
+Notes techniques / dépendances : devops + secdevops. Dépend de SEC-03a et SEC-02. À livrer avant le premier déploiement, sur ordre du PO. Pas de domaine personnalisé (`*.pages.dev`).
+
+### SEC-06 — Durcissement CI (findings LOW du scan US-001)  [Could | 2 pts, priorité basse]
+En tant qu'équipe, je veux traiter les findings LOW du scan US-001 afin de réduire la surface de la chaîne CI. À planifier après SEC-01 (peut être pris en tâches dans SEC-01 si de la place).
+Critères d'acceptation :
+- [ ] `persist-credentials: false` sur les `actions/checkout` des jobs `quality`, `unit`, `build` et `assets` de `ci.yml` (zizmor sans alerte `artipacked`).
+- [ ] `id-token: write` retiré de `security-scheduled.yml` (permissions minimales par job).
+- [ ] `security-scheduled.yml` exécute aussi gitleaks (historique complet) et CodeQL en hebdomadaire.
+- [ ] zizmor est installé à version et empreinte fixées (hash vérifié), plus via `uvx` sans empreinte.
+- [ ] Dependabot (`docker-compose`) suit les digests des images semgrep et playwright, ou une procédure de mise à jour documentée les remplace.
+- [ ] L'agrégateur `security` de `ci.yml` traite un job `skipped` comme un échec (aujourd'hui seuls `failure` et `cancelled` font échouer l'agrégation ; aligner sur `ci-ok`, qui exige `success`).
+- [ ] Migration d'ESLint 9 (déprécié) vers la version supportée, ADR consigné, `pnpm check` vert.
+Notes techniques / dépendances : devops + secdevops. Source : `docs/security/scans/US-001.md`. Hors total MVP (Could).
 
 ### SEC-04 — Mention « vos données restent dans ce navigateur »  [UI] [Should | 1 pt]
 En tant qu'utilisateur, je veux savoir où sont stockées mes données afin de décider en confiance.
@@ -106,7 +126,7 @@ Critères d'acceptation :
 - [ ] Threat model révisé ; scans complets sur `main` sans CRITICAL/HIGH ouvert.
 - [ ] Tests manuels de l'import avec le jeu de fichiers malveillants ; en-têtes de l'URL de production vérifiés (Mozilla HTTP Observatory, note visée A+).
 - [ ] Rapport `docs/security/release-mvp.md`.
-Notes techniques / dépendances : secdevops. Dernière story du MVP ; dépend de SEC-03, US-018, US-022.
+Notes techniques / dépendances : secdevops. Dernière story du MVP ; dépend de SEC-03a, SEC-03b, US-018, US-022.
 
 ## Epic B — Scène 3D et navigation
 
@@ -345,7 +365,7 @@ Critères d'acceptation :
 - [ ] Une mesure de FPS est enregistrée sur une scène de 20 objets avec seuil d'échec configurable (viewport minimal 1366×768).
 - [ ] Des captures sont archivées comme artefacts.
 - [ ] *(sécurité)* L'E2E échoue sur tout événement `securitypolicyviolation` ou erreur console CSP, sur `dist-e2e` servi avec les en-têtes de production.
-Notes techniques / dépendances : qa-tester + devops. Dépend de US-012, US-017, US-018, SEC-03 (en-têtes). Ossature Playwright déjà présente (`tests/e2e/`).
+Notes techniques / dépendances : qa-tester + devops. Dépend de US-012, US-017, US-018, SEC-03a (en-têtes). Ossature Playwright déjà présente (`tests/e2e/`).
 
 ### US-021 — Utilisation tactile et mobile  [UI] [Could | 5 pts]
 En tant qu'utilisateur mobile, je veux manipuler la scène au doigt afin de consulter mon setup sur smartphone.
@@ -361,13 +381,13 @@ Critères d'acceptation :
 - [ ] *(sécurité)* La capture PNG ne contient que le canvas (aucune donnée de l'interface ni métadonnée).
 Notes techniques / dépendances : prépare le partage (R6).
 
-**Récapitulatif MVP** : Must 85 pts (US-001 à 006, 008 à 018, 022, 024, 025, SEC-01, 02, 03, 05) ; Should 10 pts (US-007, 019, 020, SEC-04) ; Could 7 pts (US-021, 023, hors total). Total MVP : **95 pts**.
+**Récapitulatif MVP** : Must 85 pts (US-001 à 006, 008 à 018, 022, 024, 025, SEC-01, 02, 03a, 03b, 05) ; Should 10 pts (US-007, 019, 020, SEC-04) ; Could 9 pts (US-021, 023, SEC-06, hors total). Total MVP : **95 pts**.
 
 ---
 
 # Plus tard — vision long terme (stories de haut niveau, à détailler avant leur sprint)
 
-Les ids US-1xx sont provisoires. Estimations indicatives (epic-level) ; toute story > 8 pts sera redécoupée. Les stories de sécurité SEC-1x et suivantes proviennent du threat model (§9) et conditionnent les stories fonctionnelles de leur release.
+Les ids US-1xx sont provisoires. Estimations indicatives (epic-level) ; toute story > 8 pts sera redécoupée. Les stories de sécurité SEC-1x et suivantes proviennent du threat model (§9, qui donne les menaces couvertes) et conditionnent les stories fonctionnelles de leur release. **Leurs critères d'acceptation font foi ici** (repris de la v1.0 du threat model, commit 304e3f9, adaptés aux décisions PO du 2026-10-19) ; ils seront précisés à la révision du threat model en début de release.
 
 ## Option i18n — Langue secondaire française (non engagée)
 - US-100 — Traduction française de l'interface via les fichiers i18n existants [UI] ~3 (option, à décider par le PO)
@@ -377,7 +397,10 @@ Les ids US-1xx sont provisoires. Estimations indicatives (epic-level) ; toute st
 - US-102 — Bibliothèque de matériaux PBR optimisés [3D] [Should] ~5
 - US-103 — Styles en un clic : all white, all black, coloré, cosy (le style Cosy, plus chaud et plus sombre, est conservé) [UI][3D] [Should] ~8
 - US-104 — Aperçu avant/après d'un style [UI] [Could] ~3
-- **SEC-10 — Activation encadrée de `'wasm-unsafe-eval'` pour meshopt/KTX2** [Must à la 1re story qui charge un GLB/KTX2 | 1 pt] : ADR consigné ; décodeurs servis depuis l'origine, versions épinglées, empreinte vérifiée au build ; le contrôle CI accepte `'wasm-unsafe-eval'` et refuse toujours `'unsafe-eval'`.
+- **SEC-10 — Activation encadrée de `'wasm-unsafe-eval'` pour meshopt/KTX2** [Must à la 1re story qui charge un GLB/KTX2 | 1 pt | graphics-engineer + secdevops]
+  Critères d'acceptation :
+  - [ ] ADR consigné ; décodeurs servis depuis l'origine, versions épinglées, empreinte vérifiée au build.
+  - [ ] `'wasm-unsafe-eval'` ajouté à `script-src` dans `config/security-headers.mjs` (source unique, SEC-03a) ; le contrôle CSP de `sec-build-hardening` accepte `'wasm-unsafe-eval'` et refuse toujours `'unsafe-eval'` ; E2E sans violation CSP.
 Architecture : slots matière par pièce de modèle, presets de style en données (`assets/catalog/styles/styles.json` existe déjà).
 
 ## R3 — Ambiance : lumière, jour/soir, murs
@@ -393,8 +416,14 @@ Architecture : pipeline de rendu extensible (post-traitements, budgets qualité 
 - US-121 — Bibliothèque de modèles 3D libres (curation, licences, optimisation, Git LFS) [3D] ~8 — **dépend de SEC-11**
 - US-122 — Recherche et filtres de la bibliothèque [UI] ~5
 - US-123 — Placement sur surfaces autres que le bureau (étagères, sol) [3D] ~5
-- **SEC-11 — Ingestion sécurisée des modèles et textures tiers** [Must | 3 pts] : provenance (URL, auteur, licence SPDX, date, SHA-256) ; licences admises CC0 et CC-BY 4.0 (attribution affichée) ; `gltf-validator` sans erreur, ré-export `gltf-transform`, aucune `uri` externe ; tests avec glTF piégés.
-- **SEC-12 — Intégrité du catalogue distant** [Should | 2 pts, si le catalogue sort du bundle] : manifeste versionné avec SHA-256 par fichier, servi depuis l'origine, validation par schéma.
+- **SEC-11 — Ingestion sécurisée des modèles et textures tiers** [Must | 3 pts | technical-artist + secdevops, lié à US-121]
+  Critères d'acceptation :
+  - [ ] Chaque asset a une provenance (URL source, auteur, licence SPDX, date, SHA-256) dans le registre (`docs/design/3d/licences-assets.md`) ; licences admises : CC0, CC-BY 4.0 (attribution affichée dans l'app) ; tout autre cas refusé en CI.
+  - [ ] `gltf-validator` sans erreur ; ré-export `gltf-transform` ; aucune `uri` externe ; budgets respectés.
+  - [ ] Jeu de tests avec glTF piégés (uri http, data URI géante, accesseur démesuré) rejetés.
+- **SEC-12 — Intégrité du catalogue distant** [Should | 2 pts | R4/R5, seulement si le catalogue sort du bundle]
+  Critères d'acceptation :
+  - [ ] Manifeste versionné avec SHA-256 par fichier, vérifié avant usage ; servi depuis l'origine ; validation par schéma ; CSP inchangée ou ADR.
 - Revue du threat model au début de R4.
 
 ## R5 — Courses et catalogue produits
@@ -402,8 +431,16 @@ Architecture : pipeline de rendu extensible (post-traitements, budgets qualité 
 - US-131 — Liste de courses avec prix total [UI] ~5
 - US-132 — Remplacer un objet générique par un produit réel [UI][3D] ~5
 - US-133 — Mise à jour des prix et données produits (source à définir) ~8
-- **SEC-20 — Liens sortants et affiliation sûrs et transparents** [Must | 3 pts] : le setup ne contient que `productId` ; URL du seul catalogue de confiance, `https:` et domaine en liste blanche ; `rel="noopener noreferrer sponsored"` ; mention « affiliate links » ; aucun script tiers. Soumise à la question d'affiliation du PO.
-- **SEC-21 — Intégrité et fraîcheur des données produits et prix** [Should | 3 pts] : source et date affichées, prix masqué au-delà d'un âge configurable, secrets marchands côté serveur, récupération limitée à une liste blanche d'hôtes (anti-SSRF).
+- **SEC-20 — Liens sortants et affiliation sûrs et transparents** [Must | 3 pts]
+  Critères d'acceptation :
+  - [ ] Le setup ne contient que `productId` ; toute URL vient du catalogue de confiance, `https:` et domaine en liste blanche (rejet sinon, testé).
+  - [ ] Liens rendus avec `rel="noopener noreferrer sponsored"` ; aucun endpoint de redirection prenant une URL.
+  - [ ] Mention « affiliate links » visible ; aucun script ni pixel tiers ; page « Privacy » (SEC-04) mise à jour.
+  Notes : soumise à la question d'affiliation du PO ; sans affiliation, retirer `sponsored` et la mention.
+- **SEC-21 — Intégrité et fraîcheur des données produits et prix** [Should | 3 pts]
+  Critères d'acceptation :
+  - [ ] Source et date affichées ; prix masqué au-delà d'un âge configurable.
+  - [ ] Secrets marchands uniquement côté serveur ; récupération limitée à une liste blanche d'hôtes (anti-SSRF).
 - Revue du threat model au début de R5.
 
 ## R6 — Comptes, partage, communauté
@@ -411,14 +448,41 @@ Architecture : pipeline de rendu extensible (post-traitements, budgets qualité 
 - US-141 — Partage d'un setup par lien [UI] ~5
 - US-142 — Galerie d'inspiration communautaire [UI] ~8
 - US-143 — Modération et signalement ~5
-- **SEC-30 — Révision du threat model et ADR de backend sécurisé** [Must, avant toute story de compte | 2 pts] : spike backend (Supabase ou API maison) évalué par secdevops.
+- **SEC-30 — Révision du threat model et ADR de backend sécurisé** [Must, avant toute story de compte | 2 pts | secdevops]
+  Critères d'acceptation :
+  - [ ] Spike backend (Supabase ou API maison) évalué par secdevops : auth, RLS/autorisation, secrets, journalisation, localisation des données (question PO : hébergement UE), coût. ADR consigné.
+  - [ ] Threat model révisé pour R6 (menaces L-30 à L-42).
 - **SEC-31 — Authentification et sessions sécurisées** [Must | 5 pts]
+  Critères d'acceptation :
+  - [ ] Fournisseur managé ; passkeys/OAuth ; mots de passe ≥ 12 caractères vérifiés contre les fuites ; MFA disponible, obligatoire pour les admins.
+  - [ ] Sessions en cookies `HttpOnly; Secure; SameSite=Lax` (ou jeton en mémoire + refresh rotatif), aucun jeton dans `localStorage` ; la déconnexion révoque la session ; protection CSRF et CORS en liste blanche.
+  - [ ] Rate limiting sur connexion/inscription/réinitialisation ; messages non énumérants.
 - **SEC-32 — Autorisation des setups et des liens de partage** [Must | 3 pts]
-- **SEC-33 — Conformité RGPD** [Must | 5 pts] (dépend des questions PO : âge minimum, hébergement UE)
-- **SEC-34 — Sécurité des contenus partagés (UGC) et modération** [Must | 5 pts]
+  Critères d'acceptation :
+  - [ ] Refus par défaut ; suite de tests automatisés A/B/anonyme sur chaque ressource ; clé privilégiée jamais côté client.
+  - [ ] Identifiants de partage aléatoires ≥ 128 bits, setups privés par défaut, liens révocables.
+- **SEC-33 — Conformité RGPD** [Must | 5 pts | PO + secdevops + developer] (dépend des questions PO : âge minimum, hébergement UE)
+  Critères d'acceptation :
+  - [ ] Registre des traitements, politique de confidentialité, CGU, âge minimum (selon décision PO).
+  - [ ] Export et suppression du compte en self-service ; durées de conservation appliquées.
+  - [ ] DPA des sous-traitants ; procédure de notification de violation (72 h).
+- **SEC-34 — Sécurité des contenus partagés (UGC) et modération** [Must | 5 pts | lié à US-142/US-143]
+  Critères d'acceptation :
+  - [ ] Validation serveur par `parseSetup` partagé ; texte brut uniquement ; méta OG échappées ; tests de XSS stockée.
+  - [ ] Images ré-encodées sans métadonnées, servies depuis une origine dédiée ; limite de taille après décompression pour les partages par fragment d'URL.
+  - [ ] Signalement, retrait et motivation des décisions (DSA).
 - **SEC-35 — Anti-abus et maîtrise des coûts** [Must | 3 pts]
+  Critères d'acceptation :
+  - [ ] Rate limiting et quotas par compte/IP ; alertes budgétaires.
+  - [ ] CAPTCHA seulement si nécessaire, impact CSP/RGPD consigné dans un ADR.
 - **SEC-36 — Journalisation de sécurité, supervision et réponse à incident** [Must | 3 pts]
+  Critères d'acceptation :
+  - [ ] Journal d'audit des actions sensibles ; logs sans secret ni jeton.
+  - [ ] Alertes (pics d'échecs de connexion, erreurs d'autorisation) ; runbook de réponse à incident.
 - **SEC-37 — Domaine personnalisé sécurisé** [Should | 1 pt, seulement si le PO choisit un domaine ; aucun domaine pour l'instant]
+  Critères d'acceptation :
+  - [ ] DNSSEC, enregistrement CAA, verrou registrar + MFA sur le compte registrar.
+  - [ ] HSTS `includeSubDomains` ; procédure anti sous-domaine orphelin (supprimer les CNAME avant le projet Pages).
 - Dépendances : US-140 à US-143 dépendent de SEC-30 à SEC-36.
 
 ## R7 — Import d'objets personnels
@@ -426,14 +490,27 @@ Architecture : pipeline de rendu extensible (post-traitements, budgets qualité 
 - US-151 — Import photo vers objet 3D [UI][3D] ~8 — **dépend de SEC-40 à SEC-42**
 - US-152 — Calage des dimensions réelles d'un objet importé [UI][3D] ~5
 - **SEC-40 — Upload sécurisé et traitement isolé (photos, glTF)** [Must | 5 pts]
+  Critères d'acceptation :
+  - [ ] Taille et type vérifiés (octets magiques) côté client et serveur ; SVG refusé.
+  - [ ] Ré-encodage dans un bac à sable sans réseau avec limites de ressources ; conversion GLB.
+  - [ ] Contenus servis depuis une origine dédiée avec `nosniff` et `Content-Disposition` ; pas d'import par URL (ou proxy à liste blanche).
 - **SEC-41 — IA côté serveur : clé, quotas et coûts** [Must | 3 pts]
-- **SEC-42 — Confidentialité des photos** [Must | 3 pts]
+  Critères d'acceptation :
+  - [ ] Clé uniquement dans un secret manager côté serveur ; authentification requise.
+  - [ ] Quota par utilisateur et plafond global avec alerte ; sortie du modèle validée par schéma.
+- **SEC-42 — Confidentialité des photos** [Must | 3 pts] (dépend de la question PO : hébergement UE)
+  Critères d'acceptation :
+  - [ ] EXIF supprimés avant envoi ; consentement explicite.
+  - [ ] Photo source supprimée après génération ; DPA fournisseur sans entraînement sur les données ; information dans la politique de confidentialité.
 Prérequis : threat model upload, quotas.
 
 ## R8 — Réalité augmentée mobile
 - US-160 — Spike WebXR / alternatives ~3
 - US-161 — Affichage du setup en AR à l'échelle réelle [UI][3D] ~8
-- **SEC-50 — AR à permissions minimales** [Should | 1 pt] : pas de `camera-access`, `Permissions-Policy: xr-spatial-tracking=(self)`, aucune donnée spatiale transmise.
+- **SEC-50 — AR à permissions minimales** [Should | 1 pt]
+  Critères d'acceptation :
+  - [ ] Pas de `camera-access` ; `Permissions-Policy: xr-spatial-tracking=(self)` (dans `config/security-headers.mjs`) ; aucune donnée spatiale transmise.
+  - [ ] CSP et en-têtes revus (contrôle `sec-build-hardening` mis à jour).
 
 ---
 
@@ -457,7 +534,7 @@ Prérequis : threat model upload, quotas.
 13. **Personas validés** (`docs/design/ux/personas.md`).
 
 ## Opérations (validées le 2026-10-19)
-14. **GitHub + Cloudflare Pages**, **dépôt public**, **pas de domaine personnalisé** (`*.pages.dev`). → US-001, SEC-02, SEC-03 ; SEC-37 reste en « Plus tard ». Aucun push ni déploiement sans ordre explicite du PO.
+14. **GitHub + Cloudflare Pages**, **dépôt public**, **pas de domaine personnalisé** (`*.pages.dev`). → US-001, SEC-02, SEC-03a, SEC-03b ; SEC-37 reste en « Plus tard ». Aucun push ni déploiement sans ordre explicite du PO.
 
 ## Style (validées le 2026-10-19)
 15. **Direction visuelle inspirée du langage visuel d'Apple sans rien copier de protégé** : Inter auto-hébergée + Lucide ; pas de SF Pro, SF Symbols, logo ni mise en page Apple. → US-005.

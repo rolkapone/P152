@@ -24,7 +24,7 @@ Vitesse : aucun historique, 15 pts/sprint par défaut. Plan de release : 95 pts 
 1. **Levé** : Node v24.20.0 et pnpm 10.34.7 installés (le PATH des shells déjà ouverts peut être périmé ; les agents rechargent le PATH machine+user).
 2. Git LFS : à vérifier par le devops en US-001 T5 (`git lfs install`).
 3. **Dépôt GitHub et push : NON pendant ce sprint (décision PO, 2026-10-19, sprint validé).** US-001 T6 et SEC-01 T5/T6 sont **reportées au Sprint 2**. **Écart consigné** : tant que le push n'est pas fait, la « CI verte » de la DoD se vérifie **en local** avec les mêmes commandes que les jobs CI (`pnpm check`, build, E2E, scans disponibles). US-001 T6 et SEC-01 T5/T6 (exécution réelle de la CI, SARIF, PR de test) restent ouvertes jusqu'à l'accord ; si non obtenu avant la fin du sprint, elles sont reportées au Sprint 2 et signalées en revue.
-4. **Décisions par défaut confirmées tacitement** : bornes du bureau = catalogue du technical-artist (800–2400 mm) ; contrôle `build-hardening` des en-têtes en avertissement documenté jusqu'à SEC-03 (Sprint 2).
+4. **Décisions par défaut confirmées tacitement** : bornes du bureau = catalogue du technical-artist (800–2400 mm). **Révisé le 2026-10-19 (décision secdevops, scan US-001)** : le contrôle `dist/_headers` de `build-hardening` reste **bloquant** (plus d'avertissement) ; SEC-03 est découpée et SEC-03a (génération de `public/_headers`, CSP, 1 pt) est livrée en tête du Sprint 2, avant le premier push.
 
 ## Revue du design avant développement (règle CLAUDE.md)
 
@@ -55,10 +55,11 @@ Références : ADR-OPS-01/02/03 dans `docs/architecture.md`.
 
 ### US-002 — Threat model initial [secdevops] — 2 pts
 Branche : `feature/US-002-threat-model` (docs uniquement).
+Démarrée le 2026-10-19, implémenteur : secdevops. Le threat model a été commité directement sur `main` au kickoff (304e3f9) ; la branche porte les mises à jour.
 - [x] T1 Threat model et définition des scans produits (`docs/security/`).
-- [ ] T2 Relecture reviewer (cohérence avec `architecture.md`, exhaustivité des surfaces) ; verdict APPROVE / CHANGES_REQUESTED.
-- [ ] T3 Validation secdevops (auto-revue : aucun secret, liens exacts).
-- [ ] T4 Commit des documents sur la branche et merge `--no-ff` par le devops. Pas de contrôle design ni QA (aucun écran, aucune scène).
+- [ ] T2 Relecture/MAJ par secdevops selon les décisions PO (dépôt public, Cloudflare Pages, pas de push au Sprint 1, `_headers` bloquant / SEC-03a avant push, Vitest 4.1) et le scan US-001 (`docs/security/scans/US-001.md`, findings LOW → SEC-06) ; cohérence avec `architecture.md` ; aucun secret, liens exacts.
+- [ ] T3 Revue formelle reviewer du diff contre `main` : APPROVE / CHANGES_REQUESTED (3 cycles max).
+- [ ] T4 Merge `--no-ff` par le devops. Pas de contrôle design ni QA (aucun écran, aucune scène).
 
 ### US-003 — Architecture socle et modèle de données du setup [developer + graphics-engineer] — 3 pts
 Branche : `feature/US-003-architecture-schema`.
@@ -75,7 +76,7 @@ Branche : `feature/SEC-01-ci-security`. Dépend de US-001 (T3 au minimum).
 - [ ] T1 Intégrer les jobs gitleaks, CodeQL, Semgrep, zizmor, SCA + licences, `build-hardening` dans le slot `# SECDEVOPS-SLOT` ; job agrégateur `security` requis par `ci-ok`.
 - [ ] T2 Installer `.gitleaks.toml`, `.semgrep/p152.yml`, `scripts/check-licenses.mjs` depuis `docs/security/ci/`.
 - [ ] T3 Épingler actions et images (SHA / digest) ; vérifier `dependabot.yml` et `security-scheduled.yml`.
-- [ ] T4 `build-hardening` : `dist/_headers` n'existe pas encore (génération livrée par SEC-03, Sprint 2). Le contrôle des en-têtes passe en **avertissement documenté** pour ce seul point tant que SEC-03 n'est pas mergé ; les autres contrôles (hooks de test, `index.html`, gitleaks `dist`) restent bloquants. Alternative si le PO préfère : avancer la partie « génération `_headers`/CSP » de SEC-03 dans ce sprint (+1 à 2 pts).
+- [ ] T4 `build-hardening` : `dist/_headers` n'existe pas encore (génération livrée par SEC-03a, Sprint 2 en tête). Décision secdevops : le contrôle **reste bloquant** (pas d'avertissement) ; il ne s'exécute réellement qu'au premier push, qui n'aura lieu qu'après SEC-03a. Les autres contrôles (hooks de test, `index.html`, gitleaks `dist`) restent bloquants. Les findings LOW du scan US-001 sont tracés dans SEC-06 (backlog), hors Sprint 1.
 - [ ] T5 Vérification des 4 cas négatifs (faux secret, `innerHTML`, dépendance HIGH, `__p152test` dans `dist`) sur une PR de test, puis annulation.
 - [ ] T6 Vérifier la remontée SARIF dans Code scanning.
 Références : `docs/security/ci-security.md`, `docs/security/ci/`.
@@ -99,10 +100,10 @@ Décisions UX **VALIDÉES par le PO le 2026-10-19** : astuce masquée définitiv
 
 | Story | Statut (TODO / IN PROGRESS / IN REVIEW / SECURITY / DONE / BLOCKED) | Cycles de review | Notes |
 |---|---|---|---|
-| US-001 | IN PROGRESS | 0 / 3 | Branche `feature/US-001-repo-build-ci`, implémenteur : devops. Node/pnpm installés. CI vérifiée en local ; T6 (CI distante) reportée au Sprint 2. |
-| US-002 | TODO | 0 / 3 | Livrable produit ; reste relecture reviewer, validation secdevops, merge devops. |
+| US-001 | DONE | 2 / 3 | Mergée dans `main` (merge `--no-ff` dfdfcfe). Revue APPROVE au cycle 2 (`docs/reviews/US-001.md` ; cycle 1 bloqué sur l'audit tinypool/vitest, corrigé par Vitest 4.1.12). Secdevops PASS (`docs/security/scans/US-001.md`). Checks locaux verts ; CI distante (T6) reportée au Sprint 2 (décision PO). |
+| US-002 | IN PROGRESS | 0 / 3 | Branche `feature/US-002-threat-model`, implémenteur : secdevops. Reste : MAJ selon décisions PO et scan US-001, revue reviewer, merge devops. |
 | US-003 | TODO | 0 / 3 | Démarre après US-001 T3 (`pnpm check` vert). |
-| SEC-01 | TODO | 0 / 3 | Implémenteurs : devops + secdevops. Démarre après US-001 T3 ; `dist/_headers` absent = erreur bloquante de `sec-build-hardening` (ci.yml:251) : SEC-03 doit précéder le premier push ; T5/T6 dépendent du push. |
+| SEC-01 | TODO | 0 / 3 | Implémenteurs : devops + secdevops. Démarre après US-001 T3 ; `dist/_headers` absent = erreur bloquante de `sec-build-hardening` (ci.yml:270), maintenue (décision secdevops) : SEC-03a doit précéder le premier push ; T5/T6 dépendent du push. |
 | US-004 | TODO | 0 / 3 | Graphics-engineer (+ developer pour la barre). Conditionnelle (capacité). Design requis d'abord (voir section). Dépend de US-001 et US-003. |
 
 ## Risques
@@ -110,9 +111,9 @@ Décisions UX **VALIDÉES par le PO le 2026-10-19** : astuce masquée définitiv
 | # | Risque | Probabilité / impact | Parade |
 |---|---|---|---|
 | R1 | ~~Node/pnpm absents~~ levé ; risque résiduel : PATH périmé dans des shells ouverts | Faible / Faible | Les agents rechargent le PATH machine+user |
-| R2 | Première exécution de `pnpm install` / `pnpm check` : écarts d'outillage (versions ESLint 9.39, TS 5.9, Vite 7, Vitest 3 jamais testées ensemble) | Moyenne / Moyen | Time-box d'une journée en T2/T3 ; ajuster les versions par ADR |
+| R2 | Première exécution de `pnpm install` / `pnpm check` : écarts d'outillage (versions ESLint 9.39, TS 5.9, Vite 7, Vitest 4.1 jamais testées ensemble) | Moyenne / Moyen | Time-box d'une journée en T2/T3 ; ajuster les versions par ADR. **Matérialisé en partie** : audit tinypool/vitest en revue US-001, corrigé par Vitest 4.1.12 ; ESLint 9 déprécié tracé en SEC-06 |
 | R3 | Dépôt GitHub non autorisé : CI distante et CodeQL non vérifiables, SEC-01 partiellement validable | Élevée / Moyen | Vérification locale (mêmes commandes que la CI) ; demander l'accord du PO pendant le sprint ; sinon reporter US-001 T6 et SEC-01 T5/T6 au Sprint 2 |
-| R4 | `build-hardening` rouge faute de `dist/_headers` | Élevée / Faible | SEC-03 avant le premier push (le job échoue sans `dist/_headers`) ; un `::warning::` temporaire relève de secdevops |
+| R4 | `build-hardening` rouge faute de `dist/_headers` | Élevée / Faible | SEC-03a avant le premier push (le job échoue sans `dist/_headers`) ; contrôle maintenu bloquant, pas d'avertissement (décision secdevops) |
 | R5 | Sprint à 16 pts (capacité 15) | Moyenne / Faible | US-004 retirée en premier si retard |
 | R6 | Performances WebGL sur la machine du PO non connues (≥ 60 FPS sur milieu de gamme) | Faible / Moyen | Mesure dès T7 de US-004 ; paliers de qualité ADR-3D-08 |
 | R7 | Les 5 pts de US-005 (shell + Inter + verre) sont chargés pour le Sprint 2 ; US-004 en livre déjà une partie (barre de scène) | Moyenne / Faible | Coordonner le périmètre de la barre entre US-004 et US-005 |
