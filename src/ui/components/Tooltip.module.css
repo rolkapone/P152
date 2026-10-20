@@ -1,0 +1,19 @@
+/* Inverted bubble: --color-surface text on --color-text (16.3:1 light, 14:1 dark). */
+.tooltip {
+  z-index: var(--z-menu);
+  max-width: calc(100vw - 2 * var(--float-inset));
+  /* 6 / 10 px: value of the mockup (US-004 .tt), between two steps of the spacing scale. */
+  padding: calc(var(--space-1) + 2px) calc(var(--space-2) + 2px);
+  border-radius: var(--radius-sm);
+  background: var(--color-text);
+  color: var(--color-surface);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  line-height: var(--leading-tight);
+  pointer-events: none;
+  transition: opacity var(--duration-fast) var(--ease-standard);
+}
+
+.tooltip[data-entering] {
+  opacity: 0;
+}
