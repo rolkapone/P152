@@ -11,12 +11,12 @@ Légende de la colonne État : **Vérifié local** = commande exécutée sur le 
 
 | Contrôle | Outil (version épinglée) | Où | Quand | Bloquant | Menaces | État |
 |---|---|---|---|---|---|---|
-| Secrets (historique complet) | gitleaks 8.30.1 (binaire + SHA-256) | `ci.yml` `sec-secrets` | PR, push `main` | **Toute détection** | M-19 | Vérifié local (aucune fuite, toutes branches) ; hebdo : **À faire (SEC-06)** |
+| Secrets (historique complet) | gitleaks 8.30.1 (binaire + SHA-256) | `ci.yml` `sec-secrets` | PR, push `main` | **Toute détection** | M-19 | Vérifié local (aucune fuite, 44 commits, SEC-01) ; hebdo : **Intégré (SEC-01, `security-scheduled.yml` `secrets`)** |
 | Secrets (build) | gitleaks 8.30.1 `dir dist` | `ci.yml` `sec-build-hardening` | PR, push `main` | **Toute détection** | M-19 | Vérifié local |
 | Secrets (plateforme) | GitHub secret scanning + push protection | réglages du dépôt | à chaque push | **Push refusé** | M-19 | Inactif (SEC-02, **à activer avant le premier push**) |
-| SAST code | CodeQL `javascript-typescript`, `security-extended` (`github/codeql-action` v4.39.0) | `ci.yml` `sec-codeql` | PR, push `main` | **≥ High** via ruleset (SEC-02) | M-03, SR-02 | Intégré ; hebdo : **À faire (SEC-06)** |
+| SAST code | CodeQL `javascript-typescript`, `security-extended` (`github/codeql-action` v4.39.0) | `ci.yml` `sec-codeql` | PR, push `main` | **≥ High** via ruleset (SEC-02) | M-03, SR-02 | Intégré (non exécutable en local) ; hebdo : **Intégré (SEC-01, `security-scheduled.yml` `codeql`)** |
 | SAST workflows | CodeQL `actions` + zizmor 1.31.1 (`uvx`) | `ci.yml` `sec-codeql`, `sec-workflows` | PR, push `main` | zizmor **high** ; CodeQL ≥ High via ruleset | M-17, M-18 | zizmor vérifié local (0 high) ; installation sans empreinte : **SEC-06** |
-| SAST règles projet | Semgrep CE 1.181.0 (image épinglée par digest) : `p/typescript`, `p/react`, `p/javascript`, [`.semgrep/p152.yml`](../../.semgrep/p152.yml) | `ci.yml` `sec-semgrep` | PR, push `main` | règles **ERROR** | M-03, M-11, M-12, SR-01/02 | Intégré ; **non exécuté en local** (démon Docker arrêté) → relecture manuelle au scan US-001 |
+| SAST règles projet | Semgrep CE 1.181.0 (image épinglée par digest) : `p/typescript`, `p/react`, `p/javascript`, [`.semgrep/p152.yml`](../../.semgrep/p152.yml) | `ci.yml` `sec-semgrep` | PR, push `main` | règles **ERROR** | M-03, M-11, M-12, SR-01/02 | Intégré ; **non vérifié** (Docker non démarré, pas d'autre moyen sûr sous Windows) : à exécuter au premier push ou avec Docker Desktop (SEC-01 `local-run-SEC-01.md`) |
 | Vulnérabilités dépendances | `pnpm audit --audit-level high` | `ci.yml` `sec-dependencies` + `security-scheduled.yml` `audit` | PR, push `main`, hebdo | **HIGH/CRITICAL** (prod et dev) | M-16 | Vérifié local (0 vulnérabilité après Vitest 4.1.12) |
 | Vulnérabilités dépendances (2e source) | OSV-Scanner (`google/osv-scanner-action` v2.7.0) | idem | PR, push `main`, hebdo | non (rapport SARIF) | M-16 | Vérifié local (OSV-Scanner 2.7.0) |
 | Diff de dépendances en PR | `actions/dependency-review-action` v4.9.0 | `ci.yml` `sec-dependencies` | PR | **HIGH/CRITICAL** + licence hors liste | M-16, M-20, M-21 | Inactif (PR GitHub uniquement) |
@@ -25,10 +25,10 @@ Légende de la colonne État : **Vérifié local** = commande exécutée sur le 
 | `index.html` sans inline ni tiers | bash sur `dist/index.html` | `ci.yml` `sec-build-hardening` | PR, push `main` | script/style inline, URL externe | M-11, M-14 | Vérifié local |
 | Hooks de test absents | `check:bundle` (job `build`) + grep `__p152test`, `__p152perf`, `VITE_E2E`, `*.map` | `ci.yml` `build` et `sec-build-hardening` | PR, push `main` | **toute occurrence** | M-12, SR-04 | Vérifié local |
 | Mises à jour | Dependabot (npm, github-actions, docker-compose) | [`.github/dependabot.yml`](../../.github/dependabot.yml) | hebdo + alertes | n/a (PR revues) | M-16, M-17 | Inactif ; l'entrée `docker-compose` ne suit rien : **SEC-06** |
-| Hygiène du dépôt | OpenSSF Scorecard (`ossf/scorecard-action` v2.5.0) | `security-scheduled.yml` `scorecard` | hebdo | non | M-17, M-20, M-22 | Inactif ; `id-token: write` superflu : **SEC-06** |
+| Hygiène du dépôt | OpenSSF Scorecard (`ossf/scorecard-action` v2.5.0) | `security-scheduled.yml` `scorecard` | hebdo | non | M-17, M-20, M-22 | Inactif ; `id-token: write` retiré (SEC-01) |
 | Conteneurs / IaC | trivy | — | **pas au MVP** (aucune image applicative ni IaC, ADR-OPS-05) ; à activer dès qu'un Dockerfile applicatif ou de l'IaC apparaît (R6) | HIGH/CRITICAL | — | Sans objet |
 
-Agrégation : le job `security` (`permissions: {}`) échoue si un `sec-*` est en `failure` ou `cancelled` ; `ci-ok` exige `security` en succès. Le job `assets` (budgets, licences des assets, LFS) reste propriété du devops/technical-artist ; secdevops le considère comme un contrôle de conformité (M-28).
+Agrégation : le job `security` (`permissions: {}`) échoue si un `sec-*` est en `failure`, `cancelled` ou `skipped` (SEC-01) ; `ci-ok` exige `security` en succès. Le job `assets` (budgets, licences des assets, LFS) reste propriété du devops/technical-artist ; secdevops le considère comme un contrôle de conformité (M-28).
 
 ### 1.1 Versions épinglées (relevé du 2026-10-19, commit `dfdfcfe`)
 
@@ -76,11 +76,11 @@ Une vulnérabilité se corrige de préférence par montée de version, pas par e
 - Configuration : [`.gitleaks.toml`](../../.gitleaks.toml) (règles par défaut + jeton Cloudflare + variables `VITE_*` nommées comme des secrets, car **toute variable `VITE_*` est publique** ; allowlist des valeurs factices de `.env.example`). Règles projet validées par un canari au scan US-001.
 - Binaire téléchargé depuis la release officielle, **version épinglée et somme SHA-256 vérifiée** (pas d'action tierce : `gitleaks-action` demande une licence pour les comptes d'organisation).
 - Second passage sur `dist/` (`gitleaks dir`) : attrape un secret injecté au build par une variable d'environnement.
-- Hebdomadaire sur `main` : prévu par cette spécification, **absent de `security-scheduled.yml`** → SEC-06.
+- Hebdomadaire sur `main` : job `secrets` de `security-scheduled.yml` (SEC-01), même binaire et même checksum que la CI.
 - Local : le hook pre-commit (`simple-git-hooks`) ne lance que `lint-staged` ; gitleaks n'est pas installé sur le poste. Recommandé mais non bloquant : `gitleaks git --pre-commit --staged --redact`. **Obligatoire avant le premier push** : scan de toutes les branches (§6.1).
 
 ### 3.2 SAST — CodeQL + Semgrep + zizmor
-- **CodeQL** (gratuit sur dépôt public) : `javascript-typescript` en `build-mode: none`, suite `security-extended` ; langage `actions` pour les workflows ; `tests/fixtures/**` et `dist/**` exclus. CodeQL ne fait pas échouer le job : le blocage passe par le **ruleset de `main`** (« Require code scanning results », seuil *Security: High or higher*, *Alerts: Errors*) — SEC-02. Planification hebdomadaire : SEC-06.
+- **CodeQL** (gratuit sur dépôt public) : `javascript-typescript` en `build-mode: none`, suite `security-extended` ; langage `actions` pour les workflows ; `tests/fixtures/**` et `dist/**` exclus. CodeQL ne fait pas échouer le job : le blocage passe par le **ruleset de `main`** (« Require code scanning results », seuil *Security: High or higher*, *Alerts: Errors*) — SEC-02. Planification hebdomadaire : job `codeql` de `security-scheduled.yml` (SEC-01).
 - **Semgrep CE** (`--metrics=off`) : deux passes, une complète en SARIF (toutes sévérités, Code scanning), une bloquante `--severity ERROR --error`. Règles projet [`.semgrep/p152.yml`](../../.semgrep/p152.yml) : 9 règles, dont 3 ERROR (`p152-dom-html-sink`, `p152-react-dangerously-set-inner-html`, `p152-dynamic-code`) et 6 WARNING (stockage hors `src/persistence/`, `JSON.parse` hors `src/core/io/`, hooks de test, `message` listener, `Math.random` pour des ids, `http://`). Elles doublent volontairement les règles ESLint (`no-eval`, etc.) : ESLint peut être désactivé localement par un commentaire, Semgrep est revu par secdevops. Exécution locale : `docker run` (§7).
 - **zizmor** : `pull_request_target`, injection de contexte dans `run:`, actions non épinglées, `persist-credentials`, permissions excessives, empoisonnement de cache. Bloquant à partir de *high*. Au scan US-001 : 0 high ; 7 medium en persona *regular* (dont `artipacked` sur 4 jobs, reclassé LOW) → SEC-06.
 
@@ -117,8 +117,8 @@ Le test E2E (job `e2e`, QA) complète ce contrôle statique : échec sur tout `s
 
 ### 3.6 Permissions et déclencheurs
 - Workflow : `permissions: contents: read` par défaut ; seuls les jobs qui publient du SARIF ont `security-events: write` ; l'agrégateur `security` a `permissions: {}`.
-- `checkout` avec `persist-credentials: false` : en place sur les jobs `sec-*` et `e2e`, **manquant sur `quality`, `unit`, `build`, `assets`** (finding LOW `artipacked`) → SEC-06.
-- `id-token: write` dans `security-scheduled.yml` (`scorecard`) alors que `publish_results: false` → à retirer (SEC-06).
+- `checkout` avec `persist-credentials: false` : en place sur les jobs `sec-*` et `e2e`, désormais aussi sur `quality`, `unit`, `build`, `assets` (SEC-01 ; zizmor `artipacked` : 4 → 0).
+- `id-token: write` dans `security-scheduled.yml` (`scorecard`) retiré (SEC-01) : `publish_results: false` ne l'exige pas.
 - **Jamais** de `pull_request_target`, ni de `workflow_run` qui consomme un artefact de PR (sauf ADR + revue secdevops) : aucun dans les workflows actuels.
 - Aucun contexte non fiable (`github.event.*`, `head_ref`) interpolé dans un `run:` ; les contextes utilisés passent par `env:`.
 - Aucun secret dans `ci.yml` : les secrets de déploiement vivront dans `deploy.yml` (absent tant que le PO n'a pas ordonné de déploiement) sous l'environnement protégé (SEC-03b).
@@ -128,16 +128,16 @@ Le test E2E (job `e2e`, QA) complète ce contrôle statique : échec sur tout `s
 
 | Spécification (§3) | Implémentation | Écart |
 |---|---|---|
-| §3.1 gitleaks historique | `ci.yml` `sec-secrets` | gitleaks hebdo absent (SEC-06) |
+| §3.1 gitleaks historique | `ci.yml` `sec-secrets` | gitleaks hebdo : `security-scheduled.yml` `secrets` (SEC-01) |
 | §3.1 / §3.4 gitleaks `dist` | `ci.yml` `sec-build-hardening`, dernier step | — |
-| §3.2 CodeQL | `ci.yml` `sec-codeql` (matrice `javascript-typescript`, `actions`) | pas de planification hebdo (SEC-06) |
+| §3.2 CodeQL | `ci.yml` `sec-codeql` (matrice `javascript-typescript`, `actions`) | hebdo : `security-scheduled.yml` `codeql` (SEC-01) |
 | §3.2 Semgrep | `ci.yml` `sec-semgrep` (deux passes) | — |
 | §3.2 zizmor | `ci.yml` `sec-workflows` | installation sans empreinte (SEC-06) |
 | §3.3 audit, dependency-review, OSV, licences | `ci.yml` `sec-dependencies` ; `security-scheduled.yml` `audit` | — |
 | §3.4 hooks, `_headers`, `index.html` | `ci.yml` `sec-build-hardening` | `_headers` absent tant que SEC-03a n'est pas livrée ; contrôle HSTS à ajouter avec SEC-03a |
-| Agrégation | `ci.yml` `security`, puis `ci-ok` | INFO : `skipped` n'est pas traité comme un échec (pas de trou aujourd'hui, `ci-ok` exige `build` ; à durcir par robustesse) |
+| Agrégation | `ci.yml` `security`, puis `ci-ok` | `skipped` traité comme un échec dans `security` ; `ci-ok` exige déjà `success` strict (SEC-01) |
 | §3.5 Dependabot | `.github/dependabot.yml` | entrée `docker-compose` sans effet (SEC-06) |
-| §3.6 permissions | `ci.yml`, `security-scheduled.yml` | `persist-credentials`, `id-token` (SEC-06) |
+| §3.6 permissions | `ci.yml`, `security-scheduled.yml` | — (traités par SEC-01) |
 
 Toute modification du bloc `SECDEVOPS-SLOT` passe par une revue secdevops (CODEOWNERS une fois SEC-02 en place).
 
@@ -153,7 +153,7 @@ Toute modification du bloc `SECDEVOPS-SLOT` passe par une revue secdevops (CODEO
 | `config/security-headers.mjs` → `public/_headers` | devops + secdevops | **à créer (SEC-03a)** |
 | `CODEOWNERS`, `SECURITY.md` | devops, avec l'accord du PO | **à créer (SEC-02)** |
 
-Les brouillons de [`docs/security/ci/`](ci/) ne sont plus maintenus (ils peuvent déjà différer des fichiers en place : formatage, en-tête). **Toute modification se fait dans les fichiers en place.** Ils pourront être supprimés à la clôture de SEC-01 (des tâches du sprint 1 y font encore référence).
+Les brouillons de [`docs/security/ci/`](ci/) ne sont plus maintenus (ils peuvent déjà différer des fichiers en place : formatage, en-tête). **Toute modification se fait dans les fichiers en place.** Ils portent un bandeau « Obsolète, voir les fichiers en place » (SEC-01) et pourront être supprimés (des tâches du sprint 1 y font encore référence).
 
 ## 6. Dépôt GitHub (SEC-02, avec l'accord du PO)
 
@@ -165,7 +165,7 @@ Le premier push publie d'un coup tout l'historique local. Ordre à respecter (re
 2. **Scan final des secrets** sur toutes les branches locales : `gitleaks git --config .gitleaks.toml --log-opts=--all --redact .` sans fuite ; `git ls-files` ne contient aucun `.env` (seul `.env.example`).
 3. **MFA actif sur les comptes GitHub et Cloudflare du PO** (passkey ou clé de sécurité de préférence), avant la création du dépôt et du projet Pages.
 4. Création du dépôt **public** par le PO (vide). **Avant le push** : secret scanning et **push protection** actifs, Dependabot alerts, **private vulnerability reporting**.
-5. Recommandé (SEC-06, partie « avant push ») : `persist-credentials: false` sur tous les `checkout`, retrait de `id-token: write`, gitleaks hebdomadaire.
+5. Fait par SEC-01 : `persist-credentials: false` sur tous les `checkout`, retrait de `id-token: write`, gitleaks et CodeQL hebdomadaires.
 6. Push ; puis réglages ci-dessous (§6.2) ; puis SEC-01 : PR de test avec 4 échecs volontaires (faux secret, `innerHTML`, dépendance HIGH, `__p152test` dans `dist`), SARIF visibles dans Code scanning.
 
 ### 6.2 Réglages
@@ -198,15 +198,15 @@ Points restant à confirmer au premier passage sur GitHub (confiance moyenne) : 
 | Finding (sévérité) | Traitement |
 |---|---|
 | `dist/_headers` absent (contrôle bloquant) | SEC-03a, Sprint 2 en tête, avant le premier push |
-| `persist-credentials` manquant sur 4 jobs (LOW) | SEC-06 |
-| `id-token: write` superflu (LOW) | SEC-06 |
-| gitleaks et CodeQL hebdomadaires absents (LOW) | SEC-06 |
+| `persist-credentials` manquant sur 4 jobs (LOW) | **Corrigé (SEC-01)** |
+| `id-token: write` superflu (LOW) | **Corrigé (SEC-01)** |
+| gitleaks et CodeQL hebdomadaires absents (LOW) | **Corrigé (SEC-01)** |
 | zizmor sans empreinte (LOW) | SEC-06 |
 | Digests d'images non suivis par Dependabot (LOW) | SEC-06 |
 | ESLint 9 déprécié (LOW) | SEC-06 (migration avec ADR) |
 | `cooldown` Dependabot 3 jours (INFO) | Accepté (threat model §11) |
-| Agrégateur `security` et `skipped` (INFO) | Proposé au devops avec SEC-06 (robustesse) |
-| En-tête « Brouillon » obsolète dans `.gitleaks.toml` et `scripts/check-licenses.mjs` (INFO) | `.gitleaks.toml` corrigé par secdevops (US-002) ; `scripts/check-licenses.mjs` : devops, avec SEC-06 |
+| Agrégateur `security` et `skipped` (INFO) | **Corrigé (SEC-01)** |
+| En-tête « Brouillon » obsolète dans `.gitleaks.toml` et `scripts/check-licenses.mjs` (INFO) | `.gitleaks.toml` corrigé par secdevops (US-002) ; `scripts/check-licenses.mjs` : en-tête déjà à jour, brouillons de `docs/security/ci/` bannérisés (SEC-01) |
 | Override `rollup: 4.64.7` (INFO) | Retrait à partir du 2026-10-23 (risque R8 du sprint) |
 
 ## 9. Historique des versions
@@ -216,3 +216,4 @@ Points restant à confirmer au premier passage sur GitHub (confiance moyenne) : 
 | 1.0 | 2026-10-19 | Spécification initiale (kickoff) avec YAML proposé pour le slot, `dependabot.yml` et workflow hebdomadaire |
 | 1.1 | 2026-10-19 | US-002 : état réel des contrôles et versions épinglées (§1, §1.1) ; YAML retiré au profit des workflows qui font foi (§4) ; décision `_headers` bloquant et SEC-03a ; ajout du contrôle HSTS avec SEC-03a ; findings LOW → SEC-06 (§8) ; Vitest 4.1.12 ; ordre du premier push (§6.1) ; état des vérifications locales (§7) |
 | 1.2 | 2026-10-20 | Revue US-002 cycle 1 : MFA GitHub et Cloudflare du PO avant la création du dépôt (§6.1) |
+| 1.3 | 2026-10-20 | SEC-01 : findings LOW de SEC-06 absorbés (persist-credentials, id-token, `skipped` = échec, gitleaks et CodeQL hebdomadaires) ; exécution locale consignée dans [`docs/ci/local-run-SEC-01.md`](../ci/local-run-SEC-01.md) ; Semgrep et CodeQL non vérifiés ; restent en SEC-06 : zizmor sans empreinte, digests d'images non suivis, migration ESLint |
