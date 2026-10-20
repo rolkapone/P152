@@ -22,9 +22,13 @@ export interface PerfMeasure extends P152Perf {
 export const PERF_BUDGET = { drawCalls: 150, triangles: 300_000 } as const;
 export const STUDIO_BUDGET = { drawCalls: 20, triangles: 8_000 } as const;
 
-/** Waits for the 3D view to be ready, then for the hook. */
+/**
+ * Waits for the 3D view to be ready, then for the hook. No own delay: the wait is bounded by
+ * the test timeout (playwright.config.ts), so a slow cold start does not fail a test that
+ * still has time left (the suite is also warmed up by global-setup.ts).
+ */
 export async function waitForScene(page: Page): Promise<void> {
-  await page.locator('[data-scene-status="ready"]').waitFor({ timeout: 20_000 });
+  await page.locator('[data-scene-status="ready"]').waitFor({ timeout: 0 });
   await page.waitForFunction(
     () => ((window as unknown as { __p152perf?: { frames: number } }).__p152perf?.frames ?? 0) > 0,
   );

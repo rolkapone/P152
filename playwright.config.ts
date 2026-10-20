@@ -20,6 +20,8 @@ export default defineConfig({
   workers: isCI ? 2 : 4,
   reporter: isCI ? [["list"], ["html", { open: "never" }]] : [["list"]],
   timeout: 30_000,
+  // Loads the 3D view once before the workers start (cold start, see global-setup.ts).
+  globalSetup: "./tests/e2e/global-setup.ts",
   expect: {
     // Rendu WebGL logiciel (SwiftShader) : anti-crénelage légèrement variable.
     toHaveScreenshot: { maxDiffPixelRatio: 0.02, threshold: 0.2, animations: "disabled" },
