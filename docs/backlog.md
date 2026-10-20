@@ -39,7 +39,7 @@ Aucune question ouverte pour le Sprint 2 : la question 1 (bornes du bureau) est 
 
 ### US-001 — Setup repo, build et CI  [Must | 3 pts]
 En tant qu'équipe, je veux un repo avec build, lint, tests et CI afin de livrer chaque story de façon fiable.
-**État au 2026-10-19 : DONE.** Mergée dans `main` (merge `--no-ff` dfdfcfe). Revue APPROVE au cycle 2/3 (`docs/reviews/US-001.md` ; cycle 1 bloqué sur l'audit tinypool/vitest, corrigé par Vitest 4.1.12). Secdevops PASS (`docs/security/scans/US-001.md`). Checks locaux verts (`docs/ci/local-run-US-001.md`). **Écart consigné** : la CI distante n'a pas été exécutée (décision PO : pas de dépôt ni de push au Sprint 1) ; son exécution réelle est reportée au Sprint 2 (SEC-01, SEC-02).
+**État au 2026-10-19 : DONE.** Mergée dans `main` (merge `--no-ff` dfdfcfe). Revue APPROVE au cycle 2/3 (`docs/reviews/US-001.md` ; cycle 1 bloqué sur l'audit tinypool/vitest, corrigé par Vitest 4.1.12). Secdevops PASS (`docs/security/scans/US-001.md`). Checks locaux verts (`docs/ci/local-run-US-001.md`). **Écart consigné** : la CI distante n'a pas été exécutée (décision PO : pas de dépôt ni de push au Sprint 1) ; son exécution réelle est reportée au Sprint 2 (SEC-01, SEC-02). **Levé le 2026-10-21** : CI distante exécutée sur la PR #2 (mergée, 925469d), 17/17 jobs verts.
 Critères d'acceptation :
 - [x] Étant donné un clone propre, quand on lance `pnpm install --frozen-lockfile` puis le build, alors il réussit sans erreur (premier `pnpm install && pnpm check` exécuté, `pnpm-lock.yaml` commité).
 - [x] Étant donné les jobs de `ci.yml`, quand on lance en local les mêmes commandes que ceux-ci (lint, types, tests unitaires, build), alors tout est vert. *(Décision PO 2026-10-19 : pas de dépôt GitHub ni de push au Sprint 1 ; la vérification de l'exécution réelle de la CI sur une PR est reportée au Sprint 2.)*
@@ -90,12 +90,12 @@ En tant qu'équipe, je veux que chaque PR soit scannée (secrets, SAST, dépenda
 **État au 2026-10-20 : DONE.** Mergée dans `main` (360a597). Revue APPROVE au cycle 1/3 ; secdevops PASS. La PR de test distante et le SARIF sont reportés au Sprint 2 (décision PO, pas de push) ; les findings restants sont tracés dans SEC-06.
 Critères d'acceptation :
 - [x] Le slot `# SECDEVOPS-SLOT` de `ci.yml` contient les jobs de `docs/security/ci-security.md` (gitleaks, CodeQL, Semgrep, zizmor, SCA + licences, `build-hardening`) et un job agrégateur `security` requis par `ci-ok`.
-- [ ] *(reporté au Sprint 2 : exige le dépôt distant, décision PO 2026-10-19)* Une PR de test contenant un faux secret, un `innerHTML`, une dépendance vulnérable HIGH, et un `dist` contenant `__p152test` fait échouer la CI (4 cas vérifiés puis annulés).
+- [ ] *(reste à faire, rattaché à SEC-02 T5 : la première PR distante, #2, est celle du correctif E2E, sans cas négatifs)* Une PR de test contenant un faux secret, un `innerHTML`, une dépendance vulnérable HIGH, et un `dist` contenant `__p152test` fait échouer la CI (4 cas vérifiés puis annulés).
 - [x] `.gitleaks.toml`, `.semgrep/p152.yml`, `scripts/check-licenses.mjs`, `.github/dependabot.yml` et le workflow hebdomadaire sont en place ; actions et images épinglées par SHA/digest.
 - [x] *(vérification locale, Sprint 1)* Chaque job de sécurité est exécuté en local avec la même commande que dans `ci.yml` (gitleaks, SCA + licences, zizmor, `build-hardening` hors contrôle `_headers`, Semgrep) et le résultat est consigné dans `docs/ci/local-run-SEC-01.md` ; ce qui n'est pas exécutable en local (CodeQL, Semgrep si Docker est arrêté) est listé comme non vérifié, jamais comme vert.
 - [x] *(vérification locale)* Les 4 cas négatifs (faux secret, `innerHTML`, dépendance HIGH, `__p152test` dans `dist`) sont rejoués en local sur une copie jetable, chacun fait échouer la commande du job correspondant, puis tout est annulé (arbre propre) ; les cas non faisables sont consignés.
 - [x] `docs/security/ci/` porte un bandeau « obsolète : les fichiers actifs sont à la racine / dans `.github/` » (finding de la revue US-002).
-- [ ] *(reporté au Sprint 2 : exige le dépôt distant)* Les rapports SARIF remontent dans l'onglet Code scanning.
+- [x] Les rapports SARIF remontent dans l'onglet Code scanning. *(vérifié sur la PR #2, première CI distante 17/17 verte ; `dependency-review` exécuté sur la PR)*
 Notes techniques / dépendances : devops + secdevops. Dépend de US-001 (CI exécutée au moins une fois). Le contrôle `dist/_headers` de `build-hardening` **reste bloquant** (décision secdevops, scan US-001) : il n'y a pas d'avertissement toléré. La génération de `public/_headers` est donc livrée par SEC-03a **avant le premier push** (Sprint 2, en tête). Les findings LOW du scan US-001 sont regroupés dans SEC-06.
 
 ### SEC-02 — Durcissement du dépôt GitHub public  [Must | 1 pt]
@@ -106,6 +106,9 @@ Critères d'acceptation :
 - [ ] Secret scanning + push protection, Dependabot alerts, private vulnerability reporting activés ; `SECURITY.md` publié.
 - [ ] Actions : `GITHUB_TOKEN` en lecture seule par défaut, approbation requise pour les workflows des contributeurs externes, épinglage SHA obligatoire si l'option est disponible.
 - [ ] `CODEOWNERS` couvre `.github/`, `config/security-headers.mjs`, `package.json`, `pnpm-lock.yaml`, `pnpm-workspace.yaml`, `.npmrc`, `.gitleaks.toml`, `.semgrep/`.
+- [ ] *(suivi PR #2)* Les alertes Dependabot, aujourd'hui **désactivées**, sont activées par le PO (Settings > Code security) ; vérifiable : l'onglet Security > Dependabot est accessible.
+- [ ] *(suivi PR #2)* Les 4 alertes de code scanning `p152-test-hook-reference` sur `PerfProbe.tsx` sont fermées comme faux positifs (« used in tests / false positive », hook protégé par `VITE_E2E`), avec un commentaire de justification ; vérifiable : 0 alerte ouverte de cette règle.
+- [ ] *(reporté de SEC-01)* La PR de test avec les 4 cas négatifs (faux secret, `innerHTML`, dépendance HIGH, `__p152test`) fait échouer la CI, puis est fermée sans merge.
 Notes techniques / dépendances : devops. **Les réglages du compte/dépôt GitHub ne sont appliqués qu'avec l'accord explicite du PO** (le PO réalise ou valide chaque action). Dépend de US-001 et de la création du dépôt distant.
 
 ### SEC-03a — Génération des en-têtes de sécurité (`_headers`, CSP) et CSP de React Aria  [Must, avant le premier push | 2 pts]
@@ -154,6 +157,7 @@ Critères d'acceptation :
 - [ ] *(suggestion revue SEC-03a)* Le test `skipIf` de `security-headers` ne peut plus masquer un échec (il échoue si `dist/` est absent en CI) ; `apply: () => true` du plugin est justifié ou remplacé par une condition explicite.
 - [ ] *(suggestion revue SEC-03a)* `csp.spec` utilise `waitForScene` (signal de scène prête) au lieu d'une attente implicite.
 - [ ] *(suivi SEC-03a, à traiter par la première story qui ajoute une modale ou un popover)* `usePreventScroll` de React Aria (overlays, modales) injecte un `<style>` au runtime, contraire à `style-src` : la story concernée doit prévoir le même correctif (feuille statique) ou une alternative, avec test E2E sous CSP. Non traité ici faute de composant concerné.
+- [ ] *(suivi PR #2, qa-tester)* `perf.spec` vérifie un budget de temps de chargement de la scène (seuil proposé par le qa-tester, valeur validée par le PO) ; le commentaire de `pauseClock` est corrigé pour refléter son comportement réel ; `docs/qa/ci-e2e-runner.md:7` est précisé (formulation corrigée selon la revue).
 - [ ] *(règle « 10 runs E2E sous charge », reformulée)* La règle « 10 exécutions sous charge CPU sans limite » est abandonnée (impossible à tenir par construction). Définition de `docs/reviews/SEC-03a.md` : (1) référence CI : 10 runs `CI=1 pnpm test:e2e` dans l'image Playwright épinglée limitée à `--cpus=4 --memory=8g`, 0 échec ; (2) stress local informatif : charge à 50 % des threads logiques, 4 workers, 10 runs, 0 échec dû à une assertion ou à une attente de test ; (3) contrôle de conception : `--repeat-each=10` vert sans charge et aucun `waitForTimeout` dans `tests/e2e`. Remplace le critère de 10 runs sous charge ci-dessus.
 Notes techniques / dépendances : devops + secdevops. Source : `docs/security/scans/US-001.md`, scan SEC-01, scan et revue SEC-03a. Hors total MVP (Could).
 
