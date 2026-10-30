@@ -6,6 +6,7 @@ import type { PreferencesRepository } from "../../../core";
 import common from "../../../locales/en/common.json";
 import { usePreferences, useSceneView, type ViewController } from "../../../state";
 import { TOOLTIP_DELAY_MS } from "../../components/Tooltip";
+import { SceneError } from "./SceneError";
 import { SceneOverlay } from "./SceneOverlay";
 
 const initialView = useSceneView.getState();
@@ -289,7 +290,7 @@ describe("keyboard announcements (UX-8)", () => {
 describe("3D unavailable and stopped (UX-13)", () => {
   it.each([
     ["unsupported", "The 3D view can't start", /doesn't support 3D graphics \(WebGL 2\)/],
-    ["failed", "The 3D view can't start", /doesn't support 3D graphics \(WebGL 2\)/],
+    ["failed", "The 3D view didn't load", /Something went wrong while starting it\./],
     ["contextLost", "The 3D view stopped", /graphics connection was lost/],
   ] as const)("%s: alert with the title focused and Try again", async (status, title, body) => {
     const { container } = renderWithI18n(<SceneOverlay />);
@@ -319,6 +320,76 @@ describe("3D unavailable and stopped (UX-13)", () => {
       useSceneView.getState().setStatus("unsupported");
     });
     expect(document.activeElement?.textContent).toBe("The 3D view can't start");
+  });
+});
+
+describe("failed start: neutral text and Reload page from the 2nd failure (US-005 UX-14 to UX-16)", () => {
+  const FAILED_BODY =
+    "Something went wrong while starting it. Try again. If the problem continues, reload this page.";
+  const fail = () => act(() => useSceneView.getState().setStatus("failed"));
+  const retry = () => act(() => useSceneView.getState().retry());
+
+  it("shows the exact neutral text in an alert, focus on the title, no blame on the browser", () => {
+    renderWithI18n(<SceneOverlay />);
+    fail();
+    const alert = screen.getByRole("alert");
+    const title = within(alert).getByRole("heading", { level: 2 });
+    expect(title.textContent).toBe("The 3D view didn't load");
+    expect(document.activeElement).toBe(title);
+    expect(within(alert).getByText(FAILED_BODY)).toBeTruthy();
+    expect(alert.textContent).not.toMatch(/browser|device|support|WebGL|can't start/i);
+    expect(
+      within(alert)
+        .getAllByRole("button")
+        .map((b) => b.textContent),
+    ).toEqual(["Try again"]);
+  });
+
+  it("adds Reload page at the 2nd consecutive failure, and again after", () => {
+    renderWithI18n(<SceneOverlay />);
+    fail();
+    retry();
+    fail();
+    const buttons = () =>
+      within(screen.getByRole("alert"))
+        .getAllByRole("button")
+        .map((b) => b.textContent);
+    expect(buttons()).toEqual(["Try again", "Reload page"]);
+    expect(document.activeElement?.textContent).toBe("The 3D view didn't load");
+    retry();
+    fail();
+    expect(buttons()).toEqual(["Try again", "Reload page"]);
+  });
+
+  it("counts again from a ready view", () => {
+    renderWithI18n(<SceneOverlay />);
+    fail();
+    retry();
+    act(() => useSceneView.getState().setStatus("ready"));
+    act(() => useSceneView.getState().setStatus("failed"));
+    expect(screen.queryByRole("button", { name: "Reload page" })).toBeNull();
+  });
+
+  it.each(["unsupported", "contextLost"] as const)(
+    "never offers Reload page for %s, even after failures",
+    (status) => {
+      renderWithI18n(<SceneOverlay />);
+      fail();
+      retry();
+      fail();
+      retry();
+      act(() => useSceneView.getState().setStatus(status));
+      expect(screen.queryByRole("button", { name: "Reload page" })).toBeNull();
+      expect(screen.getByRole("alert").textContent).not.toContain("didn't load");
+    },
+  );
+
+  it("Reload page reloads the document", async () => {
+    const reload = vi.fn();
+    renderWithI18n(<SceneError kind="failed" canReload reload={reload} />);
+    vi.useRealTimers();
+    await userEvent.click(screen.getByRole("button", { name: "Reload page" }));
+    expect(reload).toHaveBeenCalledOnce();
   });
 });
 

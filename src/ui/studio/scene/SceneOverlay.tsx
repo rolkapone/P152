@@ -16,6 +16,7 @@ import { ViewToolbar } from "./ViewToolbar";
 export function SceneOverlay() {
   const status = useSceneView((state) => state.status);
   const attempt = useSceneView((state) => state.attempt);
+  const failures = useSceneView((state) => state.failures);
   const tipDismissed = usePreferences((state) => state.sceneTipDismissed);
   const resetButton = useRef<HTMLButtonElement>(null);
 
@@ -34,11 +35,10 @@ export function SceneOverlay() {
           {!tipDismissed && <SceneTip onDismiss={dismissTip} />}
         </div>
       )}
-      {(status === "unsupported" || status === "failed") && (
+      {(status === "unsupported" || status === "failed" || status === "contextLost") && (
         // A new screen per attempt: the focus goes to the title again after "Try again".
-        <SceneError key={attempt} kind="unsupported" />
+        <SceneError key={attempt} kind={status} canReload={failures >= 2} />
       )}
-      {status === "contextLost" && <SceneError key={attempt} kind="contextLost" />}
       <SceneAnnouncer />
     </div>
   );

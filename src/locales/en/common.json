@@ -40,7 +40,10 @@
       "unsupportedBody": "Your browser or device doesn't support 3D graphics (WebGL 2). Try updating your browser, turning on hardware acceleration, or opening this page in Chrome, Edge, Firefox or Safari.",
       "contextLostTitle": "The 3D view stopped",
       "contextLostBody": "The graphics connection was lost. Try again to restore your desk.",
-      "retry": "Try again"
+      "retry": "Try again",
+      "failedTitle": "The 3D view didn't load",
+      "failedBody": "Something went wrong while starting it. Try again. If the problem continues, reload this page.",
+      "reload": "Reload page"
     }
   },
   "shell": {
