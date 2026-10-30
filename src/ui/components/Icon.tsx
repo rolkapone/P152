@@ -1,51 +1,77 @@
 /**
- * Line icons of the interface (24 × 24 grid, stroke = currentColor), decorative only: the
- * accessible name always comes from a visible label or an aria-label (UX: no icon-only
- * meaning). Paths from Lucide (ISC licence, https://lucide.dev): rotate-ccw, check, x, info,
- * triangle-alert; "view-top" and "view-front" are the design system's own glyphs
+ * Line icons of the interface (design-system.md §6): Lucide (ISC licence, package
+ * `lucide-react`, https://lucide.dev), stroke `--icon-stroke`, `currentColor`, decorative only:
+ * the accessible name always comes from a visible label or an aria-label (no icon-only
+ * meaning). "view-top" and "view-front" are the design system's own glyphs
  * (docs/design/ui/maquettes/US-004.html).
  */
+import {
+  Box,
+  Check,
+  CircleDashed,
+  Info,
+  MousePointer2,
+  PanelLeftClose,
+  PanelLeftOpen,
+  PanelRightClose,
+  PanelRightOpen,
+  RotateCcw,
+  TriangleAlert,
+  X,
+  type LucideIcon,
+} from "lucide-react";
 import { cx } from "./cx";
 import styles from "./Icon.module.css";
 
-const PATHS = {
-  "rotate-ccw": ["M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8", "M3 3v5h5"],
+const LUCIDE = {
+  "alert-triangle": TriangleAlert,
+  box: Box,
+  check: Check,
+  "circle-dashed": CircleDashed,
+  info: Info,
+  "mouse-pointer": MousePointer2,
+  "panel-left-close": PanelLeftClose,
+  "panel-left-open": PanelLeftOpen,
+  "panel-right-close": PanelRightClose,
+  "panel-right-open": PanelRightOpen,
+  "rotate-ccw": RotateCcw,
+  x: X,
+} as const satisfies Record<string, LucideIcon>;
+
+/** Glyphs of the design system (no Lucide equivalent), same 24 × 24 grid. */
+const OWN_PATHS = {
   "view-top": [
     "M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z",
     "M3 9h18",
   ],
   "view-front": ["M4 6h16a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z"],
-  check: ["M20 6 9 17l-5-5"],
-  x: ["M18 6 6 18", "M6 6l12 12"],
-  info: ["M12 2a10 10 0 1 1 0 20 10 10 0 0 1 0-20z", "M12 16v-4", "M12 8h.01"],
-  "alert-triangle": [
-    "m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3",
-    "M12 9v4",
-    "M12 17h.01",
-  ],
 } as const;
 
-export type IconName = keyof typeof PATHS;
+export type IconName = keyof typeof LUCIDE | keyof typeof OWN_PATHS;
 
 export interface IconProps {
   readonly name: IconName;
-  /** 16, 20 (default) or 24 px. */
-  readonly size?: "sm" | "md" | "lg";
+  /** `--icon-sm` 16, `--icon-md` 18 (default), `--icon-lg` 20 (toolbar), `--icon-xl` 24. */
+  readonly size?: "sm" | "md" | "lg" | "xl";
   readonly className?: string | undefined;
 }
 
 export function Icon({ name, size = "md", className }: IconProps) {
-  return (
-    <svg
-      className={cx(styles.icon, styles[size], className)}
-      viewBox="0 0 24 24"
-      aria-hidden="true"
-      focusable="false"
-      data-icon={name}
-    >
-      {PATHS[name].map((d) => (
-        <path key={d} d={d} />
-      ))}
-    </svg>
-  );
+  const common = {
+    className: cx(styles.icon, styles[size], className),
+    "aria-hidden": true,
+    focusable: false,
+    "data-icon": name,
+  } as const;
+  if (name === "view-top" || name === "view-front") {
+    return (
+      <svg {...common} viewBox="0 0 24 24">
+        {OWN_PATHS[name].map((d) => (
+          <path key={d} d={d} />
+        ))}
+      </svg>
+    );
+  }
+  const Glyph = LUCIDE[name];
+  return <Glyph {...common} />;
 }

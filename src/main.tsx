@@ -4,6 +4,7 @@ import { I18nextProvider } from "react-i18next";
 import { App } from "./app/App";
 import { createI18n } from "./ui/i18n/config";
 import { applyDocumentLanguage } from "./ui/i18n/document";
+import "./ui/styles/fonts.css";
 import "./ui/styles/tokens.css";
 import "./ui/styles/global.css";
 

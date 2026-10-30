@@ -712,6 +712,7 @@ Tests unitaires et de composants **colocalisés** (`*.test.ts(x)` à côté du f
 | zod | Schéma (APP-03) | Types dérivés, mode jitless ; Ajv exige `new Function` |
 | i18next, react-i18next | i18n (APP-05) | Standard, pluriels, chargement paresseux ; maison = réinventer |
 | react-aria-components | Accessibilité (APP-06) | Couvre NumberField et i18n des nombres ; Radix non |
+| lucide-react (1.61.0 exacte, ISC, US-005) | Icônes (design-system §6) | Icônes au trait libres, une par module (tree-shaking), sans dépendance ni style inline (CSP) ; SF Symbols interdits, tracés recopiés à la main = maintenance sans suivi de licence. Licence livrée dans `THIRD_PARTY_LICENSES.md` du build |
 | vitest, @testing-library/react, @testing-library/dom, @testing-library/user-event, jsdom, axe-core, fast-check | Tests (APP-08) | Un seul runner ; fuzzing de l'import ; axe-core direct plutôt que vitest-axe non maintenu (ADR-APP-11) |
 | *(aucune)* : règles ESLint natives + règles locales `config/eslint-plugin-p152.mjs` | Garde-fous (APP-07, APP-05) | Couches et « pas de texte en dur » vérifiées en CI sans dépendance ; `eslint-plugin-boundaries` et `eslint-plugin-i18next` écartés (ADR-APP-10) |
 

@@ -23,7 +23,7 @@ export function SceneError({ kind }: { readonly kind: SceneErrorKind }) {
     <div className={cx(styles.screen)}>
       <div role="alert" className={cx(styles.card)}>
         <span className={cx(styles.badge)}>
-          <Icon name="alert-triangle" size="lg" />
+          <Icon name="alert-triangle" size="xl" />
         </span>
         <h2 ref={title} tabIndex={-1} className={cx(styles.cardTitle)}>
           {kind === "unsupported"
