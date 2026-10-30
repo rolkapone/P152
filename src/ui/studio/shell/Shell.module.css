@@ -187,10 +187,19 @@
   overscroll-behavior: contain;
   padding: var(--space-3) var(--space-3) var(--space-5);
   color: var(--color-text);
+  /* Opening: visibility switches at once, not transitioned (a transition, even the 0.01 ms of
+     reduced motion, would keep the panel hidden when "Skip to alerts" focuses its title). */
   transition:
     transform var(--duration-spring) var(--ease-spring-soft),
-    opacity var(--duration-base) var(--ease-standard),
-    visibility 0s;
+    opacity var(--duration-base) var(--ease-standard);
+}
+
+/* Under reduced motion, tokens.css gives every element a 0.01 ms transition of `all`: the
+   visibility inherited from a reopened panel would then stay "hidden" on its content for a
+   frame, and "Skip to alerts" could not focus the title. Content that declares no transition
+   of its own does not transition (zero specificity: components keep theirs). */
+:where(.pane *) {
+  transition-property: none;
 }
 
 .paneLeft {
@@ -368,4 +377,47 @@
   font-weight: var(--weight-semibold);
   letter-spacing: var(--tracking-subheadline);
   font-feature-settings: var(--font-features);
+}
+
+/* ---- Skip links: first Tab stops, opaque pills shown only while focused (UX-4) ---- */
+.skipLinks {
+  position: absolute;
+  z-index: var(--z-skip);
+  top: var(--space-2);
+  left: var(--space-3);
+  display: flex;
+  gap: var(--space-2);
+  pointer-events: none;
+}
+
+.skip {
+  display: inline-flex;
+  align-items: center;
+  height: var(--toggle-size);
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  color: var(--color-text);
+  box-shadow: var(--shadow-3);
+  font: var(--font-callout);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-callout);
+  font-feature-settings: var(--font-features);
+  text-decoration: none;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateY(calc(-1 * var(--space-16)));
+}
+
+.skip:focus-visible,
+.skip:focus {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+
+/* Focus fallback of "Skip to 3D view" when no 3D view can take it: inner ring. */
+.scene:focus-visible {
+  outline-offset: calc(-2 * var(--focus-width));
+  box-shadow: none;
 }

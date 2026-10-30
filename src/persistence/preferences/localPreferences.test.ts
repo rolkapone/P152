@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   createLocalPreferences,
+  DEFAULT_PREFERENCES,
   PREFERENCE_KEYS,
   type PreferenceStorage,
 } from "./localPreferences";
@@ -36,18 +37,19 @@ afterEach(() => {
 
 describe("local preferences (PreferencesRepository adapter)", () => {
   it("defaults to a visible tip when nothing is stored", () => {
-    expect(createLocalPreferences(() => memoryStorage()).load()).toEqual({
-      sceneTipDismissed: false,
-    });
+    expect(createLocalPreferences(() => memoryStorage()).load()).toEqual(DEFAULT_PREFERENCES);
   });
 
   it("stores the dismissed tip and reads it back", () => {
     const storage = memoryStorage();
     const repository = createLocalPreferences(() => storage);
-    repository.save({ sceneTipDismissed: true });
+    repository.save({ ...DEFAULT_PREFERENCES, sceneTipDismissed: true });
     expect(storage.data.get(PREFERENCE_KEYS.sceneTipDismissed)).toBe("1");
-    expect(createLocalPreferences(() => storage).load()).toEqual({ sceneTipDismissed: true });
-    repository.save({ sceneTipDismissed: false });
+    expect(createLocalPreferences(() => storage).load()).toEqual({
+      ...DEFAULT_PREFERENCES,
+      sceneTipDismissed: true,
+    });
+    repository.save({ ...DEFAULT_PREFERENCES, sceneTipDismissed: false });
     expect(storage.data.has(PREFERENCE_KEYS.sceneTipDismissed)).toBe(false);
   });
 
@@ -68,17 +70,45 @@ describe("local preferences (PreferencesRepository adapter)", () => {
       },
     ]) {
       const repository = createLocalPreferences(getStorage);
-      expect(repository.load()).toEqual({ sceneTipDismissed: false });
-      expect(() => repository.save({ sceneTipDismissed: true })).not.toThrow();
-      expect(() => repository.save({ sceneTipDismissed: false })).not.toThrow();
+      expect(repository.load()).toEqual({ ...DEFAULT_PREFERENCES, sceneTipDismissed: false });
+      expect(() =>
+        repository.save({ ...DEFAULT_PREFERENCES, sceneTipDismissed: true }),
+      ).not.toThrow();
+      expect(() =>
+        repository.save({ ...DEFAULT_PREFERENCES, sceneTipDismissed: false }),
+      ).not.toThrow();
     }
   });
 
+  it("stores each collapsed panel under its own key", () => {
+    const storage = memoryStorage();
+    const repository = createLocalPreferences(() => storage);
+    repository.save({ sceneTipDismissed: false, sidebarCollapsed: true, inspectorCollapsed: true });
+    expect(storage.data.get(PREFERENCE_KEYS.sidebarCollapsed)).toBe("1");
+    expect(storage.data.get(PREFERENCE_KEYS.inspectorCollapsed)).toBe("1");
+    expect(storage.data.has(PREFERENCE_KEYS.sceneTipDismissed)).toBe(false);
+    expect(createLocalPreferences(() => storage).load()).toEqual({
+      sceneTipDismissed: false,
+      sidebarCollapsed: true,
+      inspectorCollapsed: true,
+    });
+    repository.save(DEFAULT_PREFERENCES);
+    expect(storage.data.size).toBe(0);
+  });
+
+  it.each(["true", "open", "", '{"__proto__":1}'])(
+    "treats any other stored value (%j) of a panel as open",
+    (value) => {
+      const storage = memoryStorage({ [PREFERENCE_KEYS.sidebarCollapsed]: value });
+      expect(createLocalPreferences(() => storage).load().sidebarCollapsed).toBe(false);
+    },
+  );
+
   it("uses the browser localStorage by default", () => {
     const repository = createLocalPreferences();
-    repository.save({ sceneTipDismissed: true });
+    repository.save({ ...DEFAULT_PREFERENCES, sceneTipDismissed: true });
     expect(localStorage.getItem(PREFERENCE_KEYS.sceneTipDismissed)).toBe("1");
-    expect(repository.load()).toEqual({ sceneTipDismissed: true });
+    expect(repository.load()).toEqual({ ...DEFAULT_PREFERENCES, sceneTipDismissed: true });
   });
 
   it("falls back to the defaults when reading window.localStorage throws", () => {
@@ -86,7 +116,9 @@ describe("local preferences (PreferencesRepository adapter)", () => {
       throw new DOMException("blocked", "SecurityError");
     });
     const repository = createLocalPreferences();
-    expect(repository.load()).toEqual({ sceneTipDismissed: false });
-    expect(() => repository.save({ sceneTipDismissed: true })).not.toThrow();
+    expect(repository.load()).toEqual({ ...DEFAULT_PREFERENCES, sceneTipDismissed: false });
+    expect(() =>
+      repository.save({ ...DEFAULT_PREFERENCES, sceneTipDismissed: true }),
+    ).not.toThrow();
   });
 });

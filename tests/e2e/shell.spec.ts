@@ -98,3 +98,160 @@ test("uses the self-hosted Inter, with no third-party request", async ({ page, b
   expect(await page.evaluate(() => document.fonts.check('600 16px "Inter"'))).toBe(true);
   expect(requests.filter((url) => !url.startsWith(`${baseURL ?? ""}/`))).toEqual([]);
 });
+
+// ---- US-005 T4: memory, drawers, skip links, Tab order, reflow, reduced transparency ----
+
+test("remembers a collapsed panel after a reload (wide window, UX-6)", async ({ page }) => {
+  await page.goto("/");
+  await toggle(page, "Desk and objects panel").click();
+  await expect(sidebar(page)).toBeHidden();
+  await page.reload();
+  await expect(toggle(page, "Desk and objects panel")).toHaveAttribute("aria-expanded", "false");
+  await expect(sidebar(page)).toBeHidden();
+  await expect(inspector(page)).toBeVisible();
+});
+
+for (const size of [
+  { width: 683, height: 384 }, // 1366 x 768 at 200 % zoom
+  { width: 820, height: 1000 },
+]) {
+  test(`drawers under 1024 px, ${size.width} x ${size.height}: closed, one at a time, Escape (UX-9)`, async ({
+    page,
+  }) => {
+    await page.setViewportSize(size);
+    await page.goto("/");
+    const left = toggle(page, "Desk and objects panel");
+    const right = toggle(page, "Properties and alerts panel");
+    await expect(left).toHaveAttribute("aria-expanded", "false");
+    await expect(right).toHaveAttribute("aria-expanded", "false");
+    await expect(sidebar(page)).toBeHidden();
+    await expect(inspector(page)).toBeHidden();
+
+    await left.click();
+    await expect(sidebar(page)).toBeVisible();
+    await right.click();
+    await expect(sidebar(page)).toBeHidden();
+    await expect(inspector(page)).toBeVisible();
+    // Never over the toolbar: the verdict stays visible above the drawer.
+    const verdict = await box(page, page.getByRole("banner").getByRole("status"));
+    const drawer = await box(page, inspector(page));
+    expect(drawer.y).toBeGreaterThanOrEqual(verdict.y + verdict.height);
+
+    await inspector(page).getByRole("heading", { name: "Alerts" }).focus();
+    await page.keyboard.press("Escape");
+    await expect(inspector(page)).toBeHidden();
+    await expect(right).toBeFocused();
+  });
+}
+
+test("reflows at 320 px: no horizontal scroll, verdict and toggles fully visible", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 320, height: 640 });
+  await page.goto("/");
+  const width = await page.evaluate(() => document.documentElement.scrollWidth);
+  expect(width).toBeLessThanOrEqual(320);
+  for (const locator of [
+    page.getByRole("banner").getByRole("status"),
+    toggle(page, "Desk and objects panel"),
+    toggle(page, "Properties and alerts panel"),
+  ]) {
+    const rect = await box(page, locator);
+    expect(rect.x).toBeGreaterThanOrEqual(0);
+    expect(rect.x + rect.width).toBeLessThanOrEqual(320);
+  }
+  await expect(page.getByRole("banner").getByRole("status")).toHaveText("Nothing to check yet");
+});
+
+test("Tab order: skip links, toggles, tab, its panel, 3D view, view bar, tip (UX-4, UX-5)", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await waitForScene(page);
+  const names: string[] = [];
+  for (let i = 0; i < 12; i += 1) {
+    await page.keyboard.press("Tab");
+    names.push(
+      await page.evaluate(() => {
+        const active = document.activeElement as HTMLElement | null;
+        const label = active?.getAttribute("aria-label");
+        if (label) return label.split(".")[0] ?? label;
+        return active?.getAttribute("role") ?? active?.textContent?.trim() ?? "";
+      }),
+    );
+  }
+  expect(names).toEqual([
+    "Skip to 3D view",
+    "Skip to alerts",
+    "Desk and objects panel",
+    "Properties and alerts panel",
+    "tab",
+    "tabpanel",
+    "3D view of your desk",
+    "Reset view",
+    "Top",
+    "Front",
+    "Got it",
+    "Hide tip",
+  ]);
+});
+
+test("skip links appear on focus and move the focus (UX-4)", async ({ page }) => {
+  await page.goto("/");
+  await waitForScene(page);
+  const skipScene = page.getByRole("link", { name: "Skip to 3D view" });
+  await expect(skipScene).not.toBeInViewport();
+  await page.keyboard.press("Tab");
+  await expect(skipScene).toBeFocused();
+  await expect(skipScene).toBeInViewport();
+  expect(await skipScene.evaluate((e) => getComputedStyle(e).opacity)).toBe("1");
+  await page.keyboard.press("Enter");
+  await expect(page.getByRole("group", { name: /3D view of your desk/ })).toBeFocused();
+
+  await toggle(page, "Properties and alerts panel").click();
+  await expect(inspector(page)).toBeHidden();
+  await page.getByRole("link", { name: "Skip to alerts" }).focus();
+  await page.keyboard.press("Enter");
+  await expect(inspector(page)).toBeVisible();
+  await expect(inspector(page).getByRole("heading", { name: "Alerts" })).toBeFocused();
+});
+
+test("view keys do nothing while the focus is in the toolbar or a panel (UX-22)", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await waitForScene(page);
+  await toggle(page, "Desk and objects panel").focus();
+  await page.keyboard.press("1");
+  await page.getByRole("tab", { name: "Desk" }).focus();
+  await page.keyboard.press("2");
+  const pressed = viewBar(page).locator("[aria-pressed='true']");
+  await expect(pressed).toHaveCount(0);
+});
+
+test("Reduce transparency (.no-glass): opaque materials, same layout", async ({ page }) => {
+  await page.goto("/");
+  const toolbar = page.getByRole("banner");
+  const before = await box(page, sidebar(page));
+  await page.evaluate(() => document.documentElement.classList.add("no-glass"));
+  // Polled: under reduced motion every property still "transitions" for 0.01 ms.
+  await expect
+    .poll(() =>
+      toolbar.evaluate((e) => {
+        const style = getComputedStyle(e);
+        return [style.backgroundColor, style.backdropFilter];
+      }),
+    )
+    .toEqual(["rgb(242, 242, 247)", "none"]);
+  expect(await box(page, sidebar(page))).toEqual(before);
+});
+
+test("reduced motion: panels open and close without animation (UX-19)", async ({ page }) => {
+  await page.goto("/");
+  const durations = await sidebar(page).evaluate((e) =>
+    getComputedStyle(e)
+      .transitionDuration.split(",")
+      .map((value) => parseFloat(value)),
+  );
+  for (const seconds of durations) expect(seconds).toBeLessThanOrEqual(0.001);
+});

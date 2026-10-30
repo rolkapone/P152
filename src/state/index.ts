@@ -26,7 +26,9 @@ export {
 } from "./preferences/preferencesStore";
 export {
   createShellLayoutStore,
+  EMPTY_FREE_ZONE,
   useShellLayout,
+  type FreeZone,
   type PanelSide,
   type ShellLayoutState,
 } from "./shell/shellLayoutStore";

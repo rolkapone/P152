@@ -206,7 +206,11 @@ describe("tab order and tip (UX-3, UX-11)", () => {
     "%s hides the tip for good and moves the focus to Reset view",
     async (name) => {
       const repository: PreferencesRepository = {
-        load: () => ({ sceneTipDismissed: false }),
+        load: () => ({
+          sceneTipDismissed: false,
+          sidebarCollapsed: false,
+          inspectorCollapsed: false,
+        }),
         save: vi.fn(),
       };
       usePreferences.getState().connect(repository);
@@ -218,13 +222,24 @@ describe("tab order and tip (UX-3, UX-11)", () => {
       await user().keyboard("{Enter}");
       expect(screen.queryByText(/Drag to turn the view/)).toBeNull();
       expect(document.activeElement).toBe(button("Reset view"));
-      expect(repository.save).toHaveBeenCalledWith({ sceneTipDismissed: true });
+      expect(repository.save).toHaveBeenCalledWith({
+        sceneTipDismissed: true,
+        sidebarCollapsed: false,
+        inspectorCollapsed: false,
+      });
       expect(toolbar()).toBeTruthy();
     },
   );
 
   it("is not shown again once dismissed (stored preference)", async () => {
-    usePreferences.getState().connect({ load: () => ({ sceneTipDismissed: true }), save: vi.fn() });
+    usePreferences.getState().connect({
+      load: () => ({
+        sceneTipDismissed: true,
+        sidebarCollapsed: false,
+        inspectorCollapsed: false,
+      }),
+      save: vi.fn(),
+    });
     await renderReady();
     expect(screen.queryByText(/Drag to turn the view/)).toBeNull();
     expect(toolbar()).toBeTruthy();

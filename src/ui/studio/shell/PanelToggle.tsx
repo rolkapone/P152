@@ -17,6 +17,9 @@ const ICONS: Record<PanelSide, { open: IconName; closed: IconName }> = {
   right: { open: "panel-right-close", closed: "panel-right-open" },
 };
 
+/** Id of the toggle of a panel (Escape in a drawer gives the focus back to it). */
+export const toggleId = (side: PanelSide) => `panel-toggle-${side}`;
+
 export interface PanelToggleProps {
   readonly side: PanelSide;
   /** Id of the panel it controls. */
@@ -32,6 +35,7 @@ export function PanelToggle({ side, controls }: PanelToggleProps) {
       placement={side === "left" ? "bottom start" : "bottom end"}
     >
       <Button
+        id={toggleId(side)}
         className={cx(styles.toggle, side === "left" ? styles.toggleLeft : styles.toggleRight)}
         aria-label={side === "left" ? t("shell.toggle.left") : t("shell.toggle.right")}
         aria-expanded={open}

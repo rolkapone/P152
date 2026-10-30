@@ -44,6 +44,10 @@
     }
   },
   "shell": {
+    "skip": {
+      "scene": "Skip to 3D view",
+      "alerts": "Skip to alerts"
+    },
     "documentName": "My desk setup",
     "verdict": {
       "empty": "Nothing to check yet"

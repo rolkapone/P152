@@ -27,6 +27,10 @@ export interface SetupRepository {
 export interface UiPreferences {
   /** The 3D view tip ("Drag to turn the view…") was dismissed (US-004, reopened by Help in US-025). */
   readonly sceneTipDismissed: boolean;
+  /** The left panel (Desk and objects) was collapsed on a wide screen (US-005, UX-6). */
+  readonly sidebarCollapsed: boolean;
+  /** The right panel (Properties and alerts) was collapsed on a wide screen (US-005, UX-6). */
+  readonly inspectorCollapsed: boolean;
 }
 
 /**
