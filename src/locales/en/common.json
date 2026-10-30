@@ -1,6 +1,7 @@
 {
   "app": {
-    "name": "P152"
+    "name": "Deskfit",
+    "title": "{{appName}} - Plan your desk setup"
   },
   "scene": {
     "viewportLabel": "3D view of your desk. Use arrow keys to turn the view, plus and minus to zoom.",
