@@ -43,7 +43,9 @@ test("announces the ready view and shows the bar and the tip (UX-1, UX-2)", asyn
     const previous = boxes[i - 1];
     const current = boxes[i];
     if (!previous || !current) throw new Error("no box");
-    expect(current.x - (previous.x + previous.width)).toBeGreaterThanOrEqual(8);
+    // Design v0.4 (§14, prevails over the 8 px of US-004): 2 px between 36 px pills, which
+    // stay well above the 24 px target size of WCAG 2.5.8 without any spacing.
+    expect(current.x - (previous.x + previous.width)).toBeGreaterThanOrEqual(2);
   }
   for (const button of await buttons.all()) {
     await expect(button.locator("svg")).toHaveCount(1);

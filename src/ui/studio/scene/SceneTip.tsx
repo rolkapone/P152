@@ -1,5 +1,5 @@
 /**
- * First-visit tip of the 3D view (UX US-004 §2.1, UX-11): glass band above the view bar.
+ * First-visit tip of the 3D view (UX US-004 §2.1, UX-11): band in the regular material above the view bar.
  * "Got it" and the X ("Hide tip") have the same effect: hidden for good.
  */
 import { useTranslation } from "react-i18next";
@@ -11,7 +11,7 @@ import styles from "./SceneOverlay.module.css";
 export function SceneTip({ onDismiss }: { readonly onDismiss: () => void }) {
   const { t } = useTranslation();
   return (
-    <div className={cx("glass", styles.tip)}>
+    <div className={cx("material-regular", "float", styles.tip)}>
       <Icon name="info" className={cx(styles.tipIcon)} />
       <p className={cx(styles.tipText)}>{t("scene.tip.text")}</p>
       <div className={cx(styles.tipActions)}>
