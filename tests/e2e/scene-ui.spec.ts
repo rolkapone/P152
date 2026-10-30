@@ -9,7 +9,8 @@ const region = (page: Page) => page.getByRole("group", { name: /3D view of your 
 const toolbar = (page: Page) => page.getByRole("toolbar", { name: "View" });
 const viewButton = (page: Page, name: string) =>
   toolbar(page).getByRole("button", { name, exact: true });
-const live = (page: Page) => page.getByRole("status");
+// The live region of the 3D view (the toolbar verdict is another status).
+const live = (page: Page) => region(page).getByRole("status");
 const TIP = "Drag to turn the view, scroll to zoom, right-drag to move the view.";
 
 /**
@@ -75,8 +76,12 @@ test("tooltips after 400 ms, Escape closes them and keeps the focus (UX-4)", asy
   if (!top) throw new Error("no button");
   // A real mouse moves over the scene before reaching a button (React Aria needs a pointer
   // move to know the mouse is in use; Playwright jumps straight onto the button otherwise).
-  await page.mouse.move(10, 10);
-  await page.mouse.move(20, 20);
+  // In the free zone, between the side panels (their toggles have tooltips too).
+  const scene = await region(page).boundingBox();
+  if (!scene) throw new Error("no region");
+  const centre = { x: scene.x + scene.width / 2, y: scene.y + scene.height / 2 };
+  await page.mouse.move(centre.x, centre.y);
+  await page.mouse.move(centre.x + 10, centre.y + 10);
   await pauseClock(page);
   await page.mouse.move(top.x + top.width / 2, top.y + top.height / 2);
   await page.clock.runFor(399);
@@ -84,7 +89,7 @@ test("tooltips after 400 ms, Escape closes them and keeps the focus (UX-4)", asy
   await page.clock.runFor(1);
   await expect(page.getByRole("tooltip")).toHaveText("View from above (1)");
   await page.clock.resume();
-  await page.mouse.move(0, 0);
+  await page.mouse.move(centre.x, centre.y);
   await expect(page.getByRole("tooltip")).toHaveCount(0);
 
   await region(page).focus();
@@ -109,12 +114,12 @@ test("Top / Front are pressed toggles, released by a drag and by Reset view (UX-
   await expect(viewButton(page, "Top")).toHaveAttribute("aria-pressed", "false");
   await expect(live(page)).toHaveText("Front view.");
 
-  // Drag on the empty studio, at the top of the view.
+  // Drag on the empty studio, at the top of the free zone (between the side panels).
   const box = await region(page).boundingBox();
   if (!box) throw new Error("no region");
-  await page.mouse.move(box.x + box.width * 0.2, box.y + box.height * 0.15);
+  await page.mouse.move(box.x + box.width * 0.35, box.y + box.height * 0.15);
   await page.mouse.down();
-  await page.mouse.move(box.x + box.width * 0.4, box.y + box.height * 0.15, { steps: 8 });
+  await page.mouse.move(box.x + box.width * 0.55, box.y + box.height * 0.15, { steps: 8 });
   await page.mouse.up();
   await expect(viewButton(page, "Front")).toHaveAttribute("aria-pressed", "false");
   await expect(live(page)).toHaveText("Front view."); // nothing said for a drag

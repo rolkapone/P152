@@ -24,3 +24,9 @@ export {
   usePreferences,
   type PreferencesState,
 } from "./preferences/preferencesStore";
+export {
+  createShellLayoutStore,
+  useShellLayout,
+  type PanelSide,
+  type ShellLayoutState,
+} from "./shell/shellLayoutStore";

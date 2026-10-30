@@ -42,5 +42,33 @@
       "contextLostBody": "The graphics connection was lost. Try again to restore your desk.",
       "retry": "Try again"
     }
+  },
+  "shell": {
+    "documentName": "My desk setup",
+    "verdict": {
+      "empty": "Nothing to check yet"
+    },
+    "toggle": {
+      "left": "Desk and objects panel",
+      "right": "Properties and alerts panel",
+      "hide": "Hide panel",
+      "show": "Show panel"
+    },
+    "sidebar": {
+      "label": "Desk and objects",
+      "desk": "Desk",
+      "objects": "Objects",
+      "objectsEmptyTitle": "No objects to add yet",
+      "objectsEmptyBody": "The object library will appear here."
+    },
+    "inspector": {
+      "label": "Properties and alerts",
+      "properties": "Properties",
+      "propertiesEmptyTitle": "Nothing selected",
+      "propertiesEmptyBody": "Select an object to edit its size and position.",
+      "alerts": "Alerts",
+      "alertsEmptyTitle": "Nothing to check yet",
+      "alertsEmptyBody": "Add an object to see if it fits."
+    }
   }
 }

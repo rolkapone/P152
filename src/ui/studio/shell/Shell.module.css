@@ -1,0 +1,371 @@
+/* Studio window (design-system.md §15, maquette docs/design/ui/maquettes/US-005.html). Tokens
+   only. Layout follows the width of the window (container "app"): panes docked from 1024 px,
+   floating overlays below; toolbar on two rows under 640 px; inspector sheet under 560 px. */
+
+.app {
+  /* 2 px: inner gap of the segmented control and of the toolbar rows (maquette). */
+  --space-half: calc(var(--space-1) / 2);
+  position: fixed;
+  inset: 0;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  grid-template-columns: 100%;
+  overflow: hidden;
+  isolation: isolate;
+  container: app / inline-size;
+  background: var(--color-bg);
+}
+
+/* ---- Unified toolbar ---- */
+.toolbar {
+  position: relative;
+  z-index: calc(var(--z-panel) + 1);
+  grid-row: 1;
+  display: grid;
+  grid-template-columns: auto auto auto minmax(0, 1fr) auto auto;
+  grid-template-areas: "tl brand sep name verdict tr";
+  align-items: center;
+  column-gap: var(--space-2);
+  min-height: var(--topbar-h);
+  /* 6 px: centres the 40 px toggles in the 52 px bar. */
+  padding: calc((var(--topbar-h) - var(--toggle-size)) / 2) var(--space-3);
+  border-bottom: var(--border-width) solid var(--color-separator);
+}
+
+.toggle {
+  display: grid;
+  place-items: center;
+  width: var(--toggle-size);
+  height: var(--toggle-size);
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--color-text);
+  cursor: pointer;
+  transition:
+    background var(--duration-fast) var(--ease-standard),
+    transform var(--duration-fast) var(--ease-spring);
+}
+
+.toggle[data-hovered] {
+  background: var(--color-fill-hover);
+}
+
+.toggle[data-pressed] {
+  background: var(--color-fill);
+  transform: scale(var(--press-scale));
+}
+
+.toggleLeft {
+  grid-area: tl;
+}
+
+.toggleRight {
+  grid-area: tr;
+}
+
+.brand {
+  grid-area: brand;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  font: var(--font-headline);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-headline);
+  font-feature-settings: var(--font-features);
+}
+
+/* Accent dot of the wordmark (CSS only, no logo asset). */
+.brand::before {
+  content: "";
+  width: calc(var(--space-2) + var(--space-half));
+  height: calc(var(--space-2) + var(--space-half));
+  border-radius: 50%;
+  background: var(--color-accent-solid);
+}
+
+.separator {
+  grid-area: sep;
+  width: var(--border-width);
+  height: var(--space-5);
+  margin: 0 var(--space-1);
+  background: var(--color-separator);
+}
+
+.documentName {
+  grid-area: name;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font: var(--font-callout);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-callout);
+  font-feature-settings: var(--font-features);
+}
+
+.verdict {
+  grid-area: verdict;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  height: var(--control-md);
+  margin: 0;
+  padding: 0 var(--space-4) 0 var(--space-3);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-2);
+  color: var(--color-text);
+  font: var(--font-callout);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-callout);
+  font-feature-settings: var(--font-features);
+  white-space: nowrap;
+}
+
+.verdictIcon {
+  color: var(--color-text-muted);
+}
+
+@container app (max-width: 639px) {
+  .toolbar {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-areas:
+      "tl brand tr"
+      "name name verdict";
+    row-gap: var(--space-half);
+    padding-bottom: var(--space-2);
+  }
+
+  .separator {
+    display: none;
+  }
+
+  .brand {
+    justify-self: center;
+  }
+
+  .documentName {
+    padding-left: var(--space-2);
+  }
+}
+
+/* ---- Scene: the whole frame, beneath the panes and the toolbar ---- */
+.scene {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  --dl: 0px;
+  --dr: 0px;
+}
+
+/* Free zone of the dock (read by the scene overlays): between the docked panes open on load. */
+@container app (min-width: 1024px) {
+  .scene[data-free-left="panel"] {
+    --dl: var(--panel-left-w);
+  }
+
+  .scene[data-free-right="panel"] {
+    --dr: var(--panel-right-w);
+  }
+}
+
+/* ---- Side panes ---- */
+.pane {
+  position: absolute;
+  z-index: var(--z-panel);
+  grid-row: 2;
+  grid-column: 1 / -1;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: var(--space-3) var(--space-3) var(--space-5);
+  color: var(--color-text);
+  transition:
+    transform var(--duration-spring) var(--ease-spring-soft),
+    opacity var(--duration-base) var(--ease-standard),
+    visibility 0s;
+}
+
+.paneLeft {
+  left: 0;
+  width: var(--panel-left-w);
+  border-right: var(--border-width) solid var(--color-separator);
+}
+
+.paneRight {
+  right: 0;
+  width: var(--panel-right-w);
+  border-left: var(--border-width) solid var(--color-separator);
+}
+
+/* Collapsed: slides out, then hidden (out of the Tab order and the accessibility tree; the
+   `inert` attribute already removes it at once). */
+.pane[data-open="false"] {
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    transform var(--duration-spring) var(--ease-spring-soft),
+    opacity var(--duration-base) var(--ease-standard),
+    visibility 0s linear var(--duration-spring);
+}
+
+.paneLeft[data-open="false"] {
+  transform: translateX(-100%);
+}
+
+.paneRight[data-open="false"] {
+  transform: translateX(100%);
+}
+
+/* Under 1024 px: floating overlays above the scene, never over the toolbar. */
+@container app (max-width: 1023px) {
+  .pane {
+    top: var(--float-inset);
+    bottom: var(--float-inset);
+    width: min(var(--drawer-max-w), calc(100% - var(--space-16)));
+    border: 0;
+    border-radius: var(--radius-xl);
+    box-shadow: var(--glass-shadow);
+  }
+
+  .paneLeft {
+    left: var(--float-inset);
+  }
+
+  .paneRight {
+    right: var(--float-inset);
+    bottom: auto;
+    width: min(var(--popover-w), calc(100% - var(--space-6)));
+    max-height: calc(100% - var(--space-6));
+    transform-origin: 100% 0;
+  }
+
+  .paneLeft[data-open="false"] {
+    transform: translateX(calc(-100% - var(--space-6)));
+  }
+
+  .paneRight[data-open="false"] {
+    transform: scale(0.9);
+  }
+}
+
+/* Under 560 px: the inspector becomes a sheet anchored at the bottom. */
+@container app (max-width: 559px) {
+  .paneRight {
+    top: auto;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: auto;
+    max-height: none;
+    height: min(62%, calc(var(--sheet-w) + var(--space-10)));
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    transform-origin: 50% 100%;
+  }
+
+  .paneRight::before {
+    content: "";
+    flex: none;
+    width: var(--control-md);
+    height: calc(var(--space-1) + var(--border-width));
+    margin: 0 auto calc(-1 * var(--space-2));
+    border-radius: var(--radius-pill);
+    background: var(--color-border-strong);
+  }
+
+  .paneRight[data-open="false"] {
+    transform: translateY(100%);
+  }
+}
+
+/* ---- Sidebar: segmented control Desk / Objects ---- */
+.tabs {
+  display: grid;
+  gap: var(--space-5);
+}
+
+.segmented {
+  position: relative;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  padding: var(--space-half);
+  border-radius: var(--radius-pill);
+  background: var(--color-fill);
+  isolation: isolate;
+}
+
+/* Thumb: slides under the selected segment with a spring (2 segments). */
+.segmented::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: var(--space-half);
+  bottom: var(--space-half);
+  left: var(--space-half);
+  width: calc((100% - 2 * var(--space-half)) / 2);
+  border-radius: var(--radius-pill);
+  background: var(--color-raised);
+  box-shadow: var(--shadow-1);
+  transition: transform var(--duration-spring) var(--ease-spring);
+}
+
+.segmented:has(> :nth-child(2)[data-selected])::before {
+  transform: translateX(100%);
+}
+
+.segment {
+  display: grid;
+  place-items: center;
+  height: calc(var(--control-sm) - 2 * var(--space-half));
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-pill);
+  color: var(--color-text);
+  font: var(--font-callout);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-callout);
+  font-feature-settings: var(--font-features);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+/* Selected: raised thumb + accent text + weight (not the colour alone). */
+.segment[data-selected] {
+  color: var(--color-accent-subtle-text);
+  font-weight: var(--weight-semibold);
+}
+
+.tabPanel {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.sectionTitle {
+  margin: 0;
+  font: var(--font-headline);
+  letter-spacing: var(--tracking-headline);
+  font-feature-settings: var(--font-features);
+}
+
+/* ---- Inspector ---- */
+.section {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.groupTitle {
+  margin: 0;
+  padding: 0 var(--space-4);
+  color: var(--color-text-muted);
+  font: var(--font-subheadline);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-subheadline);
+  font-feature-settings: var(--font-features);
+}

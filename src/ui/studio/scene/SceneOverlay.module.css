@@ -90,11 +90,12 @@
 }
 
 /* ---- Dock: view bar at the bottom centre, tip above it ---- */
-/* DOM order = Tab order (bar, then tip: UX-3); column-reverse draws the tip above the bar. */
+/* DOM order = Tab order (bar, then tip: UX-3); column-reverse draws the tip above the bar.
+   Centred in the free zone between the docked panes (--dl / --dr, set by the Studio shell). */
 .dock {
   position: absolute;
-  left: var(--float-inset);
-  right: var(--float-inset);
+  left: calc(var(--dl, 0px) + var(--float-inset));
+  right: calc(var(--dr, 0px) + var(--float-inset));
   bottom: var(--float-inset);
   display: flex;
   flex-direction: column-reverse;
