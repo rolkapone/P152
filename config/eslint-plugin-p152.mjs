@@ -3,7 +3,23 @@
 import path from "node:path";
 
 const RELATIVE = /^\.{1,2}(\/|$)/;
-const LETTERS = /[A-Za-z]/;
+// Any letter of any script (accented Latin, Greek, CJK…), not only ASCII.
+const LETTERS = /\p{L}/u;
+// String methods whose result is built from the receiver (and the arguments for concat).
+const STRING_METHODS = new Set([
+  "concat",
+  "join",
+  "padEnd",
+  "padStart",
+  "repeat",
+  "replace",
+  "replaceAll",
+  "toLowerCase",
+  "toUpperCase",
+  "trim",
+  "trimEnd",
+  "trimStart",
+]);
 
 /**
  * core/ relative imports must resolve inside src/core (and inside the extra folders of
@@ -42,6 +58,40 @@ const coreRelativeImports = {
   },
 };
 
+/** Values a function may return: its expression body, or its top-level `return` statements. */
+function returnedNodes(fn) {
+  if (fn.body.type !== "BlockStatement") return textNodes(fn.body);
+  return fn.body.body
+    .filter((statement) => statement.type === "ReturnStatement")
+    .flatMap((statement) => textNodes(statement.argument));
+}
+
+const isFunction = (node) =>
+  node?.type === "ArrowFunctionExpression" || node?.type === "FunctionExpression";
+
+/**
+ * Text reachable through a call: the result of a callback (`xs.map(() => "Item")`), of an
+ * IIFE, of `String("x")`, and of string methods on a literal (`"a".concat(b)`,
+ * `["a", "b"].join()`). Plain literal arguments are not text (`t("key")`, `f("id")`).
+ */
+function callTextNodes(node) {
+  const callee = node.callee;
+  const fromCallbacks = node.arguments.filter(isFunction).flatMap(returnedNodes);
+  if (isFunction(callee)) return [...returnedNodes(callee), ...fromCallbacks];
+  if (callee.type === "Identifier" && callee.name === "String") {
+    return [...node.arguments.flatMap(textNodes), ...fromCallbacks];
+  }
+  if (
+    callee.type === "MemberExpression" &&
+    !callee.computed &&
+    STRING_METHODS.has(callee.property.name)
+  ) {
+    const args = callee.property.name === "concat" ? node.arguments.flatMap(textNodes) : [];
+    return [...textNodes(callee.object), ...args, ...fromCallbacks];
+  }
+  return fromCallbacks;
+}
+
 /** Text-bearing expressions reachable from `node` (values the expression may render). */
 function textNodes(node) {
   if (!node) return [];
@@ -61,6 +111,18 @@ function textNodes(node) {
         : [...textNodes(node.left), ...textNodes(node.right)];
     case "BinaryExpression":
       return node.operator === "+" ? [...textNodes(node.left), ...textNodes(node.right)] : [];
+    case "ArrayExpression":
+      return node.elements.flatMap((element) =>
+        element?.type === "SpreadElement" ? textNodes(element.argument) : textNodes(element),
+      );
+    case "CallExpression":
+      return callTextNodes(node);
+    case "TaggedTemplateExpression":
+      return textNodes(node.quasi);
+    case "ArrowFunctionExpression":
+    case "FunctionExpression":
+      // A render prop (`{(state) => "Open"}`) renders what it returns.
+      return returnedNodes(node);
     case "SequenceExpression":
       return textNodes(node.expressions.at(-1));
     case "TSAsExpression":
@@ -76,8 +138,11 @@ function textNodes(node) {
 /**
  * Visible and accessible text goes through i18n (ADR-APP-05): JSX text, and string or
  * template literals rendered as an element child or as a text attribute (alt, aria-label…),
- * also through a ternary, `&&`, `||`, `??` or a `+` concatenation. Not detected: a constant
- * defined elsewhere (`const M = "Hello"; … {M}`). Other attributes (className…) are free.
+ * also through a ternary, `&&`, `||`, `??`, a `+` concatenation, an array, a callback or a
+ * string method. On a component (`<Panel>`, `<Aria.Tab>`), the text props of
+ * `componentTextProps` are checked too, with their suffixed forms (`label` → `toggleLabel`).
+ * Not detected: a constant defined elsewhere (`const M = "Hello"; … {M}`). Other attributes
+ * (className…) are free.
  */
 const noLiteralText = {
   meta: {
@@ -86,7 +151,10 @@ const noLiteralText = {
     schema: [
       {
         type: "object",
-        properties: { textAttributes: { type: "array", items: { type: "string" } } },
+        properties: {
+          textAttributes: { type: "array", items: { type: "string" } },
+          componentTextProps: { type: "array", items: { type: "string" } },
+        },
         additionalProperties: false,
       },
     ],
@@ -96,7 +164,17 @@ const noLiteralText = {
     },
   },
   create(context) {
-    const textAttributes = new Set(context.options[0]?.textAttributes ?? []);
+    const options = context.options[0] ?? {};
+    const textAttributes = new Set(options.textAttributes ?? []);
+    const componentProps = options.componentTextProps ?? [];
+    const suffixes = componentProps.map((prop) => prop[0].toUpperCase() + prop.slice(1));
+    const isComponentTextProp = (name) =>
+      componentProps.includes(name) ||
+      suffixes.some((suffix) => name.endsWith(suffix) && /^[a-z]/.test(name));
+    // <Panel>, <Aria.Tab>: an upper-case or dotted name is a component, not a DOM element.
+    const isComponent = (opening) =>
+      opening.name.type === "JSXMemberExpression" ||
+      (opening.name.type === "JSXIdentifier" && /^[A-Z]/.test(opening.name.name));
     const report = (nodes, messageId) => {
       for (const node of nodes) context.report({ node, messageId });
     };
@@ -110,7 +188,10 @@ const noLiteralText = {
       },
       JSXAttribute(node) {
         const name = typeof node.name.name === "string" ? node.name.name : null;
-        if (name === null || !textAttributes.has(name) || !node.value) return;
+        if (name === null || !node.value) return;
+        const isText =
+          textAttributes.has(name) || (isComponent(node.parent) && isComponentTextProp(name));
+        if (!isText) return;
         const value =
           node.value.type === "JSXExpressionContainer" ? node.value.expression : node.value;
         report(textNodes(value), "accessible");

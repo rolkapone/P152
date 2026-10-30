@@ -267,7 +267,7 @@ Critères d'acceptation :
   - Contrastes AA vérifiés sur chaque matériau, clair et sombre ; contrôle design contre les maquettes v0.4.
   - La **Liquid Glass** n'est pas dans cette story (voir US-025).
 Références de design US-005 : UX `docs/design/ux/stories/US-005.md` ; maquette `docs/design/ui/maquettes/US-005.html` ; `docs/design/ui/design-system.md` §15 (shell), §9 et §14 (mis à jour). Le graphics-engineer ajuste le cadrage à la zone libre (UX-8, marge de vue en pixels).
-Notes techniques / dépendances : ux-designer, ui-designer, developer. Dépend de US-001. Références : maquette `docs/design/ui/maquettes/index.html`, `docs/design/ui/design-system.md` §2–§5 et §9, wireframes W2 et W11. Les ESLint `boundaries` et `i18next` arrivent avec cette story (écart ADR consigné).
+Notes techniques / dépendances : ux-designer, ui-designer, developer. Dépend de US-001. Références : maquette `docs/design/ui/maquettes/index.html`, `docs/design/ui/design-system.md` §2–§5 et §9, wireframes W2 et W11. Les garde-fous de couches et de texte en dur sont des règles ESLint natives et locales (`config/eslint-plugin-p152.mjs`, ADR-APP-10) ; `eslint-plugin-boundaries` et `eslint-plugin-i18next` sont écartés (US-005 T0).
 
 ## Epic C — Bureau
 

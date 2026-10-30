@@ -162,6 +162,15 @@ describe("layer boundaries (ADR-APP-07)", () => {
     expect(await ruleIds(`${code}\n`, "src/core/x.tsx")).toContain("no-restricted-syntax");
   });
 
+  it.each([
+    ['import x = require("..");', "src/core/x.ts", "outside core/"],
+    ['import x = require("../io");', "src/core/catalog/x.ts", "even inside core/"],
+  ])("core/ rejects the TypeScript import-equals %s in %s (%s)", async (code, filePath) => {
+    expect(await ruleIds(`${code}\nexport { x };\n`, filePath)).toContain(
+      "@typescript-eslint/no-require-imports",
+    );
+  });
+
   it("core/ has no DOM nor I/O globals", async () => {
     const code =
       "export const n = localStorage.length + window.innerWidth + globalThis.length + self.length;\n";
@@ -223,6 +232,22 @@ describe("layer boundaries (ADR-APP-07)", () => {
   });
 });
 
+// Free identifiers of the samples (components and helpers), declared so that only the rule
+// under test can report.
+const DECLARATIONS = [
+  'import type { FC } from "react";',
+  "declare const t: () => string;",
+  "declare const f: (id: string) => string;",
+  "declare const Panel: FC<Record<string, unknown>>;",
+  "declare const Tooltip: FC<Record<string, unknown>>;",
+  "declare const Empty: FC<Record<string, unknown>>;",
+  "declare const Note: FC<Record<string, unknown>>;",
+  "declare const Card: FC<Record<string, unknown>>;",
+  "declare const Aria: { Tab: FC<Record<string, unknown>> };",
+  "export { t, f, Panel, Tooltip, Empty, Note, Card, Aria };",
+  "",
+].join("\n");
+
 describe("no hard-coded UI text (ADR-APP-05)", () => {
   it.each([
     ["export const A = () => <p>Hello</p>;", "JSX text"],
@@ -255,10 +280,37 @@ describe("no hard-coded UI text (ADR-APP-05)", () => {
       "aria ??",
     ],
     ['export const A = ({ n }: { n: number }) => <button title={"Item " + n} />;', "title concat"],
+    ['export const A = ({ xs }: { xs: number[] }) => <ul>{xs.map(() => "Item")}</ul>;', "callback"],
+    [
+      'export const A = ({ xs }: { xs: number[] }) => <ul>{xs.map(() => { return "Item"; })}</ul>;',
+      "callback with a block body",
+    ],
+    ['export const A = () => <p>{["Hello"]}</p>;', "array"],
+    ['export const A = () => <p>{[t(), ...["Hello"]]}</p>;', "spread array"],
+    ['export const A = () => <p>{String("Hello")}</p>;', "String()"],
+    ['export const A = ({ n }: { n: number }) => <p>{"Total ".concat(String(n))}</p>;', "concat"],
+    ['export const A = () => <p>{["a", "b"].join(" and ")}</p>;', "join"],
+    ['export const A = () => <p>{"hello".toUpperCase()}</p>;', "string method"],
+    ['export const A = () => <p>{(() => "Hello")()}</p>;', "IIFE"],
+    ["export const A = () => <p>{String.raw`Hello`}</p>;", "tagged template"],
+    ['export const A = () => <Card>{() => "Open"}</Card>;', "render prop"],
+    ['export const A = () => <p>{"Été"}</p>;', "accented letters"],
+    ['export const A = () => <p>{"日本語"}</p>;', "CJK"],
+    ["export const A = () => <p>é</p>;", "accented JSX text"],
+    ['export const A = () => <button aria-label="Fermer à droite" />;', "non-ASCII aria-label"],
+    ['export const A = () => <Panel heading="Desk" />;', "component heading"],
+    ['export const A = () => <Tooltip content="Reset view" />;', "component content"],
+    ['export const A = () => <Panel toggleLabel="Hide sidebar" />;', "prefixed text prop"],
+    ['export const A = () => <Empty emptyTitle={"No objects"} />;', "prefixed title"],
+    ['export const A = ({ c }: { c: boolean }) => <Note message={c ? "A" : "B"} />;', "message"],
+    ['export const A = () => <Aria.Tab textValue="Desk" />;', "member component textValue"],
+    ["export const A = () => <Card description={`Wide`} />;", "description template"],
+    ['export const A = () => <Card children="Hi" />;', "children prop"],
   ])("rejects %s (%s)", async (code) => {
-    const source = `declare const t: () => string;\nexport { t };\n${code}\n`;
+    const source = `${DECLARATIONS}${code}\n`;
     expect(await ruleIds(source, "src/ui/studio/A.tsx")).toContain("p152/no-literal-text");
     expect(await ruleIds(source, "src/app/A.tsx")).toContain("p152/no-literal-text");
+    expect(await ruleIds(source, "src/render/scene/A.tsx")).toContain("p152/no-literal-text");
   });
 
   it.each([
@@ -281,10 +333,40 @@ describe("no hard-coded UI text (ADR-APP-05)", () => {
     ["export const A = ({ c }: { c: boolean }) => <p>{c ? t() : null}</p>;", "translated ternary"],
     ['export const A = ({ n }: { n: number }) => <p>{n + " / " + n}</p>;', "punctuation only"],
     ['export const A = () => <img alt="" src="x.png" />;', "decorative image (empty alt)"],
+    [
+      "export const A = ({ xs }: { xs: string[] }) => <ul>{xs.map((x) => <li key={x}>{t()}</li>)}</ul>;",
+      "callback rendering elements",
+    ],
+    ['export const A = () => <p>{f("id")}</p>;', "plain literal argument of a call"],
+    ['export const A = ({ xs }: { xs: string[] }) => <p>{xs.join(", ")}</p>;', "join separator"],
+    ['export const A = () => <p>{[t(), " / "]}</p>;', "array of translated text"],
+    [
+      'export const A = () => <Panel icon="check" variant="primary" placement="top start" id="desk" />;',
+      "non-text component props",
+    ],
+    [
+      'export const A = () => <Panel labelId="desk-title" titleClassName="x" />;',
+      "text word not at the end",
+    ],
+    [
+      'export const A = () => <meta content="width=device-width" />;',
+      "DOM element, not a component",
+    ],
+    ["export const A = () => <Panel heading={t()} toggleLabel={t()} />;", "translated text props"],
   ])("accepts %s (%s)", async (code) => {
-    const source = `declare const t: () => string;\nexport { t };\n${code}\n`;
+    const source = `${DECLARATIONS}${code}\n`;
     expect(await ruleIds(source, "src/ui/studio/A.tsx")).toEqual([]);
   });
+
+  it.each(["src/ui/x.ts", "src/app/x.ts", "src/render/scene/x.tsx", "src/render/x.tsx"])(
+    "is enabled on %s",
+    async (filePath) => {
+      const config = (await eslint.calculateConfigForFile(filePath)) as {
+        rules: Record<string, unknown>;
+      };
+      expect(config.rules["p152/no-literal-text"]).toBeDefined();
+    },
+  );
 
   it("does not apply to component tests", async () => {
     const code = "export const A = () => <p>Hello</p>;\n";

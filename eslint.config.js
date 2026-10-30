@@ -72,6 +72,12 @@ const TEXT_ATTRIBUTES = [
   ...["alt", "aria-label", "aria-description", "aria-placeholder", "aria-roledescription"],
   ...["aria-valuetext", "label", "placeholder", "title"],
 ];
+// Text props of the components (ours and React Aria), checked on <Upper> and <A.B> only, also
+// with a prefix (`label` covers `toggleLabel`, `title` covers `emptyTitle`).
+const COMPONENT_TEXT_PROPS = [
+  ...["body", "caption", "children", "content", "description", "heading", "label", "message"],
+  ...["text", "textValue", "title", "tooltip"],
+];
 
 export default tseslint.config(
   {
@@ -174,10 +180,16 @@ export default tseslint.config(
     },
   },
   {
-    files: ["src/ui/**/*.tsx", "src/app/**/*.tsx"],
-    ignores: ["**/*.test.tsx"],
+    // .ts files are listed too: a JSX-free module stays covered if it ever turns into JSX.
+    files: ["src/{ui,app}/**/*.{ts,tsx}", "src/render/**/*.tsx"],
+    ignores: ["**/*.test.{ts,tsx}"],
     plugins: { p152 },
-    rules: { "p152/no-literal-text": ["error", { textAttributes: TEXT_ATTRIBUTES }] },
+    rules: {
+      "p152/no-literal-text": [
+        "error",
+        { textAttributes: TEXT_ATTRIBUTES, componentTextProps: COMPONENT_TEXT_PROPS },
+      ],
+    },
   },
   { files: ["**/*.{js,mjs}"], languageOptions: { globals: globals.node } },
   prettier,
