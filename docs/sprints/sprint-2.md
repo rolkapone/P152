@@ -143,14 +143,16 @@ Le push est prévu en cours de sprint (pas à la fin) afin que la CI distante to
 
 ## Board
 
-| Story | Statut (TODO / IN PROGRESS / IN REVIEW / SECURITY / DONE / BLOCKED) | Cycles de review | Notes |
-|---|---|---|---|
-| SEC-03a | DONE | 1 / 3 | Mergée 42c15cd ; revue APPROVE cycle 1 ; secdevops PASS (Semgrep Docker, 0 ERROR, MEDIUM US-004 clos) ; LOW -> SEC-06, CORP -> SEC-03b ; T7 rollup ouverte |
-| Stabiliser `parseSetup.fuzz` | TODO | n/a | Tâche developer (0 pt, marge prioritaire) ; avant ou juste après le premier push, au plus tard au début de US-005 ; seed `-577722299` |
-| Fix CI e2e (`fix/ci-e2e-runner-timeouts`) | DONE | 1 / 3 | PR #2 mergée (925469d) ; revue APPROVE, secdevops PASS ; CI distante 17/17 verte. Suivis : budget de chargement de `perf.spec`, commentaire `pauseClock`, `docs/qa/ci-e2e-runner.md:7` -> SEC-06 ; alertes Dependabot et 4 alertes `p152-test-hook-reference` -> SEC-02 |
-| US-005 | IN PROGRESS | 0 / 3 | Branche `feature/US-005-shell-app`, developer, démarrage par T0 (commit isolé relu par le reviewer avant le code) ; **8 pts** (était 5) ; design v0.4 validé (2026-10-20) ; T0 règles de lint relues avant le code ; PR par le devops (T10) |
-| US-006 | TODO | 0 / 3 | Design v0.4 validé ; catalogue commité ; T1b correction de `validate.test.ts` ; liste en groupe unique (T5b) ; dépend de US-005 ; PR par le devops (T7) |
-| SEC-02 | TODO | 0 / 3 | Push fait ; réglages avec le PO ; T4b/T4c ; peut glisser au Sprint 3 (engagement 16 pts) |
+| Story | Voie | Statut (TODO / IN PROGRESS / IN REVIEW / SECURITY / DONE / BLOCKED) | Cycles de review | Notes |
+|---|---|---|---|---|
+| SEC-03a | — (livrée) | DONE | 1 / 3 | Mergée ; revue APPROVE cycle 1 ; secdevops PASS (Semgrep Docker, 0 ERROR, MEDIUM US-004 clos) ; LOW -> SEC-06, CORP -> SEC-03b ; T7 rollup ouverte |
+| Stabiliser `parseSetup.fuzz` | — (tâche) | TODO | n/a | Tâche developer (0 pt, marge prioritaire) ; avant ou juste après le premier push, au plus tard au début de US-005 ; seed `-577722299` |
+| Fix CI e2e (`fix/ci-e2e-runner-timeouts`) | — (livrée) | DONE | 1 / 3 | PR #2 mergée ; revue APPROVE, secdevops PASS ; CI distante 17/17 verte. Suivis : budget de chargement de `perf.spec`, commentaire `pauseClock`, `docs/qa/ci-e2e-runner.md:7` -> SEC-06 ; alertes Dependabot et 4 alertes `p152-test-hook-reference` -> SEC-02 |
+| US-005 | RENFORCÉE | IN PROGRESS | 0 / 3 | Branche `feature/US-005-shell-app` (poussée, T0 commitée) ; **revue anticipée de T0 à refaire** (interrompue par la limite d'usage) : reprendre au dernier commit et à la dernière PASSATION ; developer ; **8 pts** (était 5) ; design v0.4 validé (2026-10-20) ; PR par le devops (T10) |
+| US-006 | STANDARD | TODO | 0 / 3 | Design v0.4 validé ; catalogue commité ; T1b correction de `validate.test.ts` ; liste en groupe unique (T5b) ; dépend de US-005 ; PR par le devops (T7) ; repasse en RENFORCÉE si une dépendance ou un asset externe apparaît |
+| SEC-02 | RENFORCÉE | TODO | 0 / 3 | Push fait ; réglages avec le PO ; T4b/T4c ; peut glisser au Sprint 3 (engagement 16 pts) |
+
+Voies (CLAUDE.md v3) : **US-005 RENFORCÉE** (police Inter auto-hébergée = asset téléchargé, nouvelle ressource servie sous CSP `font-src` ; icônes Lucide si ajoutées = nouvelle dépendance) ; **US-006 STANDARD** (catalogue interne, aucune lecture de fichier fourni par l'utilisateur, aucun réseau, aucune dépendance prévue) ; **SEC-02 RENFORCÉE** (comptes GitHub et réglages du dépôt : MFA, ruleset, Actions ; secdevops en revue approfondie, avis demandé via PASSATION). Aucune story EXPRESS au Sprint 2 (SEC-02 est à 1 pt mais touche aux comptes et aux réglages).
 
 ## Risques
 

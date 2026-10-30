@@ -7,11 +7,11 @@
 | Points MVP (Must + Should) | **99** (Must 89, Should 10) ; +1 pt : SEC-03a passe de 1 à 2 pts (correctif CSP React Aria, finding MEDIUM US-004) ; **+3 pts le 2026-10-20 : US-005 passe de 5 à 8 pts** (design natif v0.4, décision 32) |
 | Dont stories sécurité (SEC-01 à SEC-05) | 9 (Must 8, Should 1) |
 | Points « Could » MVP (hors total, bonus) | 9 (US-021, US-023, SEC-06) |
-| Points livrés | **16 / 99 = 16,2 %** (Sprint 1 : US-001 3, US-002 2, US-003 3, SEC-01 3, US-004 5, toutes DONE) |
+| Points livrés | **18 / 99 = 18,2 %** (Sprint 1 : US-001 3, US-002 2, US-003 3, SEC-01 3, US-004 5, toutes DONE = 16 ; Sprint 2 : SEC-03a 2, DONE) |
 | Vitesse moyenne | **16 pts/sprint** (1 sprint terminé, 16 pts livrés ; prévision prudente de 15 pts conservée pour le planning) |
-| Sprint en cours | **Sprint 2** (ouvert le 2026-10-20) : SEC-03a 2 + US-005 **8** + US-006 5 + SEC-02 1 = **16 pts engagés** (capacité prudente 15 : dépassement de 1 pt, marge 0 ; SEC-02 peut glisser au Sprint 3) ; après le Sprint 2, livrés prévus 32 / 99 (32,3 %), restants 67 |
-| Sprints restants estimés avant MVP | **6 y compris le Sprint 2** (83 pts restants / 16 = 5,2 ; 6 si la vitesse retombe à 15) ; 5 après le Sprint 2 (67 / 16 = 4,2, arrondi prudent) |
-| Dernière mise à jour | 2026-10-20 (SEC-03a DONE, mergée 42c15cd ; Sprint 2 : 2 / 13 pts engagés livrés ; ouverture du Sprint 2 ; plan dans `docs/sprints/sprint-2.md`). Les SHA de commits cités dans ce document sont périmés (historique réécrit) : voir `git log --merges --oneline main` |
+| Sprint en cours | **Sprint 2** (ouvert le 2026-10-20) : SEC-03a 2 (DONE) + US-005 **8** + US-006 5 + SEC-02 1 = **16 pts engagés** (capacité prudente 15 : dépassement de 1 pt, marge 0 ; SEC-02 peut glisser au Sprint 3) ; après le Sprint 2, livrés prévus 32 / 99 (32,3 %), restants 67 |
+| Sprints restants estimés avant MVP | **6 y compris le Sprint 2** (81 pts restants / 16 = 5,1, arrondi prudent à 6 ; 6 aussi si la vitesse retombe à 15) ; 5 après le Sprint 2 (67 / 16 = 4,2) |
+| Dernière mise à jour | 2026-10-30 (SEC-03a DONE, mergée, comptée dans les 18 pts ; voies attribuées au Sprint 2 dans `docs/sprints/sprint-2.md` ; reprise de US-005 après limite d'usage : T0 poussée, revue à refaire). Les SHA de commits cités dans ce document sont périmés (historique réécrit) : voir `git log --merges --oneline main` |
 
 Détail du recalcul : 83 pts (kickoff) + SEC-01 (3) + SEC-02 (1) + SEC-03a (2 depuis la fin du Sprint 1) + SEC-03b (1) + SEC-04 (1) + SEC-05 (1) + US-024 (2, réglages d'alertes) + US-025 (2, Help et préférences d'affichage) = 96, puis +3 (US-005 5 → 8, restylage natif v0.4) = **99**. Les autres éléments issus de US-004 (dette, mineurs QA) sont des critères ajoutés à des stories existantes ou à SEC-06 (Could), sans point supplémentaire ; à réestimer au planning du Sprint 2 s'ils pèsent.
 Hypothèse : le premier déploiement public n'a lieu qu'à la fin du MVP (SEC-03a avant le premier push, SEC-03b avant ce déploiement, SEC-05 juste avant la release).
@@ -98,7 +98,7 @@ Critères d'acceptation :
 - [x] Les rapports SARIF remontent dans l'onglet Code scanning. *(vérifié sur la PR #2, première CI distante 17/17 verte ; `dependency-review` exécuté sur la PR)*
 Notes techniques / dépendances : devops + secdevops. Dépend de US-001 (CI exécutée au moins une fois). Le contrôle `dist/_headers` de `build-hardening` **reste bloquant** (décision secdevops, scan US-001) : il n'y a pas d'avertissement toléré. La génération de `public/_headers` est donc livrée par SEC-03a **avant le premier push** (Sprint 2, en tête). Les findings LOW du scan US-001 sont regroupés dans SEC-06.
 
-### SEC-02 — Durcissement du dépôt GitHub public  [Must | 1 pt]
+### SEC-02 — Durcissement du dépôt GitHub public  [Must | 1 pt | voie RENFORCÉE]
 En tant qu'équipe, je veux un dépôt public durci afin de réduire le risque de compromission de la chaîne de production.
 Critères d'acceptation :
 - [ ] MFA actif sur les comptes ayant un accès en écriture.
@@ -217,7 +217,7 @@ Décisions UX **VALIDÉES par le PO le 2026-10-19** :
 Notes techniques / dépendances : graphics-engineer + technical-artist ; ux-designer/ui-designer pour la barre flottante de scène. Dépend de US-001, US-003. Références : maquette `docs/design/ui/maquettes/index.html` (barre de scène), `docs/design/3d/apercu/index.html`, `docs/design/3d/direction-artistique.md` §3 et §10, wireframe W2.
 Références de design US-004 : UX `docs/design/ux/stories/US-004.md` ; maquette `docs/design/ui/maquettes/US-004.html` (**section 7 = consignes developer**, `docs/design/ui/design-system.md` §14) ; paramètres de scène `assets/catalog/scene/studio.json` ; spécification 3D `docs/design/3d/US-004-scene.md` (transition caméra 480 ms, cible (0 ; 0,72 ; 0), caméra jamais sous Y = 0,9 m ni dans le bureau).
 
-### US-005 — Shell de l'application en anglais  [UI] [Must | 8 pts]
+### US-005 — Shell de l'application en anglais  [UI] [Must | 8 pts | voie RENFORCÉE]
 > **Réestimée de 5 à 8 pts le 2026-10-20** (décision 32) : la direction v0.4 « Natif · Premium · Précis » ajoute la fenêtre macOS (barre d'outils unifiée, barre latérale, inspecteur), le repli iPadOS/iOS, 4 matériaux translucides, l'échelle typographique Apple en Inter et le restylage de la barre de vue, de l'astuce et des écrans de US-004. **Les critères « panneaux flottants », « verre 86 % » et « 758 px » ci-dessous sont remplacés par ceux de la rubrique v0.4** (le critère v0.4 prime en cas de conflit). Redécoupage envisageable si le developer le demande (ex. restylage de US-004 en story à part).
 En tant qu'utilisateur, je veux une interface claire en anglais (zone 3D, panneau d'objets, panneau de propriétés, alertes) afin de m'y repérer sans aide.
 Critères d'acceptation :
@@ -271,7 +271,7 @@ Notes techniques / dépendances : ux-designer, ui-designer, developer. Dépend d
 
 ## Epic C — Bureau
 
-### US-006 — Choisir un bureau dans un catalogue  [UI][3D] [Must | 5 pts]
+### US-006 — Choisir un bureau dans un catalogue  [UI][3D] [Must | 5 pts | voie STANDARD]
 En tant qu'utilisateur, je veux choisir un bureau parmi des modèles aux dimensions réelles afin de partir de mon vrai mobilier.
 Critères d'acceptation :
 - [ ] Étant donné le panneau gauche, alors un onglet **"Desk"** (à côté de "Objects", contrôle segmenté, wireframe W3) liste **7 bureaux** du catalogue (`desk.json` v2 et `desk-corner.json`) : rectangulaires 100×60, 120×60, 140×70, 160×80, 180×80 cm ; d'angle 160×140 et 180×160 cm (**orientés à droite pour ce sprint**), sous forme de **lignes** d'une colonne avec vignette, « L × P cm » et nom (cm dans la ligne, cm et mm dans le résumé).
