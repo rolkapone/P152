@@ -21,3 +21,11 @@ Suite complète, 48 tests (44 + 4 issus du découpage), 0 retry :
 | 3 | 48/48 | 6,2 min |
 
 Le plus long test : environ 30 s ; marge de plus de 3x sur le timeout de 90 s. Durée estimée du job e2e sur le runner : environ 7 min en plus de l'installation et du build (limite du job : 20 min).
+
+## PR #18 : fuite (desk.spec.ts:95) en timeout sur le runner, cycle 1
+- Diagnostic (artefact du run 41214107417) : page vivante, aucun plantage ni perte de contexte WebGL ; le snapshot montre l'UI intacte, le `toBeChecked` en échec est la conséquence du timeout de 90 s.
+- Cause : le test enchaînait 17 changements de bureau (1 + 7 x 2 + 2 + 1), chacun reconstruisant la scène en SwiftShader (plusieurs secondes sur 2 vCPU) ; en 1920 sous charge, le total dépassait 90 s. Test trop long, pas un défaut applicatif.
+- Correction : 5 changements (standard, compact, gaming, corner large, retour à standard). Assertion inchangée (`memory()` identique au départ) ; 3 bureaux distincts de tailles différentes suffisent à révéler une géométrie ou texture non libérée. Pas de `retries`, pas d'augmentation de timeout.
+- Vérification (image épinglée, `--cpus=2 --memory=7g --ipc=host`, `CI=1`) : `desk.spec.ts --repeat-each=5` 60/60 ; suite complète 122/122 en 17,0 min.
+- Réserve : 17 min de tests pour une limite de job de 30 min ; surveiller la marge si la suite grossit (à répartir en shards).
+- 2e échec du run 41219672393 (autre test) : `shell.spec.ts:104` (UX-6, 1920) `toBeHidden` du panneau resté « visible » 15 s alors que `data-open="false"`. Cause : le test agissait pendant la construction de la scène ; sans frame, la transition de `visibility` (retardée) ne se termine pas. Correction : `waitForScene` avant le clic et après le rechargement. Vérifié : `shell.spec.ts --repeat-each=5` 150/150 ; suite complète 122/122 (17,8 min).

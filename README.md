@@ -26,5 +26,6 @@
 
 Copy `.env.example` to `.env` for local settings (never committed).
 Commits follow Conventional Commits (`feat:`, `fix:`, `chore:`...).
+Property tests (fast-check) run with a fixed seed (`tests/unit/setup/fastCheck.ts`); explore other inputs locally with `FC_SEED=<32-bit integer> pnpm test`.
 
 Supply chain: `pnpm-workspace.yaml` holds `onlyBuiltDependencies` (install-script allow-list) and `minimumReleaseAge` (3 days). Local CI run results: `docs/ci/local-run-US-001.md`.

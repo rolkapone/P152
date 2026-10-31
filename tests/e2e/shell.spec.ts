@@ -103,9 +103,13 @@ test("uses the self-hosted Inter, with no third-party request", async ({ page, b
 
 test("remembers a collapsed panel after a reload (wide window, UX-6)", async ({ page }) => {
   await page.goto("/");
+  // The scene first: while it builds (slow on a 2 vCPU runner) no frame runs, so the panel
+  // visibility transition cannot end.
+  await waitForScene(page);
   await toggle(page, "Desk and objects panel").click();
   await expect(sidebar(page)).toBeHidden();
   await page.reload();
+  await waitForScene(page);
   await expect(toggle(page, "Desk and objects panel")).toHaveAttribute("aria-expanded", "false");
   await expect(sidebar(page)).toBeHidden();
   await expect(inspector(page)).toBeVisible();

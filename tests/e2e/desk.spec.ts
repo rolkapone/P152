@@ -95,7 +95,10 @@ test("the active desk again stays checked and drawn (UX-4)", async ({ page }) =>
 test("frees the geometries and textures of the previous desks (no leak)", async ({ page }) => {
   await chooseDesk(page, desk("desk.rect/standard"));
   const start = await hook(page).memory();
-  for (const choice of [...DESKS, ...DESKS]) await chooseDesk(page, choice);
+  // Three distinct desks then back to the first: a desk left undisposed shows in the counts.
+  // (7 desks twice made 15 SwiftShader rebuilds, over the 90 s CI timeout on a 2 vCPU runner.)
+  for (const id of ["desk.rect/compact", "desk.rect/gaming"]) await chooseDesk(page, desk(id));
+  await chooseDesk(page, LARGEST);
   await chooseDesk(page, desk("desk.rect/standard"));
   await expect.poll(() => hook(page).memory()).toEqual(start);
 });
