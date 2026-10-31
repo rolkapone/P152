@@ -10,6 +10,7 @@
  * - `deskRect()`: screen rectangle of the desk (CSS px of the canvas) as the camera draws it
  *   now, for the framing test in the free zone (US-005 UX-8), from the vertices of the desk
  *   (an L-shaped desk is not its bounding box);
+ * - `geometries`, `textures`: GPU memory counted after the last rendered frame;
  * - `deskSize()`: size of the desk drawn (mm, bounding box of top and legs, US-006 UX-10);
  * - `viewDirection()`: unit direction of the camera (orientation kept after a change of desk);
  * - `setDesk(desk)`: applies a desk through the state store, as the Desk panel does (the panel
@@ -68,8 +69,14 @@ export default function PerfProbe() {
     let frames = 0;
     let drawCalls = 0;
     let triangles = 0;
+    // GPU memory after the last rendered frame: between a change and the next frame the
+    // disposed geometries are gone but the new ones are not uploaded yet.
+    let geometries = 0;
+    let textures = 0;
     const stop = addAfterEffect(() => {
       frames += 1;
+      geometries = gl.info.memory.geometries;
+      textures = gl.info.memory.textures;
       drawCalls = Math.max(drawCalls, gl.info.render.calls);
       triangles = Math.max(triangles, gl.info.render.triangles);
     });
@@ -161,10 +168,10 @@ export default function PerfProbe() {
         return frames;
       },
       get geometries() {
-        return gl.info.memory.geometries;
+        return geometries;
       },
       get textures() {
-        return gl.info.memory.textures;
+        return textures;
       },
       get dpr() {
         return gl.getPixelRatio();
