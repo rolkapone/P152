@@ -84,22 +84,23 @@ Branche : `feature/SEC-03a-headers-csp`. **DONE** : mergée dans `main` (42c15cd
 - [ ] T7 (devops) Retirer l'override `rollup: 4.64.7` si possible (R8, dès le 2026-10-23), sinon le noter. *(non fait : reste ouverte, voir R8)*
 Findings LOW et suggestions : reportés dans SEC-06 ; CORP `same-origin` et règle `/index.html` : SEC-03b.
 
-### 2. US-005 — Shell de l'application en anglais [UI] [developer] — 8 pts
-Branche : `feature/US-005-shell-app`. Design v0.4 validé. Implémenteur : developer. Workflow : branche poussée, **PR ouverte par le devops (T10)**, CI sur la PR, merge via la PR.
-- [ ] T3b (developer) **Design v0.4** (`design-system.md` §18) : fenêtre macOS (barre d'outils unifiée avec bascules des deux volets, barre latérale, inspecteur), repli iPadOS/iOS, 4 matériaux, échelle typographique Inter ; restylage de la barre de vue, de l'astuce et des écrans de US-004 (bouton principal `--color-accent-solid`, coche à la place du contour 2 px, zone libre 806 px à 1366) ; UX-5 adapté (bascule droite juste après la gauche). Ajuster tests E2E et cadrage (graphics-engineer).
-- [ ] T10 (devops) Après revue APPROVE, design CONFORME, QA PASS et secdevops PASS : push de la branche, **ouverture de la PR** (description : story, critères d'acceptation, liens vers `docs/reviews/US-005.md`, contrôle design, rapport QA, scan sécurité), CI verte sur la PR, merge via la PR (commit de merge).
-- [ ] T0 (developer, reviewer) **IN PROGRESS, première tâche.** **Règles avant code (action 3)** : règle `boundaries` (correction de `from ".."` dans `core`, `eslint.config.js:22`), règle `i18next/no-literal-string` (texte en dur dans ternaire, `&&`/`||`/`??`, concaténation) + tests dans `tests/unit/lint-rules.test.ts`, seuil de couverture de `src/state` dans la config Vitest s'il est absent ; commit isolé, relu par le reviewer avant tout code applicatif.
-- [ ] T1 Tokens générés depuis `docs/design/ui/tokens.css`, thèmes clair/sombre (suit `prefers-color-scheme`), `lang="en"`, i18n complet.
-- [ ] T2 Inter auto-hébergée (`public/fonts/inter-latin-wght-normal.woff2`, `font-display: swap`, précharge, `OFL.txt`, licence consignée dans `docs/design/3d/licences-assets.md` / `THIRD_PARTY_LICENSES`) ; icônes Lucide (licence ISC).
-- [ ] T3 Mise en page W2 : top bar (mot-symbole « Deskfit », nom du setup, verdict « Nothing to check yet » ; **sans Undo/Redo, File, Help ni « Saved »**), panneau gauche (onglets Desk / Objects, Objects en état vide), panneau droit (Properties, Alerts), astuce en pied ; panneaux repliables ; verre 86 % + repli opaque (`.no-glass`, `prefers-reduced-transparency`, sans `backdrop-filter`).
-- [ ] T4 Ordre de tabulation, liens "Skip to 3D view" / "Skip to alerts", focus visible, reflow 200 %, valide dès 1366×768, `prefers-reduced-motion`.
-- [ ] T5 États vide / chargement / erreur (W11), dont **texte neutre de `failed`** (i18n, test du texte et de `role="alert"`), « Reload page » au 2e échec seulement, `SceneError` à 3 `kind`. Messages d'import `errors.json` : rattachés à US-018.
-- [ ] T6 Premier module `src/state` : seuil de couverture de `src/state` dans la config Vitest (dette US-003).
-- [ ] T7 Budget de taille vérifié par `check:bundle` (seuil proposé par developer + graphics-engineer, validé par le PO ; chunk 3D en `lazy()`).
-- [ ] T8 (ui-designer) Mise à jour de la maquette US-004 et du design-system §9/§14 (info-bulle immédiate au focus clavier).
-- [ ] T9 Tests unitaires, E2E sous CSP de production, 10 runs sous charge ; contrôle design ; QA ; secdevops.
+### 2. US-005 — Shell de l'application en anglais [UI] [developer] — 8 pts — **DONE** (PR #14, voie RENFORCÉE)
+Branche : `feature/US-005-shell-app`. Design v0.4 validé. Implémenteur : developer. Workflow : branche poussée, **PR ouverte par le devops (T10)**, CI sur la PR, merge via la PR. Tâches cochées après revue APPROVE, contrôle design ECARTS MINEURS, QA PASS (1 cycle), secdevops PASS.
+- [x] T3b (developer) **Design v0.4** (`design-system.md` §18) : fenêtre macOS (barre d'outils unifiée avec bascules des deux volets, barre latérale, inspecteur), repli iPadOS/iOS, 4 matériaux, échelle typographique Inter ; restylage de la barre de vue, de l'astuce et des écrans de US-004 (bouton principal `--color-accent-solid`, coche à la place du contour 2 px, zone libre 806 px à 1366) ; UX-5 adapté (bascule droite juste après la gauche). Ajuster tests E2E et cadrage (graphics-engineer).
+- [x] T10 (devops) **fait : PR #14, CI et merge.** Après revue APPROVE, design CONFORME, QA PASS et secdevops PASS : push de la branche, **ouverture de la PR** (description : story, critères d'acceptation, liens vers `docs/reviews/US-005.md`, contrôle design, rapport QA, scan sécurité), CI verte sur la PR, merge via la PR (commit de merge).
+- [x] T0 (developer, reviewer) **fait** (revue anticipée APPROVE). **Règles avant code (action 3)** : règle `boundaries` (correction de `from ".."` dans `core`, `eslint.config.js:22`), règle `i18next/no-literal-string` (texte en dur dans ternaire, `&&`/`||`/`??`, concaténation) + tests dans `tests/unit/lint-rules.test.ts`, seuil de couverture de `src/state` dans la config Vitest s'il est absent ; commit isolé, relu par le reviewer avant tout code applicatif.
+- [x] T1 Tokens générés depuis `docs/design/ui/tokens.css`, thèmes clair/sombre (suit `prefers-color-scheme`), `lang="en"`, i18n complet.
+- [x] T2 Inter auto-hébergée (`public/fonts/inter-latin-wght-normal.woff2`, `font-display: swap`, précharge, `OFL.txt`, licence consignée dans `docs/design/3d/licences-assets.md` / `THIRD_PARTY_LICENSES`) ; icônes Lucide (licence ISC).
+- [x] T3 Mise en page W2 : top bar (mot-symbole « Deskfit », nom du setup, verdict « Nothing to check yet » ; **sans Undo/Redo, File, Help ni « Saved »**), panneau gauche (onglets Desk / Objects, Objects en état vide), panneau droit (Properties, Alerts), astuce en pied ; panneaux repliables ; verre 86 % + repli opaque (`.no-glass`, `prefers-reduced-transparency`, sans `backdrop-filter`).
+- [x] T4 Ordre de tabulation, liens "Skip to 3D view" / "Skip to alerts", focus visible, reflow 200 %, valide dès 1366×768, `prefers-reduced-motion`.
+- [x] T5 États vide / chargement / erreur (W11), dont **texte neutre de `failed`** (i18n, test du texte et de `role="alert"`), « Reload page » au 2e échec seulement, `SceneError` à 3 `kind`. Messages d'import `errors.json` : rattachés à US-018.
+- [x] T6 Premier module `src/state` : seuil de couverture de `src/state` dans la config Vitest (dette US-003).
+- [x] T7 Budget de taille vérifié par `check:bundle` (seuil proposé par developer + graphics-engineer, validé par le PO ; chunk 3D en `lazy()`).
+- [x] T8 (ui-designer) Mise à jour de la maquette US-004 et du design-system §9/§14 (info-bulle immédiate au focus clavier).
+- [ ] T9 Tests unitaires, E2E sous CSP de production, 10 runs sous charge ; contrôle design ; QA ; secdevops. **Partiel** : contrôle design, QA et secdevops faits ; 5 runs au lieu de 10 (Questions n° 3).
 
 ### 3. US-006 — Choisir un bureau dans un catalogue [UI][3D] [graphics-engineer puis developer] — 5 pts
+**Avant tout code (2026-10-31)** : (0a) **rebase de `feature/US-006-choix-bureau` sur `main`** (developer) ; (0b) **arbitrage du bloquant R11** (graphics-engineer + technical-artist) : bureaux jusqu'à 180×160 à environ 8,2 m de distance à 1024 px, studio limité à environ 8 m (mur du fond) ; décision avant T2b.
 Branche : `feature/US-006-choix-bureau`. Après design et assets validés, et après le merge de US-005 (ou sur sa base). Même branche, deux implémenteurs.
 - [x] T1 (technical-artist) Catalogue de 7 bureaux (5 rectangulaires, 2 d'angle) : **fait**, commité sur la branche (cd27e44), schéma de catalogue (`min ≤ défaut ≤ max`). Bornes rect 800–2400 × 500–1000 × 600–1300, angle 1200–2400 × 1000–2000.
 - [ ] T1b (developer) Corriger le test « a catalog without any desk » de `validate.test.ts` (échoue avec les nouvelles données), premier commit du developer.
@@ -143,14 +144,22 @@ Le push est prévu en cours de sprint (pas à la fin) afin que la CI distante to
 
 ## Board
 
-| Story | Voie | Statut (TODO / IN PROGRESS / IN REVIEW / SECURITY / DONE / BLOCKED) | Cycles de review | Notes |
-|---|---|---|---|---|
-| SEC-03a | — (livrée) | DONE | 1 / 3 | Mergée ; revue APPROVE cycle 1 ; secdevops PASS (Semgrep Docker, 0 ERROR, MEDIUM US-004 clos) ; LOW -> SEC-06, CORP -> SEC-03b ; T7 rollup ouverte |
-| Stabiliser `parseSetup.fuzz` | — (tâche) | TODO | n/a | Tâche developer (0 pt, marge prioritaire) ; avant ou juste après le premier push, au plus tard au début de US-005 ; seed `-577722299` |
-| Fix CI e2e (`fix/ci-e2e-runner-timeouts`) | — (livrée) | DONE | 1 / 3 | PR #2 mergée ; revue APPROVE, secdevops PASS ; CI distante 17/17 verte. Suivis : budget de chargement de `perf.spec`, commentaire `pauseClock`, `docs/qa/ci-e2e-runner.md:7` -> SEC-06 ; alertes Dependabot et 4 alertes `p152-test-hook-reference` -> SEC-02 |
-| US-005 | RENFORCÉE | IN PROGRESS | 0 / 3 | Branche `feature/US-005-shell-app` (poussée, T0 commitée) ; **revue anticipée de T0 à refaire** (interrompue par la limite d'usage) : reprendre au dernier commit et à la dernière PASSATION ; developer ; **8 pts** (était 5) ; design v0.4 validé (2026-10-20) ; PR par le devops (T10) |
-| US-006 | STANDARD | TODO | 0 / 3 | Design v0.4 validé ; catalogue commité ; T1b correction de `validate.test.ts` ; liste en groupe unique (T5b) ; dépend de US-005 ; PR par le devops (T7) ; repasse en RENFORCÉE si une dépendance ou un asset externe apparaît |
-| SEC-02 | RENFORCÉE | TODO | 0 / 3 | Push fait ; réglages avec le PO ; T4b/T4c ; peut glisser au Sprint 3 (engagement 16 pts) |
+| Story | Voie | Statut (TODO / IN PROGRESS / IN REVIEW / QA / SECURITY / DONE / BLOCKED) | Cycles | Prochain agent | PR |
+|---|---|---|---|---|---|
+| SEC-03a | — (livrée) | DONE | 1 / 3 | — | — (mergée avant le premier push) |
+| Stabiliser `parseSetup.fuzz` | — (tâche) | DONE (à confirmer) | n/a | — | — |
+| Fix CI e2e (`fix/ci-e2e-runner-timeouts`) | — (livrée) | DONE | 1 / 3 | — | #2 |
+| US-005 | RENFORCÉE | DONE | 1 / 3 | — | #14 |
+| US-006 | STANDARD | IN PROGRESS | 0 / 3 | graphics-engineer + technical-artist (arbitrage T0), puis developer (T1b) | — (branche à rebaser sur `main`) |
+| SEC-02 | RENFORCÉE | TODO | 0 / 3 | devops (T1) | — |
+
+Notes du board (2026-10-31) :
+- **US-005 DONE** : revue APPROVE (T0, lots 1-2, UX-8 + lot 3, correction) ; design ECARTS MINEURS acceptés ; QA PASS après 1 cycle de correction (E2E instables sous charge : 2 workers en local, `waitForTimeout` supprimés et interdits par lint) ; secdevops PASS (threat model v1.4). Réserve : 5 runs de référence au lieu de 10 (Questions n° 3).
+- **US-006** : la branche `feature/US-006-choix-bureau` est antérieure à US-005 : **rebase sur `main` à faire** (developer) avant T1b. Bloquant technique (R11) : bureaux jusqu'à 180×160 à environ 8,2 m à 1024 px, studio limité à environ 8 m.
+- **Fix e2e et SEC-03a** : suivis de SEC-06 (budget de chargement de `perf.spec`, commentaire `pauseClock`, `docs/qa/ci-e2e-runner.md:7`) ; LOW de SEC-03a -> SEC-06 ; CORP -> SEC-03b ; T7 rollup ouverte (R8).
+- **SEC-02** : alertes Dependabot et 4 alertes `p152-test-hook-reference` à traiter avec le PO ; T4b/T4c restent ouverts ; peut glisser au Sprint 3.
+- **Parse fuzz** : seed `-577722299`, fix appliqué en suivi de US-005 (graine globale, générateur sans `__proto__`) ; 10 passages `pnpm check` à confirmer par le developer.
+- **Règle d'équipe** : ne jamais lancer deux Playwright ou `pnpm check` en parallèle (même `test-results`, même port 4173).
 
 Voies (CLAUDE.md v3) : **US-005 RENFORCÉE** (police Inter auto-hébergée = asset téléchargé, nouvelle ressource servie sous CSP `font-src` ; icônes Lucide si ajoutées = nouvelle dépendance) ; **US-006 STANDARD** (catalogue interne, aucune lecture de fichier fourni par l'utilisateur, aucun réseau, aucune dépendance prévue) ; **SEC-02 RENFORCÉE** (comptes GitHub et réglages du dépôt : MFA, ruleset, Actions ; secdevops en revue approfondie, avis demandé via PASSATION). Aucune story EXPRESS au Sprint 2 (SEC-02 est à 1 pt mais touche aux comptes et aux réglages).
 
@@ -168,13 +177,16 @@ Voies (CLAUDE.md v3) : **US-005 RENFORCÉE** (police Inter auto-hébergée = ass
 | R7 | Interruptions par limites d'usage | Moyenne / Faible | Action 5 : commits par tâche |
 | R8 | Override `rollup: 4.64.7` | Certaine / Faible | Retrait à partir du 2026-10-23 (SEC-03a T7) |
 | R9 | Mesure FPS limitée à un GPU haut de gamme, pas de Firefox | Moyenne / Faible | Réserve maintenue, traitée par US-021/US-022 |
+| R11 | US-006 : bureaux jusqu'à 180×160 à ~8,2 m à 1024 px, studio limité à ~8 m (mur du fond) | Élevée / Moyen | Arbitrage graphics-engineer + technical-artist en début de US-006 ; hausse de la limite du studio = ADR, et accord du PO si le rendu change | graphics-engineer |
+| R12 | Ressource : tests E2E sous charge (10 runs, environ 40 min de CPU et GPU partagés avec P153) | Moyenne / Faible | Transmis à `socle:ressources` ; décision sur Questions n° 3 | qa-tester (signalé par le scrum-master) |
 
 ## Questions pour le PO
 
 Tranchées le 2026-10-20 : bornes du bureau, bureau d'angle (livré, sans « Custom size »), tous les textes et le design (décisions 29 à 31).
 
-1. **Budget de taille du shell** : valider le seuil proposé par le developer et le graphics-engineer (mesures actuelles : 153,8 Ko gz principal, 266 Ko gz chunk 3D).
-2. **Premier push** : l'accord sera demandé quand SEC-03a sera mergée et la MFA faite ; le PO peut déjà confirmer la date de la MFA.
+1. **Budget de taille du shell** : valider le seuil proposé (195 kB gz index, 295 kB gz SceneCanvas) ; mesures US-005 : 176,6 kB gz index, 267,1 kB gz SceneCanvas.
+2. **Premier push** : l'accord sera demandé quand SEC-03a sera mergée et la MFA faite ; le PO peut déjà confirmer la date de la MFA. *(Premier push fait ; MFA et réglages SEC-02 restent à confirmer.)*
+3. **Critère de sortie de US-005 (règle temps réel)** : 5 runs `--repeat-each=5` verts (460/460) au lieu des 10 demandés. Accepter ce niveau, ou demander la campagne de 10 runs (environ 40 min de machine, à passer à `socle:ressources`) ?
 
 ## Revue du sprint
 (à rédiger en fin de sprint)
