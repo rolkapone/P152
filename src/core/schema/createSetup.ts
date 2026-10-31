@@ -9,16 +9,13 @@ export interface NewSetupInput {
   readonly name: string;
   /** ISO 8601 timestamp. */
   readonly now: string;
-  /** Desk catalog entry; defaults to the first desk type of the catalog. */
+  /** Desk catalog entry; defaults to the desk of the studio scene (`studio.json` desk.type). */
   readonly deskCatalogId?: string;
 }
 
 /** Empty setup: a default desk, no object. Returns null if the catalog has no such desk. */
 export function createSetup(catalog: Catalog, input: NewSetupInput): SetupV1 | null {
-  const desk =
-    input.deskCatalogId === undefined
-      ? [...catalog.objectTypes.values()].find((type) => type.type === DESK_TYPE)
-      : catalog.objectTypes.get(input.deskCatalogId);
+  const desk = catalog.objectTypes.get(input.deskCatalogId ?? catalog.studio.desk.type);
   if (desk?.type !== DESK_TYPE) return null;
   return {
     format: SETUP_FORMAT,

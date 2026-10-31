@@ -116,10 +116,10 @@ describe("createSetup", () => {
   });
 
   it("returns null for an unknown or non-desk catalog entry", () => {
-    expect(createSetup(catalog, { ...input, deskCatalogId: "desk.corner" })).toBeNull();
+    expect(createSetup(catalog, { ...input, deskCatalogId: "desk.standing" })).toBeNull();
     expect(createSetup(catalog, { ...input, deskCatalogId: "mouse.generic" })).toBeNull();
-    expect(createSetup(catalog, { ...input, deskCatalogId: "desk.rect" })?.desk.catalogId).toBe(
-      "desk.rect",
+    expect(createSetup(catalog, { ...input, deskCatalogId: "desk.corner" })?.desk.catalogId).toBe(
+      "desk.corner",
     );
   });
 });

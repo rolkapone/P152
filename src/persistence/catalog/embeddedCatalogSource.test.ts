@@ -10,9 +10,11 @@ describe("embedded catalog (CatalogSource adapter)", () => {
     const result = loadEmbeddedCatalog();
     expect(result.ok ? [] : result.error).toEqual([]);
     if (!result.ok) return;
-    expect(Object.keys(EMBEDDED_CATALOG_FILES.objectTypes)).toHaveLength(10);
-    expect([...result.value.objectTypes.keys()]).toContain("desk.rect");
-    expect(result.value.objectTypes.size).toBe(10);
+    expect(Object.keys(EMBEDDED_CATALOG_FILES.objectTypes)).toHaveLength(11);
+    expect([...result.value.objectTypes.keys()]).toEqual(
+      expect.arrayContaining(["desk.rect", "desk.corner"]),
+    );
+    expect(result.value.objectTypes.size).toBe(11);
     expect(result.value.materials.size).toBeGreaterThanOrEqual(30);
     expect(result.value.styles.size).toBeGreaterThanOrEqual(4);
     expect(loadEmbeddedCatalog()).toBe(result);

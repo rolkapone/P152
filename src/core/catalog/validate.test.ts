@@ -145,8 +145,10 @@ describe("validateCatalog rejects", () => {
   });
 
   it("a catalog without any desk", () => {
+    // Every desk type goes: desk.json (desk.rect) and desk-corner.json (desk.corner, US-006).
     const result = validateMutated((files) => {
       delete types(files)["desk.json"];
+      delete types(files)["desk-corner.json"];
     });
     expect(issueCodes(result)).toEqual(
       expect.arrayContaining(["missingDesk", "invalidStudioDesk"]),

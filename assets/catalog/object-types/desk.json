@@ -1,6 +1,6 @@
 {
   "id": "desk.rect",
-  "version": 2,
+  "version": 1,
   "type": "desk",
   "category": "furniture",
   "name": { "en": "Desk" },
