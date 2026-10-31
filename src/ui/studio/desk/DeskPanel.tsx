@@ -7,7 +7,7 @@
  * stop; arrows loop (React Aria), Home / End are added here. No "Custom size" (US-007).
  *
  * `choices` null = the catalog could not load: an alert banner takes the place of the list
- * and the summary, the scene keeps its default desk.
+ * and the summary, the scene keeps its default desk. No choice yet (empty list): title only.
  */
 import { useEffect, useId, useMemo, useRef } from "react";
 import { Radio, RadioGroup } from "react-aria-components";
@@ -80,7 +80,9 @@ export function DeskPanel({ choices, value, onChange, onReload = reloadPage }: D
     <div className={cx(styles.panel)}>
       <div className={cx(styles.header)}>
         <h2 className={cx(styles.title)}>{t("desk.title")}</h2>
-        {choices !== null && <p className={cx(styles.help)}>{t("desk.help")}</p>}
+        {choices !== null && choices.length > 0 && (
+          <p className={cx(styles.help)}>{t("desk.help")}</p>
+        )}
       </div>
       {choices === null ? (
         <div role="alert" className={cx(styles.banner)}>
@@ -93,7 +95,7 @@ export function DeskPanel({ choices, value, onChange, onReload = reloadPage }: D
             </Button>
           </div>
         </div>
-      ) : (
+      ) : choices.length === 0 ? null : (
         <>
           <RadioGroup
             className={cx(styles.list)}

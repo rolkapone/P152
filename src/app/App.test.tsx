@@ -2,7 +2,9 @@ import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { I18nextProvider } from "react-i18next";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { useSceneView } from "../state";
+// CSS.escape for React Aria in jsdom (radio groups, tabs).
+import "../../tests/unit/helpers/ui";
+import { useSceneDesk, useSceneView, useSetupDocument } from "../state";
 import { createI18n } from "../ui/i18n/config";
 import { App } from "./App";
 
@@ -14,9 +16,11 @@ declare global {
 }
 
 const initialView = useSceneView.getState();
+const initialDocument = useSetupDocument.getState();
 
 afterEach(() => {
   useSceneView.setState(initialView, true);
+  useSetupDocument.setState(initialDocument, true);
   document.body.replaceChildren();
   vi.restoreAllMocks();
 });
@@ -63,6 +67,21 @@ describe("App", () => {
     expect(alert?.querySelector("h2")?.textContent).toBe("The 3D view can't start");
     expect(document.activeElement).toBe(alert?.querySelector("h2"));
     expect(container.querySelector("[role=toolbar]")).toBeNull();
+    act(() => root.unmount());
+  });
+
+  it("opens a setup on the 140 x 70 desk, shown by the Desk tab and the 3D view (US-006)", async () => {
+    vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(null);
+    const { container, root } = await renderApp();
+    const setup = useSetupDocument.getState().setup;
+    expect(setup?.desk).toMatchObject({
+      catalogId: "desk.rect",
+      params: { width: 1400, depth: 700 },
+    });
+    expect(setup?.name).toBe("My desk setup");
+    expect(useSceneDesk.getState().desk).toMatchObject({ widthMm: 1400, depthMm: 700 });
+    const checked = container.querySelector<HTMLInputElement>("input[type=radio]:checked");
+    expect(checked?.closest("label")?.textContent).toBe("140 × 70 cmStandard desk");
     act(() => root.unmount());
   });
 });

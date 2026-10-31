@@ -179,7 +179,7 @@ describe("StudioShell (W2, design v0.4)", () => {
     const tabs = screen.getAllByRole("tab");
     expect(tabs.map((tab) => tab.textContent)).toEqual(["Desk", "Objects"]);
     expect(tabs.map((tab) => tab.getAttribute("aria-selected"))).toEqual(["true", "false"]);
-    expect(screen.getByRole("tabpanel").textContent).toContain("Desk");
+    expect(screen.getByRole("tabpanel").textContent).toContain("Choose your desk");
 
     await user.click(tabs[0] as HTMLElement);
     await user.keyboard("{ArrowRight}");

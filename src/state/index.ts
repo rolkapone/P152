@@ -34,3 +34,10 @@ export {
   type ShellLayoutState,
 } from "./shell/shellLayoutStore";
 export { createSceneDeskStore, useSceneDesk, type SceneDeskState } from "./desk/sceneDeskStore";
+export { connectSceneDesk } from "./desk/connectSceneDesk";
+export {
+  createSetupDocumentStore,
+  useSetupDocument,
+  type SetupDocumentOptions,
+  type SetupDocumentState,
+} from "./document/setupDocumentStore";
