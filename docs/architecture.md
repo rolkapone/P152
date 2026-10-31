@@ -336,7 +336,7 @@ Règles de dépendance (à faire respecter par lint, ex. `eslint-plugin-boundari
 
 ### ADR-3D-11 — Distance de la caméra selon le bureau et espace du studio (US-006, risque R11)
 
-> Statut : **Proposé** (2026-10-31, US-006, graphics-engineer). Complète ADR-3D-10 (borne de distance fixe 0,8–7 m).
+> Statut : **Accepté** (revue US-006 APPROVE, 2026-10-31 ; proposé par graphics-engineer). Complète ADR-3D-10 (borne de distance fixe 0,8–7 m).
 
 **Contexte.** Les bureaux de US-006 vont jusqu'à 180 × 160 cm (angle). Dans la plus petite fenêtre à volets ouverts (1024 px de large, barre d'outils 53 px, volets 248 et 312 px), le cadrage demande jusqu'à 8,2 m (Reset, 1024 × 768). La borne fixe de 7 m coupait ce cadrage ; la monter au-delà d'environ 8 m laissait la caméra atteindre le mur courbe du fond aux angles latéraux (azimut ±109°), ou passer sous son sol qui remonte.
 
