@@ -2,6 +2,7 @@
 export * from "./result";
 export * from "./schema";
 export * from "./catalog";
+export * from "./geometry";
 export * from "./io";
 export type * from "./ports";
 export { APP_NAME } from "./appInfo";

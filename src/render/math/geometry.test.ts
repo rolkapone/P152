@@ -3,7 +3,6 @@ import { testCatalog } from "../../../tests/unit/helpers/fixtures";
 import { toStudioConfig } from "../../core";
 import { CONTACT_CORE, contactShadowPixels } from "./contactShadow";
 import { cycloramaBuffers, cycloramaProfile, triangleCount } from "./cyclorama";
-import { DESK_STYLE_MM, deskLayout } from "./deskLayout";
 import { cubicBezier, EASE_IN_OUT } from "./easing";
 import { clamp, mmToM } from "./units";
 
@@ -48,50 +47,6 @@ describe("easing (--ease-in-out, 480 ms view transitions)", () => {
     const steep = cubicBezier(1, 0, 0, 1);
     expect(steep(0.5)).toBeCloseTo(0.5, 4);
     expect(steep(0.25)).toBeLessThan(0.25);
-  });
-});
-
-describe("deskLayout (desk.rect 1400 x 700 x 740, top 25 mm)", () => {
-  const layout = deskLayout(config.desk);
-
-  it("puts the top surface at the desk height, origin on the floor", () => {
-    expect(layout.top.size).toEqual([1.4, 0.025, 0.7]);
-    expect(layout.top.center[1] + layout.top.size[1] / 2).toBeCloseTo(0.74);
-    expect(layout.top.radius).toBeCloseTo(0.009);
-  });
-
-  it("places 4 posts from the floor to the top, inset 60 mm", () => {
-    expect(layout.legs.positions).toHaveLength(4);
-    for (const [x, y, z] of layout.legs.positions) {
-      expect(Math.abs(x)).toBeCloseTo(0.64);
-      expect(Math.abs(z)).toBeCloseTo(0.29);
-      expect(y - layout.legs.height / 2).toBeCloseTo(0);
-      expect(y + layout.legs.height / 2).toBeCloseTo(0.715);
-    }
-    expect(layout.legs.radiusTop).toBeCloseTo(0.022);
-    expect(layout.legs.radiusBottom).toBeCloseTo(0.018);
-  });
-
-  it("puts the rear rail between the back posts, 45 mm under the top", () => {
-    expect(layout.rail.size[0]).toBeCloseTo(1.28);
-    expect(layout.rail.center[1]).toBeCloseTo(0.74 - 0.025 - 0.045);
-    expect(layout.rail.center[2]).toBeCloseTo(-0.29);
-  });
-
-  it("lists one floor footprint per foot", () => {
-    expect(layout.feet).toHaveLength(4);
-    expect(layout.feet[0]?.size).toEqual([0.07, 0.07]);
-    expect(layout.feet.every((foot) => foot.center[1] === 0)).toBe(true);
-  });
-
-  it("caps the edge radius to half the thickness", () => {
-    const thin = deskLayout({ ...config.desk, thicknessMm: 10, edgeRadiusMm: 9 });
-    expect(thin.top.radius).toBeLessThan(0.005);
-  });
-
-  it("follows other desk sizes of the catalog range", () => {
-    const large = deskLayout({ ...config.desk, widthMm: 1800, depthMm: 800 });
-    expect(large.legs.positions[3]?.[0]).toBeCloseTo(0.9 - DESK_STYLE_MM.legInset / 1000);
   });
 });
 

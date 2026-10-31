@@ -1,8 +1,8 @@
 /**
- * Default desk `desk.rect` generated from the catalog (ADR-3D-03): rounded top, then 4 posts
- * and a rear rail merged into one geometry (one geometry per material slot: 2 draw calls),
- * and soft contact shadows under the desk and each foot (one instanced draw call).
- * Metres, origin on the floor.
+ * Desk generated from the catalog (ADR-3D-03): `desk.rect` (rounded top, 4 posts, rear rail)
+ * or `desk.corner` (L-shaped top, 6 posts, 2 rails); posts and rails merged into one geometry
+ * (one geometry per material slot: 2 draw calls), and soft contact shadows under the desk and
+ * each foot (one instanced draw call). Metres, origin on the floor.
  */
 import { useThree } from "@react-three/fiber";
 import { useEffect, useLayoutEffect, useMemo } from "react";
@@ -15,7 +15,7 @@ import {
   Object3D,
   PlaneGeometry,
 } from "three";
-import type { Material, StudioConfig } from "../../core";
+import type { DeskSpec, Material, StudioConfig } from "../../core";
 import { CONTACT_CORE, contactShadowPixels } from "../math/contactShadow";
 import { deskLayout, type DeskLayout } from "../math/deskLayout";
 import { mmToM } from "../math/units";
@@ -101,13 +101,16 @@ function ContactShadows({ config, layout }: { config: StudioConfig; layout: Desk
 
 interface DeskProps {
   readonly config: StudioConfig;
+  /** Desk shown now. */
+  readonly desk: DeskSpec;
   readonly materials: ReadonlyMap<string, Material>;
 }
 
-export function Desk({ config, materials }: DeskProps) {
+export function Desk({ config, desk, materials }: DeskProps) {
   const gl = useThree((state) => state.gl);
   const invalidate = useThree((state) => state.invalidate);
-  const layout = useMemo(() => deskLayout(config.desk), [config.desk]);
+  const edgeRadiusMm = config.desk.edgeRadiusMm;
+  const layout = useMemo(() => deskLayout(desk, edgeRadiusMm), [desk, edgeRadiusMm]);
   const geometries = useMemo(() => buildDeskGeometries(layout), [layout]);
   useEffect(
     () => () => {
@@ -116,8 +119,8 @@ export function Desk({ config, materials }: DeskProps) {
     },
     [geometries],
   );
-  const top = useSlotMaterial(materials, config.desk.materials["top"]);
-  const legs = useSlotMaterial(materials, config.desk.materials["legs"]);
+  const top = useSlotMaterial(materials, desk.materials["top"]);
+  const legs = useSlotMaterial(materials, desk.materials["legs"]);
 
   useLayoutEffect(() => {
     requestShadowUpdate(gl);
