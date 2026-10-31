@@ -72,3 +72,7 @@ Statuts au 2026-10-31 (fin du Sprint 2). Les stories DONE sont archivées dans `
 | US-022 | Budgets de performance et tests E2E de référence | — | — | 3 | TODO | — | [fiche](stories/US-022.md) |
 | US-021 | Utilisation tactile et mobile | [UI] | — | 5 | TODO | — | [fiche](stories/US-021.md) |
 | US-023 | Capture d'écran du setup | [UI][3D] | — | 2 | TODO | — | [fiche](stories/US-023.md) |
+
+## Notes par epic
+
+- **Epic F — Alertes « ça rentre ? »** (US-014 à US-017, US-024) : seules les alertes de niveau **Error** rendent le verdict « Doesn't fit » ; les **Warning** et **Info** sont des conseils ("tips"). Error = débordement, chevauchement, profondeur de bureau insuffisante ; Warning = encombrement > seuil, zone libre insuffisante ; Info = confort (décision 8, [decisions.md](decisions.md)).
