@@ -7,6 +7,7 @@
  * convention: `polar` (phi) from +Y, `azimuth` (theta) = atan2(x, z) from +Z.
  */
 import type { StudioConfig, Vec3, ViewName } from "../../core";
+import { framingFor, type ScreenZone, type ViewFraming } from "./framing";
 import { clamp, DEG2RAD, mmToM } from "./units";
 
 export interface Pose {
@@ -53,41 +54,9 @@ export interface CameraLimits {
   readonly keepOut: Box;
 }
 
-/**
- * How a view frames the desk on screen:
- * - `margin`: free space around the desk (1.05 = 5 % of the field on each side);
- * - `bottomInset`: fraction of the screen height kept free at the bottom for the floating
- *   view bar (UX-14: the bar never covers the desk in the default framing);
- * - `lensShift`: the orbit target is drawn above the centre of the screen, at this NDC
- *   height (0 = centre, 1 = top). Seen from the side, the target is on the desk top and the
- *   desk hangs below it: the shift centres the desk in the free area. Seen from above, the
- *   desk is around the target: the shift only clears the view bar. It follows the tilt
- *   (`lensShiftFor`) and is applied to the projection (`PerspectiveCamera.setViewOffset`),
- *   without changing the orbit itself.
- */
-export interface ViewFraming {
-  readonly margin: number;
-  readonly bottomInset: number;
-  readonly lensShift: number;
-}
+// Framing of the views (whole view or free zone between the panels): ./framing.ts.
+export { framingFor, lensShiftFor, type ScreenZone, type ViewFraming } from "./framing";
 
-const FRAMING_MARGIN = 1.05;
-const FRAMING_BOTTOM_INSET = 0.1;
-const SIDE_LENS_SHIFT = 0.3;
-
-/** Lens shift for a tilt: bottom inset when looking straight down, 0.3 from the side. */
-export function lensShiftFor(polar: number): number {
-  const side = Math.sin(clamp(polar, 0, Math.PI / 2));
-  return FRAMING_BOTTOM_INSET + (SIDE_LENS_SHIFT - FRAMING_BOTTOM_INSET) * side;
-}
-
-export function framingFor(polar: number): ViewFraming {
-  return {
-    margin: FRAMING_MARGIN,
-    bottomInset: FRAMING_BOTTOM_INSET,
-    lensShift: lensShiftFor(polar),
-  };
-}
 const EPSILON = 1e-6;
 
 /** Intersection of two boxes; on an axis where they do not overlap, `outer` is kept. */
@@ -257,8 +226,8 @@ const dot = (a: Vec3, b: Vec3) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
 
 /**
  * Smallest distance from `target`, along the direction (polar, azimuth), at which the whole
- * box is inside the free area of the screen described by `framing` (perspective camera,
- * vertical FOV).
+ * box is inside the framing rectangle of the screen, the target being drawn at the framing
+ * centre (perspective camera, vertical FOV). The box is convex: its corners suffice.
  */
 export function fitRadius(
   box: Box,
@@ -270,33 +239,37 @@ export function fitRadius(
   framing: ViewFraming = framingFor(polar),
 ): number {
   const { right, up, back } = screenAxes({ target, radius: 1, polar, azimuth });
-  const tan = Math.tan((fovDeg * DEG2RAD) / 2) / framing.margin;
-  // Visible field above and below the target (lens shift), minus the view bar at the bottom.
-  const tanUp = tan * (1 - framing.lensShift);
-  const tanDown = tan * (1 + framing.lensShift - 2 * framing.bottomInset);
-  const tanX = tan * aspect;
+  const tan = Math.tan((fovDeg * DEG2RAD) / 2);
+  // Visible field on each side of the target, up to the edges of the framing rectangle.
+  const tanUp = tan * (framing.top - framing.centerY);
+  const tanDown = tan * (framing.centerY - framing.bottom);
+  const tanRight = tan * aspect * (framing.right - framing.centerX);
+  const tanLeft = tan * aspect * (framing.centerX - framing.left);
   let radius = 0;
   for (const corner of corners(box)) {
     const rel: Vec3 = [corner[0] - target[0], corner[1] - target[1], corner[2] - target[2]];
+    const lateral = dot(rel, right);
     const vertical = dot(rel, up);
-    const lateral = Math.max(
-      Math.abs(dot(rel, right)) / tanX,
+    const needed = Math.max(
+      lateral >= 0 ? lateral / tanRight : -lateral / tanLeft,
       vertical >= 0 ? vertical / tanUp : -vertical / tanDown,
     );
-    radius = Math.max(radius, dot(rel, back) + lateral);
+    radius = Math.max(radius, dot(rel, back) + needed);
   }
   return radius;
 }
 
 /**
  * Pose of a named view: the catalog pose, moved back if needed so that the whole desk is
- * framed with a margin at this aspect ratio, then clamped to the limits.
+ * framed with a margin at this aspect ratio (in the free `zone` between the panels when one
+ * is measured, UX-8), then clamped to the limits.
  */
 export function viewPose(
   config: StudioConfig,
   view: ViewName,
   aspect: number,
   limits: CameraLimits = cameraLimits(config),
+  zone: ScreenZone | null = null,
 ): Pose {
   const { position, target } = config.camera.views[view];
   const pose = poseFromLookAt(position, target);
@@ -307,6 +280,7 @@ export function viewPose(
     pose.azimuth,
     config.camera.fovDeg,
     aspect,
+    framingFor(pose.polar, zone),
   );
   return clampPose({ ...pose, radius: Math.max(pose.radius, fit) }, limits);
 }
