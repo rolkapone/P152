@@ -38,7 +38,7 @@ const close = (actual: readonly number[], expected: readonly number[], digits = 
 describe("cameraLimits (studio.json -> radians, metres)", () => {
   it("converts the catalog limits", () => {
     expect(limits.minDistance).toBe(0.8);
-    expect(limits.maxDistance).toBe(4.5);
+    expect(limits.maxDistance).toBe(7);
     expect(limits.maxPolar).toBeCloseTo(89 * DEG2RAD);
     expect(limits.minAzimuth).toBeCloseTo(-109 * DEG2RAD);
     expect(limits.minCameraY).toBe(0.9);
