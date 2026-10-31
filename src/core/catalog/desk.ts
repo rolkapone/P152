@@ -59,7 +59,7 @@ export interface DeskChoice {
   readonly id: string;
   readonly catalogId: string;
   readonly presetId: string;
-  /** Name of the catalog entry (`name.en`), e.g. "Desk", "Corner desk". */
+  /** Name of the preset (`name.en`), else of the catalog entry, e.g. "Compact desk". */
   readonly name: string;
   readonly spec: DeskSpec;
 }
@@ -153,7 +153,7 @@ export function deskChoices(catalog: Catalog): readonly DeskChoice[] {
         id: deskChoiceId(catalogId, preset.id),
         catalogId,
         presetId: preset.id,
-        name: type.name.en,
+        name: preset.name?.en ?? type.name.en,
         spec,
       });
     }

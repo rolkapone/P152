@@ -16,11 +16,19 @@
     "legStyle": { "enum": ["post", "frame"], "default": "post" }
   },
   "presets": [
-    { "id": "compact", "params": { "width": 1000, "depth": 600 } },
-    { "id": "basic", "params": { "width": 1200, "depth": 600 } },
-    { "id": "standard", "params": { "width": 1400, "depth": 700 } },
-    { "id": "large", "params": { "width": 1600, "depth": 800 } },
-    { "id": "gaming", "params": { "width": 1800, "depth": 800 } }
+    {
+      "id": "compact",
+      "name": { "en": "Compact desk" },
+      "params": { "width": 1000, "depth": 600 }
+    },
+    { "id": "basic", "name": { "en": "Basic desk" }, "params": { "width": 1200, "depth": 600 } },
+    {
+      "id": "standard",
+      "name": { "en": "Standard desk" },
+      "params": { "width": 1400, "depth": 700 }
+    },
+    { "id": "large", "name": { "en": "Large desk" }, "params": { "width": 1600, "depth": 800 } },
+    { "id": "gaming", "name": { "en": "Gaming desk" }, "params": { "width": 1800, "depth": 800 } }
   ],
   "slots": [
     { "id": "top", "role": "top", "default": "mat.birch" },

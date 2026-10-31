@@ -53,9 +53,14 @@
   "presets": [
     {
       "id": "standard",
+      "name": { "en": "Corner desk" },
       "params": { "width": 1600, "depth": 1400, "armDepth": 600, "wingWidth": 600 }
     },
-    { "id": "large", "params": { "width": 1800, "depth": 1600, "armDepth": 700, "wingWidth": 700 } }
+    {
+      "id": "large",
+      "name": { "en": "Corner desk large" },
+      "params": { "width": 1800, "depth": 1600, "armDepth": 700, "wingWidth": 700 }
+    }
   ],
   "slots": [
     { "id": "top", "role": "top", "default": "mat.birch" },

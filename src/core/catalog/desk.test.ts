@@ -39,14 +39,23 @@ describe("deskChoices (the desk list of US-006)", () => {
   });
 
   it("resolves each preset with the catalog defaults (740 mm high, catalog materials)", () => {
-    for (const { spec, presetId, name } of choices) {
+    for (const { spec, presetId } of choices) {
       expect(spec.presetId).toBe(presetId);
       expect(spec.heightMm).toBe(740);
       expect(spec.thicknessMm).toBe(25);
       expect(spec.materials).toEqual({ top: "mat.birch", legs: "mat.black-metal" });
-      expect(name).toBe(spec.shape === "rect" ? "Desk" : "Corner desk");
       expect(Object.isFrozen(spec)).toBe(true);
     }
+    // Names of the models (preset name of the catalog, technical-artist spec).
+    expect(choices.map((choice) => choice.name)).toEqual([
+      "Compact desk",
+      "Basic desk",
+      "Standard desk",
+      "Large desk",
+      "Gaming desk",
+      "Corner desk",
+      "Corner desk large",
+    ]);
     const large = choices.at(-1)!.spec;
     expect(large).toMatchObject({
       shape: "corner",
@@ -77,6 +86,15 @@ describe("deskChoices (the desk list of US-006)", () => {
       ["desk.rect", broken],
     ]);
     expect(deskChoices({ ...catalog, objectTypes })).toEqual([]);
+  });
+
+  it("names a preset without a name after its catalog entry", () => {
+    const unnamed: ObjectType = {
+      ...type("desk.rect"),
+      presets: [{ id: "plain", params: { width: 1300 } }],
+    };
+    const objectTypes = new Map([["desk.rect", unnamed]]);
+    expect(deskChoices({ ...catalog, objectTypes }).map((choice) => choice.name)).toEqual(["Desk"]);
   });
 });
 

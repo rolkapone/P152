@@ -46,6 +46,21 @@
       "reload": "Reload page"
     }
   },
+  "desk": {
+    "title": "Choose your desk",
+    "help": "Pick the model closest to yours.",
+    "group": "Desk model",
+    "size": "{{width}} × {{depth}} cm",
+    "height": "Height {{height}} cm",
+    "selected": "Selected",
+    "summaryName": "{{name}}, {{width}} × {{depth}} cm",
+    "summarySize": "{{width}} × {{depth}} × {{height}} mm",
+    "summaryCaption": "Width × depth × height",
+    "announce": "{{name}} selected. {{width}} by {{depth}} cm.",
+    "errorTitle": "Desks couldn't load",
+    "errorBody": "Reload the page to try again.",
+    "reload": "Reload page"
+  },
   "shell": {
     "skip": {
       "scene": "Skip to 3D view",

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatCentimetres } from "./format";
+import { formatCentimetres, formatMillimetres } from "./format";
 
 describe("formatCentimetres", () => {
   it("shows millimetres as centimetres with at most one decimal", () => {
@@ -11,5 +11,13 @@ describe("formatCentimetres", () => {
 
   it("follows the language", () => {
     expect(formatCentimetres(705, "fr")).toBe("70,5");
+  });
+});
+
+describe("formatMillimetres", () => {
+  it("shows whole millimetres without grouping (desk summary, UX-8)", () => {
+    expect(formatMillimetres(1400, "en")).toBe("1400");
+    expect(formatMillimetres(740, "en")).toBe("740");
+    expect(formatMillimetres(1800.4, "en")).toBe("1800");
   });
 });

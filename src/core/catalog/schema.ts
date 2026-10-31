@@ -65,6 +65,8 @@ export const ParamDefSchema = z.union([NumericParamSchema, EnumParamSchema]);
 
 const PresetSchema = z.strictObject({
   id: Slug,
+  /** Name of the model shown in the lists (US-006, e.g. "Compact desk"); default: entry name. */
+  name: LocalizedName.optional(),
   params: z.record(Key, EnumValue),
 });
 
