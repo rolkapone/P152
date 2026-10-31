@@ -79,6 +79,20 @@ const setupObject = fc.constantFrom(...objectTypes).chain((type) =>
   }),
 );
 
+/** True if a forbidden key appears at any depth of a JSON tree (own keys, `__proto__` included). */
+function hasForbiddenKey(value: unknown): boolean {
+  if (typeof value !== "object" || value === null) return false;
+  if (Array.isArray(value)) return value.some(hasForbiddenKey);
+  return Object.keys(value).some(
+    (key) => FORBIDDEN_KEYS.has(key) || hasForbiddenKey((value as Record<string, unknown>)[key]),
+  );
+}
+
+/** Extensions free of forbidden keys at every depth (fast-check biases keys towards them). */
+const safeExtensions = fc
+  .dictionary(fc.string({ maxLength: 16 }), fc.jsonValue({ maxDepth: 3 }), { maxKeys: 4 })
+  .filter((extensions) => !hasForbiddenKey(extensions));
+
 /** Valid setups generated from the catalog (unique ids, no mounts). */
 const validSetup = fc.constantFrom(...desks).chain((desk) =>
   fc.record({
@@ -110,13 +124,20 @@ const validSetup = fc.constantFrom(...desks).chain((desk) =>
       depthMarginMm: finite(0, 500),
       keyboardClearanceMm: finite(0, 500),
     }),
-    extensions: fc.dictionary(
-      fc.string({ maxLength: 16 }).filter((k) => !FORBIDDEN_KEYS.has(k)),
-      fc.jsonValue({ maxDepth: 3 }),
-      { maxKeys: 4 },
-    ),
+    extensions: safeExtensions,
   }),
 );
+
+/** Parses a generated valid setup, then checks that serialize -> parse gives the same result. */
+function acceptsAndRoundTrips(doc: { readonly objects: readonly unknown[] }): void {
+  const first = parseSetup(JSON.stringify(doc), catalog);
+  expect(first.ok ? null : first.error).toBeNull();
+  if (!first.ok) return;
+  const again = parseSetup(serializeSetup(first.value), catalog);
+  expect(again).toEqual(first);
+  const value: SetupV1 = first.value;
+  expect(value.objects).toHaveLength(doc.objects.length);
+}
 
 /** Replaces the value at a random path of a JSON tree. */
 function mutateAt(root: unknown, choices: number[], value: unknown): unknown {
@@ -183,17 +204,35 @@ describe("parseSetup fuzzing", () => {
   });
 
   it("accepts every generated valid setup and round-trips serialize -> parse", () => {
+    fc.assert(fc.property(validSetup, acceptsAndRoundTrips), { numRuns: 200 });
+  });
+
+  // Regression: this seed generated the extensions {"":{"":{"prototype":""}}}, rightly rejected
+  // by parseSetup (forbiddenKey); the generator only filtered forbidden keys at the first level.
+  it("generates no nested forbidden key with the seed of a past failure", () => {
+    expect(hasForbiddenKey({ "": { "": { prototype: "" } } })).toBe(true);
+    fc.assert(fc.property(validSetup, acceptsAndRoundTrips), { numRuns: 200, seed: 60940642 });
+  });
+
+  it("rejects a valid setup whose extensions hide a forbidden key at any depth", () => {
     fc.assert(
-      fc.property(validSetup, (doc) => {
-        const first = parseSetup(JSON.stringify(doc), catalog);
-        expect(first.ok ? null : first.error).toBeNull();
-        if (!first.ok) return;
-        const again = parseSetup(serializeSetup(first.value), catalog);
-        expect(again).toEqual(first);
-        const value: SetupV1 = first.value;
-        expect(value.objects).toHaveLength(doc.objects.length);
-      }),
-      { numRuns: 200 },
+      fc.property(
+        validSetup,
+        fc.constantFrom(...FORBIDDEN_KEYS),
+        fc.array(fc.string({ maxLength: 8 }), { minLength: 1, maxLength: 4 }),
+        (doc, key, wrappers) => {
+          const nested = wrappers.reduceRight<unknown>((inner, wrapper) => ({ [wrapper]: inner }), {
+            "p152-marker": "",
+          });
+          const text = JSON.stringify({ ...doc, extensions: nested }).replace(
+            '"p152-marker"',
+            JSON.stringify(key),
+          );
+          const result = parseSetup(text, catalog);
+          expect(result.ok ? null : result.error.code).toBe("forbiddenKey");
+        },
+      ),
+      RUNS,
     );
   });
 });
