@@ -7,11 +7,11 @@
 | Points MVP (Must + Should) | **99** (Must 89, Should 10) ; +1 pt : SEC-03a passe de 1 à 2 pts (correctif CSP React Aria, finding MEDIUM US-004) ; **+3 pts le 2026-10-20 : US-005 passe de 5 à 8 pts** (design natif v0.4, décision 32) |
 | Dont stories sécurité (SEC-01 à SEC-05) | 9 (Must 8, Should 1) |
 | Points « Could » MVP (hors total, bonus) | 9 (US-021, US-023, SEC-06) |
-| Points livrés | **26 / 99 = 26,3 %** (Sprint 1 : US-001 3, US-002 2, US-003 3, SEC-01 3, US-004 5, toutes DONE = 16 ; Sprint 2 : SEC-03a 2, US-005 8, DONE) |
+| Points livrés | **31 / 99 = 31,3 %** (Sprint 1 : US-001 3, US-002 2, US-003 3, SEC-01 3, US-004 5, toutes DONE = 16 ; Sprint 2 : SEC-03a 2, US-005 8, US-006 5, DONE) |
 | Vitesse moyenne | **16 pts/sprint** (1 sprint terminé, 16 pts livrés ; prévision prudente de 15 pts conservée pour le planning) |
-| Sprint en cours | **Sprint 2** (ouvert le 2026-10-20) : SEC-03a 2 (DONE) + US-005 **8** (DONE, PR #14) + US-006 5 + SEC-02 1 = **16 pts engagés** (capacité prudente 15 : dépassement de 1 pt, marge 0 ; SEC-02 peut glisser au Sprint 3) ; après le Sprint 2, livrés prévus 32 / 99 (32,3 %), restants 67 |
-| Sprints restants estimés avant MVP | **6 y compris le Sprint 2** (73 pts restants / 16 = 4,6, arrondi prudent à 6 ; 6 aussi si la vitesse retombe à 15) ; 5 après le Sprint 2 (67 / 16 = 4,2) |
-| Dernière mise à jour | 2026-10-31 (US-005 DONE, PR #14, comptée dans les 26 pts ; SEC-03a DONE, comptée dans les 18 précédents ; voies attribuées au Sprint 2 dans `docs/sprints/sprint-2.md`). Les SHA de commits cités dans ce document sont périmés (historique réécrit) : voir `git log --merges --oneline main` |
+| Sprint en cours | **Sprint 2** (ouvert le 2026-10-20) : SEC-03a 2 (DONE) + US-005 **8** (DONE, PR #14) + US-006 **5** (DONE, PR #16) + SEC-02 1 (IN PROGRESS) = **16 pts engagés** (capacité prudente 15 : dépassement de 1 pt, marge 0 ; SEC-02 peut glisser au Sprint 3) ; après le Sprint 2, livrés prévus 32 / 99 (32,3 %), restants 67 |
+| Sprints restants estimés avant MVP | **6 y compris le Sprint 2** (68 pts restants à ce jour, dont SEC-02 1 pt ; 67 / 16 = 4,2, arrondi prudent ; 6 aussi si la vitesse retombe à 15) ; 5 après le Sprint 2 (67 / 16 = 4,2) |
+| Dernière mise à jour | 2026-10-31 (US-006 DONE, PR #16, comptée dans les 31 pts ; US-005 DONE, PR #14 ; SEC-03a DONE, comptée dans les 18 précédents ; voies attribuées au Sprint 2 dans `docs/sprints/sprint-2.md`). Les SHA de commits cités dans ce document sont périmés (historique réécrit) : voir `git log --merges --oneline main` |
 
 Détail du recalcul : 83 pts (kickoff) + SEC-01 (3) + SEC-02 (1) + SEC-03a (2 depuis la fin du Sprint 1) + SEC-03b (1) + SEC-04 (1) + SEC-05 (1) + US-024 (2, réglages d'alertes) + US-025 (2, Help et préférences d'affichage) = 96, puis +3 (US-005 5 → 8, restylage natif v0.4) = **99**. Les autres éléments issus de US-004 (dette, mineurs QA) sont des critères ajoutés à des stories existantes ou à SEC-06 (Could), sans point supplémentaire ; à réestimer au planning du Sprint 2 s'ils pèsent.
 Hypothèse : le premier déploiement public n'a lieu qu'à la fin du MVP (SEC-03a avant le premier push, SEC-03b avant ce déploiement, SEC-05 juste avant la release).
@@ -99,6 +99,7 @@ Critères d'acceptation :
 Notes techniques / dépendances : devops + secdevops. Dépend de US-001 (CI exécutée au moins une fois). Le contrôle `dist/_headers` de `build-hardening` **reste bloquant** (décision secdevops, scan US-001) : il n'y a pas d'avertissement toléré. La génération de `public/_headers` est donc livrée par SEC-03a **avant le premier push** (Sprint 2, en tête). Les findings LOW du scan US-001 sont regroupés dans SEC-06.
 
 ### SEC-02 — Durcissement du dépôt GitHub public  [Must | 1 pt | voie RENFORCÉE]
+**État au 2026-10-31 : IN PROGRESS** (Sprint 2 ; branche `feature/SEC-02-durcissement-depot` à créer). `SECURITY.md` et `CODEOWNERS` absents de `main`. Les réglages du dépôt et du compte ne sont appliqués qu'avec l'accord écrit du PO.
 En tant qu'équipe, je veux un dépôt public durci afin de réduire le risque de compromission de la chaîne de production.
 Critères d'acceptation :
 - [ ] MFA actif sur les comptes ayant un accès en écriture.
@@ -272,7 +273,7 @@ Notes techniques / dépendances : ux-designer, ui-designer, developer. Dépend d
 
 ### Dette et suivi issus de US-005 (fin de story, 2026-10-31)
 - **Fait en mode direct, hors sprint** : tokens.css en mouvement réduit `0s !important`, retrait de `:where(.pane *)`, fonts.css en `url()` seul, boutons de la carte d'erreur en pleine largeur. Rien à suivre.
-- **Fait (suivi du Sprint 2, marge)** : fuzz de `parseSetup` stabilisé (graine fast-check globale, générateur sans `__proto__`) ; 10 passages de `pnpm check` à confirmer par le developer.
+- **Partiel, à refaire (rouvert le 2026-10-31 par la revue sécurité de US-006)** : fuzz de `parseSetup` : graine fast-check globale et générateur sans `__proto__` au premier niveau seulement. **Le test n'est PAS stabilisé** : contre-exemple `extensions.{"".{"".prototype}}` (graine 60940642). Le parseur est correct ; le défaut est dans le générateur. Correctif : filtrer la valeur entière (`fc.jsonValue({ maxDepth: 3 }).filter(...)`), graine fixe, 10 passages `pnpm check` (tâche de marge n° 1 du Sprint 2, developer).
 - **UX-7 à reformuler** (ux-designer, avant US-006) : le dock suit la zone libre à l'ouverture d'un volet. À arbitrer avec UX-21 (barre décentrée de 124 px quand le volet gauche est replié : accepté par la QA et le contrôle design).
 - **Règle de lint `waitForTimeout`** (SEC-06) : variantes calculées, alias et déstructuration non couverts.
 - **Timeouts de 5 s des tests unitaires lourds sous charge** (SEC-06, developer).
@@ -284,38 +285,50 @@ Notes techniques / dépendances : ux-designer, ui-designer, developer. Dépend d
 ## Epic C — Bureau
 
 ### US-006 — Choisir un bureau dans un catalogue  [UI][3D] [Must | 5 pts | voie STANDARD]
-> **Avant tout code (2026-10-31)** : (1) **rebaser `feature/US-006-choix-bureau` sur `main`** (branche antérieure à US-005 ; developer). (2) **Bloquant technique (risque R11)** : les bureaux jusqu'à 180×160 demandent environ 8,2 m de distance à 1024 px, alors que le studio limite à environ 8 m (mur du fond) ; arbitrage graphics-engineer + technical-artist en début de story, avant T2b.
+> **DONE 2026-10-31** (PR #16, 5 pts, voie STANDARD, 0 cycle de correction ; revue APPROVE, design ECARTS MINEURS acceptés, QA PASS, secdevops PASS ; ADR-3D-11 accepté, R11 levé). **Réserve** : `--repeat-each=10` et la référence CI non faits (2 runs, 244/244) : critère de sortie du Sprint 2 non rempli, voir Questions n° 3 du sprint. Mobile réel (30 FPS) non mesuré : US-021 / US-022.
 En tant qu'utilisateur, je veux choisir un bureau parmi des modèles aux dimensions réelles afin de partir de mon vrai mobilier.
 Critères d'acceptation :
-- [ ] Étant donné le panneau gauche, alors un onglet **"Desk"** (à côté de "Objects", contrôle segmenté, wireframe W3) liste **7 bureaux** du catalogue (`desk.json` v2 et `desk-corner.json`) : rectangulaires 100×60, 120×60, 140×70, 160×80, 180×80 cm ; d'angle 160×140 et 180×160 cm (**orientés à droite pour ce sprint**), sous forme de **lignes** d'une colonne avec vignette, « L × P cm » et nom (cm dans la ligne, cm et mm dans le résumé).
-- [ ] Quand je clique une ligne, alors le bureau est appliqué immédiatement (ligne active : contour accent 2 px + coche, pas la couleur seule), il apparaît à l'échelle réelle (1 m = 1 unité) et le choix est annoncé aux lecteurs d'écran. Au clavier, **les flèches appliquent directement le bureau** (pas d'Entrée de validation).
-- [ ] Quand je change de bureau, alors les objets déjà posés sont conservés (aucun supprimé ni déplacé ; positions relatives au centre du bureau), les alertes recalculées (point d'appel seulement) et une erreur d'alerte remonte si un objet déborde (règles avec US-014 à US-016 ; test unitaire à ce stade).
-- [ ] Le bureau a un plateau et des pieds lisibles ; hauteur standard 720-750 mm par défaut ; bureau par défaut 140×70. Bureau d'angle : générateur de bureau en L (graphics-engineer), empreinte non rectangulaire connue du catalogue.
-- [ ] Bornes du catalogue (décision PO 30) : rectangulaire largeur 800–2400, profondeur 500–1000, hauteur 600–1300 mm ; angle 1200–2400 × 1000–2000 mm. Le catalogue est validé par le schéma (`min ≤ défaut ≤ max`) et **le test « a catalog without any desk » de `validate.test.ts` est corrigé** par le developer (les données desk.json v2 et desk-corner.json, commit cd27e44 de la branche, le font échouer).
-- [ ] **Ombre de contact allégée** (décision PO 29, ex-marge) : opacité 0,24 ; empreinte = bureau − 200×140 mm, **dérivée du bureau choisi** (pas de valeur fixe) ; le keep-out de la caméra est aussi dérivé du bureau choisi (graphics-engineer).
-- [ ] Aucun « Custom size » (US-007), aucune modale (US-020), aucun champ de saisie ni bouton mort n'est présent dans l'onglet à US-006.
-- [ ] *(design v0.4, décision PO 32 ; `design-system.md` §16, maquette `US-006.html`)* **La liste des bureaux est un groupe unique avec filets de séparation** (écart UX validé) : lignes sans cartes séparées ni espacement de 8 px entre elles ; **ligne active = coche** (plus de contour accent 2 px). UX-1 (espace ≥ 8 px entre lignes), UX-6 (contour 2 px) et UX-13 à adapter en conséquence : hauteur de ligne ≥ 56 px conservée, filet visible ≥ 3:1 non requis (décoratif), état actif non porté par la couleur seule.
-- [ ] **Critères UX testables (ux-designer, `docs/design/ux/stories/US-006.md` §10, UX-1 à UX-17)** :
-  - UX-1 Titre « Choose your desk », aide, 7 lignes ; chaque ligne : vignette, « L × P cm », nom ; hauteur ≥ 56 px, espace ≥ 8 px.
-  - UX-2 `role="radiogroup"` nommé « Desk model » ; exactement une ligne `aria-checked="true"` en permanence ; un seul arrêt de Tab.
-  - UX-3 Au chargement 140×70 actif ; scène et résumé à 140×70 cm (1400×700×740 mm).
-  - UX-4 Clic = application immédiate, sans bouton ni confirmation ; recliquer l'actif ne change rien et n'annonce rien.
-  - UX-5 Flèches : déplacent le focus et appliquent ; Début/Fin vont à la première/dernière ligne ; Espace applique ; le focus reste sur la ligne.
-  - UX-6 Ligne active : contour accent 2 px, coche, fond `accent-subtle`, nom en 600, contour ≥ 3:1 clair et sombre ; anneau de focus 3 px visible sur la ligne active.
-  - UX-7 Annonce `aria-live="polite"` « {{name}} selected. {{width}} by {{depth}} cm. » une seule fois, 400 ms après le dernier changement (rafale de 5 flèches comprise) ; aucune annonce si l'actif est recliqué.
-  - UX-8 Résumé « Selected » : nom, cm, mm, légende « Width × depth × height », mis à jour avec le choix.
-  - UX-9 Vignettes `aria-hidden`, **dessinées en SVG par l'UI** à l'échelle commune ; l'angle se reconnaît à sa forme en L sans la couleur.
-  - UX-10 Dimensions de la scène = dimensions de la ligne (1 mm) ; bureau entier visible dans la zone libre avec marge ≥ 24 px après chaque changement à 1366×768 ; orientation conservée ; Top/Front restent actifs.
-  - UX-11 Transition de cadrage 480 ms, interruptible ; instantanée sous `prefers-reduced-motion`.
-  - UX-12 Liste utilisable pendant le chargement, après `failed` et sans WebGL ; le choix survit à "Try again" ; aucune exception console.
-  - UX-13 À 1366×768, 7 bureaux et le résumé : la liste défile dans le panneau si besoin sans défilement horizontal (la hauteur de 6 lignes sans défilement de l'UX d'origine est à réévaluer avec 7 lignes) ; à 200 % et 320 px (tiroir), aucun texte rogné.
-  - UX-14 Texte ≥ 14 px ; nom accessible = texte visible ; description = hauteur (« Height 74 cm ») ; cibles ≥ 32 px ; verre ≥ 86 % avec repli opaque.
-  - UX-15 Aucun « Custom size », « Use this desk », champ de saisie ou bouton mort.
-  - UX-16 Changement avec objets (test unitaire) : aucun objet supprimé, déplacé ni confirmé ; positions relatives au centre ; recalcul des alertes déclenché une fois par changement.
-  - UX-17 Textes du §9 de l'UX reproduits depuis `src/locales/en/` ; aucun « preset », « catalog », « mesh », « orbit », « pan », « camera » dans les textes visibles ou annoncés.
+- [x] Étant donné le panneau gauche, alors un onglet **"Desk"** (à côté de "Objects", contrôle segmenté, wireframe W3) liste **7 bureaux** du catalogue (`desk.json` v2 et `desk-corner.json`) : rectangulaires 100×60, 120×60, 140×70, 160×80, 180×80 cm ; d'angle 160×140 et 180×160 cm (**orientés à droite pour ce sprint**), sous forme de **lignes** d'une colonne avec vignette, « L × P cm » et nom (cm dans la ligne, cm et mm dans le résumé).
+- [x] Quand je clique une ligne, alors le bureau est appliqué immédiatement (ligne active : coche + teinte d'accent, contour 2 px remplacé par la coche en design v0.4), il apparaît à l'échelle réelle (1 m = 1 unité) et le choix est annoncé aux lecteurs d'écran. Au clavier, **les flèches appliquent directement le bureau** (pas d'Entrée de validation).
+- [x] Quand je change de bureau, alors les objets déjà posés sont conservés (aucun supprimé ni déplacé ; positions relatives au centre du bureau), les alertes recalculées (point d'appel seulement) et une erreur d'alerte remonte si un objet déborde (règles avec US-014 à US-016 ; test unitaire à ce stade).
+- [x] Le bureau a un plateau et des pieds lisibles ; hauteur standard 720-750 mm par défaut (plateau 740 mm) ; bureau par défaut 140×70. Bureau d'angle : générateur de bureau en L (graphics-engineer), empreinte non rectangulaire connue du catalogue.
+- [x] Bornes du catalogue (décision PO 30) : rectangulaire largeur 800–2400, profondeur 500–1000, hauteur 600–1300 mm ; angle 1200–2400 × 1000–2000 mm. Le catalogue est validé par le schéma (`min ≤ défaut ≤ max`) et **le test « a catalog without any desk » de `validate.test.ts` est corrigé** (developer).
+- [x] **Ombre de contact allégée** (décision PO 29, ex-marge) : opacité 0,24 ; empreinte = bureau − 200×140 mm, **dérivée du bureau choisi** (pas de valeur fixe) ; le keep-out de la caméra est aussi dérivé du bureau choisi (graphics-engineer).
+- [x] Aucun « Custom size » (US-007), aucune modale (US-020), aucun champ de saisie ni bouton mort n'est présent dans l'onglet à US-006.
+- [x] *(design v0.4, décision PO 32 ; `design-system.md` §16, maquette `US-006.html`)* **La liste des bureaux est un groupe unique avec filets de séparation** (écart UX validé) : lignes sans cartes séparées ni espacement de 8 px entre elles ; **ligne active = coche** (plus de contour accent 2 px). UX-1, UX-6 et UX-13 adaptés en conséquence : hauteur de ligne ≥ 56 px conservée, filet décoratif, état actif non porté par la couleur seule.
+- [x] **Critères UX testables (ux-designer, `docs/design/ux/stories/US-006.md` §10, UX-1 à UX-17)**, vérifiés par QA (`docs/qa/US-006.md`) et revue, ou par tests unitaires (UX-16) :
+  - [x] UX-1 Titre « Choose your desk », aide, 7 lignes ; chaque ligne : vignette, « L × P cm », nom ; hauteur ≥ 56 px, espace ≥ 8 px.
+  - [x] UX-2 `role="radiogroup"` nommé « Desk model » ; exactement une ligne `aria-checked="true"` en permanence ; un seul arrêt de Tab.
+  - [x] UX-3 Au chargement 140×70 actif ; scène et résumé à 140×70 cm (1400×700×740 mm).
+  - [x] UX-4 Clic = application immédiate, sans bouton ni confirmation ; recliquer l'actif ne change rien et n'annonce rien.
+  - [x] UX-5 Flèches : déplacent le focus et appliquent ; Début/Fin vont à la première/dernière ligne ; Espace applique ; le focus reste sur la ligne.
+  - [x] UX-6 Ligne active : teinte `accent-subtle`, coche (contour 2 px remplacé par la coche, écart v0.4), nom en 600 ; anneau de focus 3 px visible sur la ligne active.
+  - [x] UX-7 Annonce `aria-live="polite"` « {{name}} selected. {{width}} by {{depth}} cm. » une seule fois, 400 ms après le dernier changement (rafale de 5 flèches comprise) ; aucune annonce si l'actif est recliqué.
+  - [x] UX-8 Résumé « Selected » : nom, cm, mm, légende « Width × depth × height », mis à jour avec le choix.
+  - [x] UX-9 Vignettes `aria-hidden`, **dessinées en SVG par l'UI** à l'échelle commune ; l'angle se reconnaît à sa forme en L sans la couleur.
+  - [x] UX-10 Dimensions de la scène = dimensions de la ligne (1 mm) ; bureau entier visible dans la zone libre avec marge ≥ 24 px après chaque changement à 1366×768 ; orientation conservée ; Top/Front restent actifs.
+  - [x] UX-11 Transition de cadrage 480 ms, interruptible ; instantanée sous `prefers-reduced-motion`.
+  - [x] UX-12 Liste utilisable pendant le chargement, après `failed` et sans WebGL ; le choix survit à "Try again" ; aucune exception console.
+  - [x] UX-13 À 1366×768, 7 bureaux et le résumé : la liste défile dans le panneau si besoin sans défilement horizontal ; à 200 % et 320 px (tiroir), aucun texte rogné. *(Mineur ouvert : « cm » passe à la ligne dans la colonne de 235 px, voir suivis.)*
+  - [x] UX-14 Texte ≥ 14 px ; nom accessible = texte visible ; description = hauteur (« Height 74 cm ») ; cibles ≥ 32 px ; verre ≥ 86 % avec repli opaque.
+  - [x] UX-15 Aucun « Custom size », « Use this desk », champ de saisie ni bouton mort.
+  - [x] UX-16 Changement avec objets (test unitaire) : aucun objet supprimé, déplacé ni confirmé ; positions relatives au centre ; recalcul des alertes déclenché une fois par changement.
+  - [x] UX-17 Textes du §9 de l'UX reproduits depuis `src/locales/en/` ; aucun « preset », « catalog », « mesh », « orbit », « pan », « camera » dans les textes visibles ou annoncés. *(Exception : le nom du bureau est lu en `name.en` du catalogue, voir suivis.)*
 - [ ] Au tout premier lancement, le même sélecteur est proposé en modale ("Choose your desk", bouton "Use this desk") si la story US-020 est livrée ; sinon le Studio s'ouvre sur le bureau par défaut (140×70 cm).
 Notes techniques / dépendances : technical-artist (catalogue commité sur `feature/US-006-choix-bureau`, cd27e44 : `desk.json` v2, `desk-corner.json`), graphics-engineer (scène, générateur du bureau en L, ombre et keep-out caméra dérivés du bureau), developer (onglet, état, correction de `validate.test.ts`). Dépend de US-004, US-005.
 Références de design US-006 : UX `docs/design/ux/stories/US-006.md` ; maquette `docs/design/ui/maquettes/US-006.html` ; `docs/design/ui/design-system.md` §16 ; aperçu 3D `docs/design/3d/apercu-bureaux/` et spécification `docs/design/3d/US-006-bureaux.md`. Wireframe W3 (mis à jour : lignes, pas cartes). À réestimer en cours de sprint si le bureau en L pèse (risque R4).
+- [ ] *(critère du Sprint 2, réserve QA)* `--repeat-each=10` et référence CI en conteneur limité non faits (2 runs, 244/244) : à trancher avec Questions n° 3.
+
+**Dette et suivi issus de US-006 (fin de story, 2026-10-31)** — rattachements proposés par le scrum-master, à valider au planning :
+- **Marge n° 1 (developer)** : `parseSetup.fuzz` non stabilisé (voir « Dette et suivi issus de US-005 ») ; contre-exemple `extensions.{"".{"".prototype}}`, graine 60940642 ; le parseur est correct, le générateur filtre au premier niveau seulement (LOW #1 secdevops).
+- **Repli de `crypto.randomUUID`** (`src/app/App.tsx:42`, secure context uniquement ; LOW #2 secdevops) : TypeError en HTTP sur IP du LAN (test smartphone). Repli `crypto.getRandomValues` ou test ; rattachement proposé : SEC-06 (developer).
+- **Nom de catalogue lu en `name.en` seulement** (`src/core/catalog/desk.ts`, `deskChoices`) : exception à i18n (texte de catalogue, sans clé), à consigner par ADR ou décision ; reprise avec une 2e langue (option i18n).
+- **Test négatif pour `preset.name`** (`src/core/catalog/schema.ts:69`) : vide, 81 caractères, clé de langue en trop ; rattachement proposé : SEC-06.
+- **`deskSpec` compare un sous-ensemble de params** (`desk.ts`) : à US-007, un 140×70 de hauteur différente resterait « Standard desk » ; rattaché à US-007.
+- **« cm » passe à la ligne** dans la colonne de 235 px (1366 et 1024 px : « 160 × 140 cm », « 180 × 160 cm », « Corner desk large ») : mineur QA, ui-designer ; rattachement proposé : marge ou US-007.
+- **INFO (R4)** : le `Text` du catalogue accepte les caractères de contrôle ; à durcir avant tout catalogue ouvert.
+- **Revue, non bloquants, sans suivi jusqu'ici** : `sameSetupDesk` (`src/core/commands/desk.ts`) compare des params littéraux (normaliser avant de comparer : US-019 / US-021) ; `clampPoseInto` (`src/render/math/camera.ts`) sans garde explicite si le rayon permis < `minDistance` (inatteignable aujourd'hui ; avec US-012 ou US-017) ; `connectSceneDesk()` (`App.tsx:23`) abonné au niveau du module sans désabonnement (double abonnement HMR, dev seulement ; SEC-06).
+- **Mesures à prévoir (US-022 / US-021)** : FPS mobile réel (30 FPS non mesuré), Firefox, un à-coup isolé à 33,3 ms (light-1366, bureau 180×160, non reproduit) ; `--repeat-each=10` (voir ci-dessus).
 
 ### US-007 — Dimensions personnalisées du bureau  [UI] [Should | 3 pts]
 En tant qu'utilisateur, je veux saisir largeur, profondeur et hauteur de mon bureau afin de refléter exactement le mien.
