@@ -64,3 +64,9 @@ Préférer `gh pr merge <n> --merge --admin` (bypass `pull_request`) à la désa
 
 ## Accords du PO (2026-10-31)
 Réglages appliqués hors ruleset, bypass Admin `pull_request`, exception minimatch (voir `exceptions.md`), sans `delete_branch_on_merge`, licence reportée, MFA confirmée. Ruleset : après correction du test de fuzz.
+
+## Application (2026-10-31)
+- PR #18 mergée (CI verte, `sha_pinning_required` n'a refusé aucune action).
+- Ruleset `main` (id 26280126) créé avec le JSON ci-dessus, `code_scanning` accepté. Le mode `evaluate` est refusé par le plan (Enterprise) : créé `disabled`, T5 jouée, puis passé `active`.
+- T5 (PR #19, fermée sans merge, branche supprimée) : faux secret `github-pat` bloqué par gitleaks ; lodash 4.17.20 bloqué par `pnpm audit` ; `__p152test` bloqué par `check:bundle` ; injection de template bloquée par zizmor. Ruleset actif : PR #19 en `BLOCKED`.
+- État final : ruleset `active`, bypass Admin `pull_request` seulement.
