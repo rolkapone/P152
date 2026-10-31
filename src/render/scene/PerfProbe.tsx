@@ -12,15 +12,12 @@
  *   (an L-shaped desk is not its bounding box);
  * - `geometries`, `textures`: GPU memory counted after the last rendered frame;
  * - `deskSize()`: size of the desk drawn (mm, bounding box of top and legs, US-006 UX-10);
- * - `viewDirection()`: unit direction of the camera (orientation kept after a change of desk);
- * - `setDesk(desk)`: applies a desk through the state store, as the Desk panel does (the panel
- *   is UI, developer): lets the scene be tested on its own.
+ * - `viewDirection()`: unit direction of the camera (orientation kept after a change of desk).
+ * The desk is changed through the Desk panel in the E2E tests (US-006), never through here.
  */
 import { addAfterEffect, useThree } from "@react-three/fiber";
 import { useEffect } from "react";
 import { Box3, Vector3, type Mesh } from "three";
-import type { DeskSpec } from "../../core";
-import { useSceneDesk } from "../../state";
 import { requestShadowUpdate } from "./imperative";
 
 export interface PerfMeasure {
@@ -50,7 +47,6 @@ export interface P152Perf {
   deskRect(): ScreenRect | null;
   deskSize(): { width: number; depth: number; height: number } | null;
   viewDirection(): [number, number, number];
-  setDesk(desk: DeskSpec): boolean;
 }
 
 declare global {
@@ -155,8 +151,6 @@ export default function PerfProbe() {
     const viewDirection = (): [number, number, number] =>
       camera.getWorldDirection(new Vector3()).toArray();
 
-    const setDesk = (desk: DeskSpec) => useSceneDesk.getState().setDesk(desk);
-
     window.__p152perf = {
       get drawCalls() {
         return drawCalls;
@@ -180,7 +174,6 @@ export default function PerfProbe() {
       deskRect,
       deskSize,
       viewDirection,
-      setDesk,
     };
     // The probe arrives after the first frames: render one full frame (shadow pass included).
     requestShadowUpdate(gl);

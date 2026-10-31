@@ -163,7 +163,7 @@ test("reflows at 320 px: no horizontal scroll, verdict and toggles fully visible
   await expect(page.getByRole("banner").getByRole("status")).toHaveText("Nothing to check yet");
 });
 
-test("Tab order: skip links, toggles, tab, its panel, 3D view, view bar, tip (UX-4, UX-5)", async ({
+test("Tab order: skip links, toggles, tab, the desk list, 3D view, view bar, tip (UX-4, UX-5)", async ({
   page,
 }) => {
   await page.goto("/");
@@ -176,6 +176,7 @@ test("Tab order: skip links, toggles, tab, its panel, 3D view, view bar, tip (UX
         const active = document.activeElement as HTMLElement | null;
         const label = active?.getAttribute("aria-label");
         if (label) return label.split(".")[0] ?? label;
+        if (active instanceof HTMLInputElement) return active.type;
         return active?.getAttribute("role") ?? active?.textContent?.trim() ?? "";
       }),
     );
@@ -186,7 +187,7 @@ test("Tab order: skip links, toggles, tab, its panel, 3D view, view bar, tip (UX
     "Desk and objects panel",
     "Properties and alerts panel",
     "tab",
-    "tabpanel",
+    "radio", // the desk list of the Desk tab: one Tab stop (US-006 UX-2)
     "3D view of your desk",
     "Reset view",
     "Top",
