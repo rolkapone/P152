@@ -4,21 +4,24 @@
  */
 import { addAfterEffect, useThree } from "@react-three/fiber";
 import { useEffect } from "react";
-import type { StudioConfig } from "../../core";
+import type { DeskSpec } from "../../core";
 import { useSceneView } from "../../state";
 
-export function Lifecycle({ config }: { readonly config: StudioConfig }) {
+export function Lifecycle({ desk }: { readonly desk: DeskSpec }) {
   const gl = useThree((state) => state.gl);
 
+  // Size of the desk shown, for the announcements ("3D view ready. Desk 140 by 70 cm.").
   useEffect(() => {
-    const store = useSceneView.getState();
-    store.setDeskSize({ width: config.desk.widthMm, depth: config.desk.depthMm });
+    useSceneView.getState().setDeskSize({ width: desk.widthMm, depth: desk.depthMm });
+  }, [desk]);
+
+  useEffect(() => {
     const stop = addAfterEffect(() => {
       stop();
       useSceneView.getState().setStatus("ready");
     });
     return stop;
-  }, [config]);
+  }, []);
 
   useEffect(() => {
     const canvas = gl.domElement;

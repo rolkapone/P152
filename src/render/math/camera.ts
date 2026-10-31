@@ -415,6 +415,39 @@ export function viewPose(
   return clampPose({ ...pose, radius: Math.max(pose.radius, fit) }, limits);
 }
 
+/**
+ * Pose after a change of desk (US-006 UX-10): the orientation of `current` (tilt and angle)
+ * is kept; the target goes back to the target of `view` (the last view command, Reset when the
+ * view was moved since) and the distance frames the whole new desk in the free `zone`, never
+ * closer than the catalog distance of that view. Then clamped to the limits.
+ */
+export function reframePose(
+  config: StudioConfig,
+  current: Pose,
+  view: ViewName,
+  aspect: number,
+  limits: CameraLimits,
+  zone: ScreenZone | null,
+  desk: DeskVolume,
+): Pose {
+  const { position, target } = config.camera.views[view];
+  const base = poseFromLookAt(position, target);
+  const { polar, azimuth } = current;
+  const fit = fitRadius(
+    desk.points,
+    base.target,
+    polar,
+    azimuth,
+    config.camera.fovDeg,
+    aspect,
+    framingFor(polar, zone),
+  );
+  return clampPose(
+    { target: base.target, polar, azimuth, radius: Math.max(base.radius, fit) },
+    limits,
+  );
+}
+
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 
 /**

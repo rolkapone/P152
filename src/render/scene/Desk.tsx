@@ -16,9 +16,13 @@ import {
   PlaneGeometry,
 } from "three";
 import type { DeskSpec, Material, StudioConfig } from "../../core";
-import { CONTACT_CORE, contactShadowPixels } from "../math/contactShadow";
+import {
+  CONTACT_CORE,
+  contactShadowPixels,
+  deskContactFootprints,
+  type ContactFootprint,
+} from "../math/contactShadow";
 import { deskLayout, type DeskLayout } from "../math/deskLayout";
-import { mmToM } from "../math/units";
 import { buildDeskGeometries } from "./deskGeometry";
 import { requestShadowUpdate } from "./imperative";
 import { createMaterial } from "./materials";
@@ -32,16 +36,12 @@ function useSlotMaterial(materials: ReadonlyMap<string, Material>, id: string | 
   return material;
 }
 
-interface ContactPlane {
-  readonly x: number;
+interface ContactPlane extends ContactFootprint {
   readonly y: number;
-  readonly z: number;
-  readonly width: number;
-  readonly depth: number;
 }
 
-function ContactShadows({ config, layout }: { config: StudioConfig; layout: DeskLayout }) {
-  const { opacity, deskFootprintMm, liftY } = config.lighting.contactShadow;
+/** Gradient texture and material shared by every contact plane (built once per opacity). */
+function useContactMaterial(opacity: number): MeshBasicMaterial {
   const resources = useMemo(() => {
     const size = 128;
     const texture = new DataTexture(contactShadowPixels(size), size, size);
@@ -57,15 +57,32 @@ function ContactShadows({ config, layout }: { config: StudioConfig; layout: Desk
       opacity,
       fog: false,
     });
+    return { texture, material };
+  }, [opacity]);
+  useEffect(
+    () => () => {
+      resources.material.dispose();
+      resources.texture.dispose();
+    },
+    [resources],
+  );
+  return resources.material;
+}
+
+interface ContactShadowsProps {
+  readonly config: StudioConfig;
+  readonly desk: DeskSpec;
+  readonly layout: DeskLayout;
+}
+
+/** Desk planes derived from the desk shown (US-006) and one plane per foot: 1 draw call. */
+function ContactShadows({ config, desk, layout }: ContactShadowsProps) {
+  const { opacity, deskInsetMm, liftY } = config.lighting.contactShadow;
+  const material = useContactMaterial(opacity);
+  const resources = useMemo(() => {
     const geometry = new PlaneGeometry(1, 1).rotateX(-Math.PI / 2);
     const planes: ContactPlane[] = [
-      {
-        x: 0,
-        y: liftY,
-        z: 0,
-        width: mmToM(deskFootprintMm[0]),
-        depth: mmToM(deskFootprintMm[1]),
-      },
+      ...deskContactFootprints(desk, deskInsetMm).map((plane) => ({ ...plane, y: liftY })),
       ...layout.feet.map((foot) => ({
         x: foot.center[0],
         y: liftY * 1.5,
@@ -85,14 +102,12 @@ function ContactShadows({ config, layout }: { config: StudioConfig; layout: Desk
     });
     mesh.renderOrder = 1;
     mesh.computeBoundingSphere();
-    return { texture, material, geometry, mesh };
-  }, [opacity, deskFootprintMm, liftY, layout]);
+    return { geometry, mesh };
+  }, [material, desk, deskInsetMm, liftY, layout]);
   useEffect(
     () => () => {
       resources.mesh.dispose();
       resources.geometry.dispose();
-      resources.material.dispose();
-      resources.texture.dispose();
     },
     [resources],
   );
@@ -141,7 +156,7 @@ export function Desk({ config, desk, materials }: DeskProps) {
           receiveShadow
         />
       )}
-      <ContactShadows config={config} layout={layout} />
+      <ContactShadows config={config} desk={desk} layout={layout} />
     </group>
   );
 }

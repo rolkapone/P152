@@ -1,7 +1,15 @@
 import { PerspectiveCamera, Vector3 } from "three";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import deskCorner from "../../../assets/catalog/object-types/desk-corner.json";
+import deskRectType from "../../../assets/catalog/object-types/desk.json";
 import studio from "../../../assets/catalog/scene/studio.json";
-import { StudioSceneSchema, toStudioConfig } from "../../core";
+import {
+  deskSpec,
+  ObjectTypeSchema,
+  StudioSceneSchema,
+  toStudioConfig,
+  type DeskSpec,
+} from "../../core";
 import {
   cameraLimits,
   isInside,
@@ -10,6 +18,7 @@ import {
   posesEqual,
   viewPose,
 } from "../math/camera";
+import { deskVolumeOf } from "../math/deskLayout";
 import type { ScreenZone } from "../math/framing";
 import { DEG2RAD } from "../math/units";
 import { stepFor, ViewRig } from "./viewRig";
@@ -346,5 +355,105 @@ describe("ViewRig in the free zone (US-005 UX-8)", () => {
     expect(centreX()).toBeLessThan(0);
     for (let i = 0; i < 4; i++) advance(120);
     expect(centreX()).toBeCloseTo(0, 6);
+  });
+});
+
+describe("ViewRig: change of desk (US-006 UX-10, UX-11)", () => {
+  const corner = ObjectTypeSchema.parse(deskCorner);
+  const rect = ObjectTypeSchema.parse(deskRectType);
+  const LARGE_L = deskSpec(corner, { width: 1800, depth: 1600, armDepth: 700, wingWidth: 700 })!;
+  const COMPACT = deskSpec(rect, { width: 1000, depth: 600 })!;
+
+  /** Screen rectangle of the corners of a desk outline (floor and top), CSS px of STUDIO. */
+  function outlineRect(camera: PerspectiveCamera, desk: DeskSpec) {
+    camera.updateMatrixWorld();
+    const rect = { left: Infinity, right: -Infinity, top: Infinity, bottom: -Infinity };
+    for (const [x, y, z] of deskVolumeOf(desk).points) {
+      const point = new Vector3(x, y, z).project(camera);
+      const px = ((point.x + 1) / 2) * STUDIO.width;
+      const py = ((1 - point.y) / 2) * STUDIO.height;
+      rect.left = Math.min(rect.left, px);
+      rect.right = Math.max(rect.right, px);
+      rect.top = Math.min(rect.top, py);
+      rect.bottom = Math.max(rect.bottom, py);
+    }
+    return rect;
+  }
+
+  it("keeps the orientation and frames the whole new desk in the free zone", () => {
+    const { rig, camera } = makeRig(true, () => STUDIO);
+    rig.run({ type: "turn", direction: "left" });
+    rig.run({ type: "turn", direction: "up" });
+    rig.frame(0.016);
+    const turned = rig.endPose();
+    for (const desk of [LARGE_L, COMPACT, deskSpec(corner, { orientation: "left" })!]) {
+      rig.setDesk(desk);
+      rig.frame(0.016);
+      const pose = rig.endPose();
+      expect(pose.polar).toBeCloseTo(turned.polar, 9);
+      expect(pose.azimuth).toBeCloseTo(turned.azimuth, 9);
+      const rect = outlineRect(camera, desk);
+      expect(rect.left).toBeGreaterThanOrEqual(STUDIO.left + 24);
+      expect(rect.right).toBeLessThanOrEqual(STUDIO.width - STUDIO.right - 24);
+      expect(rect.top).toBeGreaterThanOrEqual(STUDIO.top + 24);
+      expect(rect.bottom).toBeLessThanOrEqual(STUDIO.height * 0.9 - 24);
+    }
+  });
+
+  it("derives the keep-out box and the zoom-out limit from the desk", () => {
+    const { rig } = makeRig(true, () => STUDIO);
+    rig.setDesk(LARGE_L);
+    expect(rig.limits.keepOut.min[0]).toBeCloseTo(-1.0, 9);
+    expect(rig.limits.keepOut.max[2]).toBeCloseTo(0.9, 9);
+    expect(rig.limits.maxDistance).toBeGreaterThan(cameraLimits(config).maxDistance);
+    // Keyboard moves follow the desk width (5 % of 1.8 m).
+    const [x0, , z0] = rig.endPose().target;
+    rig.run({ type: "move", direction: "right" });
+    const [x1, , z1] = rig.endPose().target;
+    expect(Math.hypot(x1 - x0, z1 - z0)).toBeCloseTo(0.09, 6);
+  });
+
+  it("stays on Top: the view reframes in the same orientation", () => {
+    const { rig } = makeRig(true, () => STUDIO);
+    rig.run({ type: "view", view: "top" });
+    rig.setDesk(LARGE_L);
+    const pose = rig.endPose();
+    expect(pose.polar).toBeLessThan(0.1 * DEG2RAD);
+    expect(pose.target).toEqual(config.camera.views.top.target);
+  });
+
+  it("does nothing for the same desk", () => {
+    const { rig, invalidate } = makeRig(true, () => STUDIO);
+    rig.setDesk(LARGE_L);
+    const pose = rig.endPose();
+    invalidate.mockClear();
+    rig.setDesk(deskSpec(corner, { width: 1800, depth: 1600, armDepth: 700, wingWidth: 700 })!);
+    expect(invalidate).not.toHaveBeenCalled();
+    expect(posesEqual(rig.endPose(), pose, 1e-12)).toBe(true);
+  });
+
+  it("glides in 480 ms, interrupted by a drag", () => {
+    const { rig, advance } = makeRig(false, () => STUDIO);
+    const start = rig.endPose().radius;
+    rig.setDesk(LARGE_L);
+    expect(rig.transitioning).toBe(true);
+    advance(240);
+    expect(rig.transitioning).toBe(true);
+    rig.controls.dispatchEvent({ type: "controlstart" });
+    expect(rig.transitioning).toBe(false);
+    expect(rig.endPose().radius).toBeGreaterThan(start);
+  });
+
+  it("brings the camera closer when it turns towards the back wall zoomed out (ADR-3D-11)", () => {
+    const { rig, camera, settle } = makeRig(true);
+    rig.setDesk(LARGE_L);
+    for (let i = 0; i < 30; i++) rig.run({ type: "zoom", direction: "out" });
+    for (let i = 0; i < 4; i++) rig.run({ type: "turn", direction: "down" });
+    void rig.controls.moveTo(0, 0.72, -0.8, false); // target at the back of the desk
+    void rig.controls.rotateAzimuthTo(109 * DEG2RAD, false); // as a drag would do
+    settle();
+    const wallZ = config.cyclorama.curveStartZ - config.cyclorama.radius;
+    expect(camera.position.z).toBeGreaterThan(wallZ + 0.29);
+    expect(rig.endPose().radius).toBeLessThan(rig.limits.maxDistance - 0.5);
   });
 });

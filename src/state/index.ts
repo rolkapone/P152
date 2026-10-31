@@ -33,3 +33,4 @@ export {
   type PanelSide,
   type ShellLayoutState,
 } from "./shell/shellLayoutStore";
+export { createSceneDeskStore, useSceneDesk, type SceneDeskState } from "./desk/sceneDeskStore";

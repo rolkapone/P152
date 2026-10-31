@@ -7,6 +7,7 @@ import { Canvas } from "@react-three/fiber";
 import { lazy, Suspense, useMemo, useState } from "react";
 import { NeutralToneMapping, VSMShadowMap } from "three";
 import { studioDeskSpec, type Material, type StudioConfig } from "../../core";
+import { useSceneDesk } from "../../state";
 import { initialQualityTier, usePrefersReducedMotion, useTheme } from "../environment";
 import { Desk } from "./Desk";
 import { Lifecycle } from "./Lifecycle";
@@ -26,7 +27,10 @@ export default function SceneCanvas({ studio, materials }: SceneCanvasProps) {
   const reducedMotion = usePrefersReducedMotion();
   const [tierName] = useState(() => initialQualityTier(studio.shadow.defaults));
   const tier = studio.shadow.tiers[tierName];
-  const desk = useMemo(() => studioDeskSpec(studio), [studio]);
+  // Desk chosen by the application (US-006), the studio desk until then.
+  const chosen = useSceneDesk((state) => state.desk);
+  const studioDesk = useMemo(() => studioDeskSpec(studio), [studio]);
+  const desk = chosen ?? studioDesk;
   const glOptions = useMemo(
     () => ({
       antialias: tier.antialias,
@@ -57,10 +61,10 @@ export default function SceneCanvas({ studio, materials }: SceneCanvasProps) {
       camera={camera}
       style={{ position: "absolute", inset: 0 }}
     >
-      <Lifecycle config={studio} />
+      <Lifecycle desk={desk} />
       <Studio config={studio} theme={theme} tier={tier} />
       <Desk config={studio} desk={desk} materials={materials} />
-      <ViewControls config={studio} reducedMotion={reducedMotion} />
+      <ViewControls config={studio} desk={desk} reducedMotion={reducedMotion} />
       {PerfProbe && (
         <Suspense fallback={null}>
           <PerfProbe />

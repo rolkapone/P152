@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { testCatalog } from "../../../tests/unit/helpers/fixtures";
 import { toStudioConfig, type Vec3 } from "../../core";
 import {
+  boxVolume,
   cameraLimits,
   clampCameraPosition,
   clampPose,
@@ -19,6 +20,7 @@ import {
   poseFromLookAt,
   positionOf,
   posesEqual,
+  reframePose,
   safeCameraY,
   screenAxes,
   stepPose,
@@ -373,5 +375,31 @@ describe("stepPose (keyboard)", () => {
     const result = stepPose(top, { kind: "turn", azimuth: 0, polar: -10 * DEG2RAD }, limits);
     expect(result.limitReached).toBe(true);
     expect(result.pose.polar).toBeCloseTo(0);
+  });
+});
+
+describe("reframePose (change of desk, US-006 UX-10)", () => {
+  const large = boxVolume({ min: [-0.9, 0, -0.8], max: [0.9, 0.74, 0.8] });
+  const largeLimits = cameraLimits(config, large);
+
+  it("keeps the orientation, returns to the view target, frames the whole new desk", () => {
+    const current: Pose = { target: [0.3, 0.6, 0.2], radius: 1.2, polar: 1.1, azimuth: -0.7 };
+    const pose = reframePose(config, current, "reset", DESKTOP, largeLimits, null, large);
+    expect(pose.polar).toBeCloseTo(current.polar, 9);
+    expect(pose.azimuth).toBeCloseTo(current.azimuth, 9);
+    expect(pose.target).toEqual(config.camera.views.reset.target);
+    const fit = fitRadius(large.points, pose.target, pose.polar, pose.azimuth, 32, DESKTOP);
+    expect(pose.radius).toBeCloseTo(fit, 9);
+  });
+
+  it("never comes closer than the catalog distance of the view", () => {
+    const small = boxVolume({ min: [-0.1, 0, -0.1], max: [0.1, 0.74, 0.1] });
+    const top = viewPose(config, "top", DESKTOP);
+    const pose = reframePose(config, top, "top", DESKTOP, cameraLimits(config, small), null, small);
+    const catalog = poseFromLookAt(
+      config.camera.views.top.position,
+      config.camera.views.top.target,
+    );
+    expect(pose.radius).toBeCloseTo(catalog.radius, 9);
   });
 });

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { testCatalog } from "../../../tests/unit/helpers/fixtures";
-import { toStudioConfig } from "../../core";
-import { CONTACT_CORE, contactShadowPixels } from "./contactShadow";
+import { deskSpec, toStudioConfig } from "../../core";
+import { CONTACT_CORE, contactShadowPixels, deskContactFootprints } from "./contactShadow";
 import { cycloramaBuffers, cycloramaProfile, triangleCount } from "./cyclorama";
 import { cubicBezier, EASE_IN_OUT } from "./easing";
 import { clamp, mmToM } from "./units";
@@ -98,5 +98,47 @@ describe("contact shadow texture", () => {
   it("darkens the whole footprint core", () => {
     const edge = Math.round(((1 - CONTACT_CORE) / 2) * size) + 2;
     expect(alpha(edge, size / 2)).toBeGreaterThan(128);
+  });
+});
+
+describe("desk contact footprints (US-006, PO decision 31: desk minus 200 x 140 mm)", () => {
+  const catalog = testCatalog();
+  const rect = catalog.objectTypes.get("desk.rect")!;
+  const corner = catalog.objectTypes.get("desk.corner")!;
+  const inset = config.lighting.contactShadow.deskInsetMm;
+
+  it("reads the lighter shadow of studio.json", () => {
+    expect(config.lighting.contactShadow.opacity).toBe(0.24);
+    expect(inset).toEqual([200, 140]);
+  });
+
+  it("is the desk minus the inset, for every rectangular size", () => {
+    for (const width of [1000, 1400, 1800]) {
+      const [plane, ...rest] = deskContactFootprints(deskSpec(rect, { width, depth: 800 })!, inset);
+      expect(rest).toEqual([]);
+      expect(plane!.x).toBe(0);
+      expect(plane!.z).toBe(0);
+      expect(plane!.width).toBeCloseTo((width - 200) / 1000, 9);
+      expect(plane!.depth).toBeCloseTo(0.66, 9);
+    }
+  });
+
+  it("is the main arm and the wing for the L, mirrored for orientation left", () => {
+    const [arm, wing] = deskContactFootprints(deskSpec(corner)!, inset);
+    expect(arm!.width).toBeCloseTo(1.4, 9);
+    expect(arm!.depth).toBeCloseTo(0.46, 9);
+    expect(arm!.z).toBeCloseTo(-0.4, 9);
+    expect(wing!.x).toBeCloseTo(0.5, 9);
+    expect(wing!.width).toBeCloseTo(0.4, 9);
+    // The wing overlaps the arm by 40 mm and stops 70 mm before the front edge.
+    expect(wing!.z - wing!.depth / 2).toBeCloseTo(-0.14, 9);
+    expect(wing!.z + wing!.depth / 2).toBeCloseTo(0.63, 9);
+    const [, left] = deskContactFootprints(deskSpec(corner, { orientation: "left" })!, inset);
+    expect(left!.x).toBeCloseTo(-0.5, 9);
+  });
+
+  it("never gives an empty plane, even with a huge inset", () => {
+    const planes = deskContactFootprints(deskSpec(corner)!, [5000, 5000]);
+    expect(planes.every((plane) => plane.width > 0 && plane.depth > 0)).toBe(true);
   });
 });

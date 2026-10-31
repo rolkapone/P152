@@ -9,9 +9,12 @@
  *   action, instant under `prefers-reduced-motion` (which also removes the inertia);
  * - keyboard steps arrive through the state store (`ViewController`);
  * - framing in the free zone between the panels (US-005 UX-8): read when a view is framed
- *   (start, Reset / Top / Front), never followed live, so that collapsing or opening a panel
- *   never moves the camera (UX-7). The lens shift keeps the zone of the last framing and
- *   glides to the new one with the view transition.
+ *   (start, Reset / Top / Front, change of desk), never followed live, so that collapsing or
+ *   opening a panel never moves the camera (UX-7). The lens shift keeps the zone of the last
+ *   framing and glides to the new one with the view transition;
+ * - change of desk (US-006, `setDesk`): limits, keep-out and zoom-out limit follow the new
+ *   desk; the view keeps its orientation and reframes the whole desk in the free zone, with
+ *   the same 480 ms transition (instant under reduced motion).
  */
 import CameraControlsImpl from "camera-controls";
 import {
@@ -26,7 +29,7 @@ import {
   Vector4,
   type PerspectiveCamera,
 } from "three";
-import type { StudioConfig } from "../../core";
+import { sameDesk, studioDeskSpec, type DeskSpec, type StudioConfig } from "../../core";
 import {
   VIEW_STEPS,
   type ViewCommand,
@@ -38,10 +41,10 @@ import {
   clampPose,
   clampPoseInto,
   createPose,
-  deskVolume,
   interpolatePoseInto,
   maxPolarForHeight,
   maxRadiusInStudio,
+  reframePose,
   safeCameraY,
   stepPose,
   viewPose,
@@ -60,6 +63,7 @@ import {
   lensY,
   type ScreenZone,
 } from "../math/framing";
+import { deskVolumeOf } from "../math/deskLayout";
 import { EASE_IN_OUT } from "../math/easing";
 import { DEG2RAD, mmToM } from "../math/units";
 
@@ -131,7 +135,11 @@ export interface ViewRigOptions {
   readonly now?: () => number;
   /** Free zone of the view between the panels (CSS px), read when a view is framed (UX-8). */
   readonly freeZone?: () => ScreenZone | null;
+  /** Desk shown at the start (default: the studio desk). */
+  readonly desk?: DeskSpec;
 }
+
+type FramedView = "reset" | "top" | "front";
 
 export class ViewRig implements ViewController {
   readonly controls: CameraControlsImpl;
@@ -140,6 +148,9 @@ export class ViewRig implements ViewController {
   /** The same, the zoom-out limit raised to the last framing so that it is never cut. */
   private currentLimits: CameraLimits;
   private desk: DeskVolume;
+  private deskSpec: DeskSpec;
+  /** View whose target and distance a change of desk starts from (Reset once moved). */
+  private baseView: FramedView = "reset";
   private readonly camera: PerspectiveCamera;
   private readonly element: HTMLElement;
   private readonly config: StudioConfig;
@@ -155,7 +166,7 @@ export class ViewRig implements ViewController {
   private readonly lensTo = createLens();
   /** The view was turned, moved or zoomed, or a view command ran, since the start. */
   private touched = false;
-  private readonly deskWidth: number;
+  private deskWidth: number;
   private reducedMotion = false;
   private tween: Tween | null = null;
   private readonly target = new Vector3();
@@ -173,8 +184,9 @@ export class ViewRig implements ViewController {
     this.onPointerViewChange = options.onPointerViewChange;
     this.now = options.now ?? (() => performance.now());
     this.freeZone = options.freeZone ?? (() => null);
-    this.deskWidth = mmToM(options.config.desk.widthMm);
-    this.desk = deskVolume(options.config);
+    this.deskSpec = options.desk ?? studioDeskSpec(options.config);
+    this.deskWidth = mmToM(this.deskSpec.widthMm);
+    this.desk = deskVolumeOf(this.deskSpec);
     this.deskLimits = cameraLimits(options.config, this.desk);
     this.currentLimits = this.deskLimits;
 
@@ -268,12 +280,18 @@ export class ViewRig implements ViewController {
    * limit is raised to the framing if needed (a window taller than the reference ones), so a
    * view is never cut by it; the studio space still bounds the camera.
    */
-  private frameView(view: "reset" | "top" | "front"): Pose {
+  private frameView(view: FramedView): Pose {
+    return this.frameWith((free) =>
+      viewPose(this.config, view, this.camera.aspect, free, this.zone, this.desk),
+    );
+  }
+
+  /** Reads the free zone, computes a pose without zoom-out limit, then sets the limits. */
+  private frameWith(compute: (free: CameraLimits) => Pose): Pose {
     const zone = this.freeZone();
     this.zone = isUsableZone(zone) ? Object.freeze({ ...zone }) : null;
     lensInto(this.lensTo, this.zone);
-    const free = withMaxDistance(this.deskLimits, Infinity);
-    const pose = viewPose(this.config, view, this.camera.aspect, free, this.zone, this.desk);
+    const pose = compute(withMaxDistance(this.deskLimits, Infinity));
     this.currentLimits = withMaxDistance(
       this.deskLimits,
       Math.max(this.deskLimits.maxDistance, pose.radius),
@@ -298,24 +316,50 @@ export class ViewRig implements ViewController {
     this.invalidate();
   }
 
+  /**
+   * Shows another desk (US-006): new limits (keep-out, target box, zoom-out limit), then the
+   * view keeps its orientation and frames the whole desk in the free zone (UX-10), with the
+   * view transition (UX-11). The same desk again changes nothing.
+   */
+  setDesk(desk: DeskSpec): void {
+    if (sameDesk(desk, this.deskSpec)) return;
+    this.deskSpec = desk;
+    this.deskWidth = mmToM(desk.widthMm);
+    this.desk = deskVolumeOf(desk);
+    this.deskLimits = cameraLimits(this.config, this.desk);
+    const from = this.endPose();
+    copyLensInto(this.lensFrom, this.lens);
+    const view = this.baseView;
+    const to = this.frameWith((free) =>
+      reframePose(this.config, from, view, this.camera.aspect, free, this.zone, this.desk),
+    );
+    this.glideTo(from, to);
+  }
+
+  /** Transition to `to` (480 ms, or a jump under reduced motion), lens included. */
+  private glideTo(from: Pose, to: Pose): void {
+    const duration = this.config.camera.transitionMs;
+    if (this.reducedMotion || duration === 0) {
+      this.tween = null;
+      copyLensInto(this.lens, this.lensTo);
+      this.applyPose(to, false);
+    } else {
+      this.tween = { from, to, start: this.now(), duration };
+    }
+    this.invalidate();
+  }
+
   /** ViewController: view bar and keyboard. */
   run(command: ViewCommand): ViewCommandResult {
     this.touched = true;
     const from = this.endPose();
     if (command.type === "view") {
       copyLensInto(this.lensFrom, this.lens);
-      const to = this.frameView(command.view);
-      const duration = this.config.camera.transitionMs;
-      if (this.reducedMotion || duration === 0) {
-        this.tween = null;
-        copyLensInto(this.lens, this.lensTo);
-        this.applyPose(to, false);
-      } else {
-        this.tween = { from, to, start: this.now(), duration };
-      }
-      this.invalidate();
+      this.baseView = command.view;
+      this.glideTo(from, this.frameView(command.view));
       return { limitReached: false };
     }
+    this.baseView = "reset";
     this.tween = null;
     const { pose, limitReached } = stepPose(from, stepFor(command, this.deskWidth), this.limits);
     this.applyPose(pose, !this.reducedMotion);
@@ -405,6 +449,7 @@ export class ViewRig implements ViewController {
 
   private readonly onControlStart = () => {
     this.touched = true;
+    this.baseView = "reset";
     this.tween = null;
     this.onPointerViewChange();
     const action = this.controls.currentAction;
@@ -416,6 +461,7 @@ export class ViewRig implements ViewController {
   /** Also fired by the wheel, which has no "controlstart". */
   private readonly onControl = () => {
     this.touched = true;
+    this.baseView = "reset";
     this.tween = null;
     this.onPointerViewChange();
     this.invalidate();

@@ -4,6 +4,9 @@
  * covers `CONTACT_CORE` of the plane, so a plane is 1 / CONTACT_CORE larger than the
  * footprint it darkens. Pure (RGBA bytes), tested in Node.
  */
+import type { DeskSpec } from "../../core";
+import { mmToM } from "./units";
+
 export const CONTACT_CORE = 0.62;
 
 const smoothstep = (a: number, b: number, x: number) => {
@@ -28,4 +31,50 @@ export function contactShadowPixels(size = 128): Uint8Array {
     }
   }
   return data;
+}
+
+/** A contact plane on the floor, metres: centre and size of the footprint it darkens. */
+export interface ContactFootprint {
+  readonly x: number;
+  readonly z: number;
+  readonly width: number;
+  readonly depth: number;
+}
+
+/** Overlap of the wing plane over the arm plane, so that the L shadow has no light seam. */
+const WING_OVERLAP_M = 0.04;
+
+/**
+ * Contact footprints of the desk top (US-006, PO decision 31), derived from the desk shown:
+ * its footprint minus `insetMm` (width, depth), so that the soft shadow stays under the top.
+ * L-shaped desk: the main arm, and the return wing overlapping it slightly (same planes as the
+ * validated preview, docs/design/3d/US-006-bureaux.md section 4).
+ */
+export function deskContactFootprints(
+  desk: DeskSpec,
+  insetMm: readonly [number, number],
+): ContactFootprint[] {
+  const [ix, iz] = [mmToM(insetMm[0]), mmToM(insetMm[1])];
+  const width = mmToM(desk.widthMm);
+  const depth = mmToM(desk.depthMm);
+  const positive = (value: number) => Math.max(value, 0.01);
+  if (desk.shape === "rect") {
+    return [{ x: 0, z: 0, width: positive(width - ix), depth: positive(depth - iz) }];
+  }
+  const hx = width / 2;
+  const hz = depth / 2;
+  const arm = mmToM(desk.armDepthMm);
+  const wing = mmToM(desk.wingWidthMm);
+  const side = desk.orientation === "left" ? -1 : 1;
+  const z0 = -hz + arm - WING_OVERLAP_M;
+  const z1 = hz - iz / 2;
+  return [
+    { x: 0, z: -hz + arm / 2, width: positive(width - ix), depth: positive(arm - iz) },
+    {
+      x: side * (hx - wing / 2),
+      z: (z0 + z1) / 2,
+      width: positive(wing - ix),
+      depth: positive(z1 - z0),
+    },
+  ];
 }
