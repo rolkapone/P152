@@ -113,7 +113,7 @@ Branches et PR : PR #17 (`SECURITY.md`, `CODEOWNERS`) et PR #20 (section « Appl
 Critères (fiche `docs/archive/stories/SEC-02.md`) : MFA ; ruleset `main` (PR obligatoire, `ci-ok` requis, Code scanning ≥ High bloquant, pas de force-push ni de suppression) ; secret scanning + push protection, Dependabot alerts, private vulnerability reporting, `SECURITY.md` ; `GITHUB_TOKEN` en lecture seule, approbation des workflows externes, épinglage SHA ; `CODEOWNERS` ; 4 alertes `p152-test-hook-reference` fermées avec justification ; PR de test à 4 cas négatifs (reportée de SEC-01), fermée sans merge.
 Dépendabot : 3 PR ouvertes (#12, #13, #15) à traiter au même moment que les alertes.
 - [x] T1 (devops) `SECURITY.md`, `CODEOWNERS` : **fait, PR #17**.
-- [ ] T2 (PO) MFA activée sur le compte. *(non confirmé dans les docs : confirmation du PO demandée)*
+- [x] T2 (PO) MFA activée sur le compte : confirmée par le PO le 2026-10-20, avant le premier push (décision 41).
 - [x] T3 (devops + PO) Réglages appliqués par le PO, vérifiés par l'API le 2026-10-31 (détail dans `docs/archive/stories/SEC-02.md`).
 - [x] T4 (devops) Premier push **fait** (`main` sur GitHub, accord du PO). Première CI : 12 jobs verts, **e2e rouge** (timeouts du runner), correction en cours par le qa-tester sur `fix/ci-e2e-runner-timeouts` ; `ci-ok` à vérifier une fois e2e vert. Un force-push de `main` (purge de l'historique) est en cours.
 - [x] T4b (devops) Workflow PR suivi : PR #17 et PR #20 mergées via PR, ruleset `main` actif (`ci-ok` requis).
@@ -131,7 +131,7 @@ Ensuite, par ordre : (a) SEC-06 dette de test (`waitForTimeout` restants de `sce
 Conditions restantes (selon le secdevops) :
 - (a) SEC-03a mergée : **FAIT** ((scan PASS)).
 - (b) gitleaks exécuté sur **tout l'historique juste avant le push** (0 finding).
-- (c) MFA GitHub du PO activée.
+- (c) MFA GitHub du PO activée : **FAIT** (confirmée le 2026-10-20, décision 41).
 - (d) sur `rolkapone/P152` : secret scanning et push protection, private vulnerability reporting, Dependabot alerts activés.
 - Vérification préalable : aucun commit ne contient l'ancienne adresse, `git log` en noreply.
 - Le scrum-master signale ces conditions à l'orchestrateur ; **l'orchestrateur demande l'accord explicite du PO à ce moment-là** ; le devops pousse `main` seulement ensuite.
@@ -153,7 +153,7 @@ Notes du board (2026-10-31) :
 - **US-005 DONE** : revue APPROVE (T0, lots 1-2, UX-8 + lot 3, correction) ; design ECARTS MINEURS acceptés ; QA PASS après 1 cycle de correction (E2E instables sous charge : 2 workers en local, `waitForTimeout` supprimés et interdits par lint) ; secdevops PASS (threat model v1.4). Réserve : 5 runs de référence au lieu de 10 (Questions n° 3).
 - **US-006 DONE** (PR #16) : 5 pts, voie STANDARD, 0 cycle de correction. Plan de release : 31 / 99 livrés. Suivis dans `docs/dette.md`. Réserve : 10 runs non faits (Questions n° 3).
 - **Fix e2e et SEC-03a** : suivis de SEC-06 (budget de chargement de `perf.spec`, commentaire `pauseClock`, `docs/qa/ci-e2e-runner.md:7`) ; LOW de SEC-03a -> SEC-06 ; CORP -> SEC-03b ; T7 rollup ouverte (R8).
-- **SEC-02 DONE** (PR #17, #20 ; PR de test #19 fermée sans merge). Reste hors story : MFA du PO à confirmer ; Scorecard ouvertes #5, #6, #7 (licence, décision PO), #9 ; 11 PR Dependabot ouvertes (#4 à #13, #15), dont #12, #13, #15 en CI rouge ; garde CodeQL ≥ high à remettre en CI (SEC-06). Incident pour la rétro : tentative de merge de la PR de test « DO NOT MERGE » (#19), refusée, jamais mergée.
+- **SEC-02 DONE** (PR #17, #20 ; PR de test #19 fermée sans merge). Reste hors story : Scorecard ouvertes #5, #6, #7 (licence, décision PO), #9 ; 11 PR Dependabot ouvertes (#4 à #13, #15), dont #12, #13, #15 en CI rouge ; garde CodeQL ≥ high à remettre en CI (SEC-06). Incident pour la rétro : tentative de merge de la PR de test « DO NOT MERGE » (#19), refusée, jamais mergée.
 - **Parse fuzz** : **stabilisé (PR #18, 2026-10-31)**. Le correctif de US-005 ne filtrait que le premier niveau (LOW #1 de la revue sécurité de US-006) ; corrigé. Graines : 60940642 (secdevops), `-577722299` (origine).
 - **Règle d'équipe** : ne jamais lancer deux Playwright ou `pnpm check` en parallèle (même `test-results`, même port 4173).
 
@@ -182,11 +182,59 @@ Voies (CLAUDE.md v3) : **US-005 RENFORCÉE** (police Inter auto-hébergée = ass
 Tranchées le 2026-10-20 : bornes du bureau, bureau d'angle (livré, sans « Custom size »), tous les textes et le design (décisions 29 à 31).
 
 1. **Budget de taille du shell** : valider le seuil proposé (195 kB gz index, 295 kB gz SceneCanvas) ; mesures US-005 : 176,6 kB gz index, 267,1 kB gz SceneCanvas.
-2. **Premier push** : l'accord sera demandé quand SEC-03a sera mergée et la MFA faite ; le PO peut déjà confirmer la date de la MFA. *(Premier push fait ; MFA et réglages SEC-02 restent à confirmer.)*
+2. **Premier push** : l'accord sera demandé quand SEC-03a sera mergée et la MFA faite ; le PO peut déjà confirmer la date de la MFA. *(Fait : MFA et réglages confirmés par le PO le 2026-10-20, décision 41 ; premier push fait.)*
 3. **Critère de sortie de US-005 et US-006 (règle temps réel)** : US-005 : 5 runs `--repeat-each=5` verts (460/460) au lieu des 10 demandés ; US-006 : 2 runs (244/244), `--repeat-each=10` non lancé. Accepter ce niveau, ou demander la campagne de 10 runs (environ 40 min de machine, à passer à `socle:ressources`) ?
 
 ## Revue du sprint
-(à rédiger en fin de sprint)
+
+**Objectif atteint** : dépôt publié et durci, shell en anglais et choix du bureau livrés. **16 pts livrés sur 16 engagés ; MVP 32 / 99 pts (32,3 %).**
+
+**Livré** : SEC-03a (2 pts) ; correctif E2E du runner (PR #2) ; US-005 shell (8 pts, PR #14) ; US-006 choix du bureau (5 pts, PR #16) ; SEC-02 (1 pt, PR #17 et #20 ; PR de test #19 fermée sans merge) ; stabilité CI `parseSetup.fuzz` (PR #18) ; purge de `.claude` de l'historique ; premier push (MFA et réglages confirmés par le PO le 2026-10-20, décision 41).
+
+**Non livré ou reporté** :
+- SEC-03a T7 (retrait de l'override rollup, R8) : ouverte.
+- Critère « 10 runs » de US-005 (5 runs) et US-006 (2 runs) : non tenu (R13).
+- Garde CodeQL >= High en CI : SEC-06 (règle retirée du ruleset, décision 40).
+- Alertes Scorecard #5, #6, #7, #9 ; 11 PR Dependabot ; exception minimatch jusqu'au 2026-11-30 ([dette](../dette.md)).
+- FPS mobile réel non mesuré ; modale de premier lancement (US-020).
+
+**Chiffres** (`equipe/ressources/bilan-sprint-2.md`) : 29 appels mesurés (devis 30-40), 25,7 M d'unités, environ 1,8 M par point ; developer + graphics-engineer = 71 %, contrôle = 20 %. Mesure partielle, quota en % non relevé.
+
+**Démo pas à pas (Windows, PowerShell)** :
+1. `pnpm install`, puis `pnpm dev` (aucun port fixé dans `vite.config.ts` : port Vite par défaut), ouvrir http://localhost:5173.
+2. Barre d'outils « Deskfit » : nom du setup et verdict « Nothing to check yet ».
+3. Volets gauche et droit : replier et déplier avec les bascules, recharger la page, l'état est mémorisé.
+4. Onglet Desk : 7 bureaux ; à la souris (clic), puis au clavier (Tab, flèches) ; la ligne active porte la coche, « Selected » se met à jour.
+5. Choisir un bureau d'angle : la scène le remplace, l'ombre de contact suit.
+6. Boutons Reset, Top, Front : la caméra se recadre.
+7. Thème sombre : régler Windows en mode sombre, l'application suit.
+8. Réduire la fenêtre (1366 px puis plus étroit) : les volets deviennent des tiroirs.
+9. Zoom du navigateur à 200 % (Ctrl +) : mise en page sans perte d'accès.
 
 ## Rétro
-(à rédiger en fin de sprint)
+
+**Ce qui a marché**
+- Voies et PASSATION : circuits clairs, 0 cycle de correction sur US-006 et SEC-02, 1 sur US-005.
+- Règles de lint relues avant le code (action 3 du Sprint 1).
+- PR et CI GitHub : tout mergé via PR, `ci-ok` requis.
+- Contrôles en parallèle (design, QA, sécurité) : environ 20 % du sprint.
+- Ruleset de `main` et cas négatifs de la PR de test #19 : bloqués comme prévu.
+
+**Ce qui a moins bien marché**
+- 4 interruptions par limite d'usage.
+- Un developer arrêté à 120 tours (lot US-005 trop gros : 10 M d'unités, 39 % du sprint).
+- E2E lancés en même temps par deux agents (revue et QA) : collisions sur `test-results` et le port 4173.
+- Tests instables sous charge et sur le runner ; CI E2E de 15 à 18 min par PR.
+- US-005 réestimée de 5 à 8 pts en cours de sprint.
+- Règle `code_scanning` qui bloquait toutes les PR (retirée, décision 40) ; mode evaluate indisponible (plan Free).
+- **Incident : le devops a tenté de merger la PR de test #19 « DO NOT MERGE »** ; refusé, jamais mergée.
+- Documents trop gros jusqu'au ménage de fin de sprint.
+- Critère « 10 runs » mal posé puis non tenu (5 et 2 runs).
+
+**Actions pour le Sprint 3** (les 3 économies de `socle:ressources`, à valider par le PO, plus le garde-fou d'incident)
+1. Appels d'implémentation de 3 à 4 tâches, un commit chacune, une PASSATION ; plus d'appel à 120 tours. Responsable : orchestrateur ; tâches courtes au planning : scrum-master.
+2. Jamais deux E2E en parallèle : reviewer sans E2E (il se fie à `pnpm check`), qa-tester seul à lancer les E2E ciblés par story, suite complète laissée à la CI. Responsable : orchestrateur, qa-tester.
+3. Coût CI : une seule vérification de la CI par PR, cache navigateurs Playwright / sharding, E2E limités aux specs touchées pour EXPRESS et docs (touche la CI : accord du PO). Responsable : devops.
+4. Garde-fou merge (incident #19) : le mandat de merge cite le numéro de PR ; le devops ne merge jamais une PR « DO NOT MERGE » ni hors story. Responsable : orchestrateur, devops.
+
+Rétro du Sprint 1 : actions 2, 3, 4 et 5 appliquées ; action 1 (temps réel) appliquée au code (plus de `waitForTimeout`) mais critère « 10 runs » non tenu (Questions n° 3).

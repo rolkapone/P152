@@ -8,9 +8,9 @@
 | Dont stories sécurité (SEC-01 à SEC-05) | 9 (Must 8, Should 1) |
 | Points « Could » MVP (hors total, bonus) | 9 (US-021, US-023, SEC-06) |
 | Points livrés | **32 / 99 = 32,3 %** (Sprint 1 : US-001 3, US-002 2, US-003 3, SEC-01 3, US-004 5, toutes DONE = 16 ; Sprint 2 : SEC-03a 2, US-005 8, US-006 5, SEC-02 1, DONE) |
-| Vitesse moyenne | **16 pts/sprint** (1 sprint terminé, 16 pts livrés ; prévision prudente de 15 pts conservée pour le planning) |
+| Vitesse moyenne | **16 pts/sprint** (Sprint 1 : 16, Sprint 2 : 16 ; prévision prudente de 15 pts conservée pour le planning) |
 | Sprint en cours | **Sprint 2** (ouvert le 2026-10-20) : SEC-03a 2 (DONE) + US-005 **8** (DONE, PR #14) + US-006 **5** (DONE, PR #16) + SEC-02 1 (DONE, PR #17 et #20) = **16 pts livrés** sur 16 engagés (capacité prudente 15 : dépassement de 1 pt, accepté) ; livrés 32 / 99 (32,3 %), restants 67 |
-| Sprints restants estimés avant MVP | **6 y compris le Sprint 2** (68 pts restants à ce jour, dont SEC-02 1 pt ; 67 / 16 = 4,2, arrondi prudent ; 6 aussi si la vitesse retombe à 15) ; 5 après le Sprint 2 (67 / 16 = 4,2) |
+| Sprints restants estimés avant MVP | **5** après le Sprint 2 (67 pts restants / 16 = 4,2, arrondi à 5 ; 5 aussi à 15 pts/sprint), soit les Sprints 3 à 7 |
 | Dernière mise à jour | 2026-10-31 (SEC-02 DONE, PR #17 et #20, comptée dans les 32 pts ; US-006 DONE, PR #16, comptée dans les 31 pts ; US-005 DONE, PR #14 ; SEC-03a DONE, comptée dans les 18 précédents ; voies attribuées au Sprint 2 dans `docs/sprints/sprint-2.md`). Aucun SHA de commit dans les docs : les numéros de PR font foi |
 
 Détail du recalcul : 83 pts (kickoff) + SEC-01 (3) + SEC-02 (1) + SEC-03a (2 depuis la fin du Sprint 1) + SEC-03b (1) + SEC-04 (1) + SEC-05 (1) + US-024 (2, réglages d'alertes) + US-025 (2, Help et préférences d'affichage) = 96, puis +3 (US-005 5 → 8, restylage natif v0.4) = **99**. Les autres éléments issus de US-004 (dette, mineurs QA) sont des critères ajoutés à des stories existantes ou à SEC-06 (Could), sans point supplémentaire ; à réestimer au planning du Sprint 2 s'ils pèsent.

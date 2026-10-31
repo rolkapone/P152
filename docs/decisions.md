@@ -73,6 +73,7 @@ Une ligne par décision, numérotation d'origine conservée (1 à 36 : ancien `b
 | 38 | 2026-10-20 | **Premier push** seulement si : SEC-03a mergée, MFA du PO activée, réglages du dépôt (SEC-02) validés par le PO, accord explicite du PO à ce moment-là. Remote `origin` = `github.com/rolkapone/P152` (public). Précise 23. | [sprint-2](sprints/sprint-2.md) |
 | 39 | 2026-10-31 | **Modes de merge :** merge commit seul, sans suppression automatique des branches. Réglages SEC-02 appliqués hors ruleset, bypass Admin `pull_request`, exception minimatch (voir `docs/security/exceptions.md`), licence reportée. | [sec-02-reglages](security/sec-02-reglages.md) |
 | 40 | 2026-10-31 | **Règle `code_scanning` (CodeQL ≥ High) retirée du ruleset de `main`** (elle bloquait toute PR, même verte) ; la garde est à remettre dans la CI (SEC-06). | [sec-02-reglages](security/sec-02-reglages.md), SEC-06 |
+| 41 | 2026-10-20 | **MFA du compte GitHub et réglages du dépôt confirmés par le PO**, avant le premier push (« La MFA et les réglages du dépôt sont faits »). Précise 38. | [sprint-2](sprints/sprint-2.md) |
 
 ## Questions ouvertes (long terme, non bloquantes)
 Voir [backlog.md](backlog.md).
