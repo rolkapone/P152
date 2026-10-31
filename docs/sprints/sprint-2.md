@@ -45,7 +45,7 @@ Design US-005 et US-006 **validé par le PO**, toutes décisions confirmées (ba
 - Bornes : rectangulaire 800–2400 × 500–1000 × 600–1300 mm ; angle 1200–2400 × 1000–2000 mm.
 - Ombre de contact allégée (0,24 ; bureau − 200×140 mm), dérivée du bureau, ainsi que le keep-out de la caméra → US-006.
 
-Rattachements : les données du catalogue (`desk.json` v2, `desk-corner.json`) sont commitées sur `feature/US-006-choix-bureau` (cd27e44) et font échouer le test « a catalog without any desk » de `validate.test.ts` : **le developer le corrige dans US-006**. Le générateur du bureau en L revient au graphics-engineer dans US-006.
+Rattachements : les données du catalogue (`desk.json` v2, `desk-corner.json`) sont commitées sur `feature/US-006-choix-bureau` (PR #16) et font échouer le test « a catalog without any desk » de `validate.test.ts` : **le developer le corrige dans US-006**. Le générateur du bureau en L revient au graphics-engineer dans US-006.
 
 Références : UX `docs/design/ux/stories/US-005.md` et `US-006.md` ; maquettes `docs/design/ui/maquettes/US-005.html` et `US-006.html`, `design-system.md` §15 (shell) et §16 (bureaux) ; aperçu 3D `docs/design/3d/apercu-bureaux/` et `docs/design/3d/US-006-bureaux.md`. Les critères UX (US-005 UX-1 à UX-22 ; US-006 UX-1 à UX-17) sont dans le backlog ; UX-23 de US-005 est rattaché à US-018. Le développement peut commencer.
 
@@ -74,7 +74,7 @@ Critères UX ajoutés aux stories dans le backlog le 2026-10-20. Le développeme
 ## Stories et tâches
 
 ### 1. SEC-03a — En-têtes de sécurité, CSP, correctif React Aria [devops + secdevops + developer] — 2 pts
-Branche : `feature/SEC-03a-headers-csp`. **DONE** : mergée dans `main` (42c15cd), revue APPROVE au cycle 1/3 (`docs/reviews/SEC-03a.md`), secdevops PASS (`docs/security/scans/SEC-03a.md`, Semgrep via Docker, 0 ERROR, finding MEDIUM de US-004 clos). Critères d'acceptation 1 à 4 cochés dans le backlog.
+Branche : `feature/SEC-03a-headers-csp`. **DONE** : mergée dans `main` (voir l'historique), revue APPROVE au cycle 1/3 (`docs/reviews/SEC-03a.md`), secdevops PASS (`docs/security/scans/SEC-03a.md`, Semgrep via Docker, 0 ERROR, finding MEDIUM de US-004 clos). Critères d'acceptation 1 à 4 cochés dans le backlog.
 - [x] T1 (devops) Script de build qui génère `public/_headers` depuis `config/security-headers.mjs` ; `dist/_headers` présent après build (CSP stricte, `nosniff`, Referrer-Policy, Permissions-Policy, COOP, HSTS).
 - [x] T2 (devops) Test unitaire : contenu de `dist/_headers` = sortie de `config/security-headers.mjs` ; contrôle `dist/_headers` de `sec-build-hardening` vert, sans avertissement toléré.
 - [x] T3 (devops) `preview` et `dist-e2e` servent ces en-têtes (action 2).
@@ -137,7 +137,7 @@ Ensuite, par ordre : (a) SEC-06 dette de test (`waitForTimeout` restants de `sce
 ## Moment du premier push
 
 Conditions restantes (selon le secdevops) :
-- (a) SEC-03a mergée : **FAIT** (42c15cd, scan PASS).
+- (a) SEC-03a mergée : **FAIT** ((scan PASS)).
 - (b) gitleaks exécuté sur **tout l'historique juste avant le push** (0 finding).
 - (c) MFA GitHub du PO activée.
 - (d) sur `rolkapone/P152` : secret scanning et push protection, private vulnerability reporting, Dependabot alerts activés.

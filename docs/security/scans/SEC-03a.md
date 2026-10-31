@@ -1,6 +1,6 @@
 # Scan sécurité SEC-03a : En-têtes de sécurité et CSP
 
-- Date : 2026-10-20. Branche `feature/SEC-03a-headers-csp` (HEAD `553e62f`) contre `main` : 5 commits, 17 fichiers (+282/-10), aucun changement dans `src/`, `package.json` ni `pnpm-lock.yaml`.
+- Date : 2026-10-20. Branche `feature/SEC-03a-headers-csp` (HEAD) contre `main` : 5 commits, 17 fichiers (+282/-10), aucun changement dans `src/`, `package.json` ni `pnpm-lock.yaml`.
 - Entrée : revue APPROVE, cycle 1 ([`docs/reviews/SEC-03a.md`](../../reviews/SEC-03a.md)).
 - Outils : Semgrep 1.181.0 (image `semgrep/semgrep@sha256:81474464…304b`, le digest de `ci.yml`, Docker 29.8.2), gitleaks 8.30.1, OSV-Scanner 2.7.0 (binaires vérifiés aux scans précédents), pnpm 10.34.7, Playwright Chromium (SwiftShader).
 

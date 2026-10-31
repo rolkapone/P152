@@ -2,7 +2,7 @@
 
 > Archive : story **DONE** au Sprint 2. Voie : —. Index : [backlog](../../backlog.md). Dette de la story : [dette.md](../../dette.md).
 
-**État au 2026-10-20 : DONE.** Mergée dans `main` (42c15cd). Revue APPROVE au cycle 1/3 (`docs/reviews/SEC-03a.md`) ; secdevops PASS (`docs/security/scans/SEC-03a.md`, Semgrep via Docker, 0 ERROR ; finding MEDIUM de US-004 clos). Les LOW et suggestions sont tracés dans SEC-06 et SEC-03b.
+**État au 2026-10-20 : DONE.** Mergée dans `main` (voir l'historique). Revue APPROVE au cycle 1/3 (`docs/reviews/SEC-03a.md`) ; secdevops PASS (`docs/security/scans/SEC-03a.md`, Semgrep via Docker, 0 ERROR ; finding MEDIUM de US-004 clos). Les LOW et suggestions sont tracés dans SEC-06 et SEC-03b.
 En tant qu'équipe, je veux que le build produise les en-têtes de sécurité afin que le contrôle `build-hardening` passe et que le premier push n'échoue pas.
 Critères d'acceptation :
 - [x] Étant donné `config/security-headers.mjs` (source unique), quand on lance le build, alors `public/_headers` est généré et `dist/_headers` existe avec CSP stricte sans `unsafe-inline`/`unsafe-eval`, `nosniff`, `Referrer-Policy`, `Permissions-Policy`, COOP, HSTS.

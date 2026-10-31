@@ -2,7 +2,7 @@
 
 ## Cycle 1 : APPROVE (2026-10-20)
 
-Branche `feature/SEC-01-pipeline-securite` (7300750, ccb5692, 7206f2b ; 3385ccc déjà dans main). ci.yml et security-scheduled.yml relus en entier.
+Branche `feature/SEC-01-pipeline-securite` (voir l'historique). ci.yml et security-scheduled.yml relus en entier.
 
 ### Exécuté pendant la revue
 - `pnpm check` vert (98,11 % instructions, 96,28 % branches).

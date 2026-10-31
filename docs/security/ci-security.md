@@ -30,7 +30,7 @@ Légende de la colonne État : **Vérifié local** = commande exécutée sur le 
 
 Agrégation : le job `security` (`permissions: {}`) échoue si un `sec-*` est en `failure`, `cancelled` ou `skipped` (SEC-01) ; `ci-ok` exige `security` en succès. Le job `assets` (budgets, licences des assets, LFS) reste propriété du devops/technical-artist ; secdevops le considère comme un contrôle de conformité (M-28).
 
-### 1.1 Versions épinglées (relevé du 2026-10-19, commit `dfdfcfe`)
+### 1.1 Versions épinglées (relevé du 2026-10-19, kickoff (voir l'historique))
 
 Source de vérité : les workflows. Toutes les actions sont épinglées par SHA de commit complet, version en commentaire ; les 12 SHA ont été comparés à leur tag par `git ls-remote` au scan US-001 (12/12 conformes).
 

@@ -1,6 +1,6 @@
 # Plus tard — vision long terme (stories de haut niveau, à détailler avant leur sprint)
 
-Les ids US-1xx sont provisoires. Estimations indicatives (epic-level) ; toute story > 8 pts sera redécoupée. Les stories de sécurité SEC-1x et suivantes proviennent du threat model (§9, qui donne les menaces couvertes) et conditionnent les stories fonctionnelles de leur release. **Leurs critères d'acceptation font foi ici** (repris de la v1.0 du threat model, commit 304e3f9, adaptés aux décisions PO du 2026-10-19) ; ils seront précisés à la révision du threat model en début de release.
+Les ids US-1xx sont provisoires. Estimations indicatives (epic-level) ; toute story > 8 pts sera redécoupée. Les stories de sécurité SEC-1x et suivantes proviennent du threat model (§9, qui donne les menaces couvertes) et conditionnent les stories fonctionnelles de leur release. **Leurs critères d'acceptation font foi ici** (repris de la v1.0 du threat model, commit du kickoff, voir l'historique, adaptés aux décisions PO du 2026-10-19) ; ils seront précisés à la révision du threat model en début de release.
 
 ## Option i18n — Langue secondaire française (non engagée)
 - US-100 — Traduction française de l'interface via les fichiers i18n existants [UI] ~3 (option, à décider par le PO)

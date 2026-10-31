@@ -57,8 +57,8 @@ Branche : `feature/US-001-repo-build-ci` (implémenteur : devops). Démarrée le
 Références : ADR-OPS-01/02/03 dans `docs/architecture/` (ADR-OPS-xx).
 
 ### US-002 — Threat model initial [secdevops] — 2 pts
-Branche : `feature/US-002-threat-model` (docs uniquement). **DONE**, mergée dans `main` (55a93a6).
-Démarrée le 2026-10-19, implémenteur : secdevops. Le threat model a été commité directement sur `main` au kickoff (304e3f9) ; la branche portait les mises à jour.
+Branche : `feature/US-002-threat-model` (docs uniquement). **DONE**, mergée dans `main` (voir l'historique).
+Démarrée le 2026-10-19, implémenteur : secdevops. Le threat model a été commité directement sur `main` au kickoff (voir l'historique) ; la branche portait les mises à jour.
 - [x] T1 Threat model et définition des scans produits (`docs/security/`).
 - [x] T2 Relecture/MAJ par secdevops selon les décisions PO et le scan US-001 ; cohérence, aucun secret, liens exacts.
 - [x] T3 Revue reviewer : APPROVE au cycle 2/3.
@@ -66,7 +66,7 @@ Démarrée le 2026-10-19, implémenteur : secdevops. Le threat model a été com
 
 ### US-003 — Architecture socle et modèle de données du setup [developer + graphics-engineer] — 3 pts
 Branche : `feature/US-003-architecture-socle`. Implémenteur : developer (graphics-engineer si une tâche touche à la scène). Démarrée le 2026-10-20.
-**DONE**, mergée dans `main` (10af92a). Revue APPROVE au cycle 3/3 ; secdevops PASS. Tâches T0 à T6 réalisées. Dette tracée dans `docs/backlog.md` (« Dette issue de US-003 »).
+**DONE**, mergée dans `main` (voir l'historique). Revue APPROVE au cycle 3/3 ; secdevops PASS. Tâches T0 à T6 réalisées. Dette tracée dans `docs/backlog.md` (« Dette issue de US-003 »).
 - [x] T0 **Avant SEC-03a** : corrections de `docs/architecture.md` demandées par la revue US-002 : CSP de « Sécurité transverse » (~l.608) alignée sur ADR-OPS-06 (`form-action 'none'`, `upgrade-insecure-requests`) ; HSTS ajouté à ADR-OPS-06 ; ADR-OPS-03 : génération des en-têtes par SEC-03a (pas encore faite) ; « Vitest 3 » → « Vitest 4.1 » (~l.853).
 - [x] T1 Créer l'ossature `src/core/` (`schema`, `catalog`, `io`) conforme aux règles de dépendance (ADR-APP-07).
 - [x] T2 Schéma Zod `SetupV1` (jitless) et types dérivés ; `parseSetup` minimal (taille, JSON, enveloppe, validation stricte).
@@ -77,9 +77,9 @@ Branche : `feature/US-003-architecture-socle`. Implémenteur : developer (graphi
 Références : ADR-3D-02, ADR-APP-03/05/07.
 
 ### SEC-01 — Pipeline sécurité en CI [devops + secdevops] — 3 pts
-Branche : `feature/SEC-01-pipeline-securite`. **DONE**, mergée dans `main` (360a597). Revue APPROVE au cycle 1 ; secdevops PASS. Dépend de US-001 (DONE).
-Périmètre du sprint 1 (décision PO : pas de push) : les jobs sont déjà dans `ci.yml` depuis le kickoff (304e3f9) ; il reste la vérification locale. CI distante, SARIF et PR de test sont reportés au Sprint 2.
-- [x] T1 (fait au kickoff, 304e3f9) Jobs gitleaks, CodeQL, Semgrep, zizmor, SCA + licences, `build-hardening` dans `ci.yml` ; agrégateur `security` requis par `ci-ok`. Reste : relecture rapide de cohérence.
+Branche : `feature/SEC-01-pipeline-securite`. **DONE**, mergée dans `main` (voir l'historique). Revue APPROVE au cycle 1 ; secdevops PASS. Dépend de US-001 (DONE).
+Périmètre du sprint 1 (décision PO : pas de push) : les jobs sont déjà dans `ci.yml` depuis le kickoff (voir l'historique) ; il reste la vérification locale. CI distante, SARIF et PR de test sont reportés au Sprint 2.
+- [x] T1 (fait au kickoff) Jobs gitleaks, CodeQL, Semgrep, zizmor, SCA + licences, `build-hardening` dans `ci.yml` ; agrégateur `security` requis par `ci-ok`. Reste : relecture rapide de cohérence.
 - [x] T2 Vérifier que `.gitleaks.toml`, `.semgrep/p152.yml`, `scripts/check-licenses.mjs` sont en place à la racine et identiques aux sources de `docs/security/ci/`.
 - [x] T3 Vérifier l'épinglage SHA / digest des actions et images, `dependabot.yml` et `security-scheduled.yml`.
 - [x] T3a Exécuter en local chaque job (gitleaks, SCA + licences, zizmor, `build-hardening`, Semgrep) avec les mêmes commandes que `ci.yml` ; consigner dans `docs/ci/local-run-SEC-01.md`. Semgrep : Docker est arrêté, démarrer Docker Desktop (demander au PO) ou binaire local ; sinon marquer « non vérifié ». CodeQL : non exécutable en local, consigné comme tel.
@@ -91,7 +91,7 @@ Périmètre du sprint 1 (décision PO : pas de push) : les jobs sont déjà dans
 Références : `docs/security/ci-security.md`, `docs/security/ci/`.
 
 ### US-004 — Scène 3D de base et caméra orbitale [UI][3D] [graphics-engineer + technical-artist] — 5 pts
-Branche : `feature/US-004-scene-3d-camera`. **DONE**, mergée dans `main` (ded254f) ; les tâches T1 à T8 ci-dessous sont réalisées (revue 2/3, design, QA et secdevops passés). Implémenteurs sur la même branche : graphics-engineer (scène, caméra : T1 à T4, T7) puis developer (barre de vue, astuce, états en UI : T5, T6, écran WebGL). Dépend de US-001 et US-003 (DONE). Capacité : 11/15 pts livrés, US-004 (5 pts) porte le sprint à 16 pts, dépassement accepté au planning.
+Branche : `feature/US-004-scene-3d-camera`. **DONE**, mergée dans `main` (voir l'historique) ; les tâches T1 à T8 ci-dessous sont réalisées (revue 2/3, design, QA et secdevops passés). Implémenteurs sur la même branche : graphics-engineer (scène, caméra : T1 à T4, T7) puis developer (barre de vue, astuce, états en UI : T5, T6, écran WebGL). Dépend de US-001 et US-003 (DONE). Capacité : 11/15 pts livrés, US-004 (5 pts) porte le sprint à 16 pts, dépassement accepté au planning.
 - [ ] T1 Canvas R3F en `lazy()` derrière l'écran de chargement ; `frameloop="demand"` ; renderer WebGL2.
 - [ ] T2 Bureau par défaut généré depuis `assets/catalog/object-types/desk.json` (140×70, plateau + pieds, mètres, origine au sol).
 - [ ] T3 Studio : sol, fond continu, éclairage doux neutre, ombres de contact douces, tokens `--scene-*` (clair / sombre).
@@ -109,11 +109,11 @@ Décisions UX **VALIDÉES par le PO le 2026-10-19** : astuce masquée définitiv
 
 | Story | Statut (TODO / IN PROGRESS / IN REVIEW / SECURITY / DONE / BLOCKED) | Cycles de review | Notes |
 |---|---|---|---|
-| US-001 | DONE | 2 / 3 | Mergée dans `main` (merge `--no-ff` dfdfcfe). Revue APPROVE au cycle 2 (`docs/reviews/US-001.md` ; cycle 1 bloqué sur l'audit tinypool/vitest, corrigé par Vitest 4.1.12). Secdevops PASS (`docs/security/scans/US-001.md`). Checks locaux verts ; CI distante (T6) reportée au Sprint 2 (décision PO). |
-| US-002 | DONE | 2 / 3 | Mergée dans `main` (55a93a6). Revue APPROVE au cycle 2 (cycle 1 : critères SEC-10 à SEC-50 perdus, remis dans le backlog). Secdevops PASS (`docs/security/scans/US-002.md`, `.gitleaksignore` pour un faux positif). Finding LOW : e-mail nominatif dans les commits, décision PO avant push. |
-| US-003 | DONE | 3 / 3 | Mergée dans `main` (10af92a). Revue APPROVE au cycle 3 (`docs/reviews/US-003.md` ; cycles 1 et 2 : frontières de couches du lint). Secdevops PASS (`docs/security/scans/US-003.md`, findings LOW). Dette tracée dans le backlog. |
-| SEC-01 | DONE | 1 / 3 | Mergée dans `main` (360a597). Revue APPROVE au cycle 1 ; secdevops PASS. PR de test distante et SARIF reportés au Sprint 2 (décision PO). `dist/_headers` absent = erreur bloquante maintenue : SEC-03a avant le premier push. Findings à traiter tracés dans SEC-06. |
-| US-004 | DONE | 2 / 3 | Mergée dans `main` (ded254f). Revue APPROVE au cycle 2 (cycle 1 : test E2E UX-8 dépendant du temps réel, corrigé avec `page.clock`). Design ECARTS MINEURS acceptés ; QA PASS (60 FPS RTX 5070 à 1366 et 1920, 9 draw calls, 2 636 triangles, axe sans violation) ; secdevops PASS (MEDIUM CSP React Aria, LOW drei, tracés au backlog). Réserves : pas de vrai smartphone, pas de Firefox. |
+| US-001 | DONE | 2 / 3 | Mergée dans `main` (voir l'historique). Revue APPROVE au cycle 2 (`docs/reviews/US-001.md` ; cycle 1 bloqué sur l'audit tinypool/vitest, corrigé par Vitest 4.1.12). Secdevops PASS (`docs/security/scans/US-001.md`). Checks locaux verts ; CI distante (T6) reportée au Sprint 2 (décision PO). |
+| US-002 | DONE | 2 / 3 | Mergée dans `main` (voir l'historique). Revue APPROVE au cycle 2 (cycle 1 : critères SEC-10 à SEC-50 perdus, remis dans le backlog). Secdevops PASS (`docs/security/scans/US-002.md`, `.gitleaksignore` pour un faux positif). Finding LOW : e-mail nominatif dans les commits, décision PO avant push. |
+| US-003 | DONE | 3 / 3 | Mergée dans `main` (voir l'historique). Revue APPROVE au cycle 3 (`docs/reviews/US-003.md` ; cycles 1 et 2 : frontières de couches du lint). Secdevops PASS (`docs/security/scans/US-003.md`, findings LOW). Dette tracée dans le backlog. |
+| SEC-01 | DONE | 1 / 3 | Mergée dans `main` (voir l'historique). Revue APPROVE au cycle 1 ; secdevops PASS. PR de test distante et SARIF reportés au Sprint 2 (décision PO). `dist/_headers` absent = erreur bloquante maintenue : SEC-03a avant le premier push. Findings à traiter tracés dans SEC-06. |
+| US-004 | DONE | 2 / 3 | Mergée dans `main` (voir l'historique). Revue APPROVE au cycle 2 (cycle 1 : test E2E UX-8 dépendant du temps réel, corrigé avec `page.clock`). Design ECARTS MINEURS acceptés ; QA PASS (60 FPS RTX 5070 à 1366 et 1920, 9 draw calls, 2 636 triangles, axe sans violation) ; secdevops PASS (MEDIUM CSP React Aria, LOW drei, tracés au backlog). Réserves : pas de vrai smartphone, pas de Firefox. |
 
 ## Risques
 

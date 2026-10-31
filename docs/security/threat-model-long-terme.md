@@ -94,4 +94,4 @@ Les stories ci-dessous sont reprises dans [`docs/backlog.md`](../backlog.md) ave
 | SEC-42 | Confidentialité des photos | R7 (dépend de la question PO §12 q.3) | L-52 |
 | SEC-50 | AR à permissions minimales | R8 | L-60, L-61 |
 
-Les critères d'acceptation détaillés de SEC-10 à SEC-50 sont dans [`docs/backlog.md`](../backlog.md) (section « Plus tard », sous chaque id) : repris de la v1.0 de ce document (commit `304e3f9`, §9) et adaptés aux décisions PO du 2026-10-19 (en-têtes via `config/security-headers.mjs`, page « Privacy » de SEC-04, pas de domaine personnalisé). Ils seront précisés à la révision de début de release.
+Les critères d'acceptation détaillés de SEC-10 à SEC-50 sont dans [`docs/backlog.md`](../backlog.md) (section « Plus tard », sous chaque id) : repris de la v1.0 de ce document (commit du kickoff, voir l'historique, §9) et adaptés aux décisions PO du 2026-10-19 (en-têtes via `config/security-headers.mjs`, page « Privacy » de SEC-04, pas de domaine personnalisé). Ils seront précisés à la révision de début de release.

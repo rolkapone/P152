@@ -1,6 +1,6 @@
 # Scan sécurité SEC-01 : Pipeline sécurité en CI
 
-- Date : 2026-10-20. Branche `feature/SEC-01-pipeline-securite` (HEAD `7206f2b`) contre `main`, 8 fichiers (2 workflows, docs).
+- Date : 2026-10-20. Branche `feature/SEC-01-pipeline-securite` (HEAD) contre `main`, 8 fichiers (2 workflows, docs).
 - Revue d'entrée : APPROVE cycle 1 (`docs/reviews/SEC-01.md`).
 
 ## Scans exécutés
