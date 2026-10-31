@@ -8,7 +8,11 @@
  * - Free zone: the part of the 3D view that no docked panel nor the toolbar covers, in CSS
  *   pixels of the view. The UI measures it; the 3D view reads it when it frames the desk
  *   (load, Reset view, Top, Front, desk change: UX-8, graphics-engineer). It follows the
- *   panels open now; the dock keeps the zone of the load (UI).
+ *   panels open now.
+ * - Dock zone (view bar and tip, UX §2.3 and UX-7): the docked panels the dock stays clear of.
+ *   A panel that opens joins it (the dock never ends up under a panel); a panel that
+ *   collapses leaves it unchanged (the dock does not move under the user's eyes); crossing
+ *   1024 px recomputes it from the panels open then.
  */
 import { create } from "zustand";
 import { usePreferences } from "../preferences/preferencesStore";
@@ -24,12 +28,19 @@ export interface FreeZone {
   readonly height: number;
 }
 
+/** Docked panels the dock (view bar, tip) is centred between. */
+export interface DockZone {
+  readonly left: boolean;
+  readonly right: boolean;
+}
+
 export interface ShellLayoutState {
   /** Narrow window: drawers instead of docked panels. */
   readonly narrow: boolean;
   readonly leftOpen: boolean;
   readonly rightOpen: boolean;
   readonly freeZone: FreeZone;
+  readonly dockZone: DockZone;
   /** app/ on start-up, then the UI when the window crosses 1024 px. */
   setNarrow(narrow: boolean): void;
   togglePanel(side: PanelSide): void;
@@ -75,16 +86,26 @@ export function createShellLayoutStore(preferences: Preferences = usePreferences
         set(open ? { [OPEN[side]]: true, [OPEN[OTHER[side]]]: false } : { [OPEN[side]]: false });
         return;
       }
-      set({ [OPEN[side]]: open });
+      set((state) => ({
+        [OPEN[side]]: open,
+        dockZone: open ? { ...state.dockZone, [side]: true } : state.dockZone,
+      }));
       preferences.getState().setPanelCollapsed(COLLAPSED[side], !open);
     };
+    const wide = () => {
+      const open = remembered();
+      return { narrow: false, ...open, dockZone: { left: open.leftOpen, right: open.rightOpen } };
+    };
     return {
-      narrow: false,
-      ...remembered(),
+      ...wide(),
       freeZone: EMPTY_FREE_ZONE,
 
       setNarrow(narrow) {
-        set(narrow ? { narrow, leftOpen: false, rightOpen: false } : { narrow, ...remembered() });
+        set(
+          narrow
+            ? { narrow, leftOpen: false, rightOpen: false, dockZone: { left: false, right: false } }
+            : wide(),
+        );
       },
       togglePanel(side) {
         setOpen(side, !get()[OPEN[side]]);

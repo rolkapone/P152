@@ -9,16 +9,10 @@
  * - Panels: docked from 1024 px (remembered), drawers below (closed on load, one at a time,
  *   Escape closes and gives the focus back to the toggle): see `useShellLayout`.
  * - Free zone: measured here and published in `useShellLayout` for the camera framing; the
- *   dock keeps the zone of the load and does not move when a panel collapses (UX §2.3).
+ *   dock follows `dockZone` (a panel that opens joins it; one that collapses does not move
+ *   the dock, UX-7; crossing 1024 px recomputes it).
  */
-import {
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-  type KeyboardEvent,
-  type ReactNode,
-} from "react";
+import { useEffect, useLayoutEffect, useRef, type KeyboardEvent, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { useShellLayout, type PanelSide } from "../../../state";
 import { cx } from "../../components/cx";
@@ -53,7 +47,7 @@ export function StudioShell({ children }: StudioShellProps) {
   const narrow = useShellLayout((state) => state.narrow);
   const leftOpen = useShellLayout((state) => state.leftOpen);
   const rightOpen = useShellLayout((state) => state.rightOpen);
-  const [dockZone] = useState(() => ({ left: leftOpen && !narrow, right: rightOpen && !narrow }));
+  const dockZone = useShellLayout((state) => state.dockZone);
   const documentName = t("shell.documentName");
   const header = useRef<HTMLElement>(null);
   const left = useRef<HTMLElement>(null);

@@ -79,6 +79,25 @@ describe("shell layout store", () => {
     expect(store.getState().narrow).toBe(false);
   });
 
+  it("dock zone: follows a panel that opens, not one that collapses (UX-7)", () => {
+    const { store } = setup({ sidebarCollapsed: true });
+    expect(store.getState().dockZone).toEqual({ left: false, right: true });
+    store.getState().togglePanel("right");
+    expect(store.getState().dockZone).toEqual({ left: false, right: true });
+    store.getState().openPanel("left");
+    expect(store.getState().dockZone).toEqual({ left: true, right: true });
+  });
+
+  it("dock zone: recomputed when the window crosses 1024 px (narrow, then wide again)", () => {
+    const { store } = setup();
+    store.getState().setNarrow(true);
+    expect(store.getState().dockZone).toEqual({ left: false, right: false });
+    store.getState().openPanel("left"); // a drawer floats: the dock stays full width
+    expect(store.getState().dockZone).toEqual({ left: false, right: false });
+    store.getState().setNarrow(false);
+    expect(store.getState().dockZone).toEqual({ left: true, right: true });
+  });
+
   it("keeps the measured free zone, replaced only when it changes", () => {
     const { store } = setup();
     expect(store.getState().freeZone).toEqual(EMPTY_FREE_ZONE);

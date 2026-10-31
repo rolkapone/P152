@@ -140,7 +140,7 @@ describe("StudioShell (W2, design v0.4)", () => {
     );
   });
 
-  it("keeps the dock's free zone of the load when a panel collapses (UX §2.3)", async () => {
+  it("keeps the dock in place when a panel collapses (UX-7)", async () => {
     const user = userEvent.setup();
     renderShell();
     const main = screen.getByRole("main");
@@ -152,11 +152,25 @@ describe("StudioShell (W2, design v0.4)", () => {
     expect(main.dataset.freeRight).toBe("panel");
   });
 
-  it("starts from the panels open on load to place the dock", () => {
-    act(() => useShellLayout.setState({ leftOpen: false }));
+  it("moves the dock clear of a panel that opens (no overlap after a reopen)", async () => {
+    const user = userEvent.setup();
+    act(() => useShellLayout.setState({ leftOpen: false, dockZone: { left: false, right: true } }));
     renderShell();
-    expect(screen.getByRole("main").dataset.freeLeft).toBe("none");
-    expect(screen.getByRole("main").dataset.freeRight).toBe("panel");
+    const main = screen.getByRole("main");
+    expect(main.dataset.freeLeft).toBe("none");
+    expect(main.dataset.freeRight).toBe("panel");
+    await user.click(toggle(LEFT));
+    expect(main.dataset.freeLeft).toBe("panel");
+  });
+
+  it("recomputes the dock zone when the window gets wide again", () => {
+    act(() => useShellLayout.getState().setNarrow(true));
+    renderShell();
+    const main = screen.getByRole("main");
+    expect(main.dataset.freeLeft).toBe("none");
+    act(() => useShellLayout.getState().setNarrow(false));
+    expect(main.dataset.freeLeft).toBe("panel");
+    expect(main.dataset.freeRight).toBe("panel");
   });
 
   it("switches Desk / Objects with a segmented tab list; Desk is selected on load (UX-10)", async () => {

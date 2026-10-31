@@ -255,3 +255,53 @@ test("reduced motion: panels open and close without animation (UX-19)", async ({
   );
   for (const seconds of durations) expect(seconds).toBeLessThanOrEqual(0.001);
 });
+
+test("the dock follows the window and reopened panels: never under a panel (UX-7, UX-21)", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 900, height: 768 });
+  await page.goto("/");
+  await waitForScene(page);
+  await page.setViewportSize({ width: 1100, height: 768 });
+  await expect(inspector(page)).toBeVisible();
+  const tip = page.locator(".material-regular", { hasText: "Drag to turn the view" });
+  const clear = async () => {
+    const left = await box(page, sidebar(page));
+    const right = await box(page, inspector(page));
+    for (const element of [viewBar(page), tip]) {
+      const rect = await box(page, element);
+      expect(rect.x).toBeGreaterThanOrEqual(left.x + left.width);
+      expect(rect.x + rect.width).toBeLessThanOrEqual(right.x);
+    }
+  };
+  await expect.poll(async () => (await box(page, tip)).x).toBeGreaterThanOrEqual(248);
+  await clear();
+
+  // Collapsing does not move the dock; reopening keeps it clear of the panel.
+  const before = await box(page, viewBar(page));
+  await toggle(page, "Desk and objects panel").click();
+  await expect(sidebar(page)).toBeHidden();
+  expect(await box(page, viewBar(page))).toEqual(before);
+  await toggle(page, "Desk and objects panel").click();
+  await expect(sidebar(page)).toBeVisible();
+  await clear();
+});
+
+test("a panel opened after a load with it collapsed pushes the dock clear of it", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await toggle(page, "Properties and alerts panel").click();
+  await page.reload();
+  await waitForScene(page);
+  await expect(inspector(page)).toBeHidden();
+  await toggle(page, "Properties and alerts panel").click();
+  await expect(inspector(page)).toBeVisible();
+  const right = await box(page, inspector(page));
+  await expect
+    .poll(async () => {
+      const bar = await box(page, viewBar(page));
+      return bar.x + bar.width <= right.x;
+    })
+    .toBe(true);
+});
