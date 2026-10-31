@@ -1,0 +1,16 @@
+# SEC-02 — Durcissement du dépôt GitHub public  [Must | 1 pt | voie RENFORCÉE]
+
+> Archive : story **DONE** au Sprint 2. Voie : RENFORCÉE. Index : [backlog](../../backlog.md). Dette de la story : [dette.md](../../dette.md).
+
+**État au 2026-10-31 : DONE** (Sprint 2, voie RENFORCÉE, 1 pt). PR #17 (`SECURITY.md`, `CODEOWNERS`, liste des réglages) et PR #20 (section « Application », premier merge via le ruleset actif, sans contournement) mergées. Réglages appliqués par le PO et vérifiés par l'API le 2026-10-31 : private vulnerability reporting, security updates, secret scanning et push protection, alertes Dependabot, approbation des workflows externes, actions sélectionnées + épinglage SHA obligatoire, `GITHUB_TOKEN` en lecture seule par défaut, merge commit seul, ruleset `main` actif (PR obligatoire, `ci-ok` requis, ni force-push ni suppression ; contournement Admin en mode pull_request). Décisions du PO : contournement Admin ; exception minimatch jusqu'au 2026-11-30 (`docs/security/exceptions.md`, `osv-scanner.toml`) ; pas de suppression automatique des branches ; licence reportée ; **retrait de la règle `code_scanning`** (elle bloquait toutes les PR ; la garde CodeQL ≥ high est à remettre en CI, dans SEC-06).
+En tant qu'équipe, je veux un dépôt public durci afin de réduire le risque de compromission de la chaîne de production.
+Critères d'acceptation :
+- [ ] MFA actif sur les comptes ayant un accès en écriture. *(non vérifiable par l'API : confirmation du PO demandée)*
+- [x] Ruleset sur `main` : PR obligatoire, `ci-ok` requis, force-push et suppression interdits (vérifié). **Écart accepté par le PO** : résultats Code scanning ≥ High non bloquants (règle `code_scanning` retirée) ; garde à remettre en CI (SEC-06).
+- [x] Secret scanning + push protection, Dependabot alerts, private vulnerability reporting activés (vérifié) ; `SECURITY.md` publié (PR #17).
+- [x] Actions : `GITHUB_TOKEN` en lecture seule (vérifié), approbation des contributeurs externes (vérifié), épinglage SHA obligatoire (vérifié, `sha_pinning_required`).
+- [x] `CODEOWNERS` couvre `.github/`, `config/security-headers.mjs`, `package.json`, `pnpm-lock.yaml`, `pnpm-workspace.yaml`, `.npmrc`, `.gitleaks.toml`, `.semgrep/` (PR #17).
+- [x] *(suivi PR #2)* Alertes Dependabot activées (vérifié). 1 alerte ouverte : `minimatch` (dev, medium), couverte par l'exception jusqu'au 2026-11-30.
+- [x] *(suivi PR #2)* Les 4 alertes `p152-test-hook-reference` sont fermées « used in tests » (vérifié : 0 alerte ouverte de cette règle).
+- [x] *(reporté de SEC-01)* PR #19 : 4 cas négatifs (faux secret, `innerHTML`, dépendance HIGH, `__p152test`) arrêtés par la CI, fermée sans merge.
+Notes techniques / dépendances : devops. Les réglages du compte/dépôt GitHub ne sont appliqués qu'avec l'accord explicite du PO (le PO réalise ou valide chaque action). Dépend de US-001 et de la création du dépôt distant. Suivis au 2026-10-31 (API) : Scorecard ouvertes #5 (BranchProtectionID, high), #6 (SecurityPolicyID, medium), #7 (LicenseID, low, décision PO), #9 (MaintainedID, high), à re-vérifier par secdevops au prochain scan ; Scorecard fermées « won't fix » : CIIBestPracticesID, CodeReviewID ; 11 PR Dependabot ouvertes au 2026-10-31 (#4 à #13, #15), dont #12, #13, #15 signalées en CI rouge : à traiter en story.
