@@ -7,7 +7,11 @@
  *   below `minCameraY` nor inside the desk;
  * - Reset / Top / Front: 480 ms `in-out` transitions along an arc, interrupted by any user
  *   action, instant under `prefers-reduced-motion` (which also removes the inertia);
- * - keyboard steps arrive through the state store (`ViewController`).
+ * - keyboard steps arrive through the state store (`ViewController`);
+ * - framing in the free zone between the panels (US-005 UX-8): read when a view is framed
+ *   (start, Reset / Top / Front), never followed live, so that collapsing or opening a panel
+ *   never moves the camera (UX-7). The lens shift keeps the zone of the last framing and
+ *   glides to the new one with the view transition.
  */
 import CameraControlsImpl from "camera-controls";
 import {
@@ -38,11 +42,19 @@ import {
   safeCameraY,
   stepPose,
   viewPose,
-  lensShiftFor,
   type CameraLimits,
   type Pose,
   type ViewStep,
 } from "../math/camera";
+import {
+  blendLensInto,
+  copyLensInto,
+  createLens,
+  isUsableZone,
+  lensInto,
+  lensY,
+  type ScreenZone,
+} from "../math/framing";
 import { EASE_IN_OUT } from "../math/easing";
 import { DEG2RAD, mmToM } from "../math/units";
 
@@ -112,6 +124,8 @@ export interface ViewRigOptions {
   /** A drag or a wheel zoom changed the view. */
   readonly onPointerViewChange: () => void;
   readonly now?: () => number;
+  /** Free zone of the view between the panels (CSS px), read when a view is framed (UX-8). */
+  readonly freeZone?: () => ScreenZone | null;
 }
 
 export class ViewRig implements ViewController {
@@ -123,6 +137,15 @@ export class ViewRig implements ViewController {
   private readonly invalidate: () => void;
   private readonly onPointerViewChange: () => void;
   private readonly now: () => number;
+  private readonly freeZone: () => ScreenZone | null;
+  /** Zone of the last framing (copy), or null: whole view. */
+  private zone: ScreenZone | null = null;
+  /** Lens shift drawn now, and the two ends of the one of a view transition. */
+  private readonly lens = createLens();
+  private readonly lensFrom = createLens();
+  private readonly lensTo = createLens();
+  /** The view was turned, moved or zoomed, or a view command ran, since the start. */
+  private touched = false;
   private readonly deskWidth: number;
   private reducedMotion = false;
   private tween: Tween | null = null;
@@ -140,6 +163,7 @@ export class ViewRig implements ViewController {
     this.invalidate = options.invalidate;
     this.onPointerViewChange = options.onPointerViewChange;
     this.now = options.now ?? (() => performance.now());
+    this.freeZone = options.freeZone ?? (() => null);
     this.deskWidth = mmToM(options.config.desk.widthMm);
     this.limits = cameraLimits(options.config);
 
@@ -167,7 +191,8 @@ export class ViewRig implements ViewController {
     this.setReducedMotion(options.reducedMotion);
 
     // Default view, without transition.
-    this.applyPose(this.viewPose("reset"), false);
+    this.applyPose(this.frameView("reset"), false);
+    copyLensInto(this.lens, this.lensTo);
     controls.update(0);
     this.updateLensShift();
 
@@ -212,18 +237,46 @@ export class ViewRig implements ViewController {
     this.controls.getSpherical(this.spherical, true);
   }
 
+  /** Pose of a view in the zone of the last framing. */
   viewPose(view: "reset" | "top" | "front"): Pose {
-    return viewPose(this.config, view, this.camera.aspect, this.limits);
+    return viewPose(this.config, view, this.camera.aspect, this.limits, this.zone);
+  }
+
+  /** Reads the free zone now (it becomes `lensTo`), then frames the view in it. */
+  private frameView(view: "reset" | "top" | "front"): Pose {
+    const zone = this.freeZone();
+    this.zone = isUsableZone(zone) ? Object.freeze({ ...zone }) : null;
+    lensInto(this.lensTo, this.zone);
+    return this.viewPose(view);
+  }
+
+  /**
+   * The free zone changed (panel collapsed or opened, window resized). The camera stays where
+   * it is (UX-7): the next Reset / Top / Front reads the new zone. Only exception: the first
+   * framing had no measured zone yet and nobody has moved the view, then the start framing is
+   * simply redone (first display, UX-8).
+   */
+  freeZoneChanged(): void {
+    if (this.touched || this.zone !== null) return;
+    const pose = this.frameView("reset");
+    if (this.zone === null) return;
+    this.tween = null;
+    copyLensInto(this.lens, this.lensTo);
+    this.applyPose(pose, false);
+    this.invalidate();
   }
 
   /** ViewController: view bar and keyboard. */
   run(command: ViewCommand): ViewCommandResult {
+    this.touched = true;
     const from = this.endPose();
     if (command.type === "view") {
-      const to = this.viewPose(command.view);
+      copyLensInto(this.lensFrom, this.lens);
+      const to = this.frameView(command.view);
       const duration = this.config.camera.transitionMs;
       if (this.reducedMotion || duration === 0) {
         this.tween = null;
+        copyLensInto(this.lens, this.lensTo);
         this.applyPose(to, false);
       } else {
         this.tween = { from, to, start: this.now(), duration };
@@ -244,10 +297,10 @@ export class ViewRig implements ViewController {
     const tween = this.tween;
     if (tween !== null) {
       const t = Math.min((this.now() - tween.start) / tween.duration, 1);
-      this.applyPose(
-        interpolatePoseInto(this.framePose, tween.from, tween.to, EASE_IN_OUT(t)),
-        false,
-      );
+      const eased = EASE_IN_OUT(t);
+      this.applyPose(interpolatePoseInto(this.framePose, tween.from, tween.to, eased), false);
+      // The lens glides with the view (an interrupted transition keeps it where it is).
+      blendLensInto(this.lens, this.lensFrom, this.lensTo, eased);
       if (t >= 1) this.tween = null;
     } else {
       // Zooming in lowers the largest tilt that keeps the camera above minCameraY.
@@ -280,15 +333,23 @@ export class ViewRig implements ViewController {
   }
 
   /**
-   * Lens shift of the current tilt (render/math/camera.ts `lensShiftFor`). Only ratios of the
-   * view offset matter, so it survives the resizes of the canvas.
+   * Lens shift of the current tilt (render/math/framing.ts): the target is drawn at NDC
+   * (x, y). Only ratios of the view offset matter, so it survives the resizes of the canvas.
+   * No allocation (called before each frame).
    */
   private updateLensShift(): void {
-    const shift = lensShiftFor(this.controls.polarAngle);
+    const x = this.lens.x;
+    const y = lensY(this.lens, this.controls.polarAngle);
     const view = this.camera.view;
-    if (view?.enabled && Math.abs(view.offsetY - shift / 2) < 1e-6) return;
+    if (
+      view?.enabled &&
+      Math.abs(view.offsetX / view.fullWidth + x / 2) < 1e-6 &&
+      Math.abs(view.offsetY / view.fullHeight - y / 2) < 1e-6
+    ) {
+      return;
+    }
     const { aspect } = this.camera;
-    this.camera.setViewOffset(aspect, 1, 0, shift / 2, aspect, 1);
+    this.camera.setViewOffset(aspect, 1, (-x * aspect) / 2, y / 2, aspect, 1);
   }
 
   private applyPose(pose: Pose, smooth: boolean): void {
@@ -304,6 +365,7 @@ export class ViewRig implements ViewController {
   }
 
   private readonly onControlStart = () => {
+    this.touched = true;
     this.tween = null;
     this.onPointerViewChange();
     const action = this.controls.currentAction;
@@ -314,6 +376,7 @@ export class ViewRig implements ViewController {
 
   /** Also fired by the wheel, which has no "controlstart". */
   private readonly onControl = () => {
+    this.touched = true;
     this.tween = null;
     this.onPointerViewChange();
     this.invalidate();

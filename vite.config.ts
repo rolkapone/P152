@@ -1,6 +1,7 @@
 /// <reference types="vitest/config" />
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
+import { securityHeadersPlugin } from "./config/security-headers.mjs";
 
 // Pure code (src/core, src/render/math, tests/unit) runs in Node, UI code in jsdom (ADR-APP-08).
 const NODE_TESTS = [
@@ -10,8 +11,14 @@ const NODE_TESTS = [
 ];
 
 export default defineConfig({
-  plugins: [react()],
-  build: { target: "es2023", sourcemap: false },
+  plugins: [react(), securityHeadersPlugin()],
+  build: {
+    target: "es2023",
+    sourcemap: false,
+    // The minifier drops the @license headers: the notices of every bundled dependency (MIT,
+    // ISC for lucide-react…) ship in this file instead (US-005, licence kept).
+    license: { fileName: "THIRD_PARTY_LICENSES.md" },
+  },
   test: {
     projects: [
       { extends: true, test: { name: "node", environment: "node", include: NODE_TESTS } },

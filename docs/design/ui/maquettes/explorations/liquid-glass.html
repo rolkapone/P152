@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Exploration - Liquid glass (not the default) - Deskfit design system v0.4</title>
+<style>
+/* Police : Inter si installee localement, sinon repli systeme. Aucun reseau. */
+@font-face{font-family:"Inter";font-style:normal;font-weight:100 900;font-display:swap;src:local("Inter Variable"),local("Inter")}
+
+/* ======================= BEGIN SYNCED (tokens.css <-> maquettes) ======================= */
+:root {
+  /* ---- Typographie : Inter + echelle des styles dynamiques (minimum 14 px) ---- */
+  --font-sans: "Inter", system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, "Cascadia Mono", Consolas, Menlo, monospace;
+  --font-features: "kern", "calt", "ss03";                       /* defaut : guillemets et virgules ronds */
+  --font-features-alt: "kern", "calt", "ss03", "cv11", "ss01";   /* variante a evaluer (a simple, chiffres ouverts) */
+  font-feature-settings: var(--font-features);
+  --text-sm: 0.875rem;    /* 14 px - minimum de l'UI (Subheadline, Footnote, Caption) */
+  --text-md: 1rem;        /* 16 px - Body, Headline */
+  --text-lg: 1.0625rem;   /* 17 px - titre de barre, verdict */
+  --text-xl: 1.375rem;    /* 22 px - Title 2 */
+  --text-2xl: 1.75rem;    /* 28 px - Title 1 */
+  --text-3xl: 2.125rem;   /* 34 px - Large Title */
+  --leading-tight: 1.2;
+  --leading-snug: 1.3;
+  --leading-normal: 1.45;
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+  /* Styles (raccourci `font`). ATTENTION : `font:` remet font-feature-settings a zero ->
+     toujours ajouter `font-feature-settings: var(--font-features)` (les classes .t-* le font). */
+  --font-large-title: 700 2.125rem/1.2 var(--font-sans);
+  --font-title-1: 700 1.75rem/1.21 var(--font-sans);
+  --font-title-2: 600 1.375rem/1.27 var(--font-sans);
+  --font-title-3: 600 1.25rem/1.25 var(--font-sans);
+  --font-headline: 600 1rem/1.375 var(--font-sans);
+  --font-body: 400 1rem/1.375 var(--font-sans);
+  --font-callout: 400 0.9375rem/1.33 var(--font-sans);
+  --font-subheadline: 400 0.875rem/1.36 var(--font-sans);
+  --font-footnote: 400 0.875rem/1.29 var(--font-sans);
+  --font-caption: 500 0.875rem/1.29 var(--font-sans);
+  /* Chasse optique (Inter n'a pas d'axe opsz) : -0.0223 + 0.185 * e^(-0.1745 * px), arrondi */
+  --tracking-large-title: -0.022em;
+  --tracking-title-1: -0.021em;
+  --tracking-title-2: -0.018em;
+  --tracking-title-3: -0.017em;
+  --tracking-headline: -0.011em;
+  --tracking-body: -0.011em;
+  --tracking-callout: -0.009em;
+  --tracking-subheadline: -0.006em;
+  --tracking-footnote: -0.006em;
+  --tracking-caption: 0em;
+  --tracking-tight: -0.018em;     /* alias historique : titres >= 22 px */
+  --tracking-overline: 0.04em;
+
+  /* ---- Espacements (base 4 px) ---- */
+  --space-0: 0;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --panel-pad: 16px;
+  --float-inset: 12px;   /* marge des panneaux flottants (repli iPadOS / tiroirs) */
+
+  /* ---- Rayons concentriques : interne = externe - marge (22-8=14, 14-4=10, 10-4=6) ---- */
+  --radius-sm: 6px;      /* vignettes, tooltips, puces */
+  --radius-md: 10px;     /* champs, lignes de liste, segments internes */
+  --radius-lg: 14px;     /* groupes, cartes, alertes, popovers */
+  --radius-xl: 22px;     /* panneaux flottants, feuilles, modales */
+  --radius-pill: 999px;  /* boutons, segmented, verdict */
+
+  /* ---- Tailles ---- */
+  --control-sm: 32px;
+  --control-md: 36px;
+  --control-lg: 44px;
+  --topbar-h: 52px;        /* barre d'outils unifiee */
+  --panel-left-w: 248px;   /* barre laterale */
+  --panel-right-w: 312px;  /* inspecteur */
+  --drawer-max-w: 360px;   /* superposition (largeur < 1024 px) */
+  --popover-w: 320px;
+  --sheet-w: 480px;
+  --toggle-size: 40px;     /* cible des boutons de barre d'outils, pastille de verdict */
+  --row-min-h: 56px;       /* ligne de liste de choix (bureaux) */
+  --thumb-w: 56px;
+  --thumb-h: 44px;
+  --icon-sm: 16px;
+  --icon-md: 18px;
+  --icon-lg: 20px;
+  --icon-xl: 24px;
+  --icon-stroke: 1.6;      /* Lucide : 1.5 a 1.75 */
+  --focus-width: 3px;
+  --focus-offset: 2px;
+  --border-width: 1px;
+
+  /* ---- Motion ---- */
+  --duration-fast: 120ms;     /* survol, appui */
+  --duration-base: 200ms;     /* menus, toasts, fondus */
+  --duration-slow: 320ms;     /* barres, bandeaux */
+  --duration-spring: 460ms;   /* ressort : panneaux, feuilles, popovers, segment */
+  --duration-camera: 480ms;   /* transitions de camera 3D */
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-spring: cubic-bezier(0.34, 1.3, 0.64, 1);       /* ressort leger (repli : cubic-bezier) */
+  --ease-spring-soft: cubic-bezier(0.22, 1, 0.36, 1);    /* ressort amorti sans depassement */
+  --press-scale: 0.97;
+
+  /* ---- Materiaux (vibrancy) : filtres. Teintes dans les blocs de theme ---- */
+  --material-saturate: 180%;
+  --material-filter-ultra-thin: blur(16px) saturate(160%);
+  --material-filter-thin: blur(20px) saturate(170%);
+  --material-filter-regular: blur(28px) saturate(180%);
+  --material-filter-thick: blur(36px) saturate(180%);
+  --glass-blur: 28px;                                      /* alias historiques = materiau regular */
+  --glass-saturate: 180%;
+  --glass-filter: var(--material-filter-regular);
+  --glass-filter-soft: blur(12px) saturate(140%);          /* voile des feuilles */
+
+  /* ---- Z-index ---- */
+  --z-panel: 10;
+  --z-floating: 20;
+  --z-menu: 30;
+  --z-modal: 40;
+  --z-toast: 50;
+  --z-skip: 60;
+}
+
+/* Ressorts reels (equation d'un ressort amorti) quand linear() est supporte */
+@supports (transition-timing-function: linear(0, 1)) {
+  :root {
+    --ease-spring: linear(0, 0.081 5%, 0.258 10%, 0.46 15%, 0.644 20%, 0.793 25%, 0.901 30%, 0.972 35%, 1.014 40%, 1.033 45%, 1.038 50%, 1.035 55%, 1.029 60%, 1.021 65%, 1.014 70%, 1.008 75%, 1.004 80%, 1);
+    --ease-spring-soft: linear(0, 0.09 5%, 0.264 10%, 0.442 15%, 0.594 20%, 0.713 25%, 0.801 30%, 0.908 40%, 0.96 50%, 0.983 60%, 0.993 70%, 0.997 80%, 1);
+  }
+}
+
+/* ============================ THEME CLAIR ============================ */
+:root,
+[data-theme="light"] {
+  color-scheme: light;
+
+  --color-bg: #F2F2F7;              /* fond de fenetre (gris systeme) */
+  --color-surface: #FFFFFF;         /* lignes de groupe, champs, feuilles */
+  --color-surface-2: #EBEBF0;       /* aplats secondaires */
+  --color-raised: #FFFFFF;          /* pouce du controle segmente */
+  --color-overlay: rgba(0, 0, 0, 0.32);
+  --color-border: #D8D8DE;          /* decoratif */
+  --color-separator: rgba(60, 60, 67, 0.16);   /* filets : decoratifs */
+  --color-border-strong: #86868E;   /* contours porteurs d'information : 3.6:1 sur surface */
+  --color-fill: rgba(118, 118, 128, 0.14);     /* pistes (segmented, switch off), survol */
+  --color-fill-hover: rgba(118, 118, 128, 0.10);
+
+  --color-text: #1C1C1E;            /* 17:1 sur surface */
+  --color-text-muted: #4C4C54;      /* 8.4:1 sur surface ; 4.6:1 minimum sur materiau regular, pire fond */
+  --color-text-disabled: #9A9AA2;   /* desactive : exempte */
+
+  --color-accent: #0A64E8;          /* UNE couleur d'accent (bleu systeme). 5.2:1 sur surface */
+  --color-accent-hover: #0553C4;
+  --color-accent-active: #0443A3;
+  --color-on-accent: #FFFFFF;       /* 5.2:1 sur accent */
+  --color-accent-solid: #0A64E8;    /* aplat plein (bouton principal, switch actif) */
+  --color-accent-solid-hover: #0553C4;
+  --color-accent-solid-active: #0443A3;
+  --color-on-accent-solid: #FFFFFF;
+  --color-accent-subtle: #DDEAFE;   /* selection "accent tint", OPAQUE */
+  --color-accent-subtle-text: #0A46B8;  /* 6.7:1 sur accent-subtle */
+  --color-focus: #0A52C2;           /* 7.0:1 sur surface ; >= 3:1 meme sous materiau thin, pire fond */
+  --color-focus-halo: rgba(10, 82, 194, 0.28);
+
+  /* Statuts : semantiques, jamais decoratifs */
+  --color-success: #137A3F;
+  --color-success-bg: #E3F4EA;
+  --color-error: #B42318;
+  --color-error-bg: #FDECEA;
+  --color-warning: #8A4B00;
+  --color-warning-icon: #B86E00;
+  --color-warning-bg: #FFF3DC;
+  --color-info: #0B6B8A;
+  --color-info-bg: #E3F3F8;
+  --color-danger-solid: #B42318;
+  --color-on-danger: #FFFFFF;
+
+  /* Ombres tres douces */
+  --shadow-1: 0 0 0 0.5px rgba(0,0,0,.05), 0 1px 2px rgba(0,0,0,.04), 0 2px 8px rgba(0,0,0,.04);
+  --shadow-2: 0 0 0 0.5px rgba(0,0,0,.06), 0 4px 12px rgba(0,0,0,.06), 0 12px 32px rgba(0,0,0,.10);
+  --shadow-3: 0 0 0 0.5px rgba(0,0,0,.08), 0 8px 24px rgba(0,0,0,.08), 0 32px 80px rgba(0,0,0,.16);
+
+  /* Materiaux : teinte + opacite. Pire fond = noir pur. Regle d'usage dans design-system.md 5 */
+  --material-ultra-thin: rgba(246, 246, 248, 0.55);   /* glyphes seuls (>= 3:1) */
+  --material-thin: rgba(246, 246, 248, 0.72);         /* texte principal + icones */
+  --material-regular: rgba(246, 246, 248, 0.80);      /* tout texte (barre laterale, inspecteur, barres) */
+  --material-thick: rgba(248, 248, 250, 0.90);        /* menus, popovers, feuilles */
+  --material-solid: #F2F2F7;                          /* repli opaque des 3 premiers */
+  --material-solid-raised: #FFFFFF;                   /* repli opaque de thick */
+  --material-hairline: rgba(255, 255, 255, 0.60);     /* liseré interieur 1 px */
+  --material-outline: rgba(0, 0, 0, 0.10);            /* contour exterieur 0.5 px */
+  --material-rim: inset 0 0 0 1px var(--material-hairline), 0 0 0 0.5px var(--material-outline);
+  --glass-tint: var(--material-regular);              /* alias historiques */
+  --glass-border: var(--material-hairline);
+  --glass-shadow: var(--material-rim), 0 1px 2px rgba(0,0,0,.04), 0 8px 24px rgba(0,0,0,.08), 0 24px 56px rgba(0,0,0,.10);
+  --glass-link: #0A46B8;            /* lien sur materiau : 4.7:1 sur le pire fond */
+
+  /* Scene 3D : studio clair neutre (photo produit) */
+  --scene-bg-top: #FAFAFC;
+  --scene-bg-bottom: #DFE2E8;
+  --scene-floor: #EEF0F3;
+  --scene-shadow: rgba(40, 48, 64, 0.28);
+  --scene-desk: #D9CBB2;
+  --scene-desk-edge: #B2A283;
+  --scene-object: #8E97A6;
+  --scene-object-edge: #5F6878;
+  --scene-outline-inner: #FFFFFF;
+  --scene-outline-outer: #1B1F27;
+  --scene-selection: #0A64E8;
+  --scene-error: #B42318;
+  --scene-warning: #B86E00;
+}
+
+/* ============================ THEME SOMBRE ============================ */
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  --color-bg: #0B0B0D;
+  --color-surface: #1C1C1E;
+  --color-surface-2: #2C2C2E;
+  --color-raised: #48484C;
+  --color-overlay: rgba(0, 0, 0, 0.55);
+  --color-border: #38383A;
+  --color-separator: rgba(84, 84, 88, 0.55);
+  --color-border-strong: #8E8E98;   /* 5.2:1 sur surface */
+  --color-fill: rgba(118, 118, 128, 0.28);
+  --color-fill-hover: rgba(118, 118, 128, 0.18);
+
+  --color-text: #F5F5F7;            /* 15.6:1 */
+  --color-text-muted: #C7C7D0;      /* 8.3:1 sur surface-2 ; 4.9:1 sur materiau regular, pire fond */
+  --color-text-disabled: #6E6E76;
+
+  --color-accent: #5AA0FF;          /* 6.4:1 sur surface, 5.2:1 sur surface-2 */
+  --color-accent-hover: #7DB4FF;
+  --color-accent-active: #9BC4FF;
+  --color-on-accent: #0B1220;       /* 7.4:1 sur accent */
+  --color-accent-solid: #0A6CF0;    /* texte blanc dessus : 4.8:1 */
+  --color-accent-solid-hover: #0F66DC;
+  --color-accent-solid-active: #0B58BE;
+  --color-on-accent-solid: #FFFFFF;
+  --color-accent-subtle: #17335E;
+  --color-accent-subtle-text: #B3D1FF;  /* 8.1:1 sur accent-subtle */
+  --color-focus: #7DB4FF;
+  --color-focus-halo: rgba(125, 180, 255, 0.30);
+
+  --color-success: #4CC38A;
+  --color-success-bg: #12301F;
+  --color-error: #FF8A80;
+  --color-error-bg: #3A1714;
+  --color-warning: #F2B04A;
+  --color-warning-icon: #F2B04A;
+  --color-warning-bg: #33260D;
+  --color-info: #5CC4E0;
+  --color-info-bg: #0F2A33;
+  --color-danger-solid: #C4302B;
+  --color-on-danger: #FFFFFF;
+
+  --shadow-1: 0 0 0 0.5px rgba(255,255,255,.06), 0 1px 2px rgba(0,0,0,.30), 0 2px 8px rgba(0,0,0,.25);
+  --shadow-2: 0 0 0 0.5px rgba(255,255,255,.08), 0 4px 12px rgba(0,0,0,.35), 0 12px 32px rgba(0,0,0,.40);
+  --shadow-3: 0 0 0 0.5px rgba(255,255,255,.10), 0 8px 24px rgba(0,0,0,.40), 0 32px 80px rgba(0,0,0,.55);
+
+  --material-ultra-thin: rgba(30, 30, 33, 0.55);
+  --material-thin: rgba(30, 30, 33, 0.72);
+  --material-regular: rgba(30, 30, 33, 0.80);
+  --material-thick: rgba(28, 28, 30, 0.90);
+  --material-solid: #1C1C1E;
+  --material-solid-raised: #262628;
+  --material-hairline: rgba(255, 255, 255, 0.14);
+  --material-outline: rgba(0, 0, 0, 0.60);
+  --material-rim: inset 0 0 0 1px var(--material-hairline), 0 0 0 0.5px var(--material-outline);
+  --glass-tint: var(--material-regular);
+  --glass-border: var(--material-hairline);
+  --glass-shadow: var(--material-rim), 0 1px 2px rgba(0,0,0,.30), 0 8px 24px rgba(0,0,0,.35), 0 24px 56px rgba(0,0,0,.45);
+  --glass-link: #A8C8FF;            /* 5.1:1 sur le pire fond (blanc pur sous materiau sombre) */
+
+  --scene-bg-top: #3A414D;
+  --scene-bg-bottom: #12161C;
+  --scene-floor: #1C2129;
+  --scene-shadow: rgba(0, 0, 0, 0.5);
+  --scene-desk: #8C7B62;
+  --scene-desk-edge: #6A5B46;
+  --scene-object: #8E97A6;
+  --scene-object-edge: #C3CAD6;
+  --scene-outline-inner: #FFFFFF;
+  --scene-outline-outer: #0B0E12;
+  --scene-selection: #7DB4FF;
+  --scene-error: #FF8A80;
+  --scene-warning: #F2B04A;
+}
+
+/* Preference systeme si aucun choix explicite (defaut = systeme) */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    color-scheme: dark;
+    --color-bg: #0B0B0D; --color-surface: #1C1C1E; --color-surface-2: #2C2C2E; --color-raised: #48484C;
+    --color-overlay: rgba(0,0,0,.55); --color-border: #38383A; --color-separator: rgba(84,84,88,.55);
+    --color-border-strong: #8E8E98; --color-fill: rgba(118,118,128,.28); --color-fill-hover: rgba(118,118,128,.18);
+    --color-text: #F5F5F7; --color-text-muted: #C7C7D0; --color-text-disabled: #6E6E76;
+    --color-accent: #5AA0FF; --color-accent-hover: #7DB4FF; --color-accent-active: #9BC4FF; --color-on-accent: #0B1220;
+    --color-accent-solid: #0A6CF0; --color-accent-solid-hover: #0F66DC; --color-accent-solid-active: #0B58BE; --color-on-accent-solid: #FFFFFF;
+    --color-accent-subtle: #17335E; --color-accent-subtle-text: #B3D1FF;
+    --color-focus: #7DB4FF; --color-focus-halo: rgba(125,180,255,.30);
+    --color-success: #4CC38A; --color-success-bg: #12301F;
+    --color-error: #FF8A80; --color-error-bg: #3A1714;
+    --color-warning: #F2B04A; --color-warning-icon: #F2B04A; --color-warning-bg: #33260D;
+    --color-info: #5CC4E0; --color-info-bg: #0F2A33;
+    --color-danger-solid: #C4302B; --color-on-danger: #FFFFFF;
+    --shadow-1: 0 0 0 0.5px rgba(255,255,255,.06), 0 1px 2px rgba(0,0,0,.30), 0 2px 8px rgba(0,0,0,.25);
+    --shadow-2: 0 0 0 0.5px rgba(255,255,255,.08), 0 4px 12px rgba(0,0,0,.35), 0 12px 32px rgba(0,0,0,.40);
+    --shadow-3: 0 0 0 0.5px rgba(255,255,255,.10), 0 8px 24px rgba(0,0,0,.40), 0 32px 80px rgba(0,0,0,.55);
+    --material-ultra-thin: rgba(30,30,33,.55); --material-thin: rgba(30,30,33,.72);
+    --material-regular: rgba(30,30,33,.80); --material-thick: rgba(28,28,30,.90);
+    --material-solid: #1C1C1E; --material-solid-raised: #262628;
+    --material-hairline: rgba(255,255,255,.14); --material-outline: rgba(0,0,0,.60);
+    --material-rim: inset 0 0 0 1px var(--material-hairline), 0 0 0 0.5px var(--material-outline);
+    --glass-tint: var(--material-regular); --glass-border: var(--material-hairline);
+    --glass-shadow: var(--material-rim), 0 1px 2px rgba(0,0,0,.30), 0 8px 24px rgba(0,0,0,.35), 0 24px 56px rgba(0,0,0,.45);
+    --glass-link: #A8C8FF;
+    --scene-bg-top: #3A414D; --scene-bg-bottom: #12161C; --scene-floor: #1C2129; --scene-shadow: rgba(0,0,0,.5);
+    --scene-desk: #8C7B62; --scene-desk-edge: #6A5B46; --scene-object: #8E97A6;
+    --scene-object-edge: #C3CAD6; --scene-outline-inner: #FFFFFF; --scene-outline-outer: #0B0E12;
+    --scene-selection: #7DB4FF; --scene-error: #FF8A80; --scene-warning: #F2B04A;
+  }
+}
+
+/* ============ MATERIAUX : primitives + replis (opaque si non supporte / transparence reduite) ============
+   .material-ultra-thin | -thin | -regular | -thick : fond + flou. Ajouter .rim (liseré + contour) ou
+   .float (liseré + ombre douce) pour un element flottant ; un volet colle au bord n'en a pas
+   (un filet --color-separator suffit). .glass = regular + .float (alias historique).
+   Regle AA (pire fond : noir sous clair, blanc sous sombre) : ultra-thin = glyphes seuls ;
+   thin = texte principal + icones ; regular = tout texte ; thick = tout + statuts. */
+.material-ultra-thin { background: var(--material-ultra-thin); -webkit-backdrop-filter: var(--material-filter-ultra-thin); backdrop-filter: var(--material-filter-ultra-thin); }
+.material-thin { background: var(--material-thin); -webkit-backdrop-filter: var(--material-filter-thin); backdrop-filter: var(--material-filter-thin); }
+.material-regular { background: var(--material-regular); -webkit-backdrop-filter: var(--material-filter-regular); backdrop-filter: var(--material-filter-regular); }
+.material-thick { background: var(--material-thick); -webkit-backdrop-filter: var(--material-filter-thick); backdrop-filter: var(--material-filter-thick); }
+.rim { box-shadow: var(--material-rim); }
+.float { box-shadow: var(--glass-shadow); }
+.glass { background: var(--glass-tint); -webkit-backdrop-filter: var(--glass-filter); backdrop-filter: var(--glass-filter); box-shadow: var(--glass-shadow); }
+/* Voile des feuilles : flou leger de la scene derriere */
+.scrim {
+  background: var(--color-overlay);
+  -webkit-backdrop-filter: var(--glass-filter-soft);
+  backdrop-filter: var(--glass-filter-soft);
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .material-ultra-thin, .material-thin, .material-regular, .glass { background: var(--material-solid); }
+  .material-thick { background: var(--material-solid-raised); }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .material-ultra-thin, .material-thin, .material-regular, .glass { background: var(--material-solid); -webkit-backdrop-filter: none; backdrop-filter: none; }
+  .material-thick { background: var(--material-solid-raised); -webkit-backdrop-filter: none; backdrop-filter: none; }
+  .scrim { -webkit-backdrop-filter: none; backdrop-filter: none; }
+}
+/* Option utilisateur (US-025) / simulation : .no-glass sur <html> ou un conteneur */
+.no-glass .material-ultra-thin, .no-glass .material-thin, .no-glass .material-regular, .no-glass .glass,
+.material-ultra-thin.no-glass, .material-thin.no-glass, .material-regular.no-glass, .glass.no-glass { background: var(--material-solid); -webkit-backdrop-filter: none; backdrop-filter: none; }
+.no-glass .material-thick, .material-thick.no-glass { background: var(--material-solid-raised); -webkit-backdrop-filter: none; backdrop-filter: none; }
+.no-glass .scrim { -webkit-backdrop-filter: none; backdrop-filter: none; }
+
+/* Styles de texte (raccourci + chasse optique + options OpenType) */
+.t-large-title { font: var(--font-large-title); letter-spacing: var(--tracking-large-title); font-feature-settings: var(--font-features); }
+.t-title-1 { font: var(--font-title-1); letter-spacing: var(--tracking-title-1); font-feature-settings: var(--font-features); }
+.t-title-2 { font: var(--font-title-2); letter-spacing: var(--tracking-title-2); font-feature-settings: var(--font-features); }
+.t-title-3 { font: var(--font-title-3); letter-spacing: var(--tracking-title-3); font-feature-settings: var(--font-features); }
+.t-headline { font: var(--font-headline); letter-spacing: var(--tracking-headline); font-feature-settings: var(--font-features); }
+.t-body { font: var(--font-body); letter-spacing: var(--tracking-body); font-feature-settings: var(--font-features); }
+.t-callout { font: var(--font-callout); letter-spacing: var(--tracking-callout); font-feature-settings: var(--font-features); }
+.t-subheadline { font: var(--font-subheadline); letter-spacing: var(--tracking-subheadline); font-feature-settings: var(--font-features); }
+.t-footnote { font: var(--font-footnote); letter-spacing: var(--tracking-footnote); font-feature-settings: var(--font-features); }
+.t-caption { font: var(--font-caption); letter-spacing: var(--tracking-caption); font-feature-settings: var(--font-features); }
+
+/* Motion reduit : tout est neutralise (WCAG 2.3.3) */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-fast: 0ms;
+    --duration-base: 0ms;
+    --duration-slow: 0ms;
+    --duration-spring: 0ms;
+    --duration-camera: 0ms;
+    --press-scale: 1;
+  }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Focus visible commun : anneau accent + halo doux (wrappers : [data-focus-visible] de React Aria) */
+.focus-ring,
+:where(button, a, input, select, textarea, [tabindex]):focus-visible,
+[data-focus-visible] {
+  outline: var(--focus-width) solid var(--color-focus);
+  outline-offset: var(--focus-offset);
+  box-shadow: 0 0 0 calc(var(--focus-offset) + var(--focus-width) + 3px) var(--color-focus-halo);
+}
+/* ======================= END SYNCED ======================= */
+
+/* ===== Demo : mouvement reduit simule ===== */
+html.rm{--duration-fast:0ms;--duration-base:0ms;--duration-slow:0ms;--duration-spring:0ms;--duration-camera:0ms;--press-scale:1}
+html.rm *,html.rm *::before,html.rm *::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+
+/* ===== BASE + KIT minimal ===== */
+*{box-sizing:border-box}
+body{margin:0;background:var(--color-bg);color:var(--color-text);font:var(--font-body);letter-spacing:var(--tracking-body);font-feature-settings:var(--font-features);font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased}
+h1,h2,h3,p{margin:0}
+button{font:inherit;color:inherit;letter-spacing:inherit;font-feature-settings:inherit}
+a{color:var(--glass-link)}
+code{font:var(--weight-regular) var(--text-sm)/1.4 var(--font-mono);background:var(--color-fill);padding:1px 6px;border-radius:var(--radius-sm)}
+.muted{color:var(--color-text-muted)}
+.i{width:var(--icon-md);height:var(--icon-md);flex:none;fill:none;stroke:currentColor;stroke-width:var(--icon-stroke);stroke-linecap:round;stroke-linejoin:round}
+.i.lg{width:var(--icon-lg);height:var(--icon-lg)}
+.row{display:flex;gap:var(--space-3);align-items:center;flex-wrap:wrap}
+.seg{--n:2;--i:0;position:relative;display:grid;grid-auto-flow:column;grid-auto-columns:1fr;padding:2px;border-radius:var(--radius-pill);background:var(--color-fill);isolation:isolate}
+.seg::before{content:"";position:absolute;z-index:-1;top:2px;bottom:2px;left:2px;width:calc((100% - 4px)/var(--n));border-radius:var(--radius-pill);background:var(--color-raised);box-shadow:0 1px 3px rgba(0,0,0,.14),0 0 0 .5px rgba(0,0,0,.06);transform:translateX(calc(var(--i)*100%));transition:transform var(--duration-spring) var(--ease-spring)}
+.seg>button{height:calc(var(--control-sm) - 4px);padding:0 var(--space-3);border:0;border-radius:var(--radius-pill);background:transparent;color:var(--color-text);font:var(--font-callout);font-weight:var(--weight-medium);font-feature-settings:var(--font-features);letter-spacing:var(--tracking-callout);cursor:pointer;white-space:nowrap}
+.seg>[aria-checked=true]{font-weight:var(--weight-semibold);color:var(--color-accent-subtle-text)}
+.sw{position:relative;flex:none;width:46px;height:28px;border:0;padding:0;border-radius:var(--radius-pill);background:var(--color-border-strong);cursor:pointer;transition:background var(--duration-base) var(--ease-standard)}
+.sw::after{content:"";position:absolute;top:2px;left:2px;width:24px;height:24px;border-radius:50%;background:var(--color-on-accent-solid);box-shadow:0 1px 3px rgba(0,0,0,.3);transition:transform var(--duration-spring) var(--ease-spring)}
+.sw[aria-checked=true]{background:var(--color-accent-solid)}.sw[aria-checked=true]::after{transform:translateX(18px)}
+.demo{position:sticky;top:0;z-index:var(--z-menu);display:flex;flex-wrap:wrap;gap:var(--space-3) var(--space-5);align-items:center;padding:var(--space-2) var(--space-6);border-bottom:1px solid var(--color-separator)}
+.demo label{display:inline-flex;gap:var(--space-2);align-items:center;font:var(--font-callout);font-feature-settings:var(--font-features)}
+.wrap{max-width:1180px;margin:0 auto;padding:var(--space-8) var(--space-6) var(--space-16)}
+h2.sec{font:var(--font-title-2);letter-spacing:var(--tracking-title-2);font-feature-settings:var(--font-features);margin:var(--space-12) 0 var(--space-2)}
+.lead{max-width:78ch;color:var(--color-text-muted);margin-bottom:var(--space-4)}
+.chip{display:inline-block;font:var(--font-caption);font-feature-settings:var(--font-features);background:var(--color-fill);padding:2px 10px;border-radius:var(--radius-pill)}
+table{border-collapse:collapse;width:100%;font:var(--font-footnote);font-feature-settings:var(--font-features)}
+th,td{text-align:left;vertical-align:top;padding:6px 10px;border-bottom:1px solid var(--color-separator)}
+th{font-weight:var(--weight-semibold);background:var(--color-surface-2)}
+td.pass{color:var(--color-success);font-weight:600}td.fail{color:var(--color-error);font-weight:600}
+.verdictbox{padding:var(--space-5);border-radius:var(--radius-xl);background:var(--color-accent-subtle);color:var(--color-text)}
+.verdictbox h2{font:var(--font-title-3);margin-bottom:var(--space-2)}
+.verdictbox li{margin-bottom:var(--space-1)}
+
+/* ===== Scene de demonstration ===== */
+.stage{position:relative;height:600px;border-radius:var(--radius-xl);overflow:hidden;color:var(--color-text);background:linear-gradient(var(--scene-bg-top),var(--scene-bg-bottom));--lx:30%;--ly:0%;box-shadow:var(--shadow-1)}
+.stage[data-bg=black]{background:#000}.stage[data-bg=white]{background:#fff}
+.stage[data-bg=busy]{background:repeating-conic-gradient(from 0deg at 50% 60%,#e4572e 0 15deg,#12151c 15deg 30deg,#f6f6f8 30deg 45deg,#2a4d8f 45deg 60deg)}
+.bgl{position:absolute;inset:0}.bgl svg{width:100%;height:100%;display:block}
+.stage[data-bg=black] .bgl,.stage[data-bg=white] .bgl{opacity:.0}
+.stage.anim .bgl svg{animation:drift 6s ease-in-out infinite alternate}
+@keyframes drift{from{transform:translateX(-90px) scale(1)}to{transform:translateX(90px) scale(1.12)}}
+/* verre : base commune */
+.lg{--tint:var(--material-regular);--bl:blur(10px);--lens:blur(0px);position:absolute;z-index:2;display:flex;align-items:center;color:var(--color-text);isolation:isolate;background:var(--tint);-webkit-backdrop-filter:var(--bl) saturate(180%);backdrop-filter:var(--bl) var(--lens) saturate(180%);box-shadow:var(--glass-shadow)}
+.stage[data-v=A] .lg{--tint:var(--material-thin);--bl:blur(20px);box-shadow:var(--glass-shadow)}
+.stage[data-v=B] .lg,.stage[data-v=C] .lg,.stage[data-v=D] .lg{box-shadow:inset 0 1px 0 rgba(255,255,255,.75),inset 0 -1px 0 rgba(255,255,255,.18),inset 0 0 22px rgba(255,255,255,.14),0 0 0 .5px var(--material-outline),0 10px 34px rgba(0,0,0,.16)}
+.stage[data-v=C] .lg,.stage[data-v=D] .lg{--bl:blur(2px)}
+.stage[data-v=D] .lg{--tint:rgba(246,246,248,.28)}
+.stage[data-theme=dark][data-v=D] .lg{--tint:rgba(30,30,33,.28)}
+.stage[data-theme=dark][data-v=B] .lg,.stage[data-theme=dark][data-v=C] .lg,.stage[data-theme=dark][data-v=D] .lg{box-shadow:inset 0 1px 0 rgba(255,255,255,.28),inset 0 -1px 0 rgba(255,255,255,.06),inset 0 0 22px rgba(255,255,255,.05),0 0 0 .5px var(--material-outline),0 10px 34px rgba(0,0,0,.5)}
+/* reflets speculaires : bord degrade + eclat qui suit le pointeur */
+.lg::before,.lg::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:-1}
+.stage[data-v=A] .lg::before,.stage[data-v=A] .lg::after{display:none}
+.lg::before{padding:1.5px;background:linear-gradient(135deg,rgba(255,255,255,.95),rgba(255,255,255,.1) 38%,rgba(255,255,255,.1) 62%,rgba(255,255,255,.8));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask-composite:exclude;opacity:.9}
+.lg::after{background:radial-gradient(120% 160% at var(--lx) var(--ly),rgba(255,255,255,.42),rgba(255,255,255,0) 55%)}
+.stage[data-theme=dark] .lg::before{opacity:.45}.stage[data-theme=dark] .lg::after{opacity:.35}
+.no-glass .lg{background:var(--material-solid)!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+.no-glass .lg::before,.no-glass .lg::after{display:none}
+@media (prefers-reduced-transparency:reduce){.lg{background:var(--material-solid)!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}.lg::before,.lg::after{display:none}}
+#tb{top:14px;left:14px;right:14px;height:52px;border-radius:var(--radius-xl);padding:0 var(--space-3);gap:var(--space-3)}
+#tb .brand{font:var(--font-headline);font-weight:700;font-feature-settings:var(--font-features);display:inline-flex;align-items:center;gap:8px}
+#tb .brand::before{content:"";width:10px;height:10px;border-radius:50%;background:var(--color-accent-solid)}
+#tb .nm{flex:1;font:var(--font-callout);font-weight:500;font-feature-settings:var(--font-features)}
+.chipv{display:inline-flex;align-items:center;gap:8px;height:36px;padding:0 16px 0 12px;border-radius:var(--radius-pill);background:var(--color-surface-2);font:var(--font-callout);font-weight:600;font-feature-settings:var(--font-features)}
+.chipv .i{color:var(--color-text-muted)}
+.ibtn{display:grid;place-items:center;width:40px;height:40px;border:0;border-radius:50%;background:transparent;cursor:pointer}
+.ibtn:hover{background:var(--color-fill-hover)}
+#vb{left:50%;bottom:16px;transform:translateX(-50%);height:52px;border-radius:var(--radius-pill);padding:0 8px;gap:2px}
+.vbtn{display:inline-flex;align-items:center;gap:8px;height:36px;padding:0 16px 0 12px;border:0;border-radius:var(--radius-pill);background:transparent;cursor:pointer;font:var(--font-callout);font-weight:500;font-feature-settings:var(--font-features)}
+.vbtn:hover{background:var(--color-fill-hover)}
+.vbtn[aria-pressed=true]{background:var(--color-accent-subtle);color:var(--color-accent-subtle-text);font-weight:600}
+/* demos de morphing (CSS seul : la carte de deplacement SVG est a taille fixe) */
+.mid{position:absolute;z-index:2;left:50%;top:50%;transform:translate(-50%,-62%);display:flex;gap:40px;align-items:flex-start}
+.gseg{position:relative;display:grid;grid-template-columns:repeat(3,92px);height:44px;padding:4px;border-radius:var(--radius-pill);--tint:var(--material-regular);isolation:isolate}
+.gseg button{position:relative;z-index:2;border:0;background:transparent;border-radius:var(--radius-pill);cursor:pointer;font:var(--font-callout);font-weight:500;font-feature-settings:var(--font-features)}
+.gseg button[aria-checked=true]{font-weight:600;color:var(--color-accent-subtle-text)}
+.gthumb{position:absolute;z-index:1;top:4px;bottom:4px;left:4px;width:92px;border-radius:var(--radius-pill);background:var(--color-raised);box-shadow:0 2px 8px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.7);transform:translateX(calc(var(--i)*92px));transition:transform var(--duration-spring) var(--ease-spring)}
+.gthumb.moving{transform:translateX(calc(var(--i)*92px)) scale(1.14,1.1);transition-duration:160ms}
+.xp{position:relative;flex-direction:column;align-items:stretch;width:132px;height:44px;border-radius:22px;overflow:hidden;transition:width var(--duration-spring) var(--ease-spring-soft),height var(--duration-spring) var(--ease-spring-soft);--tint:var(--material-regular)}
+.xp.open{width:220px;height:176px}
+.xp>button.head{display:flex;align-items:center;justify-content:space-between;width:100%;height:44px;padding:0 16px;border:0;background:transparent;cursor:pointer;font:var(--font-callout);font-weight:600;font-feature-settings:var(--font-features)}
+.xp ul{list-style:none;margin:0;padding:0 8px 8px;opacity:0;transition:opacity var(--duration-base)}
+.xp.open ul{opacity:1;transition-delay:120ms}
+.xp li button{display:block;width:100%;text-align:left;height:38px;border:0;border-radius:14px;background:transparent;padding:0 12px;cursor:pointer;font:var(--font-callout);font-feature-settings:var(--font-features)}
+.xp li button:hover{background:var(--color-accent-solid);color:var(--color-on-accent-solid)}
+.fps{font:var(--font-caption);font-feature-settings:var(--font-features);padding:2px 10px;border-radius:var(--radius-pill);background:var(--color-fill)}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:var(--space-4)}
+.card{padding:var(--space-5);border-radius:var(--radius-xl);background:var(--color-surface);box-shadow:var(--shadow-1)}
+.card h3{font:var(--font-headline);font-feature-settings:var(--font-features);margin-bottom:var(--space-2)}
+.card p,.card li{font:var(--font-subheadline);font-feature-settings:var(--font-features);color:var(--color-text-muted)}
+.card ul{margin:0;padding-left:var(--space-4)}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false" id="lenses"><defs>
+  <filter id="soft" x="-20%" y="-100%" width="140%" height="300%"><feGaussianBlur stdDeviation="9"/></filter>
+  <symbol id="dashed" viewBox="0 0 24 24"><path d="M10.1 2.182a10 10 0 0 1 3.8 0M13.9 21.818a10 10 0 0 1-3.8 0M17.609 3.721a10 10 0 0 1 2.69 2.7M2.182 13.9a10 10 0 0 1 0-3.8M20.279 17.609a10 10 0 0 1-2.7 2.69M21.818 10.1a10 10 0 0 1 0 3.8M3.721 6.391a10 10 0 0 1 2.7-2.69M6.391 20.279a10 10 0 0 1-2.69-2.7"/></symbol>
+  <symbol id="rot-l" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></symbol>
+  <symbol id="top" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/></symbol>
+  <symbol id="front" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/></symbol>
+  <symbol id="check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="pl-close" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M16 15l-3-3 3-3"/></symbol>
+  <symbol id="pr-close" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M15 3v18M8 9l3 3-3 3"/></symbol>
+  <symbol id="chev-d" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+</defs></svg>
+
+<header class="demo material-regular" role="group" aria-label="Exploration options">
+  <strong class="t-headline">Liquid glass exploration</strong>
+  <div class="seg" id="s-v" role="radiogroup" aria-label="Variant" style="--n:4;--i:2"><button type="button" role="radio" aria-checked="false" data-v="A" title="Current v0.4 thin material">A v0.4</button><button type="button" role="radio" aria-checked="false" data-v="B" title="CSS only: specular rim + sheen, tint 80 percent">B CSS</button><button type="button" role="radio" aria-checked="true" data-v="C" title="B + refraction on the rim, tint 80 percent (AA-safe)">C Refraction</button><button type="button" role="radio" aria-checked="false" data-v="D" title="Full clarity, tint 28 percent (illustration, fails AA)">D Clear</button></div>
+  <div class="seg" id="s-t" role="radiogroup" aria-label="Theme" style="--n:2;--i:0"><button type="button" role="radio" aria-checked="true" data-t="light">Light</button><button type="button" role="radio" aria-checked="false" data-t="dark">Dark</button></div>
+  <div class="seg" id="s-b" role="radiogroup" aria-label="Background" style="--n:4;--i:0"><button type="button" role="radio" aria-checked="true" data-b="studio">Studio</button><button type="button" role="radio" aria-checked="false" data-b="black">Black</button><button type="button" role="radio" aria-checked="false" data-b="white">White</button><button type="button" role="radio" aria-checked="false" data-b="busy">Busy</button></div>
+  <label>Animate scene <button class="sw" type="button" role="switch" aria-checked="false" id="s-anim" aria-label="Animate scene"></button></label>
+  <label>Reduce transparency <button class="sw" type="button" role="switch" aria-checked="false" id="s-glass" aria-label="Reduce transparency"></button></label>
+  <label>Reduce motion <button class="sw" type="button" role="switch" aria-checked="false" id="s-rm" aria-label="Reduce motion"></button></label>
+  <span class="fps" id="fps" aria-live="off">FPS: -</span>
+  <a href="../index.html">Design system</a>
+</header>
+
+<main class="wrap">
+  <p class="chip">Exploration / not the default / Sprint 2</p>
+  <h1 class="t-large-title" style="margin-top:var(--space-3)">Liquid glass on the toolbar and the view bar</h1>
+  <p class="lead t-body" style="margin-top:var(--space-2)">A material that behaves like thick liquid glass: edge refraction (SVG <code>feDisplacementMap</code> used as a <code>backdrop-filter</code>), specular highlights that follow the pointer, luminous rims, controls that stretch and morph with springs. Shown over the toolbar and the floating view bar, above a placeholder studio scene. Everything is local (no network): the displacement map is drawn in a canvas and injected as an inline data URI.</p>
+
+  <div class="verdictbox" role="note">
+    <h2>Conclusion</h2>
+    <ul>
+      <li><strong>Not by default.</strong> Keep the v0.4 materials (variant A). Offer liquid glass later as an opt-in appearance (Help / Settings, with US-025), limited to the toolbar and the view bar.</li>
+      <li><strong>Only the AA-safe variants (B, C) are shippable</strong>: they keep an 80 % tint under text and put the "liquid" in the rim (refraction, specular, sheen). The fully clear look (D) cannot meet 4.5:1 on a worst-case background (see the live table), so it would only be acceptable for glyph-only controls, never for labels.</li>
+      <li><strong>Refraction only exists in Chromium</strong> (Chrome, Edge, Opera): Safari and Firefox ignore SVG filters in <code>backdrop-filter</code>. On those the same component falls back to variant B (still specular and premium). So the effect cannot be the identity of the product on Apple devices, where Safari is the browser.</li>
+      <li><strong>Cost</strong>: each lens re-filters the backdrop every frame while the WebGL scene moves. Budget: at most 100 000 px of lens area (the toolbar + view bar here are about 90 000 px), automatic fallback to B if the frame time exceeds 20 ms. Use the FPS probe on this page with "Animate scene" to compare variants on your machine; I could not measure GPU cost in my environment.</li>
+    </ul>
+  </div>
+
+  <h2 class="sec">1. Demo</h2>
+  <p class="lead">Variant C is selected. Switch variant, theme and background (the black and white stripes are the worst cases of the contrast rule). Move the pointer: the highlight follows. Click the glass segmented control (the thumb stretches then settles with a spring) and the "Views" pill (it grows into a menu). <strong>These two morphing demos are CSS-only</strong>: a displacement map has a fixed size, so animating a lens through a size change would mean regenerating the map every frame (or a 9-slice map).</p>
+  <div class="stage anim" id="stage" data-theme="light" data-v="C" data-bg="studio" aria-label="Liquid glass demo stage">
+    <div class="bgl" id="bgl" aria-hidden="true"></div>
+    <div class="lg lens" id="tb" role="toolbar" aria-label="Toolbar (demo)"><button class="ibtn" type="button" aria-label="Hide sidebar"><svg class="i lg" aria-hidden="true"><use href="#pl-close"/></svg></button><span class="brand">Deskfit</span><span class="nm">My desk setup</span><span class="chipv"><svg class="i" aria-hidden="true"><use href="#dashed"/></svg>Nothing to check yet</span><button class="ibtn" type="button" aria-label="Hide inspector"><svg class="i lg" aria-hidden="true"><use href="#pr-close"/></svg></button></div>
+    <div class="mid">
+      <div class="lg gseg" id="gseg" role="radiogroup" aria-label="Appearance (demo)" style="--i:0"><span class="gthumb" id="gthumb" aria-hidden="true"></span><button type="button" role="radio" aria-checked="true">System</button><button type="button" role="radio" aria-checked="false">Light</button><button type="button" role="radio" aria-checked="false">Dark</button></div>
+      <div class="lg xp" id="xp"><button class="head" type="button" aria-expanded="false" aria-controls="xpl">Views<svg class="i" aria-hidden="true"><use href="#chev-d"/></svg></button><ul id="xpl"><li><button type="button">Reset view</button></li><li><button type="button">Top</button></li><li><button type="button">Front</button></li></ul></div>
+    </div>
+    <div class="lg lens" id="vb" role="toolbar" aria-label="View (demo)"><button class="vbtn" type="button"><svg class="i" aria-hidden="true"><use href="#rot-l"/></svg>Reset view</button><button class="vbtn" type="button" aria-pressed="true"><svg class="i" aria-hidden="true"><use href="#check"/></svg>Top</button><button class="vbtn" type="button" aria-pressed="false"><svg class="i" aria-hidden="true"><use href="#front"/></svg>Front</button></div>
+  </div>
+  <p class="lead" style="margin-top:var(--space-2)" id="status"></p>
+
+  <h2 class="sec">2. Legibility (AA) on the worst background, computed live</h2>
+  <p class="lead">Text colour over the material tint over pure black (light theme) or pure white (dark theme), the rule of this design system. A is the v0.4 thin material. D shows why full clarity cannot carry text.</p>
+  <div id="audit"></div>
+
+  <h2 class="sec">3. Cost, compatibility, fallback</h2>
+  <div class="cards">
+    <div class="card"><h3>Performance (GPU, next to the WebGL scene)</h3><ul>
+      <li>Every <code>backdrop-filter</code> region is re-rendered each time the content behind it changes. With a WebGL canvas that animates, that is every frame, for blur and again for the SVG filter.</li>
+      <li>The lens filter (<code>feImage</code> + <code>feDisplacementMap</code>) costs more than a plain blur, and is far more expensive on integrated and mobile GPUs. It scales with the lens area, not with the scene.</li>
+      <li>Guard rails: area budget (toolbar + view bar only), lens off while the user orbits the scene (static during drags, restored on idle), auto-degrade to variant B when frame time exceeds 20 ms, off when "Reduce transparency" or battery saver is on.</li>
+      <li>The performance budget of the product stays: at least 60 FPS desktop, 30 FPS recent phone. QA must measure A, B, C on the target machines before any decision.</li>
+    </ul></div>
+    <div class="card"><h3>Accessibility</h3><ul>
+      <li>AA-safe only with an 80 % tint under text (B, C). Clearer glass needs an opaque chip under every label (the verdict chip already is) or glyph-only controls.</li>
+      <li>Refraction distorts the content behind the rim only, never the text of the control itself.</li>
+      <li>Reduced motion: no stretch, no morph (instant states); reduced transparency: opaque <code>--material-solid</code>, no rim, no lens (shown by the switches above).</li>
+      <li>Focus ring and halo are unchanged and stay at 3:1 or more (see the table).</li>
+    </ul></div>
+    <div class="card"><h3>Browser compatibility</h3><ul>
+      <li><code>backdrop-filter</code> blur and saturate: Chrome, Edge, Safari (with the <code>-webkit-</code> prefix), Firefox 103+.</li>
+      <li><code>backdrop-filter: url(#svg)</code>: Chromium only. Elsewhere the declaration must not be applied (here the lens is added by script only when Chromium is detected, otherwise B).</li>
+      <li>Masked gradient rim (<code>mask-composite</code>), <code>linear()</code> springs, container queries: all modern browsers.</li>
+      <li>This browser: <strong id="env">-</strong></li>
+    </ul></div>
+    <div class="card"><h3>If it is adopted later</h3><ul>
+      <li>New tokens (not added now): <code>--lens-scale</code>, <code>--lens-bezel</code>, <code>--specular-*</code>, a "Liquid" appearance preset beside the system theme.</li>
+      <li>Component <code>LensGlass</code> (generates and caches the map per size, observes resize, detects support, honours the three accessibility options).</li>
+      <li>Same component API as <code>.material-regular</code>: switching is a class, not a rewrite.</li>
+    </ul></div>
+  </div>
+</main>
+
+<script>
+(function(){
+var $=function(s){return document.querySelector(s)};
+var stage=$('#stage'),lensHost=$('#lenses');
+var CHROMIUM=!!(navigator.userAgentData&&navigator.userAgentData.brands&&navigator.userAgentData.brands.some(function(b){return b.brand==='Chromium'}));
+document.getElementById('env').textContent=CHROMIUM?'Chromium: refraction available.':'not Chromium: variant C falls back to B (no refraction).';
+
+/* ---- scene factice ---- */
+function art(){var leg=function(x,y,w,h){return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="3" style="fill:var(--scene-object-edge)"/>'};
+ return '<svg viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid slice"><ellipse cx="515" cy="462" rx="340" ry="30" filter="url(#soft)" style="fill:var(--scene-shadow)"/>'+leg(346,255,12,125)+leg(690,255,12,125)+leg(262,332,14,132)+leg(754,332,14,132)+'<polygon points="330,255 700,255 790,320 240,320" style="fill:var(--scene-desk);stroke:var(--scene-desk-edge);stroke-width:2" stroke-linejoin="round"/><polygon points="240,320 790,320 790,333 240,333" style="fill:var(--scene-desk-edge)"/><rect x="420" y="190" width="170" height="70" rx="8" style="fill:var(--scene-object);stroke:var(--scene-object-edge);stroke-width:2"/><rect x="60" y="30" width="180" height="90" rx="10" style="fill:#e4572e"/><rect x="760" y="440" width="190" height="110" rx="10" style="fill:#2a4d8f"/></svg>'}
+$('#bgl').innerHTML=art();
+
+/* ---- carte de deplacement : bord d'une forme arrondie, centre neutre ---- */
+function lensMap(w,h,r,b){
+  var c=document.createElement('canvas');c.width=w;c.height=h;var x=c.getContext('2d'),im=x.createImageData(w,h),d=im.data,hw=w/2,hh=h/2,bx=hw-r,by=hh-r;
+  for(var j=0;j<h;j++)for(var i=0;i<w;i++){
+    var px=i+.5-hw,py=j+.5-hh,qx=Math.abs(px)-bx,qy=Math.abs(py)-by,ox=Math.max(qx,0),oy=Math.max(qy,0),len=Math.hypot(ox,oy),dep=-(len+Math.min(Math.max(qx,qy),0)-r),k=(j*w+i)*4,nx=0,ny=0,m=0;
+    if(dep>=0&&dep<b){m=Math.pow(1-dep/b,2);
+      if(qx>0&&qy>0){nx=Math.sign(px)*ox/len;ny=Math.sign(py)*oy/len}else if(qx>qy){nx=Math.sign(px)}else{ny=Math.sign(py)}}
+    d[k]=Math.round(128+nx*m*127);d[k+1]=Math.round(128+ny*m*127);d[k+2]=128;d[k+3]=255;
+  }
+  x.putImageData(im,0,0);return c.toDataURL('image/png');
+}
+var lens={},lensCount=0;
+function buildLens(el){
+  var w=Math.round(el.offsetWidth),h=Math.round(el.offsetHeight);if(!w||!h)return;
+  var r=Math.min(parseFloat(getComputedStyle(el).borderTopLeftRadius)||h/2,h/2,w/2),id=el.dataset.lid||(el.dataset.lid='lens'+(++lensCount));
+  lens[id]='<filter id="'+id+'" x="0" y="0" width="'+w+'" height="'+h+'" filterUnits="userSpaceOnUse" primitiveUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feImage href="'+lensMap(w,h,r,Math.min(18,h/2))+'" x="0" y="0" width="'+w+'" height="'+h+'" preserveAspectRatio="none" result="m"/><feDisplacementMap in="SourceGraphic" in2="m" scale="26" xChannelSelector="R" yChannelSelector="G"/></filter>';
+  var defs=lensHost.querySelector('defs'),old=defs.querySelector('#'+id);if(old)old.remove();defs.insertAdjacentHTML('beforeend',lens[id]);
+  el.style.setProperty('--lens','url(#'+id+')');
+}
+function refreshLens(){
+  var on=CHROMIUM&&(stage.dataset.v==='C'||stage.dataset.v==='D');
+  [].forEach.call(document.querySelectorAll('.lens'),function(el){if(on)buildLens(el);else el.style.removeProperty('--lens')});
+  $('#status').textContent=on?'Refraction active on the toolbar and the view bar.':(stage.dataset.v==='C'||stage.dataset.v==='D'?'This browser cannot refract through backdrop-filter: showing the CSS-only look (variant B).':'');
+}
+var ro=window.ResizeObserver?new ResizeObserver(function(){refreshLens()}):null;if(ro)ro.observe(stage);
+
+/* ---- options ---- */
+function radio(sel,cb){$(sel).addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;var all=[].slice.call(this.children);all.forEach(function(x){x.setAttribute('aria-checked',String(x===b))});this.style.setProperty('--i',all.indexOf(b));cb(b)})}
+radio('#s-v',function(b){stage.dataset.v=b.dataset.v;refreshLens();audit()});
+radio('#s-t',function(b){stage.dataset.theme=b.dataset.t});
+radio('#s-b',function(b){stage.dataset.bg=b.dataset.b});
+$('#s-anim').addEventListener('click',function(){stage.classList.toggle('anim',this.getAttribute('aria-checked')!=='true')});
+$('#s-glass').addEventListener('click',function(){document.documentElement.classList.toggle('no-glass',this.getAttribute('aria-checked')!=='true')});
+$('#s-rm').addEventListener('click',function(){document.documentElement.classList.toggle('rm',this.getAttribute('aria-checked')!=='true')});
+document.addEventListener('click',function(e){var s=e.target.closest&&e.target.closest('.sw[role=switch]');if(s)s.setAttribute('aria-checked',String(s.getAttribute('aria-checked')!=='true'))});
+stage.addEventListener('pointermove',function(e){var r=stage.getBoundingClientRect();stage.style.setProperty('--lx',((e.clientX-r.left)/r.width*100).toFixed(1)+'%');stage.style.setProperty('--ly',((e.clientY-r.top)/r.height*100-20).toFixed(1)+'%')});
+
+/* ---- morphing ---- */
+var g=$('#gseg'),th=$('#gthumb');
+g.addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;var all=[].slice.call(g.querySelectorAll('button'));all.forEach(function(x){x.setAttribute('aria-checked',String(x===b))});g.style.setProperty('--i',all.indexOf(b));th.classList.add('moving');setTimeout(function(){th.classList.remove('moving')},170)});
+var xp=$('#xp');xp.querySelector('.head').addEventListener('click',function(){var o=xp.classList.toggle('open');this.setAttribute('aria-expanded',String(o))});
+[].forEach.call(document.querySelectorAll('.vbtn[aria-pressed]'),function(b){b.addEventListener('click',function(){[].forEach.call(document.querySelectorAll('.vbtn[aria-pressed]'),function(x){x.setAttribute('aria-pressed',String(x===b))})})});
+
+/* ---- sonde de FPS (indicative) ---- */
+var last=performance.now(),acc=0,n=0;
+function loop(t){acc+=t-last;n++;last=t;if(acc>=1000){$('#fps').textContent='FPS: '+Math.round(n*1000/acc)+' (main thread, indicative)';acc=0;n=0}requestAnimationFrame(loop)}
+requestAnimationFrame(loop);
+
+/* ---- audit de lisibilite ---- */
+function P(c){var e=document.createElement('span');e.style.color=c;document.body.appendChild(e);var s=getComputedStyle(e).color;document.body.removeChild(e);var m=s.match(/[\d.]+/g).map(Number);return {r:m[0],g:m[1],b:m[2],a:m.length>3?m[3]:1}}
+function lin(c){c/=255;return c<=.03928?c/12.92:Math.pow((c+.055)/1.055,2.4)}
+function L(c){return .2126*lin(c.r)+.7152*lin(c.g)+.0722*lin(c.b)}
+function over(f,b){return {r:f.r*f.a+b.r*(1-f.a),g:f.g*f.a+b.g*(1-f.a),b:f.b*f.a+b.b*(1-f.a),a:1}}
+function cr(f,b){var x=L(f),y=L(b);return (Math.max(x,y)+.05)/(Math.min(x,y)+.05)}
+function audit(){
+  var V=[['A  v0.4 thin material','material-thin',null],['B / C  liquid, AA-safe tint','material-regular',null],['D  full clarity','material-regular',.28]],out='<table><tr><th>Variant</th><th>Theme and worst background</th><th>Primary text</th><th>Muted text</th><th>Icon / focus ring</th><th>Result</th></tr>';
+  ['light','dark'].forEach(function(t){
+    var h=document.createElement('div');h.setAttribute('data-theme',t);h.style.cssText='position:absolute;visibility:hidden';document.body.appendChild(h);
+    var cs=getComputedStyle(h),worst=t==='light'?{r:0,g:0,b:0,a:1}:{r:255,g:255,b:255,a:1};
+    V.forEach(function(v){
+      var m=P(cs.getPropertyValue('--'+v[1]).trim());if(v[2]!==null)m.a=v[2];
+      var bg=over(m,worst),tx=cr(P(cs.getPropertyValue('--color-text').trim()),bg),mu=cr(P(cs.getPropertyValue('--color-text-muted').trim()),bg),fo=cr(P(cs.getPropertyValue('--color-focus').trim()),bg);
+      var okT=tx>=4.5,okM=mu>=4.5,okF=fo>=3,isA=v[0].charAt(0)==='A';
+      var verdict=okT&&okF&&(okM||isA)?(okM?'PASS (all text)':'PASS (primary text and icons only)'):'FAIL';
+      out+='<tr><td>'+v[0]+'</td><td>'+t+' over '+(t==='light'?'black':'white')+'</td><td>'+tx.toFixed(2)+':1</td><td>'+mu.toFixed(2)+':1</td><td>'+fo.toFixed(2)+':1</td><td class="'+(verdict==='FAIL'?'fail':'pass')+'">'+verdict+'</td></tr>';
+    });
+    document.body.removeChild(h);
+  });
+  $('#audit').innerHTML=out+'</table>';
+}
+audit();refreshLens();
+window.addEventListener('load',refreshLens);
+})();
+</script>
+</body>
+</html>

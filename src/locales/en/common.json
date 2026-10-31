@@ -1,6 +1,7 @@
 {
   "app": {
-    "name": "P152"
+    "name": "Deskfit",
+    "title": "{{appName}} - Plan your desk setup"
   },
   "scene": {
     "viewportLabel": "3D view of your desk. Use arrow keys to turn the view, plus and minus to zoom.",
@@ -39,7 +40,42 @@
       "unsupportedBody": "Your browser or device doesn't support 3D graphics (WebGL 2). Try updating your browser, turning on hardware acceleration, or opening this page in Chrome, Edge, Firefox or Safari.",
       "contextLostTitle": "The 3D view stopped",
       "contextLostBody": "The graphics connection was lost. Try again to restore your desk.",
-      "retry": "Try again"
+      "retry": "Try again",
+      "failedTitle": "The 3D view didn't load",
+      "failedBody": "Something went wrong while starting it. Try again. If the problem continues, reload this page.",
+      "reload": "Reload page"
+    }
+  },
+  "shell": {
+    "skip": {
+      "scene": "Skip to 3D view",
+      "alerts": "Skip to alerts"
+    },
+    "documentName": "My desk setup",
+    "verdict": {
+      "empty": "Nothing to check yet"
+    },
+    "toggle": {
+      "left": "Desk and objects panel",
+      "right": "Properties and alerts panel",
+      "hide": "Hide panel",
+      "show": "Show panel"
+    },
+    "sidebar": {
+      "label": "Desk and objects",
+      "desk": "Desk",
+      "objects": "Objects",
+      "objectsEmptyTitle": "No objects to add yet",
+      "objectsEmptyBody": "The object library will appear here."
+    },
+    "inspector": {
+      "label": "Properties and alerts",
+      "properties": "Properties",
+      "propertiesEmptyTitle": "Nothing selected",
+      "propertiesEmptyBody": "Select an object to edit its size and position.",
+      "alerts": "Alerts",
+      "alertsEmptyTitle": "Nothing to check yet",
+      "alertsEmptyBody": "Add an object to see if it fits."
     }
   }
 }

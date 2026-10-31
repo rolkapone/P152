@@ -292,9 +292,13 @@ jobs:
             echo "::warning::'wasm-unsafe-eval' présent : autorisé uniquement après l'ADR de SEC-10"
           fi
           for h in "X-Content-Type-Options: nosniff" "Referrer-Policy:" "Permissions-Policy:" \
-                   "Cross-Origin-Opener-Policy: same-origin"; do
+                   "Cross-Origin-Opener-Policy: same-origin" "Strict-Transport-Security: max-age="; do
             grep -qiF -- "$h" "$H" || { echo "::error::En-tête manquant : $h"; fail=1; }
           done
+          hsts_age="$(grep -iE '^[[:space:]]*Strict-Transport-Security:' "$H" | head -n1 | grep -oE 'max-age=[0-9]+' | cut -d= -f2 || true)"
+          if [ "${hsts_age:-0}" -lt 31536000 ]; then
+            echo "::error::HSTS : max-age < 31536000 (valeur : ${hsts_age:-absente})"; fail=1
+          fi
           exit "$fail"
       - name: index.html sans script/style en ligne ni ressource tierce
         run: |

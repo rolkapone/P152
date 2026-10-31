@@ -3,8 +3,8 @@ import { useTranslation } from "react-i18next";
 import { toStudioConfig } from "../core";
 import { createLocalPreferences, loadEmbeddedCatalog } from "../persistence";
 import { Viewport } from "../render";
-import { usePreferences, useSceneView } from "../state";
-import { SceneOverlay } from "../ui";
+import { usePreferences, useSceneView, useShellLayout } from "../state";
+import { isNarrowWindow, SceneOverlay, StudioShell } from "../ui";
 
 // Composition root (ADR-APP-09): the embedded catalog feeds the 3D view. A catalog that
 // fails validation never reaches the renderer (the view reports "failed").
@@ -15,18 +15,11 @@ const scene = catalog.ok
 
 // Display preferences of this browser (the dismissed tip), read before the first render.
 usePreferences.getState().connect(createLocalPreferences());
+// Docked (remembered) panels or closed drawers, known before the first render (no flash).
+useShellLayout.getState().setNarrow(isNarrowWindow());
 
-// Minimal layout until the Studio shell (US-005): the 3D view fills the window.
-const MAIN_STYLE: CSSProperties = { position: "fixed", inset: 0 };
+// Without a scene, the overlays (error screen) take the place of the 3D view.
 const FILL_STYLE: CSSProperties = { position: "relative", width: "100%", height: "100%" };
-const VISUALLY_HIDDEN: CSSProperties = {
-  position: "absolute",
-  width: 1,
-  height: 1,
-  overflow: "hidden",
-  clipPath: "inset(50%)",
-  whiteSpace: "nowrap",
-};
 
 export function App() {
   const { t } = useTranslation();
@@ -36,8 +29,7 @@ export function App() {
     if (scene === null) useSceneView.getState().setStatus("failed");
   }, [attempt]);
   return (
-    <main style={MAIN_STYLE}>
-      <h1 style={VISUALLY_HIDDEN}>{t("app.name")}</h1>
+    <StudioShell>
       {scene ? (
         <Viewport
           studio={scene.studio}
@@ -51,6 +43,6 @@ export function App() {
           <SceneOverlay />
         </div>
       )}
-    </main>
+    </StudioShell>
   );
 }

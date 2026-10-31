@@ -8,9 +8,17 @@ import type { PreferencesRepository, UiPreferences } from "../../core";
 
 export const PREFERENCE_KEYS = {
   sceneTipDismissed: "p152:v1:pref:sceneTipDismissed",
+  sidebarCollapsed: "p152:v1:pref:sidebarCollapsed",
+  inspectorCollapsed: "p152:v1:pref:inspectorCollapsed",
 } as const satisfies Record<keyof UiPreferences, string>;
 
-export const DEFAULT_PREFERENCES: UiPreferences = Object.freeze({ sceneTipDismissed: false });
+export const DEFAULT_PREFERENCES: UiPreferences = Object.freeze({
+  sceneTipDismissed: false,
+  sidebarCollapsed: false,
+  inspectorCollapsed: false,
+});
+
+const FLAGS = Object.keys(PREFERENCE_KEYS) as (keyof UiPreferences)[];
 
 /** Storage-like subset used here (tests pass an in-memory or failing stub). */
 export type PreferenceStorage = Pick<Storage, "getItem" | "setItem" | "removeItem">;
@@ -31,22 +39,26 @@ export function createLocalPreferences(
       try {
         const storage = getStorage();
         if (storage === null) return DEFAULT_PREFERENCES;
-        return { sceneTipDismissed: storage.getItem(PREFERENCE_KEYS.sceneTipDismissed) === "1" };
+        const flag = (name: keyof UiPreferences) => storage.getItem(PREFERENCE_KEYS[name]) === "1";
+        return {
+          sceneTipDismissed: flag("sceneTipDismissed"),
+          sidebarCollapsed: flag("sidebarCollapsed"),
+          inspectorCollapsed: flag("inspectorCollapsed"),
+        };
       } catch {
         return DEFAULT_PREFERENCES;
       }
     },
     save(preferences) {
-      try {
-        const storage = getStorage();
-        if (storage === null) return;
-        if (preferences.sceneTipDismissed) {
-          storage.setItem(PREFERENCE_KEYS.sceneTipDismissed, "1");
-        } else {
-          storage.removeItem(PREFERENCE_KEYS.sceneTipDismissed);
+      for (const name of FLAGS) {
+        try {
+          const storage = getStorage();
+          if (storage === null) return;
+          if (preferences[name]) storage.setItem(PREFERENCE_KEYS[name], "1");
+          else storage.removeItem(PREFERENCE_KEYS[name]);
+        } catch {
+          // Not stored: the preference lasts for this session only.
         }
-      } catch {
-        // Not stored: the preference lasts for this session only.
       }
     },
   };

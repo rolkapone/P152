@@ -33,7 +33,7 @@ export function ViewToolbar({ resetRef }: { readonly resetRef?: Ref<HTMLButtonEl
       role="toolbar"
       aria-label={t("scene.toolbar.label")}
       aria-orientation="horizontal"
-      className={cx("glass", styles.bar)}
+      className={cx("material-thin", "float", styles.bar)}
       onKeyDown={moveFocusWithArrows}
     >
       <Tooltip content={t("scene.toolbar.resetHint")} placement="top start">

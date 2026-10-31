@@ -15,14 +15,19 @@ export default defineConfig({
   forbidOnly: isCI,
   // Pas de retry : un test instable est un bug à signaler, pas à masquer (règle QA).
   retries: 0,
-  // The 3D view renders with SwiftShader (CPU): more than a few parallel pages saturate the
-  // machine and time out (US-004, measured with 16 workers on 24 threads). Same idea as CI.
-  workers: isCI ? 2 : 4,
+  // The 3D view renders with SwiftShader (CPU): parallel pages saturate the CPU and time out
+  // in goto / waitForScene (US-004: 16 workers on 24 threads; US-005 QA: 4 workers with
+  // --repeat-each=3, docs/qa/US-005.md). 2 workers locally, as in CI.
+  workers: 2,
   reporter: isCI ? [["list"], ["html", { open: "never" }]] : [["list"]],
-  timeout: 30_000,
+  // Runner CI (2 vCPU, SwiftShader) : chaque chargement de la scène prend ~15 s (4-5 s en local),
+  // un test à plusieurs actions dépasse 30 s (docs/qa/ci-e2e-runner.md). Délais élargis, sans retry
+  // et sans assouplir d'assertion ; les tests longs sont découpés.
+  timeout: isCI ? 90_000 : 30_000,
   // Loads the 3D view once before the workers start (cold start, see global-setup.ts).
   globalSetup: "./tests/e2e/global-setup.ts",
   expect: {
+    timeout: isCI ? 15_000 : 5_000,
     // Rendu WebGL logiciel (SwiftShader) : anti-crénelage légèrement variable.
     toHaveScreenshot: { maxDiffPixelRatio: 0.02, threshold: 0.2, animations: "disabled" },
   },
@@ -53,8 +58,8 @@ export default defineConfig({
         ]
       : []),
   ],
-  // Sert le build E2E (pnpm build:e2e doit avoir été exécuté). TODO (devops) : servir avec les mêmes
-  // en-têtes CSP que la production (ADR-OPS-03) quand dist/_headers existera.
+  // Sert le build E2E (pnpm build:e2e doit avoir été exécuté) avec les en-têtes de production
+  // (config/security-headers.mjs, via le plugin Vite : preview.headers, ADR-OPS-06).
   webServer: {
     command: `pnpm exec vite preview --outDir dist-e2e --port ${PORT} --strictPort`,
     url: `http://localhost:${PORT}`,

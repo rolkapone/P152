@@ -40,6 +40,8 @@ Focus initial sur "Start with a desk". Échap = Skip. Ne réapparaît pas ensuit
 ```
 Largeurs indicatives : gauche 240 px, droite 300 px, scène = reste. Ordre Tab : top bar > gauche > scène > droite.
 
+> **Affiné au Sprint 2 : voir `stories/US-005.md`** (référence pour la mise en page). Écarts avec ce schéma : à US-005 seuls sont rendus le mot-symbole, le nom du setup (lecture seule), Undo/Redo (inactifs), le verdict (état vide "Nothing to check yet", et non "It fits") ; "Saved…", File, Help, "Alert settings" sont des emplacements prévus (US-018, US-025, US-024). Largeurs retenues 248 / 312 px (design system). Sous 1024 px CSS les panneaux deviennent des tiroirs fermés par défaut. Barre de vue et astuce sont centrées dans la zone libre entre les panneaux.
+
 ## W3 — Desk picker (onglet "Desk", et modal au démarrage) [US-006, 007]
 ```
 ┌ Desk ─────────────────────────────┐
@@ -55,11 +57,13 @@ Largeurs indicatives : gauche 240 px, droite 300 px, scène = reste. Ordre Tab :
 │ Width   [ 1400 ] mm               │
 │ Depth   [  700 ] mm               │
 │ Height  [  740 ] mm               │
-│ Allowed: 600–3000 mm width        │
+│ Allowed: 800–2400 mm width        │
 │ [ Use this desk ] (modal only)    │
 └───────────────────────────────────┘
 ```
 Dans le Studio : le clic sur une carte applique tout de suite le bureau (objets conservés, alertes recalculées). "Custom size" est replié par défaut.
+
+> **Affiné au Sprint 2 : voir `stories/US-006.md`**. Les cartes en 2 colonnes deviennent des lignes en une colonne (vignette à l'échelle commune, "L × P cm", nom, coche pour l'actif) dans un `radiogroup` ; un résumé "Selected" donne les mm. "Custom size" (champs mm) = US-007, la modale = US-020. Bornes corrigées : largeur 800-2400, profondeur 500-1000, hauteur 600-1300 mm (catalogue).
 
 ## W4 — Bibliothèque d'objets (onglet "Objects") [US-008, 009, 010]
 ```
@@ -130,10 +134,10 @@ ou (✔ It fits - 1 tip) ou (✖ Doesn't fit - 2)     │  Monitor is close to e
 │ Desk: 140×70 cm                   │
 │ Width [1400] mm   Depth [700] mm  │
 │ Height [740] mm                   │
-│ ⓘ Allowed width: 600–3000 mm      │
+│ ⓘ Allowed width: 800–2400 mm      │
 └───────────────────────────────────┘
 ```
-Erreur : champ entouré + icône, message sous le champ ("Enter a width between 600 and 3000 mm."), ancienne valeur conservée, focus sur le champ.
+Erreur : champ entouré + icône, message sous le champ ("Enter a width between 800 and 2400 mm."; bornes du catalogue, injectées, jamais en dur), ancienne valeur conservée, focus sur le champ.
 
 ## W8 — File menu et dialogues [US-018]
 ```
@@ -178,3 +182,4 @@ Chargement                         Navigateur non compatible
 └──────────────────────────┘       │ Firefox, Edge or Safari.     │
                                    └──────────────────────────────┘
 ```
+> **Remplacé au Sprint 2 : voir `stories/US-005.md` §2.4.** Textes définitifs : "The 3D view can't start" (WebGL 2 absent), "The 3D view didn't load" (échec de chargement, texte neutre, "Reload page" au 2e échec), "The 3D view stopped" (contexte perdu). Le shell et le verdict restent visibles dans tous les cas.

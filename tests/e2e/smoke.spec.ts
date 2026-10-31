@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 test("the app loads without console errors", async ({ page }) => {
   const problems: string[] = [];
@@ -10,7 +10,7 @@ test("the app loads without console errors", async ({ page }) => {
 
   await page.goto("/");
 
-  await expect(page).toHaveTitle("P152");
+  await expect(page).toHaveTitle("Deskfit - Plan your desk setup");
   await expect(page.locator("html")).toHaveAttribute("lang", "en");
   await expect(page.locator("#root")).not.toBeEmpty();
   expect(problems).toEqual([]);

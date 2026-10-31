@@ -4,15 +4,16 @@
 
 | Indicateur | Valeur |
 |---|---|
-| Points MVP (Must + Should) | **96** (Must 86, Should 10) ; +1 pt : SEC-03a passe de 1 à 2 pts (correctif CSP React Aria, finding MEDIUM US-004) |
+| Points MVP (Must + Should) | **99** (Must 89, Should 10) ; +1 pt : SEC-03a passe de 1 à 2 pts (correctif CSP React Aria, finding MEDIUM US-004) ; **+3 pts le 2026-10-20 : US-005 passe de 5 à 8 pts** (design natif v0.4, décision 32) |
 | Dont stories sécurité (SEC-01 à SEC-05) | 9 (Must 8, Should 1) |
 | Points « Could » MVP (hors total, bonus) | 9 (US-021, US-023, SEC-06) |
-| Points livrés | **16 / 96 = 16,7 %** (Sprint 1 : US-001 3, US-002 2, US-003 3, SEC-01 3, US-004 5, toutes DONE) |
+| Points livrés | **18 / 99 = 18,2 %** (Sprint 1 : US-001 3, US-002 2, US-003 3, SEC-01 3, US-004 5, toutes DONE = 16 ; Sprint 2 : SEC-03a 2, DONE) |
 | Vitesse moyenne | **16 pts/sprint** (1 sprint terminé, 16 pts livrés ; prévision prudente de 15 pts conservée pour le planning) |
-| Sprints restants estimés avant MVP | **5** (80 pts restants / 16 = 5,0 ; 6 si la vitesse retombe à 15) |
-| Dernière mise à jour | 2026-10-20 (fin du Sprint 1 : 5 stories DONE, 16 pts ; revue et rétro dans `docs/sprints/sprint-1.md`) |
+| Sprint en cours | **Sprint 2** (ouvert le 2026-10-20) : SEC-03a 2 (DONE) + US-005 **8** + US-006 5 + SEC-02 1 = **16 pts engagés** (capacité prudente 15 : dépassement de 1 pt, marge 0 ; SEC-02 peut glisser au Sprint 3) ; après le Sprint 2, livrés prévus 32 / 99 (32,3 %), restants 67 |
+| Sprints restants estimés avant MVP | **6 y compris le Sprint 2** (81 pts restants / 16 = 5,1, arrondi prudent à 6 ; 6 aussi si la vitesse retombe à 15) ; 5 après le Sprint 2 (67 / 16 = 4,2) |
+| Dernière mise à jour | 2026-10-30 (SEC-03a DONE, mergée, comptée dans les 18 pts ; voies attribuées au Sprint 2 dans `docs/sprints/sprint-2.md` ; reprise de US-005 après limite d'usage : T0 poussée, revue à refaire). Les SHA de commits cités dans ce document sont périmés (historique réécrit) : voir `git log --merges --oneline main` |
 
-Détail du recalcul : 83 pts (kickoff) + SEC-01 (3) + SEC-02 (1) + SEC-03a (2 depuis la fin du Sprint 1) + SEC-03b (1) + SEC-04 (1) + SEC-05 (1) + US-024 (2, réglages d'alertes) + US-025 (2, Help et préférences d'affichage) = **96**. Les autres éléments issus de US-004 (dette, mineurs QA) sont des critères ajoutés à des stories existantes ou à SEC-06 (Could), sans point supplémentaire ; à réestimer au planning du Sprint 2 s'ils pèsent.
+Détail du recalcul : 83 pts (kickoff) + SEC-01 (3) + SEC-02 (1) + SEC-03a (2 depuis la fin du Sprint 1) + SEC-03b (1) + SEC-04 (1) + SEC-05 (1) + US-024 (2, réglages d'alertes) + US-025 (2, Help et préférences d'affichage) = 96, puis +3 (US-005 5 → 8, restylage natif v0.4) = **99**. Les autres éléments issus de US-004 (dette, mineurs QA) sont des critères ajoutés à des stories existantes ou à SEC-06 (Could), sans point supplémentaire ; à réestimer au planning du Sprint 2 s'ils pèsent.
 Hypothèse : le premier déploiement public n'a lieu qu'à la fin du MVP (SEC-03a avant le premier push, SEC-03b avant ce déploiement, SEC-05 juste avant la release).
 
 Légende : priorité MoSCoW, estimation en points (1, 2, 3, 5, 8). Tags `[UI]` = écran, `[3D]` = scène/rendu/assets.
@@ -23,7 +24,7 @@ Les critères UX/UI de ce document viennent de `docs/design/ux/principes.md`, `d
 
 Questions A à F de fin de Sprint 1 : **répondues le 2026-10-20** (voir « Décisions du PO » en fin de document, n° 22 à 28) ; G reste ouverte. Détail dans `docs/sprints/sprint-1.md`, section « Questions pour le PO ») : A. dépôt GitHub et premier push ; B. e-mail nominatif ou noreply dans les commits ; C. Docker pour Semgrep ; D. ombre de contact ; E. texte de l'état `failed` ; F. contenu du Sprint 2 ; G. questions long terme.
 
-1. **Bornes du bureau (non bloquant avant US-006/US-007)** : US-007 et le wireframe W3 annoncent largeur 600–3000 mm, mais le catalogue du technical-artist définit largeur 800–2400, profondeur 500–1000, hauteur 600–1300 mm. Quelles bornes retenir ? Par défaut, l'équipe applique les bornes du catalogue (source de vérité exécutable) et corrige les textes UX.
+Aucune question ouverte pour le Sprint 2 : la question 1 (bornes du bureau) est **tranchée par le PO le 2026-10-20** (décision 30 : rectangulaire 800–2400 × 500–1000 × 600–1300 mm ; angle 1200–2400 × 1000–2000 mm).
 
 ### Questions ouvertes à long terme (non bloquantes pour le MVP, issues du threat model §12)
 - **Affiliation (R5)** : des liens d'affiliation sont-ils compatibles avec la promesse de neutralité vis-à-vis des marques ? Si oui, déclaration « affiliate links » et classement indépendant de la commission ?
@@ -38,7 +39,7 @@ Questions A à F de fin de Sprint 1 : **répondues le 2026-10-20** (voir « Déc
 
 ### US-001 — Setup repo, build et CI  [Must | 3 pts]
 En tant qu'équipe, je veux un repo avec build, lint, tests et CI afin de livrer chaque story de façon fiable.
-**État au 2026-10-19 : DONE.** Mergée dans `main` (merge `--no-ff` dfdfcfe). Revue APPROVE au cycle 2/3 (`docs/reviews/US-001.md` ; cycle 1 bloqué sur l'audit tinypool/vitest, corrigé par Vitest 4.1.12). Secdevops PASS (`docs/security/scans/US-001.md`). Checks locaux verts (`docs/ci/local-run-US-001.md`). **Écart consigné** : la CI distante n'a pas été exécutée (décision PO : pas de dépôt ni de push au Sprint 1) ; son exécution réelle est reportée au Sprint 2 (SEC-01, SEC-02).
+**État au 2026-10-19 : DONE.** Mergée dans `main` (merge `--no-ff` dfdfcfe). Revue APPROVE au cycle 2/3 (`docs/reviews/US-001.md` ; cycle 1 bloqué sur l'audit tinypool/vitest, corrigé par Vitest 4.1.12). Secdevops PASS (`docs/security/scans/US-001.md`). Checks locaux verts (`docs/ci/local-run-US-001.md`). **Écart consigné** : la CI distante n'a pas été exécutée (décision PO : pas de dépôt ni de push au Sprint 1) ; son exécution réelle est reportée au Sprint 2 (SEC-01, SEC-02). **Levé le 2026-10-21** : CI distante exécutée sur la PR #2 (mergée, 925469d), 17/17 jobs verts.
 Critères d'acceptation :
 - [x] Étant donné un clone propre, quand on lance `pnpm install --frozen-lockfile` puis le build, alors il réussit sans erreur (premier `pnpm install && pnpm check` exécuté, `pnpm-lock.yaml` commité).
 - [x] Étant donné les jobs de `ci.yml`, quand on lance en local les mêmes commandes que ceux-ci (lint, types, tests unitaires, build), alors tout est vert. *(Décision PO 2026-10-19 : pas de dépôt GitHub ni de push au Sprint 1 ; la vérification de l'exécution réelle de la CI sur une PR est reportée au Sprint 2.)*
@@ -89,15 +90,15 @@ En tant qu'équipe, je veux que chaque PR soit scannée (secrets, SAST, dépenda
 **État au 2026-10-20 : DONE.** Mergée dans `main` (360a597). Revue APPROVE au cycle 1/3 ; secdevops PASS. La PR de test distante et le SARIF sont reportés au Sprint 2 (décision PO, pas de push) ; les findings restants sont tracés dans SEC-06.
 Critères d'acceptation :
 - [x] Le slot `# SECDEVOPS-SLOT` de `ci.yml` contient les jobs de `docs/security/ci-security.md` (gitleaks, CodeQL, Semgrep, zizmor, SCA + licences, `build-hardening`) et un job agrégateur `security` requis par `ci-ok`.
-- [ ] *(reporté au Sprint 2 : exige le dépôt distant, décision PO 2026-10-19)* Une PR de test contenant un faux secret, un `innerHTML`, une dépendance vulnérable HIGH, et un `dist` contenant `__p152test` fait échouer la CI (4 cas vérifiés puis annulés).
+- [ ] *(reste à faire, rattaché à SEC-02 T5 : la première PR distante, #2, est celle du correctif E2E, sans cas négatifs)* Une PR de test contenant un faux secret, un `innerHTML`, une dépendance vulnérable HIGH, et un `dist` contenant `__p152test` fait échouer la CI (4 cas vérifiés puis annulés).
 - [x] `.gitleaks.toml`, `.semgrep/p152.yml`, `scripts/check-licenses.mjs`, `.github/dependabot.yml` et le workflow hebdomadaire sont en place ; actions et images épinglées par SHA/digest.
 - [x] *(vérification locale, Sprint 1)* Chaque job de sécurité est exécuté en local avec la même commande que dans `ci.yml` (gitleaks, SCA + licences, zizmor, `build-hardening` hors contrôle `_headers`, Semgrep) et le résultat est consigné dans `docs/ci/local-run-SEC-01.md` ; ce qui n'est pas exécutable en local (CodeQL, Semgrep si Docker est arrêté) est listé comme non vérifié, jamais comme vert.
 - [x] *(vérification locale)* Les 4 cas négatifs (faux secret, `innerHTML`, dépendance HIGH, `__p152test` dans `dist`) sont rejoués en local sur une copie jetable, chacun fait échouer la commande du job correspondant, puis tout est annulé (arbre propre) ; les cas non faisables sont consignés.
 - [x] `docs/security/ci/` porte un bandeau « obsolète : les fichiers actifs sont à la racine / dans `.github/` » (finding de la revue US-002).
-- [ ] *(reporté au Sprint 2 : exige le dépôt distant)* Les rapports SARIF remontent dans l'onglet Code scanning.
+- [x] Les rapports SARIF remontent dans l'onglet Code scanning. *(vérifié sur la PR #2, première CI distante 17/17 verte ; `dependency-review` exécuté sur la PR)*
 Notes techniques / dépendances : devops + secdevops. Dépend de US-001 (CI exécutée au moins une fois). Le contrôle `dist/_headers` de `build-hardening` **reste bloquant** (décision secdevops, scan US-001) : il n'y a pas d'avertissement toléré. La génération de `public/_headers` est donc livrée par SEC-03a **avant le premier push** (Sprint 2, en tête). Les findings LOW du scan US-001 sont regroupés dans SEC-06.
 
-### SEC-02 — Durcissement du dépôt GitHub public  [Must | 1 pt]
+### SEC-02 — Durcissement du dépôt GitHub public  [Must | 1 pt | voie RENFORCÉE]
 En tant qu'équipe, je veux un dépôt public durci afin de réduire le risque de compromission de la chaîne de production.
 Critères d'acceptation :
 - [ ] MFA actif sur les comptes ayant un accès en écriture.
@@ -105,15 +106,19 @@ Critères d'acceptation :
 - [ ] Secret scanning + push protection, Dependabot alerts, private vulnerability reporting activés ; `SECURITY.md` publié.
 - [ ] Actions : `GITHUB_TOKEN` en lecture seule par défaut, approbation requise pour les workflows des contributeurs externes, épinglage SHA obligatoire si l'option est disponible.
 - [ ] `CODEOWNERS` couvre `.github/`, `config/security-headers.mjs`, `package.json`, `pnpm-lock.yaml`, `pnpm-workspace.yaml`, `.npmrc`, `.gitleaks.toml`, `.semgrep/`.
+- [ ] *(suivi PR #2)* Les alertes Dependabot, aujourd'hui **désactivées**, sont activées par le PO (Settings > Code security) ; vérifiable : l'onglet Security > Dependabot est accessible.
+- [ ] *(suivi PR #2)* Les 4 alertes de code scanning `p152-test-hook-reference` sur `PerfProbe.tsx` sont fermées comme faux positifs (« used in tests / false positive », hook protégé par `VITE_E2E`), avec un commentaire de justification ; vérifiable : 0 alerte ouverte de cette règle.
+- [ ] *(reporté de SEC-01)* La PR de test avec les 4 cas négatifs (faux secret, `innerHTML`, dépendance HIGH, `__p152test`) fait échouer la CI, puis est fermée sans merge.
 Notes techniques / dépendances : devops. **Les réglages du compte/dépôt GitHub ne sont appliqués qu'avec l'accord explicite du PO** (le PO réalise ou valide chaque action). Dépend de US-001 et de la création du dépôt distant.
 
 ### SEC-03a — Génération des en-têtes de sécurité (`_headers`, CSP) et CSP de React Aria  [Must, avant le premier push | 2 pts]
+**État au 2026-10-20 : DONE.** Mergée dans `main` (42c15cd). Revue APPROVE au cycle 1/3 (`docs/reviews/SEC-03a.md`) ; secdevops PASS (`docs/security/scans/SEC-03a.md`, Semgrep via Docker, 0 ERROR ; finding MEDIUM de US-004 clos). Les LOW et suggestions sont tracés dans SEC-06 et SEC-03b.
 En tant qu'équipe, je veux que le build produise les en-têtes de sécurité afin que le contrôle `build-hardening` passe et que le premier push n'échoue pas.
 Critères d'acceptation :
-- [ ] Étant donné `config/security-headers.mjs` (source unique), quand on lance le build, alors `public/_headers` est généré et `dist/_headers` existe avec CSP stricte sans `unsafe-inline`/`unsafe-eval`, `nosniff`, `Referrer-Policy`, `Permissions-Policy`, COOP, HSTS.
-- [ ] Un test unitaire vérifie que le contenu de `dist/_headers` correspond à `config/security-headers.mjs` ; le contrôle `dist/_headers` de `sec-build-hardening` (ci.yml) est vert, sans avertissement toléré.
-- [ ] Le preview/E2E servi avec ces en-têtes ne produit aucune violation CSP en console.
-- [ ] *(finding MEDIUM du scan US-004)* React Aria `usePress` injecte un `<style>` inline au runtime, ce qui viole `style-src` d'ADR-OPS-06. Correction : `index.html` contient `<link rel="stylesheet" id="react-aria-pressable-style" href="/react-aria-pressable.css">`, le fichier `public/react-aria-pressable.css` existe (même contenu que le style injecté), **jamais `'unsafe-inline'`** ; un test E2E sous CSP de production échoue sur tout `securitypolicyviolation` et sur toute erreur console CSP, et vérifie qu'aucun `<style>` injecté par React Aria n'est présent.
+- [x] Étant donné `config/security-headers.mjs` (source unique), quand on lance le build, alors `public/_headers` est généré et `dist/_headers` existe avec CSP stricte sans `unsafe-inline`/`unsafe-eval`, `nosniff`, `Referrer-Policy`, `Permissions-Policy`, COOP, HSTS.
+- [x] Un test unitaire vérifie que le contenu de `dist/_headers` correspond à `config/security-headers.mjs` ; le contrôle `dist/_headers` de `sec-build-hardening` (ci.yml) est vert, sans avertissement toléré.
+- [x] Le preview/E2E servi avec ces en-têtes ne produit aucune violation CSP en console.
+- [x] *(finding MEDIUM du scan US-004)* React Aria `usePress` injecte un `<style>` inline au runtime, ce qui viole `style-src` d'ADR-OPS-06. Correction : `index.html` contient `<link rel="stylesheet" id="react-aria-pressable-style" href="/react-aria-pressable.css">`, le fichier `public/react-aria-pressable.css` existe (même contenu que le style injecté), **jamais `'unsafe-inline'`** ; un test E2E sous CSP de production échoue sur tout `securitypolicyviolation` et sur toute erreur console CSP, et vérifie qu'aucun `<style>` injecté par React Aria n'est présent.
 Notes techniques / dépendances : devops + secdevops (+ developer pour le correctif React Aria). **Sprint 2, en tête, avant tout push** (décision secdevops : contrôle bloquant). Dépend de US-001 (DONE). Débloque SEC-01 (jobs) et US-022 (E2E sous CSP).
 
 ### SEC-03b — Déploiement sécurisé sur Cloudflare Pages  [Must avant le premier déploiement | 1 pt]
@@ -123,6 +128,8 @@ Critères d'acceptation :
 - [ ] Jeton Cloudflare à portée « Pages : Edit » sur le seul compte ; MFA Cloudflare ; procédure de rotation écrite dans `docs/security/`.
 - [ ] Après chaque déploiement, un contrôle automatique lit les en-têtes de l'URL réelle et échoue si un en-tête diffère de `config/security-headers.mjs`.
 - [ ] Les previews portent `X-Robots-Tag: noindex` et ne sont jamais construites depuis un fork.
+- [ ] *(suivi SEC-03a)* `Cross-Origin-Resource-Policy: same-origin` ajouté dans `config/security-headers.mjs` en passant par **ADR-OPS-06** (mise à jour de l'ADR, test d'en-têtes et contrôle CI alignés).
+- [ ] *(suivi SEC-03a)* Vérifier que la règle `/index.html` des en-têtes est bien opérante sur Cloudflare Pages (elle est inopérante en local/preview) ; corriger ou retirer sinon.
 Notes techniques / dépendances : devops + secdevops. Dépend de SEC-03a et SEC-02. À livrer avant le premier déploiement, sur ordre du PO. Pas de domaine personnalisé (`*.pages.dev`).
 
 ### SEC-06 — Durcissement CI (findings LOW du scan US-001)  [Could | 2 pts, priorité basse]
@@ -141,9 +148,18 @@ Critères d'acceptation :
 - [ ] Les échecs de `security-scheduled.yml` déclenchent un agrégateur ou une notification (lien avec SEC-02).
 - [ ] *(au premier push)* `upload-sarif` fonctionne dans le conteneur semgrep et `security-events: write` est géré pour les PR de forks.
 - [ ] *(dette de test)* Un test sur 190 a échoué une fois dans `pnpm check` sous charge, puis est passé 6 fois : identifier le test instable (candidat probable : fuzz fast-check, timeout ou seed), le stabiliser (seed fixe ou timeout explicite) et le vérifier par 10 exécutions consécutives sous charge. Instabilité déjà tracée de `parseSetup.fuzz`.
-- [ ] *(dette de test, US-004)* Les `waitForTimeout` restants de `tests/e2e/scene.spec.ts` (l.37, 39, 50, 53) sont remplacés par des attentes sur un état observable ou `page.clock` ; `open()` de `scene-ui.spec.ts` n'est plus sensible à la charge (attente d'un signal de scène prête). Règle : aucun test E2E ne dépend du temps réel. Vérifié par 10 exécutions consécutives de `pnpm test:e2e` sous charge (CPU saturé) sans échec (juste après le merge US-004, le devops avait vu 1 à 4 échecs sur 3 runs ; 40/40 deux fois ensuite).
+- [ ] *(dette de test, US-004)* Les `waitForTimeout` restants de `tests/e2e/scene.spec.ts` (l.37, 39, 50, 53) sont remplacés par des attentes sur un état observable ou `page.clock` ; `open()` de `scene-ui.spec.ts` n'est plus sensible à la charge (attente d'un signal de scène prête). Règle : aucun test E2E ne dépend du temps réel. Vérifié selon la règle reformulée (référence CI 4 CPU / 8 Go, `--repeat-each=10` sans charge ; voir plus bas) au lieu de « CPU saturé » (juste après le merge US-004, le devops avait vu 1 à 4 échecs sur 3 runs ; 40/40 deux fois ensuite).
 - [ ] *(LOW, scan US-004)* `@react-three/drei` est installé mais inutilisé, et ses helpers chargent des ressources depuis un CDN (contraire à la CSP). Soit la dépendance est retirée de `package.json` / lockfile, soit une règle de lint interdit ses imports qui chargent depuis un CDN (test de la règle dans `tests/unit/lint-rules.test.ts`).
-Notes techniques / dépendances : devops + secdevops. Source : `docs/security/scans/US-001.md` et scan SEC-01. Hors total MVP (Could).
+- [ ] *(LOW, scan SEC-03a)* Test de non-divergence du CSS React Aria : `public/react-aria-pressable.css` est comparé au style que la version installée de React Aria injecterait (échec à la mise à jour de la dépendance si divergence).
+- [ ] *(LOW, scan SEC-03a)* Les chemins de `.semgrep/p152.yml` sont ancrés (pas de motif qui déborde sur d'autres dossiers) ; test de la règle.
+- [ ] *(LOW, scan SEC-03a)* Le contrôle CI des en-têtes (`sec-build-hardening`) est étendu à `style-src`, `connect-src` et `worker-src`.
+- [ ] *(suggestion revue SEC-03a)* Note dans le README sur la preview : `upgrade-insecure-requests` et HSTS (comportement en `http://localhost`, Safari, HSTS mémorisé).
+- [ ] *(suggestion revue SEC-03a)* Le test `skipIf` de `security-headers` ne peut plus masquer un échec (il échoue si `dist/` est absent en CI) ; `apply: () => true` du plugin est justifié ou remplacé par une condition explicite.
+- [ ] *(suggestion revue SEC-03a)* `csp.spec` utilise `waitForScene` (signal de scène prête) au lieu d'une attente implicite.
+- [ ] *(suivi SEC-03a, à traiter par la première story qui ajoute une modale ou un popover)* `usePreventScroll` de React Aria (overlays, modales) injecte un `<style>` au runtime, contraire à `style-src` : la story concernée doit prévoir le même correctif (feuille statique) ou une alternative, avec test E2E sous CSP. Non traité ici faute de composant concerné.
+- [ ] *(suivi PR #2, qa-tester)* `perf.spec` vérifie un budget de temps de chargement de la scène (seuil proposé par le qa-tester, valeur validée par le PO) ; le commentaire de `pauseClock` est corrigé pour refléter son comportement réel ; `docs/qa/ci-e2e-runner.md:7` est précisé (formulation corrigée selon la revue).
+- [ ] *(règle « 10 runs E2E sous charge », reformulée)* La règle « 10 exécutions sous charge CPU sans limite » est abandonnée (impossible à tenir par construction). Définition de `docs/reviews/SEC-03a.md` : (1) référence CI : 10 runs `CI=1 pnpm test:e2e` dans l'image Playwright épinglée limitée à `--cpus=4 --memory=8g`, 0 échec ; (2) stress local informatif : charge à 50 % des threads logiques, 4 workers, 10 runs, 0 échec dû à une assertion ou à une attente de test ; (3) contrôle de conception : `--repeat-each=10` vert sans charge et aucun `waitForTimeout` dans `tests/e2e`. Remplace le critère de 10 runs sous charge ci-dessus.
+Notes techniques / dépendances : devops + secdevops. Source : `docs/security/scans/US-001.md`, scan SEC-01, scan et revue SEC-03a. Hors total MVP (Could).
 
 ### SEC-04 — Mention « vos données restent dans ce navigateur »  [UI] [Should | 1 pt]
 En tant qu'utilisateur, je veux savoir où sont stockées mes données afin de décider en confiance.
@@ -201,7 +217,8 @@ Décisions UX **VALIDÉES par le PO le 2026-10-19** :
 Notes techniques / dépendances : graphics-engineer + technical-artist ; ux-designer/ui-designer pour la barre flottante de scène. Dépend de US-001, US-003. Références : maquette `docs/design/ui/maquettes/index.html` (barre de scène), `docs/design/3d/apercu/index.html`, `docs/design/3d/direction-artistique.md` §3 et §10, wireframe W2.
 Références de design US-004 : UX `docs/design/ux/stories/US-004.md` ; maquette `docs/design/ui/maquettes/US-004.html` (**section 7 = consignes developer**, `docs/design/ui/design-system.md` §14) ; paramètres de scène `assets/catalog/scene/studio.json` ; spécification 3D `docs/design/3d/US-004-scene.md` (transition caméra 480 ms, cible (0 ; 0,72 ; 0), caméra jamais sous Y = 0,9 m ni dans le bureau).
 
-### US-005 — Shell de l'application en anglais  [UI] [Must | 5 pts]
+### US-005 — Shell de l'application en anglais  [UI] [Must | 8 pts | voie RENFORCÉE]
+> **Réestimée de 5 à 8 pts le 2026-10-20** (décision 32) : la direction v0.4 « Natif · Premium · Précis » ajoute la fenêtre macOS (barre d'outils unifiée, barre latérale, inspecteur), le repli iPadOS/iOS, 4 matériaux translucides, l'échelle typographique Apple en Inter et le restylage de la barre de vue, de l'astuce et des écrans de US-004. **Les critères « panneaux flottants », « verre 86 % » et « 758 px » ci-dessous sont remplacés par ceux de la rubrique v0.4** (le critère v0.4 prime en cas de conflit). Redécoupage envisageable si le developer le demande (ex. restylage de US-004 en story à part).
 En tant qu'utilisateur, je veux une interface claire en anglais (zone 3D, panneau d'objets, panneau de propriétés, alertes) afin de m'y repérer sans aide.
 Critères d'acceptation :
 - [ ] Étant donné l'app, quand elle se charge, alors la mise en page (wireframe W2) affiche la scène plein viewport avec top bar, panneau gauche (onglets Desk / Objects), panneau droit (Properties puis Alerts) et astuce en pied, en panneaux flottants ; les deux panneaux latéraux sont repliables.
@@ -214,23 +231,78 @@ Critères d'acceptation :
 - [ ] Ordre de tabulation : top bar → panneau gauche → scène → panneau droit ; liens "Skip to 3D view" et "Skip to alerts" en tête.
 - [ ] **Inter auto-hébergée** : fichier `public/fonts/inter-latin-wght-normal.woff2` servi en same-origin (`font-src 'self'`, aucune requête tierce), `@font-face` avec `font-display: swap` et repli système, précharge dans `index.html` ; **licence SIL OFL 1.1 consignée** (`public/fonts/OFL.txt` + entrée dans `docs/design/3d/licences-assets.md`/`THIRD_PARTY_LICENSES`). Icônes Lucide (ISC, licence conservée) ; aucune police ni icône Apple.
 - [ ] Les états vide, chargement ("Loading 3D scene…", barre `role="progressbar"`, shell visible) et erreur / navigateur sans WebGL (W11) sont définis.
-- [ ] Le nom provisoire « Deskfit » est un mot-symbole texte (pas d'asset logo).
-- [ ] *(suivi US-004, ux-designer)* L'état `failed` de la scène (hors WebGL indisponible) affiche un texte neutre qui n'accuse pas le navigateur (aujourd'hui « unsupported ») : titre, message et action "Try again" définis par l'ux-designer, texte dans les fichiers i18n, test du texte et du `role="alert"`. Texte à valider par le PO.
+- [ ] Le nom affiché « Deskfit » (`app.name` = "Deskfit", décision PO 29) est un mot-symbole texte (pas d'asset logo) ; titre de page « Deskfit - Plan your desk setup ».
+- [ ] *(suivi US-004, ux-designer ; texte validé par le PO)* L'état `failed` de la scène (hors WebGL indisponible) affiche le texte neutre : titre « The 3D view didn't load », corps « Something went wrong while starting it. Try again. If the problem continues, reload this page. », bouton "Try again", puis bouton "Reload page" **à partir du 2e échec consécutif** ; texte dans les fichiers i18n, test du texte exact et du `role="alert"`.
+- [ ] *(décisions PO 29, périmètre du shell)* Undo / Redo **ne sont pas rendus** jusqu'à US-019 (aucun bouton mort) ; le verdict vide affiche « Nothing to check yet » ; l'onglet "Objects" est visible avec l'état vide « No objects to add yet / The object library will appear here. » ; File, Help, "Saved in this browser" et "Alert settings" ne sont pas rendus.
+- [ ] *(messages d'import, dette US-003, rattachés à US-018)* `tooLarge` reste « This file is too large (1 MB max). Choose another file. » ; `tooManyObjects` devient « This setup has too many objects (50 max). Choose another file. » (UX-23, à vérifier dans US-018).
+- [ ] **Critères UX testables (ux-designer, `docs/design/ux/stories/US-005.md` §7, UX-1 à UX-22 ; UX-23 → US-018)** :
+  - UX-1 À 1366×768 : scène plein viewport, top bar 56 px, deux panneaux flottants (248 et 312 px, marges 12 px), aucune barre de défilement de page ; chaque panneau défile en interne.
+  - UX-2 Le `role="status"` « Nothing to check yet » est visible en haut à droite, de 320 à 1920 px CSS, panneaux repliés ou non, tiroir ouvert ou non, dans tous les états de la scène ; jamais icône seule ni rogné.
+  - UX-3 Exactement un `banner`, un `main`, deux `complementary` nommés ("Desk and objects", "Properties and alerts"), un `h1`, pas de saut de niveau ; `lang="en"` ; titre de page défini.
+  - UX-4 Les deux skip links sont les deux premiers arrêts de Tab, invisibles hors focus, non masqués au focus ; "Skip to 3D view" focalise le viewport ; "Skip to alerts" ouvre le panneau droit s'il est replié et focalise le titre "Alerts".
+  - UX-5 Ordre de Tab : Skip to 3D view, Skip to alerts, bascule gauche, onglet sélectionné, contenu de l'onglet, viewport, Reset view, Top, Front, (Got it, Hide tip), bascule droite ; aucun piège, aucun `tabindex` positif, focus visible ≥ 3:1 jamais masqué. (Undo/Redo absents, décision 29.)
+  - UX-6 Chaque bascule : `aria-expanded`, `aria-controls`, nom constant, cible ≥ 40 px ; le focus reste sur la bascule ; contenu replié retiré de Tab et de l'arbre d'accessibilité ; le choix survit au rechargement en mode large.
+  - UX-7 Replier/ouvrir un panneau ne déplace ni la caméra ni le dock.
+  - UX-8 À 1366×768 panneaux ouverts, après chargement et après "Reset view"/"Top"/"Front", le bureau entier est visible dans la zone libre (758 px) avec une marge ≥ 24 px de chaque côté (exigence graphics-engineer).
+  - UX-9 Sous 1024 px CSS (dont 1366×768 à 200 %) : tiroirs fermés au chargement, un seul ouvert à la fois, Échap ferme et renvoie le focus à la bascule, top bar et verdict jamais recouverts ; à 320 px pas de défilement horizontal, aucune commande coupée.
+  - UX-10 `tablist`/`tab`/`tabpanel` ; "Desk" sélectionné au chargement ; flèches gauche/droite changent d'onglet ; onglet actif distinct autrement que par la couleur.
+  - UX-11 Textes des états vides (Verdict, Properties, Alerts, Objects) conformes au §6 de l'UX, sans lien ni bouton mort.
+  - UX-12 Aucun élément "File", "Help", "Alert settings", "Saved…" ni crayon d'édition dans le DOM ; **Undo/Redo absents du DOM** (décision PO 29, à la place de « présents désactivés » de l'UX d'origine).
+  - UX-13 Shell visible pendant "Loading 3D scene…" (`role="progressbar"`), panneaux utilisables, CLS ≈ 0 sur la zone de scène.
+  - UX-14 État `failed` : titre et corps exacts dans `role="alert"`, focus sur le titre, "Try again" relance l'initialisation ; le texte ne contient ni "browser", "device", "support" ni "WebGL" ; pas de barre de vue ni d'astuce ; aucune exception non gérée.
+  - UX-15 "Reload page" absent au 1er échec, présent et fonctionnel dès le 2e échec consécutif, absent pour `unsupported` et `contextLost`.
+  - UX-16 `unsupported` et `contextLost` gardent exactement les textes d'US-004 ; `failed` n'affiche jamais le texte `unsupported`.
+  - UX-17 Tous les textes viennent de `src/locales/en/` ; aucun libellé ne contient "orbit", "pan", "mesh" ou "camera".
+  - UX-18 Verre ≥ 86 % avec repli opaque sans flou (sans `backdrop-filter`, `prefers-reduced-transparency`, `.no-glass`) ; contrastes ≥ 4,5:1 texte et ≥ 3:1 icônes/contours, clair et sombre ; texte ≥ 14 px ; cibles ≥ 32 px ; thème par défaut = système.
+  - UX-19 Sous `prefers-reduced-motion: reduce`, repli/ouverture instantanés et barre de chargement statique.
+  - UX-20 Info-bulle des bascules immédiate au focus clavier, ~400 ms au survol, Échap la ferme sans quitter le focus.
+  - UX-21 Barre de vue et astuce centrées dans la zone libre, jamais sous un panneau à 1366 px, comportement d'US-004 conservé.
+  - UX-22 Focus dans un panneau ou la top bar : 0, 1, 2, flèches, + et - ne déplacent pas la caméra.
 - [ ] *(suivi US-004, ui-designer)* La maquette `docs/design/ui/maquettes/US-004.html` et `design-system.md` §9 et §14 sont mis à jour : l'info-bulle s'affiche **immédiatement** au focus clavier (le délai ~400 ms ne vaut que pour le survol souris), conformément au comportement livré et à UX-4.
 - [ ] *(budget de taille, suivi US-004)* Un budget est fixé et vérifié par `check:bundle` (ou un script dédié) : mesures actuelles = chunk principal 153,8 Ko gz, chunk 3D 266 Ko gz ; le seuil (valeur proposée par le developer et le graphics-engineer, validée par le PO) fait échouer le build en cas de dépassement ; le chunk 3D reste chargé en `lazy()`.
-Notes techniques / dépendances : ux-designer, ui-designer, developer. Dépend de US-001. Références : maquette `docs/design/ui/maquettes/index.html`, `docs/design/ui/design-system.md` §2–§5 et §9, wireframes W2 et W11. Les ESLint `boundaries` et `i18next` arrivent avec cette story (écart ADR consigné).
+- [ ] **Design v0.4 « Natif · Premium · Précis » (décision PO 32)** — références : `docs/design/ui/design-system.md` v0.4 (§12, §15, §16, §18 impact code), maquettes `US-004.html`, `US-005.html`, `US-006.html` :
+  - Fenêtre macOS : barre d'outils unifiée, barre latérale (gauche) et inspecteur (droite) ; repli iPadOS puis iOS ; 4 matériaux translucides avec repli opaque (`.no-glass`, `prefers-reduced-transparency`, sans `backdrop-filter`) ; échelle typographique de type Apple en Inter ; icônes Lucide ; **ni SF Pro, ni SF Symbols, ni logo Apple**.
+  - **Bascules des deux volets dans la barre d'outils** (écart UX validé) ; **UX-5 adapté** : l'ordre de Tab place la bascule droite **juste après** la bascule gauche (Skip to 3D view, Skip to alerts, bascule gauche, bascule droite, onglet sélectionné, contenu de l'onglet, viewport, Reset view, Top, Front, (Got it, Hide tip)).
+  - **Restylage des écrans de US-004 selon §18** : barre de vue, astuce, états vide / chargement / erreur ; bouton principal en `--color-accent-solid` ; **coche à la place du contour 2 px** pour l'élément actif ; **zone libre de 806 px à 1366** (remplace 758 px dans UX-8/UX-21 et UX-1 : les largeurs des volets suivent §15). Tests E2E et marges de cadrage (≥ 24 px) à ajuster.
+  - Contrastes AA vérifiés sur chaque matériau, clair et sombre ; contrôle design contre les maquettes v0.4.
+  - La **Liquid Glass** n'est pas dans cette story (voir US-025).
+Références de design US-005 : UX `docs/design/ux/stories/US-005.md` ; maquette `docs/design/ui/maquettes/US-005.html` ; `docs/design/ui/design-system.md` §15 (shell), §9 et §14 (mis à jour). Le graphics-engineer ajuste le cadrage à la zone libre (UX-8, marge de vue en pixels).
+Notes techniques / dépendances : ux-designer, ui-designer, developer. Dépend de US-001. Références : maquette `docs/design/ui/maquettes/index.html`, `docs/design/ui/design-system.md` §2–§5 et §9, wireframes W2 et W11. Les garde-fous de couches et de texte en dur sont des règles ESLint natives et locales (`config/eslint-plugin-p152.mjs`, ADR-APP-10) ; `eslint-plugin-boundaries` et `eslint-plugin-i18next` sont écartés (US-005 T0).
 
 ## Epic C — Bureau
 
-### US-006 — Choisir un bureau dans un catalogue  [UI][3D] [Must | 5 pts]
+### US-006 — Choisir un bureau dans un catalogue  [UI][3D] [Must | 5 pts | voie STANDARD]
 En tant qu'utilisateur, je veux choisir un bureau parmi des modèles aux dimensions réelles afin de partir de mon vrai mobilier.
 Critères d'acceptation :
-- [ ] Étant donné le panneau gauche, alors un onglet **"Desk"** (à côté de "Objects", contrôle segmenté, wireframe W3) liste au moins 5 bureaux types (ex. 120×60, 140×70, 160×80, 180×80 cm, bureau d'angle) sous forme de cartes avec dimensions en cm/mm.
-- [ ] Quand je clique une carte, alors le bureau est appliqué immédiatement (carte active : contour accent 2 px + coche, pas la couleur seule), il apparaît à l'échelle réelle (1 m = 1 unité) et le choix est annoncé aux lecteurs d'écran.
-- [ ] Quand je change de bureau, alors les objets déjà posés sont conservés et les alertes recalculées.
-- [ ] Le bureau a un plateau et des pieds lisibles ; hauteur standard 720-750 mm par défaut.
+- [ ] Étant donné le panneau gauche, alors un onglet **"Desk"** (à côté de "Objects", contrôle segmenté, wireframe W3) liste **7 bureaux** du catalogue (`desk.json` v2 et `desk-corner.json`) : rectangulaires 100×60, 120×60, 140×70, 160×80, 180×80 cm ; d'angle 160×140 et 180×160 cm (**orientés à droite pour ce sprint**), sous forme de **lignes** d'une colonne avec vignette, « L × P cm » et nom (cm dans la ligne, cm et mm dans le résumé).
+- [ ] Quand je clique une ligne, alors le bureau est appliqué immédiatement (ligne active : contour accent 2 px + coche, pas la couleur seule), il apparaît à l'échelle réelle (1 m = 1 unité) et le choix est annoncé aux lecteurs d'écran. Au clavier, **les flèches appliquent directement le bureau** (pas d'Entrée de validation).
+- [ ] Quand je change de bureau, alors les objets déjà posés sont conservés (aucun supprimé ni déplacé ; positions relatives au centre du bureau), les alertes recalculées (point d'appel seulement) et une erreur d'alerte remonte si un objet déborde (règles avec US-014 à US-016 ; test unitaire à ce stade).
+- [ ] Le bureau a un plateau et des pieds lisibles ; hauteur standard 720-750 mm par défaut ; bureau par défaut 140×70. Bureau d'angle : générateur de bureau en L (graphics-engineer), empreinte non rectangulaire connue du catalogue.
+- [ ] Bornes du catalogue (décision PO 30) : rectangulaire largeur 800–2400, profondeur 500–1000, hauteur 600–1300 mm ; angle 1200–2400 × 1000–2000 mm. Le catalogue est validé par le schéma (`min ≤ défaut ≤ max`) et **le test « a catalog without any desk » de `validate.test.ts` est corrigé** par le developer (les données desk.json v2 et desk-corner.json, commit cd27e44 de la branche, le font échouer).
+- [ ] **Ombre de contact allégée** (décision PO 29, ex-marge) : opacité 0,24 ; empreinte = bureau − 200×140 mm, **dérivée du bureau choisi** (pas de valeur fixe) ; le keep-out de la caméra est aussi dérivé du bureau choisi (graphics-engineer).
+- [ ] Aucun « Custom size » (US-007), aucune modale (US-020), aucun champ de saisie ni bouton mort n'est présent dans l'onglet à US-006.
+- [ ] *(design v0.4, décision PO 32 ; `design-system.md` §16, maquette `US-006.html`)* **La liste des bureaux est un groupe unique avec filets de séparation** (écart UX validé) : lignes sans cartes séparées ni espacement de 8 px entre elles ; **ligne active = coche** (plus de contour accent 2 px). UX-1 (espace ≥ 8 px entre lignes), UX-6 (contour 2 px) et UX-13 à adapter en conséquence : hauteur de ligne ≥ 56 px conservée, filet visible ≥ 3:1 non requis (décoratif), état actif non porté par la couleur seule.
+- [ ] **Critères UX testables (ux-designer, `docs/design/ux/stories/US-006.md` §10, UX-1 à UX-17)** :
+  - UX-1 Titre « Choose your desk », aide, 7 lignes ; chaque ligne : vignette, « L × P cm », nom ; hauteur ≥ 56 px, espace ≥ 8 px.
+  - UX-2 `role="radiogroup"` nommé « Desk model » ; exactement une ligne `aria-checked="true"` en permanence ; un seul arrêt de Tab.
+  - UX-3 Au chargement 140×70 actif ; scène et résumé à 140×70 cm (1400×700×740 mm).
+  - UX-4 Clic = application immédiate, sans bouton ni confirmation ; recliquer l'actif ne change rien et n'annonce rien.
+  - UX-5 Flèches : déplacent le focus et appliquent ; Début/Fin vont à la première/dernière ligne ; Espace applique ; le focus reste sur la ligne.
+  - UX-6 Ligne active : contour accent 2 px, coche, fond `accent-subtle`, nom en 600, contour ≥ 3:1 clair et sombre ; anneau de focus 3 px visible sur la ligne active.
+  - UX-7 Annonce `aria-live="polite"` « {{name}} selected. {{width}} by {{depth}} cm. » une seule fois, 400 ms après le dernier changement (rafale de 5 flèches comprise) ; aucune annonce si l'actif est recliqué.
+  - UX-8 Résumé « Selected » : nom, cm, mm, légende « Width × depth × height », mis à jour avec le choix.
+  - UX-9 Vignettes `aria-hidden`, **dessinées en SVG par l'UI** à l'échelle commune ; l'angle se reconnaît à sa forme en L sans la couleur.
+  - UX-10 Dimensions de la scène = dimensions de la ligne (1 mm) ; bureau entier visible dans la zone libre avec marge ≥ 24 px après chaque changement à 1366×768 ; orientation conservée ; Top/Front restent actifs.
+  - UX-11 Transition de cadrage 480 ms, interruptible ; instantanée sous `prefers-reduced-motion`.
+  - UX-12 Liste utilisable pendant le chargement, après `failed` et sans WebGL ; le choix survit à "Try again" ; aucune exception console.
+  - UX-13 À 1366×768, 7 bureaux et le résumé : la liste défile dans le panneau si besoin sans défilement horizontal (la hauteur de 6 lignes sans défilement de l'UX d'origine est à réévaluer avec 7 lignes) ; à 200 % et 320 px (tiroir), aucun texte rogné.
+  - UX-14 Texte ≥ 14 px ; nom accessible = texte visible ; description = hauteur (« Height 74 cm ») ; cibles ≥ 32 px ; verre ≥ 86 % avec repli opaque.
+  - UX-15 Aucun « Custom size », « Use this desk », champ de saisie ou bouton mort.
+  - UX-16 Changement avec objets (test unitaire) : aucun objet supprimé, déplacé ni confirmé ; positions relatives au centre ; recalcul des alertes déclenché une fois par changement.
+  - UX-17 Textes du §9 de l'UX reproduits depuis `src/locales/en/` ; aucun « preset », « catalog », « mesh », « orbit », « pan », « camera » dans les textes visibles ou annoncés.
 - [ ] Au tout premier lancement, le même sélecteur est proposé en modale ("Choose your desk", bouton "Use this desk") si la story US-020 est livrée ; sinon le Studio s'ouvre sur le bureau par défaut (140×70 cm).
-Notes techniques / dépendances : technical-artist (`assets/catalog/object-types/desk.json`, presets compact/standard/large existants ; le bureau d'angle `desk.corner` reste à produire), graphics-engineer, developer pour l'onglet. Dépend de US-004, US-005. Références : wireframe W3, maquettes du panneau gauche. Voir la question sur les bornes des dimensions.
+Notes techniques / dépendances : technical-artist (catalogue commité sur `feature/US-006-choix-bureau`, cd27e44 : `desk.json` v2, `desk-corner.json`), graphics-engineer (scène, générateur du bureau en L, ombre et keep-out caméra dérivés du bureau), developer (onglet, état, correction de `validate.test.ts`). Dépend de US-004, US-005.
+Références de design US-006 : UX `docs/design/ux/stories/US-006.md` ; maquette `docs/design/ui/maquettes/US-006.html` ; `docs/design/ui/design-system.md` §16 ; aperçu 3D `docs/design/3d/apercu-bureaux/` et spécification `docs/design/3d/US-006-bureaux.md`. Wireframe W3 (mis à jour : lignes, pas cartes). À réestimer en cours de sprint si le bureau en L pèse (risque R4).
 
 ### US-007 — Dimensions personnalisées du bureau  [UI] [Should | 3 pts]
 En tant qu'utilisateur, je veux saisir largeur, profondeur et hauteur de mon bureau afin de refléter exactement le mien.
@@ -239,7 +311,7 @@ Critères d'acceptation :
 - [ ] Les valeurs hors bornes sont refusées avec un message sous le champ, relié par `aria-describedby`, ex. "Enter a width between X and Y mm." (bornes = celles du catalogue, voir question PO) ; l'ancienne valeur est conservée et le focus revient au champ en erreur.
 - [ ] Les champs sont des NumberField avec libellé visible, suffixe "mm", pas 10 mm (Maj 1, Ctrl 100).
 - [ ] Les alertes sont recalculées après modification.
-Notes techniques / dépendances : dépend de US-006. Wireframes W3 et W7.
+Notes techniques / dépendances : dépend de US-006. Wireframes W3 et W7. Bornes (décision PO 30) : rectangulaire 800–2400 × 500–1000 × 600–1300 mm ; **le bureau d'angle n'a pas de "Custom size"** (angle 1200–2400 × 1000–2000 mm, hors saisie), à rouvrir si le PO le demande.
 
 ## Epic D — Objets paramétrables
 
@@ -370,6 +442,7 @@ Critères d'acceptation :
 - [ ] *(sécurité)* Fixtures malveillantes dans `tests/fixtures/setups/malicious/` (> 1 Mio, `__proto__`/`constructor` à tous les niveaux, 51 objets, `1e308`, chaîne de 1 Mo, `mount` cyclique, clé inconnue contenant du HTML, version future) toutes rejetées sans exception ; fuzzing fast-check « ne lève jamais » ; le message d'erreur n'affiche jamais le contenu du fichier ni de pile ; la relecture sur événement `storage` passe par `parseSetup`.
 - [ ] *(sécurité)* L'import de fichier appelle `checkDeclaredSize(file.size)` **avant** `file.text()` (un fichier > 1 Mio n'est jamais lu en mémoire), puis `parseSetup(text, catalog, { declaredBytes: file.size })`.
 - [ ] *(dette US-003)* Les messages `tooLarge` (limite 1 Mio, libellé exact) et `tooManyObjects` sont validés par l'ux-designer ; `NO_CONTROL_CHARS` rejette aussi les caractères C1 et bidi dans les noms (test) ; `zod` n'est importable que depuis le point d'entrée prévu dans tout `src/` (règle lint) et un E2E sur le vrai `dist` sous CSP vérifie que le mode jitless est actif.
+- [ ] *(UX-23 de US-005, validé par le PO, décision 29)* `src/locales/en/errors.json` contient `tooLarge` = "This file is too large (1 MB max). Choose another file." et `tooManyObjects` = "This setup has too many objects (50 max). Choose another file." ; affichés en `role="alert"`.
 Notes techniques / dépendances : dépend de US-003. L'import de fichier est une surface d'attaque (threat model M-01 à M-06).
 
 ### US-019 — Annuler / rétablir  [UI] [Should | 3 pts]
@@ -395,6 +468,7 @@ Critères d'acceptation :
 - [ ] Une option **"Reduce transparency"** (bascule) dans Help applique la classe `.no-glass` (fond opaque, sans flou) en plus de la préférence système `prefers-reduced-transparency` ; le choix est mémorisé (préférences locales) et s'applique sans rechargement.
 - [ ] Un choix de thème "System / Light / Dark" (défaut = System) dans Help ; `data-theme` prime sur la préférence système.
 - [ ] Modale opaque, focus piégé, Échap ferme, libellés accessibles, AA.
+- [ ] *(décision PO 32, optionnel — Should/Could, à arbitrer ; ne change pas les 2 pts tant qu'il n'est pas engagé)* **Apparence « Liquid Glass »** : choix optionnel d'apparence (Standard / Liquid Glass) dans Help, désactivé par défaut, sans effet sur la mise en page, repli sur le matériau standard avec `.no-glass` / `prefers-reduced-transparency` ; exploration : `docs/design/ui/maquettes/explorations/liquid-glass.html`. Si le travail pèse, créer une story dédiée en R2/R3 (« Apparence Liquid Glass », ≈ 3 pts, [UI]).
 Notes techniques / dépendances : developer, ui-designer. Dépend de US-005. Référence : wireframe W10, design system §2 et §5. Reçoit la mention de confidentialité de SEC-04.
 
 ### US-022 — Budgets de performance et tests E2E de référence  [Must | 3 pts]
@@ -405,7 +479,7 @@ Critères d'acceptation :
 - [ ] Des captures sont archivées comme artefacts.
 - [ ] *(sécurité)* L'E2E échoue sur tout événement `securitypolicyviolation` ou erreur console CSP, sur `dist-e2e` servi avec les en-têtes de production.
 - [ ] *(suivi US-004, qualité auto)* Bascule automatique du palier de qualité (ADR-3D-08) : si le FPS mesuré reste sous le seuil pendant N secondes, le rendu passe au palier inférieur (pixel ratio, ombres) sans action de l'utilisateur ; test unitaire de la logique de bascule et E2E avec un FPS simulé bas. (Peut être pris par US-021 si le tactile est engagé avant.)
-- [ ] *(suivi US-004, fiabilité)* Les tests E2E sont fiables sous la charge de la CI : aucun `waitForTimeout`, aucune attente sur du temps réel (voir SEC-06), 10 exécutions consécutives sous charge sans échec.
+- [ ] *(suivi US-004, fiabilité)* Les tests E2E sont fiables sous la charge de la CI : aucun `waitForTimeout`, aucune attente sur du temps réel (voir SEC-06), et la règle reformulée de `docs/reviews/SEC-03a.md` : référence CI = 10 runs `CI=1` dans l'image Playwright limitée à 4 CPU et 8 Go, 0 échec ; stress local informatif à 50 % des threads ; `--repeat-each=10` sans charge vert.
 - [ ] *(suivi US-004, navigateurs)* Le parcours E2E de référence est exécuté aussi sur Firefox (non testé en US-004) ; les écarts sont consignés.
 Notes techniques / dépendances : qa-tester + devops. Dépend de US-012, US-017, US-018, SEC-03a (en-têtes). Ossature Playwright déjà présente (`tests/e2e/`).
 
@@ -597,8 +671,19 @@ Prérequis : threat model upload, quotas.
 27. **Texte neutre de l'état `failed`** accepté. → US-005.
 28. **Sprint 2 accepté** : SEC-03a, US-005, US-006, SEC-02 (+ marge SEC-06 ou SEC-03b). **MVP à 96 points** confirmé.
 
+## Design du Sprint 2 (validé le 2026-10-20)
+29. **Shell (US-005)** : Undo/Redo masqués jusqu'à US-019 ; verdict vide « Nothing to check yet » ; onglet Objects visible avec état vide ; nom affiché « Deskfit » ; texte `failed` neutre avec « Reload page » au 2e échec ; `tooManyObjects` reformulé ; `tooLarge` gardé en « 1 MB ». → US-005, US-018.
+30. **Bureaux (US-006)** : catalogue de 7 bureaux (5 rectangulaires 100×60, 120×60, 140×70, 160×80, 180×80 ; 2 d'angle 160×140 et 180×160) ; angle orienté à droite ce sprint et sans « Custom size » ; flèches du clavier appliquent directement le bureau ; vignettes SVG dessinées par l'UI ; bornes rect 800–2400 × 500–1000 × 600–1300 mm, angle 1200–2400 × 1000–2000 mm. → US-006, US-007.
+31. **Ombre de contact allégée** : opacité 0,24, empreinte = bureau − 200×140 mm, dérivée du bureau ; keep-out de la caméra dérivé du bureau. → US-006 (et non US-008).
+
+## Design natif et workflow (validé le 2026-10-20)
+32. **Design « app native Apple premium » v0.4 « Natif · Premium · Précis » VALIDÉ** (le v0.3 ne convenait pas) : fenêtre macOS (barre d'outils unifiée, barre latérale, inspecteur), repli iPadOS et iOS, 4 matériaux translucides, échelle typographique Apple avec Inter, Lucide ; toujours sans SF Pro, SF Symbols ni logo Apple. Écarts UX validés : bascules de volets dans la barre d'outils (Tab : droite juste après gauche) ; liste des bureaux en groupe unique avec filets. **US-005 réestimée à 8 pts** (restylage de US-004 inclus). → US-005, US-006.
+33. **Liquid Glass** : apparence optionnelle plus tard, rattachée à US-025 (ou story R2/R3) ; exploration `docs/design/ui/maquettes/explorations/liquid-glass.html`. → US-025.
+34. **Ordre produit inchangé** : le MVP reste sur « ça rentre ? » ; le design suit en R2 (styles, matières), R3 (ambiance), R4 (modèles 3D libres CC0/CC-BY). Blender servira en R4 (préparation des modèles) ; **le PO sera prévenu avant**.
+35. **Workflow GitHub** : chaque story = branche poussée + **Pull Request ouverte par le devops** (description : story, critères, liens vers les rapports de revue / design / QA / sécurité) ; la CI tourne sur la PR ; **merge via la PR (commit de merge)**.
+36. **Jamais versionnés** : `.claude/`, `CLAUDE.md`, `LISEZMOI-EQUIPE.md` (purge de l'historique et force-push de `main` en cours). Premier push fait ; première CI : 12 jobs verts, e2e rouge (timeouts du runner, correction par le qa-tester sur `fix/ci-e2e-runner-timeouts`).
+
 ## Questions encore ouvertes (long terme, non bloquantes)
 - Affiliation compatible avec la neutralité de la marque (R5, threat model §12 q.1).
 - Âge minimum des comptes (R6, §12 q.2).
 - Hébergement des données dans l'UE (R6/R7, §12 q.3).
-- Bornes des dimensions du bureau (voir « Questions pour le PO », en tête de document ; à trancher avant US-006/US-007).

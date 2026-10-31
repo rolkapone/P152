@@ -150,7 +150,7 @@ Toute modification du bloc `SECDEVOPS-SLOT` passe par une revue secdevops (CODEO
 | [`scripts/check-licenses.mjs`](../../scripts/check-licenses.mjs) | devops (règles : secdevops) | [`ci/check-licenses.mjs`](ci/check-licenses.mjs) |
 | [`.github/dependabot.yml`](../../.github/dependabot.yml) | devops | v1.0 de ce document |
 | [`.github/workflows/security-scheduled.yml`](../../.github/workflows/security-scheduled.yml) | devops (contenu : secdevops) | v1.0 de ce document |
-| `config/security-headers.mjs` → `public/_headers` | devops + secdevops | **à créer (SEC-03a)** |
+| `config/security-headers.mjs` → `public/_headers` | devops + secdevops | créé (SEC-03a) : le plugin Vite émet `dist/_headers` (pas de `public/_headers`) et configure `preview.headers` |
 | `CODEOWNERS`, `SECURITY.md` | devops, avec l'accord du PO | **à créer (SEC-02)** |
 
 Les brouillons de [`docs/security/ci/`](ci/) ne sont plus maintenus (ils peuvent déjà différer des fichiers en place : formatage, en-tête). **Toute modification se fait dans les fichiers en place.** Ils portent un bandeau « Obsolète, voir les fichiers en place » (SEC-01) et pourront être supprimés (des tâches du sprint 1 y font encore référence).

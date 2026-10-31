@@ -24,3 +24,12 @@ export {
   usePreferences,
   type PreferencesState,
 } from "./preferences/preferencesStore";
+export {
+  createShellLayoutStore,
+  EMPTY_FREE_ZONE,
+  useShellLayout,
+  type DockZone,
+  type FreeZone,
+  type PanelSide,
+  type ShellLayoutState,
+} from "./shell/shellLayoutStore";

@@ -1,5 +1,5 @@
 import AxeBuilder from "@axe-core/playwright";
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Page } from "./fixtures";
 import { waitForScene } from "./helpers/perf";
 
 // US-004 (developer part): view bar, tip, announcements, loading and error screens.
@@ -9,8 +9,19 @@ const region = (page: Page) => page.getByRole("group", { name: /3D view of your 
 const toolbar = (page: Page) => page.getByRole("toolbar", { name: "View" });
 const viewButton = (page: Page, name: string) =>
   toolbar(page).getByRole("button", { name, exact: true });
-const live = (page: Page) => page.getByRole("status");
+// The live region of the 3D view (the toolbar verdict is another status).
+const live = (page: Page) => region(page).getByRole("status");
 const TIP = "Drag to turn the view, scroll to zoom, right-drag to move the view.";
+
+/**
+ * Freezes the page clock. pauseAt jumps forward (instantly) and throws "Cannot fast-forward to
+ * the past" when its target is already behind the page time: with a 1 s margin this happened on
+ * the loaded CI runner (docs/qa/ci-e2e-runner.md). A wide margin costs nothing.
+ */
+async function pauseClock(page: Page) {
+  const now = await page.evaluate(() => Date.now());
+  await page.clock.pauseAt(now + 60_000);
+}
 
 async function open(page: Page) {
   await page.goto("/");
@@ -32,7 +43,9 @@ test("announces the ready view and shows the bar and the tip (UX-1, UX-2)", asyn
     const previous = boxes[i - 1];
     const current = boxes[i];
     if (!previous || !current) throw new Error("no box");
-    expect(current.x - (previous.x + previous.width)).toBeGreaterThanOrEqual(8);
+    // Design v0.4 (§14, prevails over the 8 px of US-004): 2 px between 36 px pills, which
+    // stay well above the 24 px target size of WCAG 2.5.8 without any spacing.
+    expect(current.x - (previous.x + previous.width)).toBeGreaterThanOrEqual(2);
   }
   for (const button of await buttons.all()) {
     await expect(button.locator("svg")).toHaveCount(1);
@@ -65,17 +78,20 @@ test("tooltips after 400 ms, Escape closes them and keeps the focus (UX-4)", asy
   if (!top) throw new Error("no button");
   // A real mouse moves over the scene before reaching a button (React Aria needs a pointer
   // move to know the mouse is in use; Playwright jumps straight onto the button otherwise).
-  await page.mouse.move(10, 10);
-  await page.mouse.move(20, 20);
-  const now = await page.evaluate(() => Date.now());
-  await page.clock.pauseAt(now + 1_000);
+  // In the free zone, between the side panels (their toggles have tooltips too).
+  const scene = await region(page).boundingBox();
+  if (!scene) throw new Error("no region");
+  const centre = { x: scene.x + scene.width / 2, y: scene.y + scene.height / 2 };
+  await page.mouse.move(centre.x, centre.y);
+  await page.mouse.move(centre.x + 10, centre.y + 10);
+  await pauseClock(page);
   await page.mouse.move(top.x + top.width / 2, top.y + top.height / 2);
   await page.clock.runFor(399);
   await expect(page.getByRole("tooltip")).toHaveCount(0);
   await page.clock.runFor(1);
   await expect(page.getByRole("tooltip")).toHaveText("View from above (1)");
   await page.clock.resume();
-  await page.mouse.move(0, 0);
+  await page.mouse.move(centre.x, centre.y);
   await expect(page.getByRole("tooltip")).toHaveCount(0);
 
   await region(page).focus();
@@ -100,12 +116,12 @@ test("Top / Front are pressed toggles, released by a drag and by Reset view (UX-
   await expect(viewButton(page, "Top")).toHaveAttribute("aria-pressed", "false");
   await expect(live(page)).toHaveText("Front view.");
 
-  // Drag on the empty studio, at the top of the view.
+  // Drag on the empty studio, at the top of the free zone (between the side panels).
   const box = await region(page).boundingBox();
   if (!box) throw new Error("no region");
-  await page.mouse.move(box.x + box.width * 0.2, box.y + box.height * 0.15);
+  await page.mouse.move(box.x + box.width * 0.35, box.y + box.height * 0.15);
   await page.mouse.down();
-  await page.mouse.move(box.x + box.width * 0.4, box.y + box.height * 0.15, { steps: 8 });
+  await page.mouse.move(box.x + box.width * 0.55, box.y + box.height * 0.15, { steps: 8 });
   await page.mouse.up();
   await expect(viewButton(page, "Front")).toHaveAttribute("aria-pressed", "false");
   await expect(live(page)).toHaveText("Front view."); // nothing said for a drag
@@ -131,8 +147,7 @@ test("keyboard on the scene: 0 / 1 / 2 and one announcement 600 ms after the ste
   await page.keyboard.press("0");
   await expect(live(page)).toHaveText("View reset.");
 
-  const now = await page.evaluate(() => Date.now());
-  await page.clock.pauseAt(now + 1_000);
+  await pauseClock(page);
   await page.keyboard.press("ArrowRight");
   await page.keyboard.press("ArrowRight");
   await page.clock.runFor(599);
@@ -186,11 +201,11 @@ test("the tip still works when the browser blocks the storage", async ({ page })
   expect(errors).toEqual([]);
 });
 
-test("bar and tip fit at 1366 x 768 and at 200 % zoom (UX-14)", async ({ page }) => {
-  for (const size of [
-    { width: 1366, height: 768 },
-    { width: 683, height: 384 }, // 1366 x 768 at 200 % zoom
-  ]) {
+for (const size of [
+  { width: 1366, height: 768 },
+  { width: 683, height: 384 }, // 1366 x 768 at 200 % zoom
+]) {
+  test(`bar and tip fit at ${size.width} x ${size.height} (UX-14)`, async ({ page }) => {
     await page.setViewportSize(size);
     await open(page);
     const bar = await toolbar(page).boundingBox();
@@ -200,13 +215,13 @@ test("bar and tip fit at 1366 x 768 and at 200 % zoom (UX-14)", async ({ page })
     expect(bar.x + bar.width).toBeLessThanOrEqual(size.width);
     expect(bar.y + bar.height).toBeLessThanOrEqual(size.height);
     expect(tip.y + tip.height).toBeLessThanOrEqual(bar.y); // the tip never covers the bar
-  }
-});
+  });
+}
 
-test("no serious accessibility violation on the ready scene, light and dark (UX-12)", async ({
-  page,
-}) => {
-  for (const scheme of ["light", "dark"] as const) {
+for (const scheme of ["light", "dark"] as const) {
+  test(`no serious accessibility violation on the ready scene, ${scheme} (UX-12)`, async ({
+    page,
+  }) => {
     await page.emulateMedia({ colorScheme: scheme });
     await open(page);
     const results = await new AxeBuilder({ page })
@@ -216,8 +231,8 @@ test("no serious accessibility violation on the ready scene, light and dark (UX-
       (v) => v.impact === "serious" || v.impact === "critical",
     );
     expect(blocking.map((v) => `${scheme} ${v.id}: ${v.nodes.length}`)).toEqual([]);
-  }
-});
+  });
+}
 
 test.describe("without WebGL 2 (UX-13)", () => {
   test.beforeEach(async ({ page }) => {

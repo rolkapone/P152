@@ -145,7 +145,7 @@
     },
     "limits": {
       "minDistance": 0.8,
-      "maxDistance": 4.5,
+      "maxDistance": 7.0,
       "minPolarDeg": 0,
       "maxPolarDeg": 89,
       "minAzimuthDeg": -109,

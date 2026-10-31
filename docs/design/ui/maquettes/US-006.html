@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>US-006 - Desk panel - mockup v0.4 (Deskfit)</title>
+<style>
+/* Police : Inter si installee localement, sinon repli systeme. Aucun reseau. */
+@font-face{font-family:"Inter";font-style:normal;font-weight:100 900;font-display:swap;src:local("Inter Variable"),local("Inter")}
+
+/* ======================= BEGIN SYNCED (tokens.css <-> maquettes) ======================= */
+:root {
+  /* ---- Typographie : Inter + echelle des styles dynamiques (minimum 14 px) ---- */
+  --font-sans: "Inter", system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, "Cascadia Mono", Consolas, Menlo, monospace;
+  --font-features: "kern", "calt", "ss03";                       /* defaut : guillemets et virgules ronds */
+  --font-features-alt: "kern", "calt", "ss03", "cv11", "ss01";   /* variante a evaluer (a simple, chiffres ouverts) */
+  font-feature-settings: var(--font-features);
+  --text-sm: 0.875rem;    /* 14 px - minimum de l'UI (Subheadline, Footnote, Caption) */
+  --text-md: 1rem;        /* 16 px - Body, Headline */
+  --text-lg: 1.0625rem;   /* 17 px - titre de barre, verdict */
+  --text-xl: 1.375rem;    /* 22 px - Title 2 */
+  --text-2xl: 1.75rem;    /* 28 px - Title 1 */
+  --text-3xl: 2.125rem;   /* 34 px - Large Title */
+  --leading-tight: 1.2;
+  --leading-snug: 1.3;
+  --leading-normal: 1.45;
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+  /* Styles (raccourci `font`). ATTENTION : `font:` remet font-feature-settings a zero ->
+     toujours ajouter `font-feature-settings: var(--font-features)` (les classes .t-* le font). */
+  --font-large-title: 700 2.125rem/1.2 var(--font-sans);
+  --font-title-1: 700 1.75rem/1.21 var(--font-sans);
+  --font-title-2: 600 1.375rem/1.27 var(--font-sans);
+  --font-title-3: 600 1.25rem/1.25 var(--font-sans);
+  --font-headline: 600 1rem/1.375 var(--font-sans);
+  --font-body: 400 1rem/1.375 var(--font-sans);
+  --font-callout: 400 0.9375rem/1.33 var(--font-sans);
+  --font-subheadline: 400 0.875rem/1.36 var(--font-sans);
+  --font-footnote: 400 0.875rem/1.29 var(--font-sans);
+  --font-caption: 500 0.875rem/1.29 var(--font-sans);
+  /* Chasse optique (Inter n'a pas d'axe opsz) : -0.0223 + 0.185 * e^(-0.1745 * px), arrondi */
+  --tracking-large-title: -0.022em;
+  --tracking-title-1: -0.021em;
+  --tracking-title-2: -0.018em;
+  --tracking-title-3: -0.017em;
+  --tracking-headline: -0.011em;
+  --tracking-body: -0.011em;
+  --tracking-callout: -0.009em;
+  --tracking-subheadline: -0.006em;
+  --tracking-footnote: -0.006em;
+  --tracking-caption: 0em;
+  --tracking-tight: -0.018em;     /* alias historique : titres >= 22 px */
+  --tracking-overline: 0.04em;
+
+  /* ---- Espacements (base 4 px) ---- */
+  --space-0: 0;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --panel-pad: 16px;
+  --float-inset: 12px;   /* marge des panneaux flottants (repli iPadOS / tiroirs) */
+
+  /* ---- Rayons concentriques : interne = externe - marge (22-8=14, 14-4=10, 10-4=6) ---- */
+  --radius-sm: 6px;      /* vignettes, tooltips, puces */
+  --radius-md: 10px;     /* champs, lignes de liste, segments internes */
+  --radius-lg: 14px;     /* groupes, cartes, alertes, popovers */
+  --radius-xl: 22px;     /* panneaux flottants, feuilles, modales */
+  --radius-pill: 999px;  /* boutons, segmented, verdict */
+
+  /* ---- Tailles ---- */
+  --control-sm: 32px;
+  --control-md: 36px;
+  --control-lg: 44px;
+  --topbar-h: 52px;        /* barre d'outils unifiee */
+  --panel-left-w: 248px;   /* barre laterale */
+  --panel-right-w: 312px;  /* inspecteur */
+  --drawer-max-w: 360px;   /* superposition (largeur < 1024 px) */
+  --popover-w: 320px;
+  --sheet-w: 480px;
+  --toggle-size: 40px;     /* cible des boutons de barre d'outils, pastille de verdict */
+  --row-min-h: 56px;       /* ligne de liste de choix (bureaux) */
+  --thumb-w: 56px;
+  --thumb-h: 44px;
+  --icon-sm: 16px;
+  --icon-md: 18px;
+  --icon-lg: 20px;
+  --icon-xl: 24px;
+  --icon-stroke: 1.6;      /* Lucide : 1.5 a 1.75 */
+  --focus-width: 3px;
+  --focus-offset: 2px;
+  --border-width: 1px;
+
+  /* ---- Motion ---- */
+  --duration-fast: 120ms;     /* survol, appui */
+  --duration-base: 200ms;     /* menus, toasts, fondus */
+  --duration-slow: 320ms;     /* barres, bandeaux */
+  --duration-spring: 460ms;   /* ressort : panneaux, feuilles, popovers, segment */
+  --duration-camera: 480ms;   /* transitions de camera 3D */
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-spring: cubic-bezier(0.34, 1.3, 0.64, 1);       /* ressort leger (repli : cubic-bezier) */
+  --ease-spring-soft: cubic-bezier(0.22, 1, 0.36, 1);    /* ressort amorti sans depassement */
+  --press-scale: 0.97;
+
+  /* ---- Materiaux (vibrancy) : filtres. Teintes dans les blocs de theme ---- */
+  --material-saturate: 180%;
+  --material-filter-ultra-thin: blur(16px) saturate(160%);
+  --material-filter-thin: blur(20px) saturate(170%);
+  --material-filter-regular: blur(28px) saturate(180%);
+  --material-filter-thick: blur(36px) saturate(180%);
+  --glass-blur: 28px;                                      /* alias historiques = materiau regular */
+  --glass-saturate: 180%;
+  --glass-filter: var(--material-filter-regular);
+  --glass-filter-soft: blur(12px) saturate(140%);          /* voile des feuilles */
+
+  /* ---- Z-index ---- */
+  --z-panel: 10;
+  --z-floating: 20;
+  --z-menu: 30;
+  --z-modal: 40;
+  --z-toast: 50;
+  --z-skip: 60;
+}
+
+/* Ressorts reels (equation d'un ressort amorti) quand linear() est supporte */
+@supports (transition-timing-function: linear(0, 1)) {
+  :root {
+    --ease-spring: linear(0, 0.081 5%, 0.258 10%, 0.46 15%, 0.644 20%, 0.793 25%, 0.901 30%, 0.972 35%, 1.014 40%, 1.033 45%, 1.038 50%, 1.035 55%, 1.029 60%, 1.021 65%, 1.014 70%, 1.008 75%, 1.004 80%, 1);
+    --ease-spring-soft: linear(0, 0.09 5%, 0.264 10%, 0.442 15%, 0.594 20%, 0.713 25%, 0.801 30%, 0.908 40%, 0.96 50%, 0.983 60%, 0.993 70%, 0.997 80%, 1);
+  }
+}
+
+/* ============================ THEME CLAIR ============================ */
+:root,
+[data-theme="light"] {
+  color-scheme: light;
+
+  --color-bg: #F2F2F7;              /* fond de fenetre (gris systeme) */
+  --color-surface: #FFFFFF;         /* lignes de groupe, champs, feuilles */
+  --color-surface-2: #EBEBF0;       /* aplats secondaires */
+  --color-raised: #FFFFFF;          /* pouce du controle segmente */
+  --color-overlay: rgba(0, 0, 0, 0.32);
+  --color-border: #D8D8DE;          /* decoratif */
+  --color-separator: rgba(60, 60, 67, 0.16);   /* filets : decoratifs */
+  --color-border-strong: #86868E;   /* contours porteurs d'information : 3.6:1 sur surface */
+  --color-fill: rgba(118, 118, 128, 0.14);     /* pistes (segmented, switch off), survol */
+  --color-fill-hover: rgba(118, 118, 128, 0.10);
+
+  --color-text: #1C1C1E;            /* 17:1 sur surface */
+  --color-text-muted: #4C4C54;      /* 8.4:1 sur surface ; 4.6:1 minimum sur materiau regular, pire fond */
+  --color-text-disabled: #9A9AA2;   /* desactive : exempte */
+
+  --color-accent: #0A64E8;          /* UNE couleur d'accent (bleu systeme). 5.2:1 sur surface */
+  --color-accent-hover: #0553C4;
+  --color-accent-active: #0443A3;
+  --color-on-accent: #FFFFFF;       /* 5.2:1 sur accent */
+  --color-accent-solid: #0A64E8;    /* aplat plein (bouton principal, switch actif) */
+  --color-accent-solid-hover: #0553C4;
+  --color-accent-solid-active: #0443A3;
+  --color-on-accent-solid: #FFFFFF;
+  --color-accent-subtle: #DDEAFE;   /* selection "accent tint", OPAQUE */
+  --color-accent-subtle-text: #0A46B8;  /* 6.7:1 sur accent-subtle */
+  --color-focus: #0A52C2;           /* 7.0:1 sur surface ; >= 3:1 meme sous materiau thin, pire fond */
+  --color-focus-halo: rgba(10, 82, 194, 0.28);
+
+  /* Statuts : semantiques, jamais decoratifs */
+  --color-success: #137A3F;
+  --color-success-bg: #E3F4EA;
+  --color-error: #B42318;
+  --color-error-bg: #FDECEA;
+  --color-warning: #8A4B00;
+  --color-warning-icon: #B86E00;
+  --color-warning-bg: #FFF3DC;
+  --color-info: #0B6B8A;
+  --color-info-bg: #E3F3F8;
+  --color-danger-solid: #B42318;
+  --color-on-danger: #FFFFFF;
+
+  /* Ombres tres douces */
+  --shadow-1: 0 0 0 0.5px rgba(0,0,0,.05), 0 1px 2px rgba(0,0,0,.04), 0 2px 8px rgba(0,0,0,.04);
+  --shadow-2: 0 0 0 0.5px rgba(0,0,0,.06), 0 4px 12px rgba(0,0,0,.06), 0 12px 32px rgba(0,0,0,.10);
+  --shadow-3: 0 0 0 0.5px rgba(0,0,0,.08), 0 8px 24px rgba(0,0,0,.08), 0 32px 80px rgba(0,0,0,.16);
+
+  /* Materiaux : teinte + opacite. Pire fond = noir pur. Regle d'usage dans design-system.md 5 */
+  --material-ultra-thin: rgba(246, 246, 248, 0.55);   /* glyphes seuls (>= 3:1) */
+  --material-thin: rgba(246, 246, 248, 0.72);         /* texte principal + icones */
+  --material-regular: rgba(246, 246, 248, 0.80);      /* tout texte (barre laterale, inspecteur, barres) */
+  --material-thick: rgba(248, 248, 250, 0.90);        /* menus, popovers, feuilles */
+  --material-solid: #F2F2F7;                          /* repli opaque des 3 premiers */
+  --material-solid-raised: #FFFFFF;                   /* repli opaque de thick */
+  --material-hairline: rgba(255, 255, 255, 0.60);     /* liseré interieur 1 px */
+  --material-outline: rgba(0, 0, 0, 0.10);            /* contour exterieur 0.5 px */
+  --material-rim: inset 0 0 0 1px var(--material-hairline), 0 0 0 0.5px var(--material-outline);
+  --glass-tint: var(--material-regular);              /* alias historiques */
+  --glass-border: var(--material-hairline);
+  --glass-shadow: var(--material-rim), 0 1px 2px rgba(0,0,0,.04), 0 8px 24px rgba(0,0,0,.08), 0 24px 56px rgba(0,0,0,.10);
+  --glass-link: #0A46B8;            /* lien sur materiau : 4.7:1 sur le pire fond */
+
+  /* Scene 3D : studio clair neutre (photo produit) */
+  --scene-bg-top: #FAFAFC;
+  --scene-bg-bottom: #DFE2E8;
+  --scene-floor: #EEF0F3;
+  --scene-shadow: rgba(40, 48, 64, 0.28);
+  --scene-desk: #D9CBB2;
+  --scene-desk-edge: #B2A283;
+  --scene-object: #8E97A6;
+  --scene-object-edge: #5F6878;
+  --scene-outline-inner: #FFFFFF;
+  --scene-outline-outer: #1B1F27;
+  --scene-selection: #0A64E8;
+  --scene-error: #B42318;
+  --scene-warning: #B86E00;
+}
+
+/* ============================ THEME SOMBRE ============================ */
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  --color-bg: #0B0B0D;
+  --color-surface: #1C1C1E;
+  --color-surface-2: #2C2C2E;
+  --color-raised: #48484C;
+  --color-overlay: rgba(0, 0, 0, 0.55);
+  --color-border: #38383A;
+  --color-separator: rgba(84, 84, 88, 0.55);
+  --color-border-strong: #8E8E98;   /* 5.2:1 sur surface */
+  --color-fill: rgba(118, 118, 128, 0.28);
+  --color-fill-hover: rgba(118, 118, 128, 0.18);
+
+  --color-text: #F5F5F7;            /* 15.6:1 */
+  --color-text-muted: #C7C7D0;      /* 8.3:1 sur surface-2 ; 4.9:1 sur materiau regular, pire fond */
+  --color-text-disabled: #6E6E76;
+
+  --color-accent: #5AA0FF;          /* 6.4:1 sur surface, 5.2:1 sur surface-2 */
+  --color-accent-hover: #7DB4FF;
+  --color-accent-active: #9BC4FF;
+  --color-on-accent: #0B1220;       /* 7.4:1 sur accent */
+  --color-accent-solid: #0A6CF0;    /* texte blanc dessus : 4.8:1 */
+  --color-accent-solid-hover: #0F66DC;
+  --color-accent-solid-active: #0B58BE;
+  --color-on-accent-solid: #FFFFFF;
+  --color-accent-subtle: #17335E;
+  --color-accent-subtle-text: #B3D1FF;  /* 8.1:1 sur accent-subtle */
+  --color-focus: #7DB4FF;
+  --color-focus-halo: rgba(125, 180, 255, 0.30);
+
+  --color-success: #4CC38A;
+  --color-success-bg: #12301F;
+  --color-error: #FF8A80;
+  --color-error-bg: #3A1714;
+  --color-warning: #F2B04A;
+  --color-warning-icon: #F2B04A;
+  --color-warning-bg: #33260D;
+  --color-info: #5CC4E0;
+  --color-info-bg: #0F2A33;
+  --color-danger-solid: #C4302B;
+  --color-on-danger: #FFFFFF;
+
+  --shadow-1: 0 0 0 0.5px rgba(255,255,255,.06), 0 1px 2px rgba(0,0,0,.30), 0 2px 8px rgba(0,0,0,.25);
+  --shadow-2: 0 0 0 0.5px rgba(255,255,255,.08), 0 4px 12px rgba(0,0,0,.35), 0 12px 32px rgba(0,0,0,.40);
+  --shadow-3: 0 0 0 0.5px rgba(255,255,255,.10), 0 8px 24px rgba(0,0,0,.40), 0 32px 80px rgba(0,0,0,.55);
+
+  --material-ultra-thin: rgba(30, 30, 33, 0.55);
+  --material-thin: rgba(30, 30, 33, 0.72);
+  --material-regular: rgba(30, 30, 33, 0.80);
+  --material-thick: rgba(28, 28, 30, 0.90);
+  --material-solid: #1C1C1E;
+  --material-solid-raised: #262628;
+  --material-hairline: rgba(255, 255, 255, 0.14);
+  --material-outline: rgba(0, 0, 0, 0.60);
+  --material-rim: inset 0 0 0 1px var(--material-hairline), 0 0 0 0.5px var(--material-outline);
+  --glass-tint: var(--material-regular);
+  --glass-border: var(--material-hairline);
+  --glass-shadow: var(--material-rim), 0 1px 2px rgba(0,0,0,.30), 0 8px 24px rgba(0,0,0,.35), 0 24px 56px rgba(0,0,0,.45);
+  --glass-link: #A8C8FF;            /* 5.1:1 sur le pire fond (blanc pur sous materiau sombre) */
+
+  --scene-bg-top: #3A414D;
+  --scene-bg-bottom: #12161C;
+  --scene-floor: #1C2129;
+  --scene-shadow: rgba(0, 0, 0, 0.5);
+  --scene-desk: #8C7B62;
+  --scene-desk-edge: #6A5B46;
+  --scene-object: #8E97A6;
+  --scene-object-edge: #C3CAD6;
+  --scene-outline-inner: #FFFFFF;
+  --scene-outline-outer: #0B0E12;
+  --scene-selection: #7DB4FF;
+  --scene-error: #FF8A80;
+  --scene-warning: #F2B04A;
+}
+
+/* Preference systeme si aucun choix explicite (defaut = systeme) */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    color-scheme: dark;
+    --color-bg: #0B0B0D; --color-surface: #1C1C1E; --color-surface-2: #2C2C2E; --color-raised: #48484C;
+    --color-overlay: rgba(0,0,0,.55); --color-border: #38383A; --color-separator: rgba(84,84,88,.55);
+    --color-border-strong: #8E8E98; --color-fill: rgba(118,118,128,.28); --color-fill-hover: rgba(118,118,128,.18);
+    --color-text: #F5F5F7; --color-text-muted: #C7C7D0; --color-text-disabled: #6E6E76;
+    --color-accent: #5AA0FF; --color-accent-hover: #7DB4FF; --color-accent-active: #9BC4FF; --color-on-accent: #0B1220;
+    --color-accent-solid: #0A6CF0; --color-accent-solid-hover: #0F66DC; --color-accent-solid-active: #0B58BE; --color-on-accent-solid: #FFFFFF;
+    --color-accent-subtle: #17335E; --color-accent-subtle-text: #B3D1FF;
+    --color-focus: #7DB4FF; --color-focus-halo: rgba(125,180,255,.30);
+    --color-success: #4CC38A; --color-success-bg: #12301F;
+    --color-error: #FF8A80; --color-error-bg: #3A1714;
+    --color-warning: #F2B04A; --color-warning-icon: #F2B04A; --color-warning-bg: #33260D;
+    --color-info: #5CC4E0; --color-info-bg: #0F2A33;
+    --color-danger-solid: #C4302B; --color-on-danger: #FFFFFF;
+    --shadow-1: 0 0 0 0.5px rgba(255,255,255,.06), 0 1px 2px rgba(0,0,0,.30), 0 2px 8px rgba(0,0,0,.25);
+    --shadow-2: 0 0 0 0.5px rgba(255,255,255,.08), 0 4px 12px rgba(0,0,0,.35), 0 12px 32px rgba(0,0,0,.40);
+    --shadow-3: 0 0 0 0.5px rgba(255,255,255,.10), 0 8px 24px rgba(0,0,0,.40), 0 32px 80px rgba(0,0,0,.55);
+    --material-ultra-thin: rgba(30,30,33,.55); --material-thin: rgba(30,30,33,.72);
+    --material-regular: rgba(30,30,33,.80); --material-thick: rgba(28,28,30,.90);
+    --material-solid: #1C1C1E; --material-solid-raised: #262628;
+    --material-hairline: rgba(255,255,255,.14); --material-outline: rgba(0,0,0,.60);
+    --material-rim: inset 0 0 0 1px var(--material-hairline), 0 0 0 0.5px var(--material-outline);
+    --glass-tint: var(--material-regular); --glass-border: var(--material-hairline);
+    --glass-shadow: var(--material-rim), 0 1px 2px rgba(0,0,0,.30), 0 8px 24px rgba(0,0,0,.35), 0 24px 56px rgba(0,0,0,.45);
+    --glass-link: #A8C8FF;
+    --scene-bg-top: #3A414D; --scene-bg-bottom: #12161C; --scene-floor: #1C2129; --scene-shadow: rgba(0,0,0,.5);
+    --scene-desk: #8C7B62; --scene-desk-edge: #6A5B46; --scene-object: #8E97A6;
+    --scene-object-edge: #C3CAD6; --scene-outline-inner: #FFFFFF; --scene-outline-outer: #0B0E12;
+    --scene-selection: #7DB4FF; --scene-error: #FF8A80; --scene-warning: #F2B04A;
+  }
+}
+
+/* ============ MATERIAUX : primitives + replis (opaque si non supporte / transparence reduite) ============
+   .material-ultra-thin | -thin | -regular | -thick : fond + flou. Ajouter .rim (liseré + contour) ou
+   .float (liseré + ombre douce) pour un element flottant ; un volet colle au bord n'en a pas
+   (un filet --color-separator suffit). .glass = regular + .float (alias historique).
+   Regle AA (pire fond : noir sous clair, blanc sous sombre) : ultra-thin = glyphes seuls ;
+   thin = texte principal + icones ; regular = tout texte ; thick = tout + statuts. */
+.material-ultra-thin { background: var(--material-ultra-thin); -webkit-backdrop-filter: var(--material-filter-ultra-thin); backdrop-filter: var(--material-filter-ultra-thin); }
+.material-thin { background: var(--material-thin); -webkit-backdrop-filter: var(--material-filter-thin); backdrop-filter: var(--material-filter-thin); }
+.material-regular { background: var(--material-regular); -webkit-backdrop-filter: var(--material-filter-regular); backdrop-filter: var(--material-filter-regular); }
+.material-thick { background: var(--material-thick); -webkit-backdrop-filter: var(--material-filter-thick); backdrop-filter: var(--material-filter-thick); }
+.rim { box-shadow: var(--material-rim); }
+.float { box-shadow: var(--glass-shadow); }
+.glass { background: var(--glass-tint); -webkit-backdrop-filter: var(--glass-filter); backdrop-filter: var(--glass-filter); box-shadow: var(--glass-shadow); }
+/* Voile des feuilles : flou leger de la scene derriere */
+.scrim {
+  background: var(--color-overlay);
+  -webkit-backdrop-filter: var(--glass-filter-soft);
+  backdrop-filter: var(--glass-filter-soft);
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .material-ultra-thin, .material-thin, .material-regular, .glass { background: var(--material-solid); }
+  .material-thick { background: var(--material-solid-raised); }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .material-ultra-thin, .material-thin, .material-regular, .glass { background: var(--material-solid); -webkit-backdrop-filter: none; backdrop-filter: none; }
+  .material-thick { background: var(--material-solid-raised); -webkit-backdrop-filter: none; backdrop-filter: none; }
+  .scrim { -webkit-backdrop-filter: none; backdrop-filter: none; }
+}
+/* Option utilisateur (US-025) / simulation : .no-glass sur <html> ou un conteneur */
+.no-glass .material-ultra-thin, .no-glass .material-thin, .no-glass .material-regular, .no-glass .glass,
+.material-ultra-thin.no-glass, .material-thin.no-glass, .material-regular.no-glass, .glass.no-glass { background: var(--material-solid); -webkit-backdrop-filter: none; backdrop-filter: none; }
+.no-glass .material-thick, .material-thick.no-glass { background: var(--material-solid-raised); -webkit-backdrop-filter: none; backdrop-filter: none; }
+.no-glass .scrim { -webkit-backdrop-filter: none; backdrop-filter: none; }
+
+/* Styles de texte (raccourci + chasse optique + options OpenType) */
+.t-large-title { font: var(--font-large-title); letter-spacing: var(--tracking-large-title); font-feature-settings: var(--font-features); }
+.t-title-1 { font: var(--font-title-1); letter-spacing: var(--tracking-title-1); font-feature-settings: var(--font-features); }
+.t-title-2 { font: var(--font-title-2); letter-spacing: var(--tracking-title-2); font-feature-settings: var(--font-features); }
+.t-title-3 { font: var(--font-title-3); letter-spacing: var(--tracking-title-3); font-feature-settings: var(--font-features); }
+.t-headline { font: var(--font-headline); letter-spacing: var(--tracking-headline); font-feature-settings: var(--font-features); }
+.t-body { font: var(--font-body); letter-spacing: var(--tracking-body); font-feature-settings: var(--font-features); }
+.t-callout { font: var(--font-callout); letter-spacing: var(--tracking-callout); font-feature-settings: var(--font-features); }
+.t-subheadline { font: var(--font-subheadline); letter-spacing: var(--tracking-subheadline); font-feature-settings: var(--font-features); }
+.t-footnote { font: var(--font-footnote); letter-spacing: var(--tracking-footnote); font-feature-settings: var(--font-features); }
+.t-caption { font: var(--font-caption); letter-spacing: var(--tracking-caption); font-feature-settings: var(--font-features); }
+
+/* Motion reduit : tout est neutralise (WCAG 2.3.3) */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-fast: 0ms;
+    --duration-base: 0ms;
+    --duration-slow: 0ms;
+    --duration-spring: 0ms;
+    --duration-camera: 0ms;
+    --press-scale: 1;
+  }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Focus visible commun : anneau accent + halo doux (wrappers : [data-focus-visible] de React Aria) */
+.focus-ring,
+:where(button, a, input, select, textarea, [tabindex]):focus-visible,
+[data-focus-visible] {
+  outline: var(--focus-width) solid var(--color-focus);
+  outline-offset: var(--focus-offset);
+  box-shadow: 0 0 0 calc(var(--focus-offset) + var(--focus-width) + 3px) var(--color-focus-halo);
+}
+/* ======================= END SYNCED ======================= */
+
+/* ===== Demo : mouvement reduit simule ===== */
+html.rm{--duration-fast:0ms;--duration-base:0ms;--duration-slow:0ms;--duration-spring:0ms;--duration-camera:0ms;--press-scale:1}
+html.rm *,html.rm *::before,html.rm *::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+
+/* ===== BASE + KIT (identique a index.html) ===== */
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--color-bg);color:var(--color-text);font:var(--font-body);letter-spacing:var(--tracking-body);font-feature-settings:var(--font-features);font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased}
+h1,h2,h3,p{margin:0}
+button,input{font:inherit;color:inherit;letter-spacing:inherit;font-feature-settings:inherit}
+a{color:var(--glass-link)}
+code{font:var(--weight-regular) var(--text-sm)/1.4 var(--font-mono);background:var(--color-fill);padding:1px 6px;border-radius:var(--radius-sm)}
+.muted{color:var(--color-text-muted)}
+.i{width:var(--icon-md);height:var(--icon-md);flex:none;fill:none;stroke:currentColor;stroke-width:var(--icon-stroke);stroke-linecap:round;stroke-linejoin:round}
+.i.sm{width:var(--icon-sm);height:var(--icon-sm)}.i.lg{width:var(--icon-lg);height:var(--icon-lg)}.i.xl{width:var(--icon-xl);height:var(--icon-xl)}
+.row{display:flex;gap:var(--space-3);align-items:center;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:var(--space-2);height:var(--control-md);padding:0 var(--space-4);border:0;border-radius:var(--radius-pill);background:var(--color-fill);color:var(--color-text);font:var(--font-callout);font-weight:var(--weight-medium);font-feature-settings:var(--font-features);letter-spacing:var(--tracking-callout);white-space:nowrap;cursor:pointer;transition:background var(--duration-fast) var(--ease-standard),transform var(--duration-base) var(--ease-spring)}
+.btn:hover{background:var(--color-border)}
+.btn:active{transform:scale(var(--press-scale))}
+.btn.primary{background:var(--color-accent-solid);color:var(--color-on-accent-solid)}
+.btn.sm{height:var(--control-sm);padding:0 var(--space-3);font-size:var(--text-sm)}
+.seg{--n:2;--i:0;position:relative;display:grid;grid-auto-flow:column;grid-auto-columns:1fr;padding:2px;border-radius:var(--radius-pill);background:var(--color-fill);isolation:isolate}
+.seg::before{content:"";position:absolute;z-index:-1;top:2px;bottom:2px;left:2px;width:calc((100% - 4px)/var(--n));border-radius:var(--radius-pill);background:var(--color-raised);box-shadow:0 1px 3px rgba(0,0,0,.14),0 0 0 .5px rgba(0,0,0,.06);transform:translateX(calc(var(--i)*100%));transition:transform var(--duration-spring) var(--ease-spring)}
+.seg>button{height:calc(var(--control-sm) - 4px);padding:0 var(--space-3);border:0;border-radius:var(--radius-pill);background:transparent;color:var(--color-text);font:var(--font-callout);font-weight:var(--weight-medium);font-feature-settings:var(--font-features);letter-spacing:var(--tracking-callout);cursor:pointer;white-space:nowrap}
+.seg>[aria-selected=true],.seg>[aria-checked=true]{font-weight:var(--weight-semibold);color:var(--color-accent-subtle-text)}
+.sw{position:relative;flex:none;width:46px;height:28px;border:0;padding:0;border-radius:var(--radius-pill);background:var(--color-border-strong);cursor:pointer;transition:background var(--duration-base) var(--ease-standard)}
+.sw::after{content:"";position:absolute;top:2px;left:2px;width:24px;height:24px;border-radius:50%;background:var(--color-on-accent-solid);box-shadow:0 1px 3px rgba(0,0,0,.3);transition:transform var(--duration-spring) var(--ease-spring)}
+.sw[aria-checked=true]{background:var(--color-accent-solid)}.sw[aria-checked=true]::after{transform:translateX(18px)}
+.grp-h{font:var(--font-subheadline);font-weight:var(--weight-semibold);font-feature-settings:var(--font-features);letter-spacing:var(--tracking-subheadline);color:var(--color-text-muted);padding:0 var(--space-4) var(--space-2)}
+.grp-f{font:var(--font-footnote);font-feature-settings:var(--font-features);letter-spacing:var(--tracking-footnote);color:var(--color-text-muted);padding:var(--space-2) var(--space-4) 0}
+.grp{background:var(--color-surface);border-radius:var(--radius-lg);overflow:hidden}
+.grp>.r{position:relative;display:flex;align-items:center;gap:var(--space-3);min-height:44px;padding:var(--space-2) var(--space-4)}
+.grp>.r+.r::before{content:"";position:absolute;top:0;left:var(--space-4);right:0;height:1px;background:var(--color-separator)}
+.r .lbl{flex:1;min-width:0}
+.opt{cursor:pointer;min-height:var(--row-min-h)!important;padding:6px var(--space-4) 6px var(--space-3)!important;transition:background var(--duration-fast) var(--ease-standard),transform var(--duration-fast) var(--ease-standard)}
+.grp>.opt:hover,.grp>.opt.is-hover{background:var(--color-fill-hover)}
+.opt:active{background:var(--color-fill)}
+.opt[aria-checked=true]{background:var(--color-accent-subtle)!important}
+.opt .tx{display:grid;gap:2px;min-width:0;flex:1}
+.opt .t1{font:var(--font-headline);font-feature-settings:var(--font-features);letter-spacing:var(--tracking-headline)}
+.opt .t2{font:var(--font-subheadline);font-feature-settings:var(--font-features);letter-spacing:var(--tracking-subheadline);color:var(--color-text-muted)}
+.opt[aria-checked=true] .t1{color:var(--color-accent-subtle-text)}
+.opt .chk{color:var(--color-accent-subtle-text);visibility:hidden}.opt[aria-checked=true] .chk{visibility:visible}
+.opt:focus-visible,.opt.is-focus{outline:var(--focus-width) solid var(--color-focus);outline-offset:-3px;box-shadow:none}
+.thumb{flex:none;width:var(--thumb-w);height:var(--thumb-h);color:var(--color-text-muted)}
+.opt[aria-checked=true] .thumb{color:var(--color-accent-subtle-text)}
+.thumb svg{display:block;width:100%;height:100%}
+.banner{display:flex;gap:var(--space-3);align-items:flex-start;padding:var(--space-3) var(--space-4);border-radius:var(--radius-lg);background:var(--color-error-bg);color:var(--color-text)}
+.banner .i{color:var(--color-error);margin-top:2px}
+.banner b{display:block;font:var(--font-headline);font-feature-settings:var(--font-features)}
+#tipbox{position:fixed;z-index:var(--z-toast);display:none}
+
+/* ===== SHELL reduit (barre laterale + scene) : memes regles que US-005 ===== */
+.app{position:relative;width:100%;height:100%;overflow:hidden;container:app/inline-size;display:grid;grid-template-rows:auto 1fr;grid-template-columns:100%;isolation:isolate;background:var(--color-bg);color:var(--color-text);font:var(--font-body);letter-spacing:var(--tracking-body);font-feature-settings:var(--font-features);font-variant-numeric:tabular-nums}
+.pane{position:absolute;grid-row:2;grid-column:1/-1;top:0;bottom:0;z-index:3;display:flex;flex-direction:column;gap:var(--space-5);overflow:auto;overscroll-behavior:contain;padding:var(--space-3) var(--space-3) var(--space-5)}
+.pane-l{left:0;width:var(--panel-left-w);border-right:1px solid var(--color-separator)}
+.pane h2.h{font:var(--font-headline);font-feature-settings:var(--font-features);letter-spacing:var(--tracking-headline)}
+.pane .help{font:var(--font-subheadline);font-feature-settings:var(--font-features);letter-spacing:var(--tracking-subheadline);color:var(--color-text-muted);margin-top:2px}
+.pane [role=tabpanel]{display:grid;gap:var(--space-4)}
+@container app (max-width:1023px){
+  .pane{top:var(--float-inset);bottom:var(--float-inset);width:min(var(--drawer-max-w),calc(100% - 64px));border:0;border-radius:var(--radius-xl);box-shadow:var(--glass-shadow)}
+  .pane-l{left:var(--float-inset)}
+}
+.scene{position:absolute;inset:0;z-index:1;overflow:hidden;background:linear-gradient(var(--scene-bg-top),var(--scene-bg-bottom));cursor:grab;--dl:0px;--dr:0px}
+@container app (min-width:1024px){.scene{--dl:var(--dlw,0px)}}
+.art{position:absolute;top:0;bottom:0;left:var(--dl);right:0;width:calc(100% - var(--dl));height:100%}
+.sbdemo{width:248px;display:flex;flex-direction:column;gap:var(--space-5);padding:var(--space-3) var(--space-3) var(--space-5);border-radius:var(--radius-lg)}
+.sbdemo [role=tabpanel]{display:grid;gap:var(--space-4)}
+.sbdemo h2.h{font:var(--font-headline);font-feature-settings:var(--font-features);letter-spacing:var(--tracking-headline)}
+.sbdemo .help{font:var(--font-subheadline);font-feature-settings:var(--font-features);letter-spacing:var(--tracking-subheadline);color:var(--color-text-muted);margin-top:2px}
+
+/* ===== Page de demonstration ===== */
+.demo{position:sticky;top:0;z-index:var(--z-menu);display:flex;flex-wrap:wrap;gap:var(--space-3) var(--space-6);align-items:center;padding:var(--space-2) var(--space-6);border-bottom:1px solid var(--color-separator)}
+.demo label{display:inline-flex;gap:var(--space-2);align-items:center;font:var(--font-callout);font-feature-settings:var(--font-features)}
+.wrap{max-width:1240px;margin:0 auto;padding:var(--space-8) var(--space-6) var(--space-16)}
+h2.sec{font:var(--font-title-2);letter-spacing:var(--tracking-title-2);font-feature-settings:var(--font-features);margin:var(--space-16) 0 var(--space-2)}
+.lead{max-width:76ch;color:var(--color-text-muted);margin-bottom:var(--space-4)}
+.chip{display:inline-block;font:var(--font-caption);font-feature-settings:var(--font-features);background:var(--color-fill);padding:2px 10px;border-radius:var(--radius-pill);margin-bottom:var(--space-2)}
+.fig{margin:var(--space-4) 0 0}
+.cap{margin:var(--space-2) 0 0;font:var(--font-footnote);color:var(--color-text-muted)}
+.devbox{margin:0 auto;position:relative}
+.dev{transform-origin:0 0;border-radius:14px;overflow:hidden;box-shadow:var(--shadow-3)}
+.bench{display:flex;gap:var(--space-6);flex-wrap:wrap;align-items:flex-start;padding:var(--space-6);border-radius:var(--radius-xl);background:linear-gradient(var(--scene-bg-top),var(--scene-bg-bottom));color:var(--color-text)}
+.bench figure{margin:0}.bench .chip{background:var(--color-surface)}
+ul.dev-notes{margin:0 0 var(--space-3);padding-left:var(--space-5)}ul.dev-notes li{margin-bottom:var(--space-1)}
+table{border-collapse:collapse;width:100%;font:var(--font-footnote)}
+th,td{text-align:left;vertical-align:top;padding:6px 10px;border-bottom:1px solid var(--color-separator)}
+th{font-weight:var(--weight-semibold);background:var(--color-surface-2)}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
+  <filter id="soft6" x="-20%" y="-50%" width="140%" height="200%"><feGaussianBlur stdDeviation="10"/></filter>
+  <symbol id="check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="alert" viewBox="0 0 24 24"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3M12 9v4M12 17h.01"/></symbol>
+  <symbol id="box" viewBox="0 0 24 24"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5M12 22V12"/></symbol>
+</defs></svg>
+
+<header class="demo material-regular" role="group" aria-label="Demo options">
+  <strong class="t-headline">US-006 Desk panel <span class="muted" style="font-weight:400">mockup v0.4</span></strong>
+  <label>Reduce transparency <button class="sw" type="button" role="switch" aria-checked="false" id="s-glass" aria-label="Reduce transparency"></button></label>
+  <label>Reduce motion <button class="sw" type="button" role="switch" aria-checked="false" id="s-rm" aria-label="Reduce motion"></button></label>
+  <a href="index.html">Design system</a><a href="US-005.html">US-005 shell</a>
+</header>
+
+<main class="wrap">
+  <p class="chip">US-006 / Sprint 2 / high-fidelity mockup</p>
+  <h1 class="t-large-title">Choose your desk</h1>
+  <p class="lead t-body" style="margin-top:var(--space-2)">The Desk tab of the sidebar: a grouped radio list of 7 desk models (5 rectangular, 2 corner) with a top-plan thumbnail at a common scale, an accent-tint selected row with a check, and a "Selected" summary group. The frames below show the sidebar and the scene only (the toolbar and inspector are in US-005). The scene drawing is a <strong>placeholder</strong>; its desk follows your choice at the real common scale.</p>
+
+  <h2 class="sec">1. macOS window, light (interactive)</h2>
+  <p class="lead">Click a row, or Tab into the list and use the arrow keys (they apply the desk straight away), Home / End, Space. The announcement is grouped: one message 400 ms after the last change.</p>
+  <div id="f-light"></div>
+  <p class="cap" role="status" aria-live="polite" id="ann">Announced to screen readers (visually hidden in the app): <span id="ann-t">3D view ready. Desk 140 by 70 cm.</span></p>
+
+  <h2 class="sec">2. Dark, corner desk selected</h2>
+  <div id="f-dark"></div>
+
+  <h2 class="sec">3. Row states and catalog error</h2>
+  <p class="lead">Left to right: default; keyboard focus on a row (inset ring, distinct from the selection) with a hovered row; the catalog could not be read (the default 140 x 70 desk stays in the scene). Over a studio background to show the material.</p>
+  <div class="bench" data-theme="light" id="b-light"></div>
+  <div class="bench" data-theme="dark" id="b-dark" style="margin-top:var(--space-4)"></div>
+
+  <h2 class="sec">4. iPadOS portrait, sidebar as a floating overlay</h2>
+  <div id="f-ipad"></div>
+
+  <h2 class="sec">5. Row anatomy</h2>
+  <table>
+    <tr><th>Part</th><th>Spec</th></tr>
+    <tr><td>Row</td><td>Min height 56 px (<code>--row-min-h</code>), padding 6 / 16 / 6 / 12, hairline separator inset by 16 px (decorative). No gap between rows: the grouped list is one object (the 8 px gap of the UX criterion is replaced by the separator; targets stay 56 px high and 216 px wide).</td></tr>
+    <tr><td>Thumbnail</td><td>56 x 44 (<code>--thumb-w/h</code>), top plan drawn by the UI in SVG, <code>aria-hidden</code>, common scale 0.275 px per cm (the 180 x 160 corner desk fills the box), fill 16 % + 1.4 px contour in <code>currentColor</code> (the L shape is readable without colour).</td></tr>
+    <tr><td>Text</td><td>Dimensions "140 x 70 cm" Headline 16/600 (tabular), name Subheadline 14 <code>--color-text-muted</code>. Accessible name = visible text; description "Height 74 cm".</td></tr>
+    <tr><td>Selected</td><td><code>--color-accent-subtle</code> fill (opaque) + dimensions in <code>--color-accent-subtle-text</code> + check on the right (space always reserved) + <code>aria-checked="true"</code>. No contour: the check and the 600 weight are the non-colour cues.</td></tr>
+    <tr><td>Hover / pressed</td><td><code>--color-fill-hover</code> / <code>--color-fill</code>, 120 ms. Never the only cue.</td></tr>
+    <tr><td>Focus</td><td>3 px <code>--color-focus</code> ring drawn inside the row (<code>outline-offset: -3px</code>, the group clips outside rings); visible together with the selection.</td></tr>
+    <tr><td>Summary group</td><td>"Selected" title (Subheadline 600 muted), grouped card with 2 rows (name and cm in Headline, mm in Subheadline muted), footnote legend "Width x depth x height". Not interactive, no live region.</td></tr>
+  </table>
+
+  <h2 class="sec">6. For the developer</h2>
+  <ul class="dev-notes">
+    <li><strong>Components</strong>: <code>RadioGroup</code> "Desk model" (one Tab stop, arrows move and apply, Home / End, Space); row = <code>Radio</code> styled as <code>.grp > .r.opt</code> with <code>Thumb</code> (SVG from <code>width</code>, <code>depth</code>, <code>shape</code>, <code>arm</code> at the common scale, scale computed from the largest catalog model), text, <code>Check</code> (Lucide <code>check</code>). Group = <code>--color-surface</code>, <code>--radius-lg</code>, <code>overflow: hidden</code>. Section title Headline + help Subheadline (see markup in this page).</li>
+    <li><strong>Selection</strong> is applied immediately (no Apply button, no confirmation); re-clicking the active row does nothing and announces nothing. The announcement is debounced 400 ms: "{name} selected. {w} by {d} cm."; one history entry per burst (US-019).</li>
+    <li><strong>Catalog error</strong>: banner (<code>error-bg</code>, alert icon, Headline "Desks couldn't load", text, small default button "Reload page", <code>role="alert"</code>) replaces the list and the summary.</li>
+    <li><strong>Camera</strong>: after a change, the whole desk must fit in the free zone between the panes with a margin of at least 24 px (806 px wide at 1366 px, docked panes), 480 ms <code>--ease-in-out</code>, instant under reduced motion; orientation and Top / Front are kept.</li>
+    <li><strong>Tokens used</strong> (all existing or new in v0.4): <code>--radius-lg</code>, <code>--row-min-h</code>, <code>--thumb-w/h</code>, <code>--color-surface</code>, <code>--color-separator</code>, <code>--color-fill*</code>, <code>--color-accent-subtle(-text)</code>, <code>--icon-stroke</code>, <code>--focus-*</code>, <code>.material-regular</code>.</li>
+    <li><strong>Contrast</strong>: dimensions on <code>accent-subtle</code> 6.7:1 (light) / 8.1:1 (dark); name (muted) on <code>accent-subtle</code> 7.0 / 7.5; muted on white 8.4 / on hovered row over material 4.5 (worst background); ring 3 px vs surface 5.2 / 8.0; thumbnail contour vs surface 8.4 and vs accent-subtle 6.7.</li>
+  </ul>
+</main>
+<div id="tipbox"><div class="tt" role="tooltip" id="tipin"></div></div>
+
+<script>
+(function(){
+var ic=function(id,c){return '<svg class="i '+(c||'')+'" aria-hidden="true" focusable="false"><use href="#'+id+'"/></svg>'};
+var DK=[{id:'compact',n:'Compact desk',w:100,d:60},{id:'basic',n:'Basic desk',w:120,d:60},{id:'standard',n:'Standard desk',w:140,d:70},{id:'large',n:'Large desk',w:160,d:80},{id:'gaming',n:'Gaming desk',w:180,d:80},{id:'corner',n:'Corner desk',w:160,d:140,L:60},{id:'cornerl',n:'Corner desk large',w:180,d:160,L:70}];
+var K=.275;
+function byId(id){return DK.filter(function(x){return x.id===id})[0]}
+function thumb(d){var w=d.w*K,h=d.d*K,x=(56-w)/2,y=(44-h)/2,a=(d.L||0)*K,s='fill="currentColor" fill-opacity=".16" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"';
+  return '<svg viewBox="0 0 56 44" aria-hidden="true">'+(d.L?'<path d="M'+x+' '+y+'H'+(x+w)+'V'+(y+h)+'H'+(x+w-a)+'V'+(y+a)+'H'+x+'Z" '+s+'/>':'<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="2" '+s+'/>')+'</svg>'}
+function rows(sel,o){o=o||{};return DK.map(function(d,i){var on=d.id===sel;return '<div class="r opt'+(o.focus===d.id?' is-focus':'')+(o.hover===d.id?' is-hover':'')+'" role="radio" aria-checked="'+on+'" tabindex="'+(on?0:-1)+'" data-id="'+d.id+'" aria-label="'+d.w+' × '+d.d+' cm '+d.n+'"><span class="thumb">'+thumb(d)+'</span><span class="tx"><span class="t1">'+d.w+' × '+d.d+' cm</span><span class="t2">'+d.n+'</span></span>'+ic('check','chk')+'</div>'}).join('')}
+function summary(d){return '<div class="grp-h">Selected</div><div class="grp"><div class="r"><span class="lbl t-headline">'+d.n+', '+d.w+' × '+d.d+' cm</span></div><div class="r"><span class="lbl t-subheadline muted">'+(d.w*10)+' × '+(d.d*10)+' × 740 mm</span></div></div><div class="grp-f">Width × depth × height</div>'}
+function deskPanel(sel,o){
+  o=o||{};
+  var seg='<div class="seg" role="tablist" aria-label="Library" style="--n:2;--i:0"><button type="button" role="tab" aria-selected="true">Desk</button><button type="button" role="tab" aria-selected="false">Objects</button></div>';
+  if(o.error)return seg+'<div role="tabpanel"><div><h2 class="h">Choose your desk</h2></div><div class="banner" role="alert">'+ic('alert')+'<div><b>Desks couldn\'t load</b>Reload the page to try again.<div style="margin-top:var(--space-2)"><button class="btn sm" type="button">Reload page</button></div></div></div></div>';
+  return seg+'<div role="tabpanel"><div><h2 class="h">Choose your desk</h2><p class="help">Pick the model closest to yours.</p></div><div class="grp" role="radiogroup" aria-label="Desk model">'+rows(sel,o)+'</div><div class="sum">'+summary(byId(sel))+'</div></div>';
+}
+
+/* Scene : bureau en axonometrie, echelle commune (vrai cadrage : Three.js) */
+function deskSVG(d){
+  var k=2.2,c=Math.cos(Math.PI/6)*k,s=Math.sin(Math.PI/6)*k,H=74,T=2.5,cx=500,cy=420;
+  var P=function(x,y,z){return [cx+(x-y)*c,cy+(x+y)*s-z*k]};
+  var pts=function(poly,z){return poly.map(function(p){var q=P(p[0],p[1],z);return q[0].toFixed(1)+','+q[1].toFixed(1)}).join(' ')};
+  var w2=d.w/2,d2=d.d/2,a=d.L||0;
+  var poly=d.L?[[-w2,-d2],[w2,-d2],[w2,d2],[w2-a,d2],[w2-a,-d2+a],[-w2,-d2+a]]:[[-w2,-d2],[w2,-d2],[w2,d2],[-w2,d2]];
+  var legs=d.L?[[-w2+5,-d2+5],[w2-5,-d2+5],[w2-5,d2-5],[w2-a+5,d2-5],[-w2+5,-d2+a-5]]:[[-w2+5,-d2+5],[w2-5,-d2+5],[w2-5,d2-5],[-w2+5,d2-5]];
+  legs.sort(function(p,q){return (p[0]+p[1])-(q[0]+q[1])});
+  var out='<polygon points="'+pts(poly.map(function(p){return [p[0]*1.04,p[1]*1.04]}),0)+'" filter="url(#soft6)" style="fill:var(--scene-shadow)"/>';
+  legs.forEach(function(l){var t=P(l[0],l[1],H-T),b=P(l[0],l[1],0);out+='<rect x="'+(t[0]-4).toFixed(1)+'" y="'+t[1].toFixed(1)+'" width="8" height="'+(b[1]-t[1]).toFixed(1)+'" rx="2" style="fill:var(--scene-object-edge)"/>'});
+  for(var z=H-T;z<H;z+=.5)out+='<polygon points="'+pts(poly,z)+'" style="fill:var(--scene-desk-edge)"/>';
+  out+='<polygon points="'+pts(poly,H)+'" stroke-linejoin="round" style="fill:var(--scene-desk);stroke:var(--scene-desk-edge);stroke-width:1.5"/>';
+  return '<svg class="art" viewBox="0 0 1000 620" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false">'+out+'</svg>';
+}
+
+var uid=0;
+function frame(o){
+  var u=++uid;
+  return '<figure class="fig"><span class="chip">'+o.label+'</span><div class="devbox" data-w="'+o.w+'" data-h="'+o.h+'"><div class="dev"><div class="app" data-theme="'+o.theme+'" style="--dlw:248px">'+
+   '<aside class="pane pane-l material-regular" aria-label="Desk and objects" data-sel="'+o.sel+'">'+deskPanel(o.sel)+'</aside>'+
+   '<main class="scene" aria-label="3D view of your desk">'+deskSVG(byId(o.sel))+'</main></div></div></div></figure>';
+}
+function mount(){
+  var set=function(id,h){document.getElementById(id).innerHTML=h};
+  set('f-light',frame({theme:'light',w:1100,h:720,sel:'standard',label:'macOS - sidebar docked, 7 desks fit without scrolling at 1366 x 768 (frame shown 1100 x 720)'}));
+  set('f-dark',frame({theme:'dark',w:1100,h:720,sel:'cornerl',label:'macOS - dark - Corner desk large (L shape)'}));
+  var bench=function(t){return '<figure><span class="chip">Default</span><div class="sbdemo material-regular rim" data-theme="'+t+'">'+deskPanel('standard')+'</div></figure>'+
+    '<figure><span class="chip">Keyboard focus on row 4, hover on row 6</span><div class="sbdemo material-regular rim" data-theme="'+t+'">'+deskPanel('standard',{focus:'large',hover:'corner'})+'</div></figure>'+
+    '<figure><span class="chip">Catalog error</span><div class="sbdemo material-regular rim" data-theme="'+t+'" style="min-height:280px">'+deskPanel('standard',{error:true})+'</div></figure>'};
+  set('b-light',bench('light'));set('b-dark',bench('dark'));
+  var f=document.getElementById('f-ipad');
+  f.innerHTML='<figure class="fig"><span class="chip">iPadOS portrait 820 x 900 - sidebar overlay (non-modal), radius-xl, glass shadow</span><div class="devbox" data-w="820" data-h="900"><div class="dev"><div class="app" data-theme="light" style="--dlw:0px"><aside class="pane pane-l material-regular" aria-label="Desk and objects" data-sel="standard">'+deskPanel('standard')+'</aside><main class="scene" aria-label="3D view of your desk">'+deskSVG(byId('standard'))+'</main></div></div></div></figure>';
+  fit();
+}
+function fit(){[].forEach.call(document.querySelectorAll('.devbox'),function(b){var d=b.firstElementChild,w=+b.dataset.w,h=+b.dataset.h,s=Math.min(1,b.parentNode.parentNode.clientWidth/w);d.style.width=w+'px';d.style.height=h+'px';d.style.transform='scale('+s+')';b.style.width=w*s+'px';b.style.height=h*s+'px'})}
+window.addEventListener('resize',fit);
+
+/* ---- selection ---- */
+var annTimer;
+function choose(opt,fromKey){
+  var grp=opt.parentNode,pane=opt.closest('.pane'),app=opt.closest('.app'),was=pane.dataset.sel;
+  if(was===opt.dataset.id)return;
+  [].forEach.call(grp.children,function(o){var on=o===opt;o.setAttribute('aria-checked',String(on));o.tabIndex=on?0:-1});
+  var d=byId(opt.dataset.id);pane.dataset.sel=d.id;pane.querySelector('.sum').innerHTML=summary(d);
+  var old=app.querySelector('.art');old.outerHTML=deskSVG(d);
+  if(app.closest('#f-light')){clearTimeout(annTimer);annTimer=setTimeout(function(){document.getElementById('ann-t').textContent=d.n+' selected. '+d.w+' by '+d.d+' cm.'},400)}
+}
+document.addEventListener('click',function(e){
+  var seg=e.target.closest&&e.target.closest('.seg>button');
+  if(seg){var s=seg.parentNode,all=[].slice.call(s.children),i=all.indexOf(seg),a=seg.getAttribute('role')==='tab'?'aria-selected':'aria-checked';all.forEach(function(x){x.setAttribute(a,String(x===seg))});s.style.setProperty('--i',i);return}
+  var sw=e.target.closest&&e.target.closest('.sw[role=switch]');if(sw){sw.setAttribute('aria-checked',String(sw.getAttribute('aria-checked')!=='true'));return}
+  var opt=e.target.closest&&e.target.closest('.opt');if(opt&&opt.closest('.app'))choose(opt);
+});
+document.addEventListener('keydown',function(e){
+  var o=e.target.closest&&e.target.closest('.opt');if(!o||!o.closest('.app'))return;
+  if(/^Arrow|^Home$|^End$/.test(e.key)){e.preventDefault();var all=[].slice.call(o.parentNode.children),i=all.indexOf(o),n=e.key==='Home'?0:e.key==='End'?all.length-1:(i+(/Down|Right/.test(e.key)?1:-1)+all.length)%all.length;all[n].focus();choose(all[n],true)}
+  else if(e.key===' '){e.preventDefault();choose(o)}
+});
+document.getElementById('s-glass').addEventListener('click',function(){document.documentElement.classList.toggle('no-glass',this.getAttribute('aria-checked')!=='true')});
+document.getElementById('s-rm').addEventListener('click',function(){document.documentElement.classList.toggle('rm',this.getAttribute('aria-checked')!=='true')});
+mount();
+})();
+</script>
+</body>
+</html>

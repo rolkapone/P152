@@ -1,4 +1,6 @@
-/* Base of the page (design system): tokens only, imported once by src/main.tsx after tokens.css. */
+/* Base of the page (design system v0.4 §4, §18 point 4): tokens only, imported once by
+   src/main.tsx after tokens.css. The theme follows the system (tokens.css: :root and
+   prefers-color-scheme; a manual data-theme on <html> wins, US-025). */
 *,
 *::before,
 *::after {
@@ -10,9 +12,12 @@ body {
   margin: 0;
   background: var(--color-bg);
   color: var(--color-text);
-  font-family: var(--font-sans);
-  font-size: var(--text-md);
-  font-weight: var(--weight-regular);
-  line-height: var(--leading-normal);
+  font: var(--font-body);
+  letter-spacing: var(--tracking-body);
+  /* After the `font` shorthand, which resets the OpenType features. */
+  font-feature-settings: var(--font-features);
   font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }

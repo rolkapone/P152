@@ -1,0 +1,445 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>P152 - US-006 desk catalogue and contact shadow preview</title>
+<!--
+  Preview for the PO (US-006 [3D]): switch between the generic desks of the catalogue and compare the contact shadow
+  "before" (assets/catalog/scene/studio.json today) and "after" (proposal). NOT the production renderer.
+  three.js 0.170.0 (exact version) is loaded from jsDelivr (MIT licence). No other asset: environment, cyclorama,
+  desks and contact shadows are all generated in code. Studio lighting, materials and camera are the ones validated
+  by the PO in docs/design/3d/apercu/index.html and studio.json.
+  The DESKS table mirrors assets/catalog/object-types/desk.json (desk.rect) and desk-corner.json (desk.corner).
+  Generic furniture: no brand, no logo.
+-->
+<style>
+  :root { color-scheme: light; --glass: rgba(255,255,255,.66); --glass-line: rgba(255,255,255,.65); --fg: #1d1d1f; --muted: #5c5f66; --accent: #2a62d4; --accent-fg: #fff; --shadow: 0 8px 30px rgba(20,22,30,.12), 0 1px 3px rgba(20,22,30,.08); }
+  body[data-studio="dark"] { color-scheme: dark; --glass: rgba(38,40,46,.62); --glass-line: rgba(255,255,255,.12); --fg: #f2f3f5; --muted: #a9adb5; --accent: #6b9bff; --accent-fg: #0b1220; --shadow: 0 8px 30px rgba(0,0,0,.45); }
+  html, body { margin: 0; height: 100%; overflow: hidden; font: 14px/1.4 Inter, system-ui, "Segoe UI", Roboto, sans-serif; background: #e8e8ea; color: var(--fg); }
+  #c { position: fixed; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+  .panel { position: fixed; background: var(--glass); color: var(--fg); border: 1px solid var(--glass-line); border-radius: 20px; padding: 10px 14px; box-shadow: var(--shadow);
+           -webkit-backdrop-filter: blur(22px) saturate(1.5); backdrop-filter: blur(22px) saturate(1.5); }
+  #cards { top: 16px; left: 16px; width: 252px; display: flex; flex-direction: column; gap: 6px; max-height: calc(100% - 140px); overflow: auto; }
+  #cards h2 { margin: 0 0 2px; font-size: 12px; font-weight: 600; letter-spacing: .02em; color: var(--muted); }
+  .card { display: flex; justify-content: space-between; align-items: center; gap: 8px; text-align: left; width: 100%; padding: 8px 12px; border-radius: 14px; border: 2px solid transparent; background: rgba(127,130,140,.10); }
+  .card .nm { font-weight: 600; }
+  .card .dm { font-size: 12.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .card .ck { visibility: hidden; font-weight: 700; color: var(--accent); }
+  .card[aria-pressed="true"] { border-color: var(--accent); background: rgba(127,130,140,.16); }
+  .card[aria-pressed="true"] .ck { visibility: visible; }
+  #opts { top: 16px; right: 16px; display: flex; flex-direction: column; gap: 8px; align-items: flex-start; max-width: calc(100% - 320px); }
+  .group { display: flex; gap: 4px; align-items: center; flex-wrap: wrap; }
+  .group > .lbl { font-size: 12px; font-weight: 600; letter-spacing: .02em; color: var(--muted); margin-right: 6px; min-width: 72px; }
+  button { font: inherit; color: var(--fg); background: transparent; border: 0; border-radius: 999px; padding: 6px 14px; min-height: 32px; cursor: pointer; transition: background .2s ease; }
+  .card { border-radius: 14px; }
+  button:hover { background: rgba(127,130,140,.18); }
+  .opt[aria-pressed="true"] { background: var(--accent); color: var(--accent-fg); }
+  button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  #info { bottom: 16px; left: 16px; font-size: 13px; max-width: 460px; font-variant-numeric: tabular-nums; }
+  #info b { font-weight: 600; }
+  #info .m { color: var(--muted); font-size: 12.5px; }
+  #shadowNote { bottom: 16px; right: 16px; font-size: 12.5px; color: var(--muted); max-width: 360px; font-variant-numeric: tabular-nums; }
+  #shadowNote b { color: var(--fg); font-weight: 600; }
+  #divider { position: fixed; top: 0; bottom: 0; left: 50%; width: 2px; margin-left: -1px; background: var(--accent); pointer-events: none; display: none; }
+  .tag { position: fixed; top: 50%; padding: 4px 12px; border-radius: 999px; font-weight: 600; font-size: 12.5px; background: var(--glass); border: 1px solid var(--glass-line); display: none; pointer-events: none; }
+  #tagB { right: calc(50% + 14px); } #tagA { left: calc(50% + 14px); }
+  #err { top: 90px; left: 290px; display: none; max-width: 420px; }
+  @media (prefers-reduced-motion: reduce) { button { transition: none; } }
+</style>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+} }
+</script>
+</head>
+<body data-studio="light">
+<canvas id="c" aria-label="3D studio preview of the desk catalogue" role="img"></canvas>
+<div id="divider"></div><span id="tagB" class="tag">Before</span><span id="tagA" class="tag">After</span>
+
+<div id="cards" class="panel" role="group" aria-label="Desk catalogue"><h2>Desk</h2></div>
+
+<div id="opts" class="panel">
+  <div class="group" role="group" aria-label="Contact shadow"><span class="lbl">Shadow</span>
+    <button type="button" class="opt" data-shadow="before" aria-pressed="false">Before</button>
+    <button type="button" class="opt" data-shadow="after" aria-pressed="false">After</button>
+    <button type="button" class="opt" data-shadow="split" aria-pressed="true">Split</button>
+  </div>
+  <div class="group" role="group" aria-label="Desk top finish"><span class="lbl">Top</span><span id="topBtns" class="group"></span></div>
+  <div class="group" role="group" aria-label="Sample objects"><span class="lbl">Objects</span>
+    <button type="button" class="opt" id="objBtn" aria-pressed="false">Show sample objects</button>
+  </div>
+  <div class="group" role="group" aria-label="Backdrop"><span class="lbl">Backdrop</span>
+    <button type="button" class="opt" data-studio="light" aria-pressed="true">Light</button>
+    <button type="button" class="opt" data-studio="dark" aria-pressed="false">Dark</button>
+  </div>
+  <div class="group" role="group" aria-label="View"><span class="lbl">View</span>
+    <button type="button" data-view="reset">Reset</button>
+    <button type="button" data-view="top">Top</button>
+    <button type="button" data-view="front">Front</button>
+  </div>
+</div>
+<div id="info" class="panel" role="status" aria-live="polite"></div>
+<div id="shadowNote" class="panel"></div>
+<div id="err" class="panel" role="alert">The 3D library could not be loaded (internet access to cdn.jsdelivr.net is required for this preview).</div>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+
+/* ------------------------------------------------------------------ data (mirror of assets/catalog) */
+// desk.rect presets (desk.json) and desk.corner presets (desk-corner.json). Millimetres.
+const RECT = { id: 'desk.rect', height: 740, thickness: 25, budget: 1500 };
+const CORNER = { id: 'desk.corner', height: 740, thickness: 25, budget: 2500 };
+const DESKS = [
+  { type: RECT, preset: 'compact', label: 'Compact', w: 1000, d: 600 },
+  { type: RECT, preset: 'basic', label: 'Basic', w: 1200, d: 600 },
+  { type: RECT, preset: 'standard', label: 'Standard', w: 1400, d: 700, isDefault: true },
+  { type: RECT, preset: 'large', label: 'Large', w: 1600, d: 800 },
+  { type: RECT, preset: 'gaming', label: 'Gaming', w: 1800, d: 800 },
+  { type: CORNER, preset: 'standard', label: 'Corner', w: 1600, d: 1400, arm: 600, wing: 600, orientation: 'right' },
+  { type: CORNER, preset: 'large', label: 'Corner large', w: 1800, d: 1600, arm: 700, wing: 700, orientation: 'right' }
+];
+const MATS = {
+  'mat.birch': { c: '#e4cfa6', m: 0, r: .65 }, 'mat.oak': { c: '#c9a577', m: 0, r: .62 }, 'mat.walnut': { c: '#6b4a35', m: 0, r: .58 },
+  'mat.satin-white': { c: '#ecebe7', m: 0, r: .50 }, 'mat.matte-black': { c: '#202226', m: 0, r: .78 },
+  'mat.black-metal': { c: '#2a2d31', m: .85, r: .45 }, 'mat.soft-touch-black': { c: '#1d1f22', m: 0, r: .68 },
+  'mat.anodized-graphite': { c: '#4a4d52', m: 1, r: .40 }, 'mat.warm-white': { c: '#f1ede2', m: 0, r: .60 },
+  'mat.felt-dark': { c: '#2d3035', m: 0, r: 1 }, 'mat.screen-lit': { c: '#0a0b0e', m: 0, r: .12, e: '#c9d6ea', ei: .55 }
+};
+const TOPS = [['Birch', 'mat.birch'], ['Oak', 'mat.oak'], ['Walnut', 'mat.walnut'], ['White', 'mat.satin-white'], ['Black', 'mat.matte-black']];
+const STUDIO = {
+  light: { background: '#e8e8ea', floor: '#e2e2e5', env: .7, rim: 1.1 },
+  dark: { background: '#1c1e22', floor: '#212328', env: .55, rim: 1.5 }
+};
+// Contact shadow: BEFORE = studio.json today; AFTER = proposal (docs/design/3d/US-006-bureaux.md section 4).
+const SHADOW = {
+  before: { opacity: 0.42, footprint: () => [1500, 800], note: 'opacity 0.42, one fixed 1500 x 800 mm plane (whatever the desk)' },
+  after: { opacity: 0.24, inset: [200, 140], note: 'opacity 0.24, footprint = desk - (200, 140) mm (derived from the desk)' }
+};
+const FOOT = 70, INSET = 60, RAIL_DROP = 45, FEET_LIFT = 0.0015;
+const mm = v => v / 1000;
+
+/* ------------------------------------------------------------------ renderer, studio environment, lights */
+const reducedMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+const canvas = document.getElementById('c');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.toneMapping = THREE.NeutralToneMapping;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.VSMShadowMap;
+renderer.shadowMap.autoUpdate = false;
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color('#e8e8ea');
+scene.fog = new THREE.Fog('#e8e8ea', 9, 20);
+
+function buildStudioEnv() {
+  const s = new THREE.Scene();
+  const room = new THREE.Mesh(new THREE.BoxGeometry(14, 7, 14), new THREE.MeshBasicMaterial({ color: 0x77777c, side: THREE.BackSide }));
+  room.position.y = 3.5; s.add(room);
+  const box = (w, h, pos, v) => {
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ color: new THREE.Color().setScalar(v), side: THREE.DoubleSide }));
+    m.position.set(...pos); m.lookAt(0, 1, 0); s.add(m);
+  };
+  box(4.5, 3.2, [3.5, 4.2, 3.5], 7); box(2.2, 4.5, [-5, 2.6, 1.5], 3); box(6, 0.7, [0, 6.4, -1], 5); box(1.4, 4.5, [-2.5, 2.6, -6], 4);
+  return s;
+}
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(buildStudioEnv(), 0.03).texture;
+scene.environmentIntensity = STUDIO.light.env;
+
+const camera = new THREE.PerspectiveCamera(32, 1, 0.1, 40);
+const hemi = new THREE.HemisphereLight('#ffffff', '#b8b8bd', 0.35); scene.add(hemi);
+const key = new THREE.DirectionalLight('#fff6ea', 2.4);
+key.position.set(1.8, 3.2, 2.2); key.target.position.set(0, 0.7, 0);
+key.castShadow = true; key.shadow.mapSize.set(2048, 2048);
+Object.assign(key.shadow.camera, { left: -2.2, right: 2.2, top: 2.2, bottom: -2.2, near: 0.5, far: 9 });
+key.shadow.bias = -0.0005; key.shadow.normalBias = 0.02; key.shadow.radius = 10; key.shadow.blurSamples = 16;
+scene.add(key, key.target);
+const fill = new THREE.DirectionalLight('#e3ecff', 0.55); fill.position.set(-2.6, 1.8, 1.8); scene.add(fill);
+const rim = new THREE.DirectionalLight('#ffffff', 1.1); rim.position.set(-0.8, 2.4, -2.6); scene.add(rim);
+
+function buildCyclo() {
+  const prof = [[9, 0], [-1.6, 0]], R = 1.5, cz = -1.6, N = 18;
+  for (let i = 1; i <= N; i++) { const t = i / N * Math.PI / 2; prof.push([cz - R * Math.sin(t), R - R * Math.cos(t)]); }
+  prof.push([cz - R, 7]);
+  const X = 16, pos = [], nor = [], idx = [];
+  prof.forEach(([z, y], i) => {
+    const a = prof[Math.max(i - 1, 0)], b = prof[Math.min(i + 1, prof.length - 1)];
+    let tz = b[0] - a[0], ty = b[1] - a[1]; const l = Math.hypot(tz, ty); tz /= l; ty /= l;
+    for (const x of [-X, X]) { pos.push(x, y, z); nor.push(0, -tz, ty); }
+  });
+  for (let i = 0; i < prof.length - 1; i++) { const a = i * 2; idx.push(a, a + 1, a + 2, a + 1, a + 3, a + 2); }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  g.setAttribute('normal', new THREE.Float32BufferAttribute(nor, 3));
+  g.setIndex(idx); return g;
+}
+const floor = new THREE.Mesh(buildCyclo(), new THREE.MeshStandardMaterial({ color: '#e2e2e5', roughness: 0.92, side: THREE.DoubleSide, envMapIntensity: 0.6 }));
+floor.receiveShadow = true; scene.add(floor);
+
+/* ------------------------------------------------------------------ contact shadow (same gradient texture as src/render/math/contactShadow.ts) */
+const CORE = 0.62;
+const contactTex = (() => {
+  const n = 128, cv = document.createElement('canvas'); cv.width = cv.height = n;
+  const ctx = cv.getContext('2d'), im = ctx.createImageData(n, n);
+  const sm = (a, b, x) => { const t = Math.min(Math.max((x - a) / (b - a), 0), 1); return t * t * (3 - 2 * t); };
+  for (let j = 0; j < n; j++) for (let i = 0; i < n; i++) {
+    const px = Math.abs((i + .5) / n * 2 - 1) - CORE, py = Math.abs((j + .5) / n * 2 - 1) - CORE, r = 0.18;
+    const qx = px + r, qy = py + r, d = Math.hypot(Math.max(qx, 0), Math.max(qy, 0)) + Math.min(Math.max(qx, qy), 0) - r;
+    const a = Math.pow(1 - sm(-0.08, 0.38, d), 1.6), k = (j * n + i) * 4;
+    im.data[k] = im.data[k + 1] = im.data[k + 2] = 0; im.data[k + 3] = Math.round(255 * a);
+  }
+  ctx.putImageData(im, 0, 0);
+  const t = new THREE.CanvasTexture(cv); t.anisotropy = 2; return t;
+})();
+const contactGeo = new THREE.PlaneGeometry(1, 1).rotateX(-Math.PI / 2);
+const contactMats = {};
+for (const k of ['before', 'after']) contactMats[k] = new THREE.MeshBasicMaterial({ map: contactTex, transparent: true, depthWrite: false, opacity: SHADOW[k].opacity, fog: false });
+// rect in metres: centre (x, z), size (w, d). The plane is 1 / CORE larger than the footprint it darkens.
+function contactPlane(mat, x, z, w, d, y) {
+  const m = new THREE.Mesh(contactGeo, mat);
+  m.scale.set(w / CORE, 1, d / CORE); m.position.set(x, y, z); m.renderOrder = 1; return m;
+}
+
+/* ------------------------------------------------------------------ desk generator (proposal for desk.rect and desk.corner) */
+const topMaterial = new THREE.MeshStandardMaterial();
+const legsMaterial = new THREE.MeshStandardMaterial();
+function applyMat(material, id) {
+  const d = MATS[id];
+  material.color.set(d.c); material.metalness = d.m; material.roughness = d.r;
+  material.emissive.set(d.e || '#000000'); material.emissiveIntensity = d.ei || 0; material.needsUpdate = true;
+}
+applyMat(topMaterial, 'mat.birch'); applyMat(legsMaterial, 'mat.black-metal');
+
+const rbox = (w, h, d, r, seg = 4) => new RoundedBoxGeometry(w, h, d, seg, Math.min(r, w / 2 - 1e-4, h / 2 - 1e-4, d / 2 - 1e-4));
+function mergeParts(parts) {
+  const ng = parts.map(p => p.index === null ? p : p.toNonIndexed());
+  const g = mergeGeometries(ng, false);
+  parts.forEach(p => p.dispose()); ng.forEach(p => p.dispose());
+  return g;
+}
+function posts(points, height) {
+  return points.map(([x, z]) => {
+    const g = new THREE.CylinderGeometry(0.022, 0.018, height, 24, 1, true);   // open ended: both ends hidden
+    g.translate(x, height / 2, z); return g;
+  });
+}
+function railBox(x0, z0, x1, z1, y) {                           // thin rail between two post axes, at height y
+  const len = Math.hypot(x1 - x0, z1 - z0), alongX = Math.abs(x1 - x0) > Math.abs(z1 - z0);
+  const g = alongX ? rbox(len, 0.07, 0.016, 0.006, 1) : rbox(0.016, 0.07, len, 0.006, 1);
+  g.translate((x0 + x1) / 2, y, (z0 + z1) / 2); return g;
+}
+// polygon (x, z) with rounded corners -> THREE.Shape in (x, -z) so that after rotateX(-90deg) world z = -shape y
+function roundedPolygon(pts, radii) {
+  const s = new THREE.Shape(), n = pts.length;
+  const P = i => pts[(i + n) % n], S = ([x, z]) => [x, -z];
+  for (let i = 0; i < n; i++) {
+    const p = P(i), a = P(i - 1), b = P(i + 1), r = radii[i];
+    const la = Math.hypot(a[0] - p[0], a[1] - p[1]), lb = Math.hypot(b[0] - p[0], b[1] - p[1]);
+    const A = [p[0] + (a[0] - p[0]) / la * r, p[1] + (a[1] - p[1]) / la * r], B = [p[0] + (b[0] - p[0]) / lb * r, p[1] + (b[1] - p[1]) / lb * r];
+    const [ax, ay] = S(A), [px, py] = S(p), [bx, by] = S(B);
+    if (i === 0) s.moveTo(ax, ay); else s.lineTo(ax, ay);
+    s.quadraticCurveTo(px, py, bx, by);
+  }
+  s.closePath(); return s;
+}
+
+/** Builds { group, tris, feet:[x,z], footprints:[{x,z,w,d}] } for a catalogue entry; metres, origin = centre of the bounding box. */
+function buildDesk(desk) {
+  const H = mm(desk.type.height), T = mm(desk.type.thickness), W = mm(desk.w), D = mm(desk.d), inset = mm(INSET);
+  const group = new THREE.Group();
+  let topGeo, legPts, rails = [], rects;
+  const railY = H - T - mm(RAIL_DROP);
+  if (desk.type === RECT) {
+    topGeo = rbox(W, T, D, 0.009); topGeo.translate(0, H - T / 2, 0);
+    const lx = W / 2 - inset, lz = D / 2 - inset;
+    legPts = [[-lx, -lz], [lx, -lz], [-lx, lz], [lx, lz]];
+    rails = [railBox(-lx, -lz, lx, -lz, railY)];
+    rects = [{ x: 0, z: 0, w: W, d: D }];
+  } else {
+    const s = desk.orientation === 'left' ? -1 : 1, hx = W / 2, hz = D / 2, a = mm(desk.arm), w = mm(desk.wing);
+    // L outline (right-handed: the wing is at +X), mirrored when orientation = 'left'
+    const outline = [[-hx, -hz], [hx, -hz], [hx, hz], [hx - w, hz], [hx - w, -hz + a], [-hx, -hz + a]].map(([x, z]) => [s * x, z]);
+    const bevel = 0.009;
+    const shape = roundedPolygon(outline, [0.025, 0.025, 0.025, 0.025, 0.012, 0.025]);
+    topGeo = new THREE.ExtrudeGeometry(shape, { depth: T - 2 * bevel, bevelEnabled: true, bevelThickness: bevel, bevelSize: bevel, bevelOffset: -bevel, bevelSegments: 3, curveSegments: 4 });
+    topGeo.rotateX(-Math.PI / 2); topGeo.translate(0, H - T + bevel, 0);
+    const i = inset;
+    const lp = [[-hx + i, -hz + i], [hx - i, -hz + i], [hx - i, hz - i], [hx - w + i, hz - i], [hx - w + i, -hz + a - i], [-hx + i, -hz + a - i]].map(([x, z]) => [s * x, z]);
+    legPts = lp;
+    rails = [railBox(lp[0][0], lp[0][1], lp[1][0], lp[1][1], railY), railBox(lp[1][0], lp[1][1], lp[2][0], lp[2][1], railY)];
+    rects = [{ x: s * 0, z: -hz + a / 2, w: W, d: a, arm: true }, { x: s * (hx - w / 2), z: (-hz + a + hz) / 2, w, d: D - a, wing: true }];
+  }
+  const legGeo = mergeParts([...posts(legPts, H - T), ...rails]);
+  const top = new THREE.Mesh(topGeo, topMaterial), legs = new THREE.Mesh(legGeo, legsMaterial);
+  for (const m of [top, legs]) { m.castShadow = true; m.receiveShadow = true; group.add(m); }
+  const count = g => (g.index ? g.index.count : g.attributes.position.count) / 3;
+  return { group, geos: [topGeo, legGeo], tris: count(topGeo) + count(legGeo), legPts, rects, desk };
+}
+
+/** Contact planes of one mode ('before' | 'after') as a Group. */
+function buildContact(built, mode) {
+  const g = new THREE.Group(), mat = contactMats[mode], desk = built.desk;
+  if (mode === 'before') {
+    g.add(contactPlane(mat, 0, 0, mm(1500), mm(800), 0.001));        // today: one fixed plane, any desk
+  } else {
+    const [ix, iz] = SHADOW.after.inset.map(mm);
+    if (desk.type === RECT) g.add(contactPlane(mat, 0, 0, mm(desk.w) - ix, mm(desk.d) - iz, 0.001));
+    else {
+      const s = desk.orientation === 'left' ? -1 : 1, hx = mm(desk.w) / 2, hz = mm(desk.d) / 2, a = mm(desk.arm), w = mm(desk.wing);
+      g.add(contactPlane(mat, 0, -hz + a / 2, mm(desk.w) - ix, a - iz, 0.001));                          // main arm
+      const z0 = -hz + a - 0.04, z1 = hz - iz / 2;                                                      // wing, overlapping the arm slightly
+      g.add(contactPlane(mat, s * (hx - w / 2), (z0 + z1) / 2, w - ix, z1 - z0, 0.001));               // return wing
+    }
+  }
+  for (const [x, z] of built.legPts) g.add(contactPlane(mat, x, z, mm(FOOT), mm(FOOT), FEET_LIFT));    // each foot touches the floor
+  return g;
+}
+
+/* ------------------------------------------------------------------ sample objects (generic boxes, to check scale and that objects stay put) */
+const sampleMat = id => { const m = new THREE.MeshStandardMaterial(); applyMat(m, id); return m; };
+const SM = { body: sampleMat('mat.soft-touch-black'), metal: sampleMat('mat.anodized-graphite'), keys: sampleMat('mat.warm-white'), pad: sampleMat('mat.felt-dark'), screen: sampleMat('mat.screen-lit') };
+function box(g, mat, w, h, d, x, y, z, r = 0.003) {
+  const m = new THREE.Mesh(rbox(w, h, d, r, 2), mat); m.position.set(x, y, z); m.castShadow = true; m.receiveShadow = true; g.add(m); return m;
+}
+function buildSamples(desk) {
+  // placed on the work area: whole top for a rectangle, the notch side of the main arm for the L
+  const g = new THREE.Group(), H = mm(desk.type.height), top = H;
+  let cx = 0, depthA = mm(desk.d), z0 = -mm(desk.d) / 2;
+  if (desk.type === CORNER) { const s = desk.orientation === 'left' ? -1 : 1; cx = -s * mm(desk.wing) / 2; depthA = mm(desk.arm); }
+  const mw = 0.614, mh = 0.345;
+  box(g, SM.metal, 0.24, 0.008, 0.18, cx, top + 0.004, z0 + 0.2);                        // monitor base
+  box(g, SM.metal, 0.05, 0.27, 0.02, cx, top + 0.14, z0 + 0.14);                          // neck
+  box(g, SM.body, mw + 0.014, mh + 0.014, 0.012, cx, top + 0.1 + mh / 2 + 0.07, z0 + 0.12);   // panel
+  const sc = new THREE.Mesh(new THREE.PlaneGeometry(mw, mh), SM.screen); sc.position.set(cx, top + 0.17 + mh / 2, z0 + 0.12 + 0.0064); g.add(sc);
+  const kz = z0 + Math.max(depthA - 0.14, 0.38);
+  box(g, SM.keys, 0.44, 0.022, 0.135, cx, top + 0.011, kz);                               // keyboard
+  box(g, SM.body, 0.065, 0.034, 0.115, cx + 0.31, top + 0.017, kz, 0.015);               // mouse
+  g.traverse(o => { if (o.isMesh) o.userData.sample = true; });
+  return g;
+}
+
+/* ------------------------------------------------------------------ current selection */
+const state = { desk: DESKS[2], shadow: 'split', samples: false, studio: 'light', topId: 'mat.birch', view: 'reset' };
+let built = null, deskGroup = null, contacts = {}, samplesGroup = null, viewTween = null;
+const info = document.getElementById('info'), noteEl = document.getElementById('shadowNote');
+const cm = v => Number.isInteger(v / 10) ? String(v / 10) : (v / 10).toFixed(1);
+const dimsCm = d => d.type === CORNER ? `${cm(d.w)} × ${cm(d.d)} cm` : `${cm(d.w)} × ${cm(d.d)} cm`;
+
+function disposeDesk() {
+  if (!built) return;
+  scene.remove(built.group, contacts.before, contacts.after);
+  samplesGroup && scene.remove(samplesGroup);
+  built.geos.forEach(g => g.dispose());
+  [contacts.before, contacts.after, samplesGroup].forEach(g => g && g.traverse(o => { if (o.isMesh && o.userData.sample) o.geometry.dispose(); }));
+}
+function selectDesk(desk, announce = true) {
+  disposeDesk();
+  state.desk = desk; built = buildDesk(desk);
+  contacts = { before: buildContact(built, 'before'), after: buildContact(built, 'after') };
+  scene.add(built.group, contacts.before, contacts.after);
+  samplesGroup = buildSamples(desk); samplesGroup.visible = state.samples; scene.add(samplesGroup);
+  document.querySelectorAll('.card').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.i === String(DESKS.indexOf(desk)))));
+  const name = desk.type === CORNER ? desk.label : `${desk.label} desk`;
+  const extra = desk.type === CORNER ? ` &middot; arm ${desk.arm} mm deep, wing ${desk.wing} mm wide, wing on the ${desk.orientation}` : '';
+  info.innerHTML = `<b>${name}</b> &middot; ${dimsCm(desk)} (${desk.w} × ${desk.d} mm), height ${desk.type.height} mm${extra}<br>` +
+    `<span class="m">${desk.type.id} / ${desk.preset} &middot; ${Math.round(built.tris)} triangles (budget ${desk.type.budget}) &middot; 2 materials (top, legs)</span>`;
+  updateShadowMode();
+  renderer.shadowMap.needsUpdate = true;
+  if (announce) setView(state.view);
+}
+function updateShadowMode() {
+  const m = state.shadow;
+  document.querySelectorAll('[data-shadow]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.shadow === m)));
+  document.getElementById('divider').style.display = m === 'split' ? 'block' : 'none';
+  document.getElementById('tagB').style.display = document.getElementById('tagA').style.display = m === 'split' ? 'block' : 'none';
+  const parts = [];
+  if (m !== 'after') parts.push(`<b>Before</b>: ${SHADOW.before.note}`);
+  if (m !== 'before') parts.push(`<b>After</b>: ${SHADOW.after.note}`);
+  noteEl.innerHTML = parts.join('<br>');
+  if (m !== 'split') { contacts.before.visible = m === 'before'; contacts.after.visible = m === 'after'; }
+}
+
+/* ------------------------------------------------------------------ UI */
+const cardHost = document.getElementById('cards');
+DESKS.forEach((d, i) => {
+  const b = document.createElement('button'); b.type = 'button'; b.className = 'card'; b.dataset.i = String(i); b.setAttribute('aria-pressed', 'false');
+  b.innerHTML = `<span><span class="nm">${d.label}</span><br><span class="dm">${dimsCm(d)}${d.isDefault ? ' &middot; default' : ''}</span></span><span class="ck" aria-hidden="true">✓</span>`;
+  b.setAttribute('aria-label', `${d.type === CORNER ? d.label : d.label + ' desk'}, ${dimsCm(d)}`);
+  b.addEventListener('click', () => selectDesk(d)); cardHost.appendChild(b);
+});
+document.querySelectorAll('[data-shadow]').forEach(b => b.addEventListener('click', () => { state.shadow = b.dataset.shadow; updateShadowMode(); }));
+const topHost = document.getElementById('topBtns');
+for (const [label, id] of TOPS) {
+  const b = document.createElement('button'); b.type = 'button'; b.className = 'opt'; b.textContent = label; b.dataset.id = id; b.setAttribute('aria-pressed', String(id === state.topId));
+  b.addEventListener('click', () => { state.topId = id; applyMat(topMaterial, id); topHost.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b))); });
+  topHost.appendChild(b);
+}
+document.getElementById('objBtn').addEventListener('click', e => {
+  state.samples = !state.samples; samplesGroup.visible = state.samples; e.currentTarget.setAttribute('aria-pressed', String(state.samples)); renderer.shadowMap.needsUpdate = true;
+});
+document.querySelectorAll('button[data-studio]').forEach(b => b.addEventListener('click', () => {
+  const s = STUDIO[b.dataset.studio]; state.studio = b.dataset.studio; document.body.dataset.studio = state.studio;
+  document.querySelectorAll('button[data-studio]').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+  scene.background.set(s.background); scene.fog.color.set(s.background); floor.material.color.set(s.floor);
+  scene.environmentIntensity = s.env; rim.intensity = s.rim; document.body.style.background = s.background;
+}));
+
+/* ------------------------------------------------------------------ camera: eased views, framed on the current desk */
+const controls = new OrbitControls(camera, canvas);
+controls.enableDamping = !reducedMotion(); controls.dampingFactor = 0.07;
+controls.minDistance = 0.8; controls.maxDistance = 6; controls.maxPolarAngle = Math.PI * 0.495;
+controls.minAzimuthAngle = -1.9; controls.maxAzimuthAngle = 1.9;
+const ease = t => t * t * t * (t * (6 * t - 15) + 10), mix = (a, b, k) => a + (b - a) * k;
+function viewFor(name) {
+  const d = state.desk, k = Math.max(1, Math.max(d.w / 1400, d.d / 800) * 0.92);     // push the camera back for big desks
+  const tgt = [0, 0.72, 0];
+  if (name === 'top') return { pos: [0, 3.4 * k, 0.051], tgt: [0, 0.74, 0.05] };
+  if (name === 'front') return { pos: [0, 1.1 + 0.1 * (k - 1), 3.3 * k], tgt };
+  return { pos: [1.75 * k, 1.5 * k, 2.7 * k], tgt };
+}
+function setView(name, instant = false) {
+  state.view = name; const v = viewFor(name), toT = new THREE.Vector3(...v.tgt), toP = new THREE.Vector3(...v.pos);
+  if (instant || reducedMotion()) { viewTween = null; camera.position.copy(toP); controls.target.copy(toT); controls.update(); return; }
+  const fromT = controls.target.clone();
+  viewTween = { t0: performance.now(), dur: 480, fromT, toT, fromS: new THREE.Spherical().setFromVector3(camera.position.clone().sub(fromT)), toS: new THREE.Spherical().setFromVector3(toP.clone().sub(toT)) };
+}
+function stepView(now) {
+  if (!viewTween) return;
+  const c = viewTween, k = Math.min((now - c.t0) / c.dur, 1), e = ease(k);
+  let dth = c.toS.theta - c.fromS.theta; dth = Math.atan2(Math.sin(dth), Math.cos(dth));
+  const s = new THREE.Spherical(mix(c.fromS.radius, c.toS.radius, e), mix(c.fromS.phi, c.toS.phi, e), c.fromS.theta + dth * e);
+  controls.target.lerpVectors(c.fromT, c.toT, e); camera.position.setFromSpherical(s).add(controls.target);
+  if (k >= 1) viewTween = null;
+}
+['pointerdown', 'wheel'].forEach(ev => canvas.addEventListener(ev, () => { viewTween = null; }, { passive: true }));
+document.querySelectorAll('[data-view]').forEach(b => b.addEventListener('click', () => setView(b.dataset.view)));
+
+/* ------------------------------------------------------------------ loop */
+function resize() { const w = innerWidth, h = innerHeight; renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); }
+addEventListener('resize', resize); resize();
+setView('reset', true); selectDesk(DESKS[2], false);
+renderer.setAnimationLoop(t => {
+  stepView(t); controls.update();
+  const w = innerWidth, h = innerHeight;
+  if (state.shadow === 'split') {
+    renderer.setScissorTest(true);
+    contacts.before.visible = true; contacts.after.visible = false;
+    renderer.setScissor(0, 0, w / 2, h); renderer.render(scene, camera);
+    contacts.before.visible = false; contacts.after.visible = true;
+    renderer.setScissor(w / 2, 0, w / 2, h); renderer.render(scene, camera);
+    renderer.setScissorTest(false);
+  } else renderer.render(scene, camera);
+});
+</script>
+<script>
+  addEventListener('error', e => { if (e.target && e.target.tagName === 'SCRIPT') document.getElementById('err').style.display = 'block'; }, true);
+  window.addEventListener('unhandledrejection', () => { document.getElementById('err').style.display = 'block'; });
+</script>
+</body>
+</html>
