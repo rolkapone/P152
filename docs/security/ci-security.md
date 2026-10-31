@@ -60,7 +60,7 @@ Source de vérité : les workflows. Toutes les actions sont épinglées par SHA 
 | MEDIUM | Signalé | Backlog sous 30 jours | Item proposé au scrum-master |
 | LOW / info | Signalé | Backlog au mieux | Item proposé au scrum-master (ex. SEC-06) |
 
-**Exceptions** (faux positif vérifié, vulnérabilité non atteignable, ex. CVE d'un serveur de dev Vite jamais exposé) : uniquement avec identifiant (GHSA/CVE/règle), justification, approbateur secdevops et **date d'expiration ≤ 30 jours**, consignées dans `docs/security/exceptions.md` (créé à la première exception ; **aucune exception à ce jour**) et dans l'outil :
+**Exceptions** (faux positif vérifié, vulnérabilité non atteignable, ex. CVE d'un serveur de dev Vite jamais exposé) : uniquement avec identifiant (GHSA/CVE/règle), justification, approbateur secdevops et **date d'expiration ≤ 30 jours**, consignées dans `docs/security/exceptions.md` (créé à la première exception ; une exception en cours, voir le fichier) et dans l'outil :
 - `pnpm audit` : `auditConfig.ignoreGhsas` (dans `pnpm-workspace.yaml`) ;
 - OSV-Scanner : `osv-scanner.toml` `[[IgnoredVulns]]` avec `ignoreUntil` et `reason` ;
 - Semgrep : commentaire `// nosemgrep: <id> -- <raison>` ;

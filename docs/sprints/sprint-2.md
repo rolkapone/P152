@@ -99,24 +99,28 @@ Branche : `feature/US-005-shell-app`. Design v0.4 validé. Implémenteur : devel
 - [x] T8 (ui-designer) Mise à jour de la maquette US-004 et du design-system §9/§14 (info-bulle immédiate au focus clavier).
 - [ ] T9 Tests unitaires, E2E sous CSP de production, 10 runs sous charge ; contrôle design ; QA ; secdevops. **Partiel** : contrôle design, QA et secdevops faits ; 5 runs au lieu de 10 (Questions n° 3).
 
-### 3. US-006 — Choisir un bureau dans un catalogue [UI][3D] [graphics-engineer puis developer] — 5 pts
-**Avant tout code (2026-10-31)** : (0a) **rebase de `feature/US-006-choix-bureau` sur `main`** (developer) ; (0b) **arbitrage du bloquant R11** (graphics-engineer + technical-artist) : bureaux jusqu'à 180×160 à environ 8,2 m de distance à 1024 px, studio limité à environ 8 m (mur du fond) ; décision avant T2b.
-Branche : `feature/US-006-choix-bureau`. Après design et assets validés, et après le merge de US-005 (ou sur sa base). Même branche, deux implémenteurs.
-- [x] T1 (technical-artist) Catalogue de 7 bureaux (5 rectangulaires, 2 d'angle) : **fait**, commité sur la branche (cd27e44), schéma de catalogue (`min ≤ défaut ≤ max`). Bornes rect 800–2400 × 500–1000 × 600–1300, angle 1200–2400 × 1000–2000.
-- [ ] T1b (developer) Corriger le test « a catalog without any desk » de `validate.test.ts` (échoue avec les nouvelles données), premier commit du developer.
-- [ ] T2 (graphics-engineer) Génération du bureau depuis le preset choisi (plateau + pieds, échelle 1 m = 1 unité, hauteur 720-750 mm), **générateur du bureau en L** (orienté à droite), remplacement du bureau dans la scène, objets conservés ; tessellation bornée.
-- [ ] T2b (graphics-engineer) **Ombre de contact allégée** (opacité 0,24, empreinte = bureau − 200×140 mm) et **keep-out de la caméra** dérivés du bureau choisi.
-- [ ] T3 (graphics-engineer) Test : bornes du bureau et boîte englobante = dimensions du preset (tolérance 1 mm) ; le cadrage caméra (zone libre, marge ≥ 24 px) reste valide pour chaque bureau, dont l'angle.
-- [ ] T4 (developer) État du bureau choisi dans `src/state` (couverture), sérialisation au schéma `SetupV1`, bureau par défaut 140×70.
-- [ ] T5 (developer) Onglet "Desk" (7 lignes, vignettes SVG dessinées à l'échelle commune, ligne active contour + coche, clic et **flèches = application immédiate**, annonce `aria-live` regroupée à 400 ms, résumé « Selected », pas de « Custom size ») ; recalcul des alertes branché sur le changement (point d'appel seulement, les règles arrivent avec US-014 à US-016).
-- [ ] T5b (developer) Design v0.4 : liste en **groupe unique avec filets**, coche pour la ligne active (maquette `US-006.html`, §16) ; UX-1/UX-6/UX-13 adaptés.
-- [ ] T6 Tests unitaires et E2E (sélection clavier/souris, annonce), 10 runs sous charge ; contrôle design ; QA (FPS 1366×768, captures) ; secdevops.
-- [ ] T7 (devops) Après les verdicts (revue, design, QA, sécurité) : push de la branche, **ouverture de la PR** (story, critères, liens vers les rapports), CI verte sur la PR, merge via la PR (commit de merge).
+### 3. US-006 — Choisir un bureau dans un catalogue [UI][3D] [graphics-engineer puis developer] — 5 pts — **DONE** (PR #16, voie STANDARD, 0 cycle de correction)
+Branche : `feature/US-006-choix-bureau`, mise à jour sur `main` avant T1b (merge, pas de rebase). Revue APPROVE au cycle 1/3 (`docs/reviews/US-006.md`) ; design ECARTS MINEURS acceptés (`docs/design/ui/controles/US-006.md`) ; QA PASS (`docs/qa/US-006.md` : 59,5 à 60,4 FPS sur les 7 bureaux, 244/244 E2E, 0 violation axe) ; secdevops PASS (`docs/security/scans/US-006.md`) ; **ADR-3D-11 accepté** : arbitrage R11 fait (distance caméra par bureau, borne d'espace du studio).
+**Réserve** : `--repeat-each=10` et la référence CI en conteneur limité ne sont **pas faits** (2 runs seulement, 244/244). Critère de sortie de l'action 1 non rempli : voir Questions n° 3.
+- [x] T0a (developer) Branche mise à jour sur `main` (avant T1b).
+- [x] T0b (graphics-engineer, technical-artist) Arbitrage R11 : ADR-3D-11 accepté (distance par bureau, borne du studio).
+- [x] T1 (technical-artist) Catalogue de 7 bureaux (5 rectangulaires, 2 d'angle), schéma `min ≤ défaut ≤ max`. Bornes rect 800–2400 × 500–1000 × 600–1300, angle 1200–2400 × 1000–2000.
+- [x] T1b (developer) Test « a catalog without any desk » de `validate.test.ts` corrigé.
+- [x] T2 (graphics-engineer) Génération du bureau depuis le preset (plateau 740 mm, pieds), générateur du bureau en L (orienté à droite), remplacement dans la scène, objets conservés ; tessellation bornée (2 500 triangles, 2 draw calls).
+- [x] T2b (graphics-engineer) Ombre de contact allégée (0,24, bureau − 200×140 mm) et keep-out de la caméra dérivés du bureau.
+- [x] T3 (graphics-engineer) Bornes et boîte englobante vérifiées ; cadrage valide pour chaque bureau, dont l'angle (`desk.spec.ts`, `framing.spec.ts`).
+- [x] T4 (developer) `setup.desk` dans `src/state`, sérialisé au schéma `SetupV1` (version 1 conservée), défaut 140×70.
+- [x] T5 (developer) Onglet Desk (7 lignes, vignettes SVG, clic et flèches = application immédiate, annonce 400 ms, résumé « Selected », pas de « Custom size ») ; alertes recalculées au point d'appel.
+- [x] T5b (developer) Design v0.4 : liste en groupe unique avec filets, coche pour la ligne active (UX-6 adapté : coche au lieu du contour 2 px).
+- [~] T6 Tests unitaires et E2E **faits** (244/244, 2 runs) ; contrôle design faite ; QA faite (FPS, captures) ; secdevops faite. **Non fait** : 10 runs sous charge (action 1).
+- [x] T7 (devops) PR #16 ouverte, CI verte, merge via la PR.
 - Hors sprint : modale "Choose your desk" au premier lancement (US-020).
 
-### 4. SEC-02 — Durcissement du dépôt GitHub public [devops] — 1 pt
-Branche : `feature/SEC-02-durcissement-depot` (fichiers du dépôt : `SECURITY.md`, `CODEOWNERS`). Les réglages du compte/dépôt GitHub sont appliqués **uniquement avec l'accord explicite du PO**, qui réalise ou valide chaque action.
-- [ ] T1 (devops) `SECURITY.md`, `CODEOWNERS` (`.github/`, `config/security-headers.mjs`, `package.json`, `pnpm-lock.yaml`, `pnpm-workspace.yaml`, `.npmrc`, `.gitleaks.toml`, `.semgrep/`) ; prêts avant le push.
+### 4. SEC-02 — Durcissement du dépôt GitHub public [devops] — 1 pt — **IN PROGRESS** (2026-10-31)
+Branche : `feature/SEC-02-durcissement-depot` (à créer ; fichiers du dépôt : `SECURITY.md`, `CODEOWNERS`, absents de `main` au 2026-10-31). Les réglages du compte/dépôt GitHub sont appliqués **uniquement avec l'accord explicite du PO**, qui réalise ou valide chaque action : aucun réglage n'est appliqué avant son accord écrit.
+Critères (backlog SEC-02) : MFA ; ruleset `main` (PR obligatoire, `ci-ok` requis, Code scanning ≥ High bloquant, pas de force-push ni de suppression) ; secret scanning + push protection, Dependabot alerts, private vulnerability reporting, `SECURITY.md` ; `GITHUB_TOKEN` en lecture seule, approbation des workflows externes, épinglage SHA ; `CODEOWNERS` ; 4 alertes `p152-test-hook-reference` fermées avec justification ; PR de test à 4 cas négatifs (reportée de SEC-01), fermée sans merge.
+Dépendabot : 3 PR ouvertes (#12, #13, #15) à traiter au même moment que les alertes.
+- [ ] T1 (devops) `SECURITY.md`, `CODEOWNERS` (`.github/`, `config/security-headers.mjs`, `package.json`, `pnpm-lock.yaml`, `pnpm-workspace.yaml`, `.npmrc`, `.gitleaks.toml`, `.semgrep/`) ; prêts avant le push. *(2026-10-31 : fichiers absents de `main`, à faire.)*
 - [ ] T2 (PO) MFA activée sur le compte.
 - [ ] T3 (devops + PO) Liste pas à pas des réglages (ruleset `main`, `ci-ok` requis, Code scanning ≥ High bloquant, secret scanning + push protection, Dependabot alerts, private vulnerability reporting, `GITHUB_TOKEN` en lecture seule, approbation des workflows externes, épinglage SHA) ; le PO les applique ou les valide.
 - [x] T4 (devops) Premier push **fait** (`main` sur GitHub, accord du PO). Première CI : 12 jobs verts, **e2e rouge** (timeouts du runner), correction en cours par le qa-tester sur `fix/ci-e2e-runner-timeouts` ; `ci-ok` à vérifier une fois e2e vert. Un force-push de `main` (purge de l'historique) est en cours.
@@ -127,7 +131,7 @@ Branche : `feature/SEC-02-durcissement-depot` (fichiers du dépôt : `SECURITY.m
 - [ ] T7 (secdevops / PO) Fermer les 4 alertes de code scanning `p152-test-hook-reference` sur `PerfProbe.tsx` (faux positifs : hook protégé par `VITE_E2E`), avec justification.
 
 ### Marge (2 pts, non engagés)
-**Priorité n° 1 de la marge : tâche « Stabiliser `parseSetup.fuzz` »** (developer, 0 pt, prise sur la marge), à faire **juste après le premier push, ou avant**, et au plus tard au début de US-005. Constat : `parseSetup.fuzz.test.ts` est instable (2 échecs sur 5 dans `pnpm check` sur la branche SEC-03a ; seed reproductible `-577722299`). Une fois sur GitHub, la CI rougirait au hasard. Sortie : cause identifiée et corrigée (le bug éventuel est dans `parseSetup`, pas masqué par un timeout), seed `-577722299` rejouée en test de non-régression, graine fixe pour la CI, `pnpm check` vert 10 fois (`--repeat`/boucle, sans charge artificielle).
+**Priorité n° 1 de la marge : tâche « Stabiliser `parseSetup.fuzz` »** (developer, 0 pt, prise sur la marge), à faire **juste après le premier push, ou avant**, et au plus tard au début de US-005. **Rouvert le 2026-10-31** : le correctif de US-005 n'était pas complet (le générateur ne filtre les clés interdites qu'au premier niveau ; contre-exemple `extensions.{"".{"".prototype}}`, graine 60940642 relevée par la revue sécurité de US-006). Le parseur est correct (`forbiddenKey`) ; le défaut est dans le test. Constat d'origine : `parseSetup.fuzz.test.ts` est instable (2 échecs sur 5 dans `pnpm check` sur la branche SEC-03a ; seed reproductible `-577722299`). Une fois sur GitHub, la CI rougirait au hasard. Sortie : cause identifiée et corrigée (le bug éventuel est dans `parseSetup`, pas masqué par un timeout), seed `-577722299` rejouée en test de non-régression, graine fixe pour la CI, `pnpm check` vert 10 fois (`--repeat`/boucle, sans charge artificielle).
 Ensuite, par ordre : (a) SEC-06 dette de test (`waitForTimeout` restants de `scene.spec.ts`, `open()` de `scene-ui.spec.ts`, LOW de SEC-03a) ; (b) ~~ombre de contact~~ (déplacée dans US-006) ; (c) SEC-03b (dont CORP `same-origin` via ADR-OPS-06), seulement si SEC-02 est terminée (pas de déploiement prévu). Aucune n'est prise avant que US-005 et US-006 soient en revue, hormis la stabilisation de `parseSetup.fuzz`.
 
 ## Moment du premier push
@@ -147,18 +151,18 @@ Le push est prévu en cours de sprint (pas à la fin) afin que la CI distante to
 | Story | Voie | Statut (TODO / IN PROGRESS / IN REVIEW / QA / SECURITY / DONE / BLOCKED) | Cycles | Prochain agent | PR |
 |---|---|---|---|---|---|
 | SEC-03a | — (livrée) | DONE | 1 / 3 | — | — (mergée avant le premier push) |
-| Stabiliser `parseSetup.fuzz` | — (tâche) | DONE (à confirmer) | n/a | — | — |
+| Stabiliser `parseSetup.fuzz` | — (tâche de marge) | TODO (rouvert : correctif incomplet) | 0 / 3 | developer (filtre de la valeur entière, graine fixe) | — |
 | Fix CI e2e (`fix/ci-e2e-runner-timeouts`) | — (livrée) | DONE | 1 / 3 | — | #2 |
 | US-005 | RENFORCÉE | DONE | 1 / 3 | — | #14 |
-| US-006 | STANDARD | IN PROGRESS | 0 / 3 | graphics-engineer + technical-artist (arbitrage T0), puis developer (T1b) | — (branche à rebaser sur `main`) |
-| SEC-02 | RENFORCÉE | TODO | 0 / 3 | devops (T1) | — |
+| US-006 | STANDARD | DONE | 0 / 3 | — (suivis dans le backlog) | #16 |
+| SEC-02 | RENFORCÉE | IN PROGRESS | 0 / 3 | devops (T1, branche à créer), puis accord du PO avant tout réglage | — |
 
 Notes du board (2026-10-31) :
 - **US-005 DONE** : revue APPROVE (T0, lots 1-2, UX-8 + lot 3, correction) ; design ECARTS MINEURS acceptés ; QA PASS après 1 cycle de correction (E2E instables sous charge : 2 workers en local, `waitForTimeout` supprimés et interdits par lint) ; secdevops PASS (threat model v1.4). Réserve : 5 runs de référence au lieu de 10 (Questions n° 3).
-- **US-006** : la branche `feature/US-006-choix-bureau` est antérieure à US-005 : **rebase sur `main` à faire** (developer) avant T1b. Bloquant technique (R11) : bureaux jusqu'à 180×160 à environ 8,2 m à 1024 px, studio limité à environ 8 m.
+- **US-006 DONE** (PR #16) : 5 pts, voie STANDARD, 0 cycle de correction. Plan de release : 31 / 99 livrés. Suivis dans le backlog (section « Dette et suivi issus de US-006 »). Réserve : 10 runs non faits (Questions n° 3).
 - **Fix e2e et SEC-03a** : suivis de SEC-06 (budget de chargement de `perf.spec`, commentaire `pauseClock`, `docs/qa/ci-e2e-runner.md:7`) ; LOW de SEC-03a -> SEC-06 ; CORP -> SEC-03b ; T7 rollup ouverte (R8).
-- **SEC-02** : alertes Dependabot et 4 alertes `p152-test-hook-reference` à traiter avec le PO ; T4b/T4c restent ouverts ; peut glisser au Sprint 3.
-- **Parse fuzz** : seed `-577722299`, fix appliqué en suivi de US-005 (graine globale, générateur sans `__proto__`) ; 10 passages `pnpm check` à confirmer par le developer.
+- **SEC-02** : IN PROGRESS. T1 (`SECURITY.md`, `CODEOWNERS`) à faire ; 3 Dependabot PR ouvertes (#12, #13, #15) ; alertes Dependabot et 4 alertes `p152-test-hook-reference` à traiter avec le PO ; T4b/T4c restent ouverts ; peut glisser au Sprint 3.
+- **Parse fuzz** : **rouvert le 2026-10-31** (revue sécurité de US-006, LOW #1) : le correctif de US-005 ne filtre que le premier niveau. La mention « stabilisé » était inexacte. Graine de référence 60940642 (secdevops) et `-577722299` (origine).
 - **Règle d'équipe** : ne jamais lancer deux Playwright ou `pnpm check` en parallèle (même `test-results`, même port 4173).
 
 Voies (CLAUDE.md v3) : **US-005 RENFORCÉE** (police Inter auto-hébergée = asset téléchargé, nouvelle ressource servie sous CSP `font-src` ; icônes Lucide si ajoutées = nouvelle dépendance) ; **US-006 STANDARD** (catalogue interne, aucune lecture de fichier fourni par l'utilisateur, aucun réseau, aucune dépendance prévue) ; **SEC-02 RENFORCÉE** (comptes GitHub et réglages du dépôt : MFA, ruleset, Actions ; secdevops en revue approfondie, avis demandé via PASSATION). Aucune story EXPRESS au Sprint 2 (SEC-02 est à 1 pt mais touche aux comptes et aux réglages).
@@ -170,6 +174,7 @@ Voies (CLAUDE.md v3) : **US-005 RENFORCÉE** (police Inter auto-hébergée = ass
 | R1 | Push différé (MFA, réglages) : CI distante, SARIF et SEC-02 T4/T5 bloqués | Moyenne / Moyen | SEC-02 T1 prête tôt ; demander au PO la MFA dès le début du sprint ; sinon SEC-02 glisse au Sprint 3 (1 pt) |
 | R2 | CSP stricte casse un comportement (Inter, verre, R3F, React Aria) | Moyenne / Moyen | Preview/E2E sous CSP dès SEC-03a (action 2) |
 | R10 | Engagement à 16 pts pour une capacité prudente de 15 ; e2e rouge en CI ; purge d'historique en cours | Moyenne / Moyen | Pas de marge : SEC-02 glisse en premier ; fix e2e mergé avant les PR de stories ; ne rien baser sur d'anciens SHA |
+| R13 | Critère de sortie « 10 runs » (action 1) non tenu sur US-005 (5 runs) et US-006 (2 runs) : la règle temps réel n'est pas mesurée | Élevée / Moyen | Décision du PO (Questions n° 3) ; si campagne, passer à `socle:ressources` (environ 40 min de machine, GPU et CPU partagés avec P153) | scrum-master (signalé) |
 | R3 | US-005 déborde (shell + Inter + verre + lint + budget + restylage natif v0.4 = 8 pts) | Moyenne / Moyen | T0 courte et isolée ; US-006 peut démarrer sa partie 3D (T1 à T3) en parallèle ; la marge sert de tampon |
 | R4 | Générateur du bureau en L (graphics-engineer) + ombre et keep-out dérivés : US-006 plus chargée | Moyenne / Moyen | Angle orienté à droite seulement, sans « Custom size » ; réestimer en cours de sprint ; la marge sert de tampon |
 | R5 | ~~Bornes du bureau~~ | Levé | Tranché par le PO (décision 30) |
@@ -177,7 +182,7 @@ Voies (CLAUDE.md v3) : **US-005 RENFORCÉE** (police Inter auto-hébergée = ass
 | R7 | Interruptions par limites d'usage | Moyenne / Faible | Action 5 : commits par tâche |
 | R8 | Override `rollup: 4.64.7` | Certaine / Faible | Retrait à partir du 2026-10-23 (SEC-03a T7) |
 | R9 | Mesure FPS limitée à un GPU haut de gamme, pas de Firefox | Moyenne / Faible | Réserve maintenue, traitée par US-021/US-022 |
-| R11 | US-006 : bureaux jusqu'à 180×160 à ~8,2 m à 1024 px, studio limité à ~8 m (mur du fond) | Élevée / Moyen | Arbitrage graphics-engineer + technical-artist en début de US-006 ; hausse de la limite du studio = ADR, et accord du PO si le rendu change | graphics-engineer |
+| R11 | ~~US-006 : bureaux jusqu'à 180×160 à ~8,2 m à 1024 px, studio limité à ~8 m~~ | Levé | ADR-3D-11 accepté (2026-10-31) ; QA : 60 FPS à 8,97 m | graphics-engineer |
 | R12 | Ressource : tests E2E sous charge (10 runs, environ 40 min de CPU et GPU partagés avec P153) | Moyenne / Faible | Transmis à `socle:ressources` ; décision sur Questions n° 3 | qa-tester (signalé par le scrum-master) |
 
 ## Questions pour le PO
@@ -186,7 +191,7 @@ Tranchées le 2026-10-20 : bornes du bureau, bureau d'angle (livré, sans « Cus
 
 1. **Budget de taille du shell** : valider le seuil proposé (195 kB gz index, 295 kB gz SceneCanvas) ; mesures US-005 : 176,6 kB gz index, 267,1 kB gz SceneCanvas.
 2. **Premier push** : l'accord sera demandé quand SEC-03a sera mergée et la MFA faite ; le PO peut déjà confirmer la date de la MFA. *(Premier push fait ; MFA et réglages SEC-02 restent à confirmer.)*
-3. **Critère de sortie de US-005 (règle temps réel)** : 5 runs `--repeat-each=5` verts (460/460) au lieu des 10 demandés. Accepter ce niveau, ou demander la campagne de 10 runs (environ 40 min de machine, à passer à `socle:ressources`) ?
+3. **Critère de sortie de US-005 et US-006 (règle temps réel)** : US-005 : 5 runs `--repeat-each=5` verts (460/460) au lieu des 10 demandés ; US-006 : 2 runs (244/244), `--repeat-each=10` non lancé. Accepter ce niveau, ou demander la campagne de 10 runs (environ 40 min de machine, à passer à `socle:ressources`) ?
 
 ## Revue du sprint
 (à rédiger en fin de sprint)
