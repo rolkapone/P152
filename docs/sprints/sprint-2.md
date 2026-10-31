@@ -116,22 +116,22 @@ Branche : `feature/US-006-choix-bureau`, mise à jour sur `main` avant T1b (merg
 - [x] T7 (devops) PR #16 ouverte, CI verte, merge via la PR.
 - Hors sprint : modale "Choose your desk" au premier lancement (US-020).
 
-### 4. SEC-02 — Durcissement du dépôt GitHub public [devops] — 1 pt — **IN PROGRESS** (2026-10-31)
-Branche : `feature/SEC-02-durcissement-depot` (à créer ; fichiers du dépôt : `SECURITY.md`, `CODEOWNERS`, absents de `main` au 2026-10-31). Les réglages du compte/dépôt GitHub sont appliqués **uniquement avec l'accord explicite du PO**, qui réalise ou valide chaque action : aucun réglage n'est appliqué avant son accord écrit.
+### 4. SEC-02 — Durcissement du dépôt GitHub public [devops] — 1 pt — **DONE** (2026-10-31)
+Branches et PR : PR #17 (`SECURITY.md`, `CODEOWNERS`) et PR #20 (section « Application ») mergées ; PR de test #19 fermée sans merge. Réglages appliqués par le PO (accord écrit), vérifiés par l'API le 2026-10-31. Workflow PR suivi (CI sur la PR, merge via la PR).
 Critères (backlog SEC-02) : MFA ; ruleset `main` (PR obligatoire, `ci-ok` requis, Code scanning ≥ High bloquant, pas de force-push ni de suppression) ; secret scanning + push protection, Dependabot alerts, private vulnerability reporting, `SECURITY.md` ; `GITHUB_TOKEN` en lecture seule, approbation des workflows externes, épinglage SHA ; `CODEOWNERS` ; 4 alertes `p152-test-hook-reference` fermées avec justification ; PR de test à 4 cas négatifs (reportée de SEC-01), fermée sans merge.
 Dépendabot : 3 PR ouvertes (#12, #13, #15) à traiter au même moment que les alertes.
-- [ ] T1 (devops) `SECURITY.md`, `CODEOWNERS` (`.github/`, `config/security-headers.mjs`, `package.json`, `pnpm-lock.yaml`, `pnpm-workspace.yaml`, `.npmrc`, `.gitleaks.toml`, `.semgrep/`) ; prêts avant le push. *(2026-10-31 : fichiers absents de `main`, à faire.)*
-- [ ] T2 (PO) MFA activée sur le compte.
-- [ ] T3 (devops + PO) Liste pas à pas des réglages (ruleset `main`, `ci-ok` requis, Code scanning ≥ High bloquant, secret scanning + push protection, Dependabot alerts, private vulnerability reporting, `GITHUB_TOKEN` en lecture seule, approbation des workflows externes, épinglage SHA) ; le PO les applique ou les valide.
+- [x] T1 (devops) `SECURITY.md`, `CODEOWNERS` : **fait, PR #17**.
+- [ ] T2 (PO) MFA activée sur le compte. *(non confirmé dans les docs : confirmation du PO demandée)*
+- [x] T3 (devops + PO) Réglages appliqués par le PO, vérifiés par l'API le 2026-10-31 (détail dans `docs/backlog.md`, SEC-02).
 - [x] T4 (devops) Premier push **fait** (`main` sur GitHub, accord du PO). Première CI : 12 jobs verts, **e2e rouge** (timeouts du runner), correction en cours par le qa-tester sur `fix/ci-e2e-runner-timeouts` ; `ci-ok` à vérifier une fois e2e vert. Un force-push de `main` (purge de l'historique) est en cours.
-- [ ] T4b (devops) La branche `feature/SEC-02-durcissement-depot` suit le workflow PR (push, PR avec liens vers les rapports, CI sur la PR, merge via la PR). Ruleset `main` : PR obligatoire, `ci-ok` requis.
+- [x] T4b (devops) Workflow PR suivi : PR #17 et PR #20 mergées via PR, ruleset `main` actif (`ci-ok` requis).
 - [x] T4c (devops) `.gitignore` : `.claude/`, `CLAUDE.md`, `LISEZMOI-EQUIPE.md` ; **fait** : purge de l'historique et force-push de `main` effectués.
-- [ ] T5 (devops, secdevops) Reports Sprint 1 : US-001 T6 (CI sur PR réelle) **vérifié** (PR #2, 17/17 verte) ; SEC-01 T6 (SARIF) **vérifié** ; SEC-01 T5 : **reste la PR de test avec les 4 cas négatifs**, rattachée ici ; consignés dans `docs/ci/`.
-- [ ] T6 (PO) Activer les alertes Dependabot (désactivées).
-- [ ] T7 (secdevops / PO) Fermer les 4 alertes de code scanning `p152-test-hook-reference` sur `PerfProbe.tsx` (faux positifs : hook protégé par `VITE_E2E`), avec justification.
+- [x] T5 (devops, secdevops) Reports Sprint 1 : PR de test #19 (4 cas négatifs arrêtés par la CI), fermée sans merge ; US-001 T6 et SEC-01 T6 vérifiés (PR #2) ; SEC-01 T5 rattaché ici, fait.
+- [x] T6 (PO) Alertes Dependabot activées (vérifié par l'API ; 1 alerte ouverte `minimatch`, exception jusqu'au 2026-11-30).
+- [x] T7 (secdevops / PO) 4 alertes `p152-test-hook-reference` fermées « used in tests » (vérifié : 0 ouverte).
 
 ### Marge (2 pts, non engagés)
-**Priorité n° 1 de la marge : tâche « Stabiliser `parseSetup.fuzz` »** (developer, 0 pt, prise sur la marge), à faire **juste après le premier push, ou avant**, et au plus tard au début de US-005. **Rouvert le 2026-10-31** : le correctif de US-005 n'était pas complet (le générateur ne filtre les clés interdites qu'au premier niveau ; contre-exemple `extensions.{"".{"".prototype}}`, graine 60940642 relevée par la revue sécurité de US-006). Le parseur est correct (`forbiddenKey`) ; le défaut est dans le test. Constat d'origine : `parseSetup.fuzz.test.ts` est instable (2 échecs sur 5 dans `pnpm check` sur la branche SEC-03a ; seed reproductible `-577722299`). Une fois sur GitHub, la CI rougirait au hasard. Sortie : cause identifiée et corrigée (le bug éventuel est dans `parseSetup`, pas masqué par un timeout), seed `-577722299` rejouée en test de non-régression, graine fixe pour la CI, `pnpm check` vert 10 fois (`--repeat`/boucle, sans charge artificielle).
+**Marge (faite, PR #18)** : tâche « Stabiliser `parseSetup.fuzz` » livrée en EXPRESS (developer, 2026-10-31) : générateur sans clés interdites à toute profondeur, graine fast-check globale (`FC_SEED`), timeout e2e 30 min ; test de fuite à 5 changements de bureau et `waitForScene` dans UX-6 (cycle 1). Contre-exemple `extensions.{"".{"".prototype}}`, graine 60940642.
 Ensuite, par ordre : (a) SEC-06 dette de test (`waitForTimeout` restants de `scene.spec.ts`, `open()` de `scene-ui.spec.ts`, LOW de SEC-03a) ; (b) ~~ombre de contact~~ (déplacée dans US-006) ; (c) SEC-03b (dont CORP `same-origin` via ADR-OPS-06), seulement si SEC-02 est terminée (pas de déploiement prévu). Aucune n'est prise avant que US-005 et US-006 soient en revue, hormis la stabilisation de `parseSetup.fuzz`.
 
 ## Moment du premier push
@@ -151,18 +151,18 @@ Le push est prévu en cours de sprint (pas à la fin) afin que la CI distante to
 | Story | Voie | Statut (TODO / IN PROGRESS / IN REVIEW / QA / SECURITY / DONE / BLOCKED) | Cycles | Prochain agent | PR |
 |---|---|---|---|---|---|
 | SEC-03a | — (livrée) | DONE | 1 / 3 | — | — (mergée avant le premier push) |
-| Stabiliser `parseSetup.fuzz` | — (tâche de marge) | TODO (rouvert : correctif incomplet) | 0 / 3 | developer (filtre de la valeur entière, graine fixe) | — |
+| Stabiliser `parseSetup.fuzz` (+ timeout e2e) | EXPRESS (PR #18) | DONE | 1 / 3 | — | #18 |
 | Fix CI e2e (`fix/ci-e2e-runner-timeouts`) | — (livrée) | DONE | 1 / 3 | — | #2 |
 | US-005 | RENFORCÉE | DONE | 1 / 3 | — | #14 |
 | US-006 | STANDARD | DONE | 0 / 3 | — (suivis dans le backlog) | #16 |
-| SEC-02 | RENFORCÉE | IN PROGRESS | 0 / 3 | devops (T1, branche à créer), puis accord du PO avant tout réglage | — |
+| SEC-02 | RENFORCÉE | DONE | 0 / 3 | — | #17, #20 |
 
 Notes du board (2026-10-31) :
 - **US-005 DONE** : revue APPROVE (T0, lots 1-2, UX-8 + lot 3, correction) ; design ECARTS MINEURS acceptés ; QA PASS après 1 cycle de correction (E2E instables sous charge : 2 workers en local, `waitForTimeout` supprimés et interdits par lint) ; secdevops PASS (threat model v1.4). Réserve : 5 runs de référence au lieu de 10 (Questions n° 3).
 - **US-006 DONE** (PR #16) : 5 pts, voie STANDARD, 0 cycle de correction. Plan de release : 31 / 99 livrés. Suivis dans le backlog (section « Dette et suivi issus de US-006 »). Réserve : 10 runs non faits (Questions n° 3).
 - **Fix e2e et SEC-03a** : suivis de SEC-06 (budget de chargement de `perf.spec`, commentaire `pauseClock`, `docs/qa/ci-e2e-runner.md:7`) ; LOW de SEC-03a -> SEC-06 ; CORP -> SEC-03b ; T7 rollup ouverte (R8).
-- **SEC-02** : IN PROGRESS. T1 (`SECURITY.md`, `CODEOWNERS`) à faire ; 3 Dependabot PR ouvertes (#12, #13, #15) ; alertes Dependabot et 4 alertes `p152-test-hook-reference` à traiter avec le PO ; T4b/T4c restent ouverts ; peut glisser au Sprint 3.
-- **Parse fuzz** : **rouvert le 2026-10-31** (revue sécurité de US-006, LOW #1) : le correctif de US-005 ne filtre que le premier niveau. La mention « stabilisé » était inexacte. Graine de référence 60940642 (secdevops) et `-577722299` (origine).
+- **SEC-02 DONE** (PR #17, #20 ; PR de test #19 fermée sans merge). Reste hors story : MFA du PO à confirmer ; Scorecard ouvertes #5, #6, #7 (licence, décision PO), #9 ; 11 PR Dependabot ouvertes (#4 à #13, #15), dont #12, #13, #15 en CI rouge ; garde CodeQL ≥ high à remettre en CI (SEC-06). Incident pour la rétro : tentative de merge de la PR de test « DO NOT MERGE » (#19), refusée, jamais mergée.
+- **Parse fuzz** : **stabilisé (PR #18, 2026-10-31)**. Le correctif de US-005 ne filtrait que le premier niveau (LOW #1 de la revue sécurité de US-006) ; corrigé. Graines : 60940642 (secdevops), `-577722299` (origine).
 - **Règle d'équipe** : ne jamais lancer deux Playwright ou `pnpm check` en parallèle (même `test-results`, même port 4173).
 
 Voies (CLAUDE.md v3) : **US-005 RENFORCÉE** (police Inter auto-hébergée = asset téléchargé, nouvelle ressource servie sous CSP `font-src` ; icônes Lucide si ajoutées = nouvelle dépendance) ; **US-006 STANDARD** (catalogue interne, aucune lecture de fichier fourni par l'utilisateur, aucun réseau, aucune dépendance prévue) ; **SEC-02 RENFORCÉE** (comptes GitHub et réglages du dépôt : MFA, ruleset, Actions ; secdevops en revue approfondie, avis demandé via PASSATION). Aucune story EXPRESS au Sprint 2 (SEC-02 est à 1 pt mais touche aux comptes et aux réglages).

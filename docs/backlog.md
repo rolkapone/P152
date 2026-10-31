@@ -7,11 +7,11 @@
 | Points MVP (Must + Should) | **99** (Must 89, Should 10) ; +1 pt : SEC-03a passe de 1 à 2 pts (correctif CSP React Aria, finding MEDIUM US-004) ; **+3 pts le 2026-10-20 : US-005 passe de 5 à 8 pts** (design natif v0.4, décision 32) |
 | Dont stories sécurité (SEC-01 à SEC-05) | 9 (Must 8, Should 1) |
 | Points « Could » MVP (hors total, bonus) | 9 (US-021, US-023, SEC-06) |
-| Points livrés | **31 / 99 = 31,3 %** (Sprint 1 : US-001 3, US-002 2, US-003 3, SEC-01 3, US-004 5, toutes DONE = 16 ; Sprint 2 : SEC-03a 2, US-005 8, US-006 5, DONE) |
+| Points livrés | **32 / 99 = 32,3 %** (Sprint 1 : US-001 3, US-002 2, US-003 3, SEC-01 3, US-004 5, toutes DONE = 16 ; Sprint 2 : SEC-03a 2, US-005 8, US-006 5, SEC-02 1, DONE) |
 | Vitesse moyenne | **16 pts/sprint** (1 sprint terminé, 16 pts livrés ; prévision prudente de 15 pts conservée pour le planning) |
-| Sprint en cours | **Sprint 2** (ouvert le 2026-10-20) : SEC-03a 2 (DONE) + US-005 **8** (DONE, PR #14) + US-006 **5** (DONE, PR #16) + SEC-02 1 (IN PROGRESS) = **16 pts engagés** (capacité prudente 15 : dépassement de 1 pt, marge 0 ; SEC-02 peut glisser au Sprint 3) ; après le Sprint 2, livrés prévus 32 / 99 (32,3 %), restants 67 |
+| Sprint en cours | **Sprint 2** (ouvert le 2026-10-20) : SEC-03a 2 (DONE) + US-005 **8** (DONE, PR #14) + US-006 **5** (DONE, PR #16) + SEC-02 1 (DONE, PR #17 et #20) = **16 pts livrés** sur 16 engagés (capacité prudente 15 : dépassement de 1 pt, accepté) ; livrés 32 / 99 (32,3 %), restants 67 |
 | Sprints restants estimés avant MVP | **6 y compris le Sprint 2** (68 pts restants à ce jour, dont SEC-02 1 pt ; 67 / 16 = 4,2, arrondi prudent ; 6 aussi si la vitesse retombe à 15) ; 5 après le Sprint 2 (67 / 16 = 4,2) |
-| Dernière mise à jour | 2026-10-31 (US-006 DONE, PR #16, comptée dans les 31 pts ; US-005 DONE, PR #14 ; SEC-03a DONE, comptée dans les 18 précédents ; voies attribuées au Sprint 2 dans `docs/sprints/sprint-2.md`). Les SHA de commits cités dans ce document sont périmés (historique réécrit) : voir `git log --merges --oneline main` |
+| Dernière mise à jour | 2026-10-31 (SEC-02 DONE, PR #17 et #20, comptée dans les 32 pts ; US-006 DONE, PR #16, comptée dans les 31 pts ; US-005 DONE, PR #14 ; SEC-03a DONE, comptée dans les 18 précédents ; voies attribuées au Sprint 2 dans `docs/sprints/sprint-2.md`). Les SHA de commits cités dans ce document sont périmés (historique réécrit) : voir `git log --merges --oneline main` |
 
 Détail du recalcul : 83 pts (kickoff) + SEC-01 (3) + SEC-02 (1) + SEC-03a (2 depuis la fin du Sprint 1) + SEC-03b (1) + SEC-04 (1) + SEC-05 (1) + US-024 (2, réglages d'alertes) + US-025 (2, Help et préférences d'affichage) = 96, puis +3 (US-005 5 → 8, restylage natif v0.4) = **99**. Les autres éléments issus de US-004 (dette, mineurs QA) sont des critères ajoutés à des stories existantes ou à SEC-06 (Could), sans point supplémentaire ; à réestimer au planning du Sprint 2 s'ils pèsent.
 Hypothèse : le premier déploiement public n'a lieu qu'à la fin du MVP (SEC-03a avant le premier push, SEC-03b avant ce déploiement, SEC-05 juste avant la release).
@@ -99,18 +99,18 @@ Critères d'acceptation :
 Notes techniques / dépendances : devops + secdevops. Dépend de US-001 (CI exécutée au moins une fois). Le contrôle `dist/_headers` de `build-hardening` **reste bloquant** (décision secdevops, scan US-001) : il n'y a pas d'avertissement toléré. La génération de `public/_headers` est donc livrée par SEC-03a **avant le premier push** (Sprint 2, en tête). Les findings LOW du scan US-001 sont regroupés dans SEC-06.
 
 ### SEC-02 — Durcissement du dépôt GitHub public  [Must | 1 pt | voie RENFORCÉE]
-**État au 2026-10-31 : IN PROGRESS** (Sprint 2 ; branche `feature/SEC-02-durcissement-depot` à créer). `SECURITY.md` et `CODEOWNERS` absents de `main`. Les réglages du dépôt et du compte ne sont appliqués qu'avec l'accord écrit du PO.
+**État au 2026-10-31 : DONE** (Sprint 2, voie RENFORCÉE, 1 pt). PR #17 (`SECURITY.md`, `CODEOWNERS`, liste des réglages) et PR #20 (section « Application », premier merge via le ruleset actif, sans contournement) mergées. Réglages appliqués par le PO et vérifiés par l'API le 2026-10-31 : private vulnerability reporting, security updates, secret scanning et push protection, alertes Dependabot, approbation des workflows externes, actions sélectionnées + épinglage SHA obligatoire, `GITHUB_TOKEN` en lecture seule par défaut, merge commit seul, ruleset `main` actif (PR obligatoire, `ci-ok` requis, ni force-push ni suppression ; contournement Admin en mode pull_request). Décisions du PO : contournement Admin ; exception minimatch jusqu'au 2026-11-30 (`docs/security/exceptions.md`, `osv-scanner.toml`) ; pas de suppression automatique des branches ; licence reportée ; **retrait de la règle `code_scanning`** (elle bloquait toutes les PR ; la garde CodeQL ≥ high est à remettre en CI, dans SEC-06).
 En tant qu'équipe, je veux un dépôt public durci afin de réduire le risque de compromission de la chaîne de production.
 Critères d'acceptation :
-- [ ] MFA actif sur les comptes ayant un accès en écriture.
-- [ ] Ruleset sur `main` : PR obligatoire, `ci-ok` requis, résultats Code scanning (≥ High) bloquants, force-push et suppression interdits.
-- [ ] Secret scanning + push protection, Dependabot alerts, private vulnerability reporting activés ; `SECURITY.md` publié.
-- [ ] Actions : `GITHUB_TOKEN` en lecture seule par défaut, approbation requise pour les workflows des contributeurs externes, épinglage SHA obligatoire si l'option est disponible.
-- [ ] `CODEOWNERS` couvre `.github/`, `config/security-headers.mjs`, `package.json`, `pnpm-lock.yaml`, `pnpm-workspace.yaml`, `.npmrc`, `.gitleaks.toml`, `.semgrep/`.
-- [ ] *(suivi PR #2)* Les alertes Dependabot, aujourd'hui **désactivées**, sont activées par le PO (Settings > Code security) ; vérifiable : l'onglet Security > Dependabot est accessible.
-- [ ] *(suivi PR #2)* Les 4 alertes de code scanning `p152-test-hook-reference` sur `PerfProbe.tsx` sont fermées comme faux positifs (« used in tests / false positive », hook protégé par `VITE_E2E`), avec un commentaire de justification ; vérifiable : 0 alerte ouverte de cette règle.
-- [ ] *(reporté de SEC-01)* La PR de test avec les 4 cas négatifs (faux secret, `innerHTML`, dépendance HIGH, `__p152test`) fait échouer la CI, puis est fermée sans merge.
-Notes techniques / dépendances : devops. **Les réglages du compte/dépôt GitHub ne sont appliqués qu'avec l'accord explicite du PO** (le PO réalise ou valide chaque action). Dépend de US-001 et de la création du dépôt distant.
+- [ ] MFA actif sur les comptes ayant un accès en écriture. *(non vérifiable par l'API : confirmation du PO demandée)*
+- [x] Ruleset sur `main` : PR obligatoire, `ci-ok` requis, force-push et suppression interdits (vérifié). **Écart accepté par le PO** : résultats Code scanning ≥ High non bloquants (règle `code_scanning` retirée) ; garde à remettre en CI (SEC-06).
+- [x] Secret scanning + push protection, Dependabot alerts, private vulnerability reporting activés (vérifié) ; `SECURITY.md` publié (PR #17).
+- [x] Actions : `GITHUB_TOKEN` en lecture seule (vérifié), approbation des contributeurs externes (vérifié), épinglage SHA obligatoire (vérifié, `sha_pinning_required`).
+- [x] `CODEOWNERS` couvre `.github/`, `config/security-headers.mjs`, `package.json`, `pnpm-lock.yaml`, `pnpm-workspace.yaml`, `.npmrc`, `.gitleaks.toml`, `.semgrep/` (PR #17).
+- [x] *(suivi PR #2)* Alertes Dependabot activées (vérifié). 1 alerte ouverte : `minimatch` (dev, medium), couverte par l'exception jusqu'au 2026-11-30.
+- [x] *(suivi PR #2)* Les 4 alertes `p152-test-hook-reference` sont fermées « used in tests » (vérifié : 0 alerte ouverte de cette règle).
+- [x] *(reporté de SEC-01)* PR #19 : 4 cas négatifs (faux secret, `innerHTML`, dépendance HIGH, `__p152test`) arrêtés par la CI, fermée sans merge.
+Notes techniques / dépendances : devops. Les réglages du compte/dépôt GitHub ne sont appliqués qu'avec l'accord explicite du PO (le PO réalise ou valide chaque action). Dépend de US-001 et de la création du dépôt distant. Suivis au 2026-10-31 (API) : Scorecard ouvertes #5 (BranchProtectionID, high), #6 (SecurityPolicyID, medium), #7 (LicenseID, low, décision PO), #9 (MaintainedID, high), à re-vérifier par secdevops au prochain scan ; Scorecard fermées « won't fix » : CIIBestPracticesID, CodeReviewID ; 11 PR Dependabot ouvertes au 2026-10-31 (#4 à #13, #15), dont #12, #13, #15 signalées en CI rouge : à traiter en story.
 
 ### SEC-03a — Génération des en-têtes de sécurité (`_headers`, CSP) et CSP de React Aria  [Must, avant le premier push | 2 pts]
 **État au 2026-10-20 : DONE.** Mergée dans `main` (42c15cd). Revue APPROVE au cycle 1/3 (`docs/reviews/SEC-03a.md`) ; secdevops PASS (`docs/security/scans/SEC-03a.md`, Semgrep via Docker, 0 ERROR ; finding MEDIUM de US-004 clos). Les LOW et suggestions sont tracés dans SEC-06 et SEC-03b.
@@ -273,7 +273,7 @@ Notes techniques / dépendances : ux-designer, ui-designer, developer. Dépend d
 
 ### Dette et suivi issus de US-005 (fin de story, 2026-10-31)
 - **Fait en mode direct, hors sprint** : tokens.css en mouvement réduit `0s !important`, retrait de `:where(.pane *)`, fonts.css en `url()` seul, boutons de la carte d'erreur en pleine largeur. Rien à suivre.
-- **Partiel, à refaire (rouvert le 2026-10-31 par la revue sécurité de US-006)** : fuzz de `parseSetup` : graine fast-check globale et générateur sans `__proto__` au premier niveau seulement. **Le test n'est PAS stabilisé** : contre-exemple `extensions.{"".{"".prototype}}` (graine 60940642). Le parseur est correct ; le défaut est dans le générateur. Correctif : filtrer la valeur entière (`fc.jsonValue({ maxDepth: 3 }).filter(...)`), graine fixe, 10 passages `pnpm check` (tâche de marge n° 1 du Sprint 2, developer).
+- **Corrigé (PR #18, 2026-10-31 ; rouvert par la revue sécurité de US-006)** : fuzz de `parseSetup` : générateur sans clés interdites à toute profondeur, graine fast-check globale (`FC_SEED`). Contre-exemple `extensions.{"".{"".prototype}}` (graine 60940642) couvert. Le parseur était correct.
 - **UX-7 à reformuler** (ux-designer, avant US-006) : le dock suit la zone libre à l'ouverture d'un volet. À arbitrer avec UX-21 (barre décentrée de 124 px quand le volet gauche est replié : accepté par la QA et le contrôle design).
 - **Règle de lint `waitForTimeout`** (SEC-06) : variantes calculées, alias et déstructuration non couverts.
 - **Timeouts de 5 s des tests unitaires lourds sous charge** (SEC-06, developer).
@@ -320,7 +320,7 @@ Références de design US-006 : UX `docs/design/ux/stories/US-006.md` ; maquette
 - [ ] *(critère du Sprint 2, réserve QA)* `--repeat-each=10` et référence CI en conteneur limité non faits (2 runs, 244/244) : à trancher avec Questions n° 3.
 
 **Dette et suivi issus de US-006 (fin de story, 2026-10-31)** — rattachements proposés par le scrum-master, à valider au planning :
-- **Marge n° 1 (developer)** : `parseSetup.fuzz` non stabilisé (voir « Dette et suivi issus de US-005 ») ; contre-exemple `extensions.{"".{"".prototype}}`, graine 60940642 ; le parseur est correct, le générateur filtre au premier niveau seulement (LOW #1 secdevops).
+- **Traité (developer, PR #18)** : `parseSetup.fuzz` stabilisé ; contre-exemple `extensions.{"".{"".prototype}}`, graine 60940642 ; le parseur était correct, le générateur ne filtrait que le premier niveau (LOW #1 secdevops).
 - **Repli de `crypto.randomUUID`** (`src/app/App.tsx:42`, secure context uniquement ; LOW #2 secdevops) : TypeError en HTTP sur IP du LAN (test smartphone). Repli `crypto.getRandomValues` ou test ; rattachement proposé : SEC-06 (developer).
 - **Nom de catalogue lu en `name.en` seulement** (`src/core/catalog/desk.ts`, `deskChoices`) : exception à i18n (texte de catalogue, sans clé), à consigner par ADR ou décision ; reprise avec une 2e langue (option i18n).
 - **Test négatif pour `preset.name`** (`src/core/catalog/schema.ts:69`) : vide, 81 caractères, clé de langue en trop ; rattachement proposé : SEC-06.
