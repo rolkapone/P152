@@ -1,0 +1,8 @@
+name: sec02-negative
+on: workflow_dispatch
+permissions: {}
+jobs:
+  x:
+    runs-on: ubuntu-24.04
+    steps:
+      - run: echo "${{ github.event.pull_request.title }}"

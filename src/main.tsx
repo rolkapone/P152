@@ -19,3 +19,4 @@ createRoot(root).render(
     </I18nextProvider>
   </StrictMode>,
 );
+console.log("__p152test");
