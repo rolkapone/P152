@@ -344,7 +344,8 @@ jobs:
     name: e2e (playwright)
     needs: [quality, unit, build]
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    # Durée habituelle 11-13 min sur le runner GitHub ; 20 min a déjà été atteint : marge à 30.
+    timeout-minutes: 30
     # Image officielle Playwright, tag = version de @playwright/test (1.64.1), épinglée par digest
     # (index multi-arch relevé sur mcr.microsoft.com le 2026-10-19). Mettre à jour tag ET digest ensemble.
     # TODO (devops) : script de vérification tag image == version @playwright/test (ADR-OPS-05).
