@@ -1,0 +1,4 @@
+[[IgnoredVulns]]
+id = "GHSA-g3hv-75wg-m249"
+ignoreUntil = 2026-11-30
+reason = "minimatch CVE-2026-118764, dev seulement (lint), motifs versionnés ; correctif via ESLint 10. Voir docs/security/exceptions.md"
