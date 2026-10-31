@@ -131,7 +131,7 @@ describe("parseSetup: invalid fixtures", () => {
   it("rejects a desk entry that is not a desk, and an unknown desk", () => {
     const base = fixture("valid", "minimal");
     const notDesk = base.replace('"catalogId": "desk.rect"', '"catalogId": "mouse.generic"');
-    const unknown = base.replace('"catalogId": "desk.rect"', '"catalogId": "desk.corner"');
+    const unknown = base.replace('"catalogId": "desk.rect"', '"catalogId": "desk.standing"');
     expect(parseSetup(notDesk, catalog)).toEqual({
       ok: false,
       error: { code: "typeMismatch", path: "desk.catalogId" },

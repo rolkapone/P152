@@ -1,0 +1,225 @@
+/* Desk tab (design-system.md §16, maquette US-006 .grp > .r.opt): one grouped list with
+   hairlines, active line = accent tint + accent dimensions + check (not the colour alone),
+   inner focus ring distinct from the selection. Tokens only. */
+.panel {
+  /* 2 px gaps and the 6 px vertical padding of a line (maquette .opt). */
+  --gap-half: calc(var(--space-1) / 2);
+  --row-pad-y: calc(var(--space-1) + var(--gap-half));
+  display: grid;
+  gap: var(--space-4);
+}
+
+.header {
+  display: grid;
+  gap: var(--gap-half);
+}
+
+.title {
+  margin: 0;
+  font: var(--font-headline);
+  letter-spacing: var(--tracking-headline);
+  font-feature-settings: var(--font-features);
+}
+
+.help {
+  margin: 0;
+  color: var(--color-text-muted);
+  font: var(--font-subheadline);
+  letter-spacing: var(--tracking-subheadline);
+  font-feature-settings: var(--font-features);
+}
+
+/* ---- Grouped list (list of desks, summary) ---- */
+.list,
+.group {
+  display: grid;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+
+/* Hairline between lines, inset like the native lists (decorative). */
+.row + .row::before,
+.groupRow + .groupRow::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: var(--space-4);
+  right: 0;
+  height: var(--border-width);
+  background: var(--color-separator);
+}
+
+.row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: var(--row-min-h);
+  padding: var(--row-pad-y) var(--space-4) var(--row-pad-y) var(--space-3);
+  color: var(--color-text);
+  cursor: pointer;
+  transition:
+    background var(--duration-fast) var(--ease-standard),
+    transform var(--duration-fast) var(--ease-standard);
+}
+
+.row[data-hovered] {
+  background: var(--color-fill-hover);
+}
+
+.row[data-pressed] {
+  background: var(--color-fill);
+}
+
+.row[data-selected] {
+  background: var(--color-accent-subtle);
+}
+
+/* Inner ring (outline-offset: -width): stays inside the clipped group, distinct from the
+   tint of the active line. */
+.row[data-focus-visible] {
+  outline: var(--focus-width) solid var(--color-focus);
+  outline-offset: calc(-1 * var(--focus-width));
+  box-shadow: none;
+}
+
+.thumb {
+  flex: none;
+  width: var(--thumb-w);
+  height: var(--thumb-h);
+  color: var(--color-text-muted);
+}
+
+.row[data-selected] .thumb {
+  color: var(--color-accent-subtle-text);
+}
+
+.plan {
+  fill: currentColor;
+  fill-opacity: 0.16;
+  stroke: currentColor;
+  stroke-width: 1.4;
+  stroke-linejoin: round;
+}
+
+.text {
+  display: grid;
+  flex: 1;
+  gap: var(--gap-half);
+  min-width: 0;
+}
+
+.size {
+  font: var(--font-headline);
+  letter-spacing: var(--tracking-headline);
+  font-feature-settings: var(--font-features), "tnum";
+  overflow-wrap: anywhere;
+}
+
+.row[data-selected] .size {
+  color: var(--color-accent-subtle-text);
+}
+
+.name {
+  color: var(--color-text-muted);
+  font: var(--font-subheadline);
+  letter-spacing: var(--tracking-subheadline);
+  font-feature-settings: var(--font-features);
+  overflow-wrap: anywhere;
+}
+
+/* Room kept on every line, shown on the active one only. */
+.check {
+  color: var(--color-accent-subtle-text);
+  visibility: hidden;
+}
+
+.row[data-selected] .check {
+  visibility: visible;
+}
+
+/* ---- Summary "Selected" ---- */
+.summary {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.groupTitle {
+  margin: 0;
+  padding: 0 var(--space-4);
+  color: var(--color-text-muted);
+  font: var(--font-subheadline);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-subheadline);
+  font-feature-settings: var(--font-features);
+}
+
+.groupRow {
+  position: relative;
+  margin: 0;
+  padding: var(--space-2) var(--space-4);
+  overflow-wrap: anywhere;
+}
+
+.summaryName {
+  font: var(--font-headline);
+  letter-spacing: var(--tracking-headline);
+  font-feature-settings: var(--font-features), "tnum";
+}
+
+.summarySize {
+  color: var(--color-text-muted);
+  font: var(--font-subheadline);
+  letter-spacing: var(--tracking-subheadline);
+  font-feature-settings: var(--font-features), "tnum";
+}
+
+.caption {
+  margin: 0;
+  padding: 0 var(--space-4);
+  color: var(--color-text-muted);
+  font: var(--font-footnote);
+  letter-spacing: var(--tracking-footnote);
+  font-feature-settings: var(--font-features);
+}
+
+/* ---- Catalog error ---- */
+.banner {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--color-error-bg);
+  color: var(--color-text);
+  font: var(--font-subheadline);
+  letter-spacing: var(--tracking-subheadline);
+  font-feature-settings: var(--font-features);
+}
+
+.banner p {
+  margin: 0;
+}
+
+.bannerIcon {
+  margin-top: var(--gap-half);
+  color: var(--color-error);
+}
+
+.bannerText {
+  display: grid;
+  gap: var(--gap-half);
+  min-width: 0;
+}
+
+.bannerTitle {
+  font: var(--font-headline);
+  letter-spacing: var(--tracking-headline);
+  font-feature-settings: var(--font-features);
+}
+
+.bannerAction {
+  justify-self: start;
+  margin-top: var(--space-2);
+}

@@ -1,0 +1,80 @@
+{
+  "id": "desk.corner",
+  "version": 1,
+  "type": "desk",
+  "category": "furniture",
+  "name": { "en": "Corner desk" },
+  "generator": "procedural",
+  "model": null,
+  "license": "Original work (project)",
+  "source": "Generated in code",
+  "params": {
+    "width": {
+      "unit": "mm",
+      "default": 1600,
+      "min": 1200,
+      "max": 2400,
+      "step": 10,
+      "note": "Bounding box along X (the main arm length)."
+    },
+    "depth": {
+      "unit": "mm",
+      "default": 1400,
+      "min": 1000,
+      "max": 2000,
+      "step": 10,
+      "note": "Bounding box along Z (the return wing length, back edge to front edge)."
+    },
+    "armDepth": {
+      "unit": "mm",
+      "default": 600,
+      "min": 500,
+      "max": 800,
+      "step": 10,
+      "note": "Depth of the main arm along the back wall. Always < depth (800 < 1000)."
+    },
+    "wingWidth": {
+      "unit": "mm",
+      "default": 600,
+      "min": 500,
+      "max": 800,
+      "step": 10,
+      "note": "Width of the return wing. Always < width (800 < 1200)."
+    },
+    "orientation": {
+      "enum": ["right", "left"],
+      "default": "right",
+      "note": "Side of the return wing seen from the user (+Z side). The user sits in the notch of the L."
+    },
+    "height": { "unit": "mm", "default": 740, "min": 600, "max": 1300, "step": 10 },
+    "thickness": { "unit": "mm", "default": 25, "min": 18, "max": 40, "step": 1 },
+    "legStyle": { "enum": ["post"], "default": "post" }
+  },
+  "presets": [
+    {
+      "id": "standard",
+      "name": { "en": "Corner desk" },
+      "params": { "width": 1600, "depth": 1400, "armDepth": 600, "wingWidth": 600 }
+    },
+    {
+      "id": "large",
+      "name": { "en": "Corner desk large" },
+      "params": { "width": 1800, "depth": 1600, "armDepth": 700, "wingWidth": 700 }
+    }
+  ],
+  "slots": [
+    { "id": "top", "role": "top", "default": "mat.birch" },
+    { "id": "legs", "role": "legs", "default": "mat.black-metal" }
+  ],
+  "budget": { "tris": 2500, "drawCalls": 2 },
+  "placement": {
+    "restsOn": ["floor"],
+    "canSupport": ["*"],
+    "footprintParts": [
+      "main arm: width x armDepth, against the back edge",
+      "return wing: wingWidth x (depth - armDepth), on the orientation side, towards the user"
+    ],
+    "clearanceFrontMm": 600
+  },
+  "notes": "L-shaped desk. Origin = centre of the bounding box (width x depth), back edge at z = -depth/2, user side +Z, like desk.rect, so camera framing and keep-out box are unchanged. orientation 'right' puts the wing at +X, 'left' mirrors it. Top = one extruded L (1 draw call), 6 posts at 60 mm inset from the outer corners, rear and wing-side rails. Label: Corner 160x140 / 180x160 cm."
+}

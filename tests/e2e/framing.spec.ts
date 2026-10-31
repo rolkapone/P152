@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "./fixtures";
+import { deskRect, expectDeskInFreeZone, frames, type Rect } from "./helpers/framing";
 import { waitForScene } from "./helpers/perf";
 
 // US-005 UX-8 (graphics-engineer): on load and after Reset view / Top / Front, the whole desk
@@ -6,23 +7,12 @@ import { waitForScene } from "./helpers/perf";
 // at least 24 px; collapsing or opening a panel never moves the camera (UX-7), the next view
 // command uses the new zone. Reduced motion (playwright.config.ts): views jump at once.
 
-interface Rect {
-  left: number;
-  top: number;
-  right: number;
-  bottom: number;
-}
-
-const MARGIN = 24;
 const LEFT_TOGGLE = "Desk and objects panel";
 const RIGHT_TOGGLE = "Properties and alerts panel";
 
 const viewButton = (page: Page, name: string) =>
   page.getByRole("toolbar", { name: "View" }).getByRole("button", { name, exact: true });
 const toggle = (page: Page, name: string) => page.getByRole("button", { name, exact: true });
-const frames = (page: Page) =>
-  page.evaluate(() => (window as unknown as { __p152perf: { frames: number } }).__p152perf.frames);
-
 /**
  * Runs a view command and waits for the next rendered frame: the view rig moves the camera
  * just before it (reduced motion: no transition), so the camera is final afterwards.
@@ -31,62 +21,6 @@ async function showView(page: Page, name: string) {
   const before = await frames(page);
   await viewButton(page, name).click();
   await expect.poll(() => frames(page)).toBeGreaterThan(before);
-}
-
-/** The desk as the camera draws it now, in page CSS px (window.__p152perf, E2E build). */
-async function deskRect(page: Page): Promise<Rect> {
-  const rect = await page.evaluate(() => {
-    const probe = (window as unknown as { __p152perf?: { deskRect(): Rect | null } }).__p152perf;
-    const canvas = document.querySelector("canvas")?.getBoundingClientRect();
-    const desk = probe?.deskRect();
-    if (!desk || !canvas) return null;
-    return {
-      left: desk.left + canvas.left,
-      top: desk.top + canvas.top,
-      right: desk.right + canvas.left,
-      bottom: desk.bottom + canvas.top,
-    };
-  });
-  if (!rect) throw new Error("window.__p152perf.deskRect() unavailable");
-  return rect;
-}
-
-/** Free zone measured in the page: under the toolbar, between the docked panels open now. */
-async function freeZone(page: Page): Promise<Rect> {
-  return page.evaluate(() => {
-    const app = document.querySelector("[data-layout]");
-    const docked = app?.getAttribute("data-layout") === "wide";
-    const side = (name: string) => {
-      const pane = document.querySelector<HTMLElement>(`aside[aria-label="${name}"]`);
-      return docked && pane?.dataset.open === "true" ? pane.getBoundingClientRect() : null;
-    };
-    const header = document.querySelector("header")!.getBoundingClientRect();
-    const left = side("Desk and objects");
-    const right = side("Properties and alerts");
-    return {
-      left: left ? left.right : 0,
-      top: header.bottom,
-      right: right ? right.left : window.innerWidth,
-      bottom: window.innerHeight,
-    };
-  });
-}
-
-const inside = (desk: Rect, zone: Rect) =>
-  desk.left >= zone.left + MARGIN &&
-  desk.right <= zone.right - MARGIN &&
-  desk.top >= zone.top + MARGIN &&
-  desk.bottom <= zone.bottom - MARGIN;
-
-/** Waits until the desk is drawn inside the free zone (observable state, no fixed delay). */
-async function expectDeskInFreeZone(page: Page) {
-  const zone = await freeZone(page);
-  await expect
-    .poll(async () => {
-      const desk = await deskRect(page);
-      return inside(desk, zone) ? "inside" : JSON.stringify({ desk, zone });
-    })
-    .toBe("inside");
 }
 
 /** Waits for a panel to be fully collapsed or open (its transition is 0 ms in reduced motion). */

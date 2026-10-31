@@ -539,7 +539,7 @@ th{font-weight:var(--weight-semibold);background:var(--color-surface-2)}
   <table>
     <tr><th>Part</th><th>Spec</th></tr>
     <tr><td>Row</td><td>Min height 56 px (<code>--row-min-h</code>), padding 6 / 16 / 6 / 12, hairline separator inset by 16 px (decorative). No gap between rows: the grouped list is one object (the 8 px gap of the UX criterion is replaced by the separator; targets stay 56 px high and 216 px wide).</td></tr>
-    <tr><td>Thumbnail</td><td>56 x 44 (<code>--thumb-w/h</code>), top plan drawn by the UI in SVG, <code>aria-hidden</code>, common scale 0.275 px per cm (the 180 x 160 corner desk fills the box), fill 16 % + 1.4 px contour in <code>currentColor</code> (the L shape is readable without colour).</td></tr>
+    <tr><td>Thumbnail</td><td>56 x 44 (<code>--thumb-w/h</code>), top plan drawn by the UI in SVG, <code>aria-hidden</code>, common scale about 0.266 px per cm (the largest catalog model fills the box minus 1.4 px for the contour, which is never clipped), fill 16 % + 1.4 px contour in <code>currentColor</code> (the L shape is readable without colour).</td></tr>
     <tr><td>Text</td><td>Dimensions "140 x 70 cm" Headline 16/600 (tabular), name Subheadline 14 <code>--color-text-muted</code>. Accessible name = visible text; description "Height 74 cm".</td></tr>
     <tr><td>Selected</td><td><code>--color-accent-subtle</code> fill (opaque) + dimensions in <code>--color-accent-subtle-text</code> + check on the right (space always reserved) + <code>aria-checked="true"</code>. No contour: the check and the 600 weight are the non-colour cues.</td></tr>
     <tr><td>Hover / pressed</td><td><code>--color-fill-hover</code> / <code>--color-fill</code>, 120 ms. Never the only cue.</td></tr>
@@ -563,7 +563,7 @@ th{font-weight:var(--weight-semibold);background:var(--color-surface-2)}
 (function(){
 var ic=function(id,c){return '<svg class="i '+(c||'')+'" aria-hidden="true" focusable="false"><use href="#'+id+'"/></svg>'};
 var DK=[{id:'compact',n:'Compact desk',w:100,d:60},{id:'basic',n:'Basic desk',w:120,d:60},{id:'standard',n:'Standard desk',w:140,d:70},{id:'large',n:'Large desk',w:160,d:80},{id:'gaming',n:'Gaming desk',w:180,d:80},{id:'corner',n:'Corner desk',w:160,d:140,L:60},{id:'cornerl',n:'Corner desk large',w:180,d:160,L:70}];
-var K=.275;
+var K=(44-1.4)/160;
 function byId(id){return DK.filter(function(x){return x.id===id})[0]}
 function thumb(d){var w=d.w*K,h=d.d*K,x=(56-w)/2,y=(44-h)/2,a=(d.L||0)*K,s='fill="currentColor" fill-opacity=".16" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"';
   return '<svg viewBox="0 0 56 44" aria-hidden="true">'+(d.L?'<path d="M'+x+' '+y+'H'+(x+w)+'V'+(y+h)+'H'+(x+w-a)+'V'+(y+a)+'H'+x+'Z" '+s+'/>':'<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="2" '+s+'/>')+'</svg>'}

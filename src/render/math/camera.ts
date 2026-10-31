@@ -7,7 +7,7 @@
  * convention: `polar` (phi) from +Y, `azimuth` (theta) = atan2(x, z) from +Z.
  */
 import type { StudioConfig, Vec3, ViewName } from "../../core";
-import { framingFor, type ScreenZone, type ViewFraming } from "./framing";
+import { framingFor, REFERENCE_ZONES, type ScreenZone, type ViewFraming } from "./framing";
 import { clamp, DEG2RAD, mmToM } from "./units";
 
 export interface Pose {
@@ -52,7 +52,35 @@ export interface CameraLimits {
   readonly pan: Box;
   /** Desk volume inflated by the margin: the camera never enters it. */
   readonly keepOut: Box;
+  /** Part of the studio the camera may occupy (in front of the curved wall, on the floor). */
+  readonly keepIn: StudioKeepIn;
 }
+
+/**
+ * What the view frames and avoids (US-006): the volume of the desk shown now, in metres,
+ * origin on the floor. `points` span the desk (corners of its outline at the floor and at the
+ * top): their convex hull is what must fit on screen, tighter than the box for an L-shaped desk.
+ */
+export interface DeskVolume {
+  readonly box: Box;
+  readonly points: readonly Vec3[];
+}
+
+/**
+ * Studio space the camera may occupy (ADR-3D-11, risk R11): `minZ` keeps it in front of the
+ * curved back wall and high enough above its rising floor, `maxZ` and `maxAbsX` on the
+ * cyclorama floor. Derived from studio.json `cyclorama` with a clearance.
+ */
+export interface StudioKeepIn {
+  readonly minZ: number;
+  readonly maxZ: number;
+  readonly maxAbsX: number;
+}
+
+/** Distance kept between the camera and the decor of the studio, metres. */
+export const STUDIO_CLEARANCE_M = 0.3;
+/** Room left beyond the farthest framing of the reference windows when zooming out. */
+export const FIT_SPARE = 1.1;
 
 // Framing of the views (whole view or free zone between the panels): ./framing.ts.
 export { framingFor, lensShiftFor, type ScreenZone, type ViewFraming } from "./framing";
@@ -73,18 +101,108 @@ export function intersectBoxes(outer: Box, inner: Box): Box {
   return { min: [min[0]!, min[1]!, min[2]!], max: [max[0]!, max[1]!, max[2]!] };
 }
 
+/** Corners of a box. */
+export function boxCorners(box: Box): Vec3[] {
+  const out: Vec3[] = [];
+  for (const x of [box.min[0], box.max[0]]) {
+    for (const y of [box.min[1], box.max[1]]) {
+      for (const z of [box.min[2], box.max[2]]) out.push([x, y, z]);
+    }
+  }
+  return out;
+}
+
+/** Volume of a box-shaped desk. */
+export function boxVolume(box: Box): DeskVolume {
+  return { box, points: boxCorners(box) };
+}
+
+/** Volume of the default desk of the studio (studio.json `desk`). */
+export function deskVolume(config: StudioConfig): DeskVolume {
+  return boxVolume(deskBox(config));
+}
+
+/** Studio space of the camera, from the cyclorama (see `StudioKeepIn`). */
+export function studioKeepIn(config: StudioConfig): StudioKeepIn {
+  const { cyclorama } = config;
+  const c = STUDIO_CLEARANCE_M;
+  const r = cyclorama.radius;
+  const wallZ = cyclorama.curveStartZ - r;
+  // The curved floor rises behind curveStartZ: the lowest camera (minCameraY) stays `c` above.
+  const rise = config.camera.limits.minCameraY - c;
+  let curveZ = wallZ;
+  if (rise <= 0) curveZ = cyclorama.curveStartZ;
+  else if (rise < r) curveZ = cyclorama.curveStartZ - Math.sqrt(r * r - (r - rise) * (r - rise));
+  return {
+    minZ: Math.max(wallZ + c, curveZ),
+    maxZ: cyclorama.floorEndZ - c,
+    maxAbsX: cyclorama.halfWidthX - c,
+  };
+}
+
 /**
- * Limits of the view. `content` is the box that must stay in view (the desk in US-004;
- * later stories may pass the bounds of the whole setup).
+ * Largest distance from `target` along (polar, azimuth) that keeps the camera in the studio
+ * space. Infinite when the direction never leaves it. Numbers only: used in the render loop.
  */
-export function cameraLimits(config: StudioConfig, content: Box = deskBox(config)): CameraLimits {
+export function maxRadiusInStudio(
+  targetX: number,
+  targetZ: number,
+  polar: number,
+  azimuth: number,
+  keepIn: StudioKeepIn,
+): number {
+  const s = Math.sin(polar);
+  const dx = s * Math.sin(azimuth);
+  const dz = s * Math.cos(azimuth);
+  let radius = Infinity;
+  if (dz < -EPSILON) radius = Math.min(radius, (targetZ - keepIn.minZ) / -dz);
+  if (dz > EPSILON) radius = Math.min(radius, (keepIn.maxZ - targetZ) / dz);
+  if (Math.abs(dx) > EPSILON) {
+    radius = Math.min(radius, (keepIn.maxAbsX - Math.sign(dx) * targetX) / Math.abs(dx));
+  }
+  return Math.max(radius, 0);
+}
+
+/**
+ * Zoom-out limit for a desk (ADR-3D-11): the catalog distance, or more for a large desk, so
+ * that every view frames it in the reference windows (1024 px wide, both panels docked) with
+ * `FIT_SPARE` to spare. The studio space still bounds the camera (`maxRadiusInStudio`).
+ */
+export function deskMaxDistance(config: StudioConfig, desk: DeskVolume): number {
+  let needed = 0;
+  for (const view of ["reset", "top", "front"] as const) {
+    const { position, target } = config.camera.views[view];
+    const pose = poseFromLookAt(position, target);
+    for (const zone of REFERENCE_ZONES) {
+      const fit = fitRadius(
+        desk.points,
+        pose.target,
+        pose.polar,
+        pose.azimuth,
+        config.camera.fovDeg,
+        zone.width / zone.height,
+        framingFor(pose.polar, zone),
+      );
+      needed = Math.max(needed, fit);
+    }
+  }
+  return Math.max(config.camera.limits.maxDistance, needed * FIT_SPARE);
+}
+
+/**
+ * Limits of the view for the desk shown now (`desk`, the studio default desk when omitted):
+ * zoom-out limit, target box and keep-out box follow the desk (US-006).
+ */
+export function cameraLimits(
+  config: StudioConfig,
+  desk: DeskVolume = deskVolume(config),
+): CameraLimits {
   const { limits } = config.camera;
-  const keep = limits.deskKeepOutMm;
-  const halfWidth = mmToM(keep.halfWidth + keep.margin);
-  const halfDepth = mmToM(keep.halfDepth + keep.margin);
+  const margin = mmToM(limits.deskKeepOutMm.margin);
+  const content = desk.box;
   return {
     minDistance: limits.minDistance,
-    maxDistance: limits.maxDistance,
+    maxDistance: deskMaxDistance(config, desk),
     minPolar: limits.minPolarDeg * DEG2RAD,
     maxPolar: limits.maxPolarDeg * DEG2RAD,
     minAzimuth: limits.minAzimuthDeg * DEG2RAD,
@@ -98,10 +216,16 @@ export function cameraLimits(config: StudioConfig, content: Box = deskBox(config
       content,
     ),
     keepOut: {
-      min: [-halfWidth, 0, -halfDepth],
-      max: [halfWidth, mmToM(keep.height + keep.margin), halfDepth],
+      min: [content.min[0] - margin, 0, content.min[2] - margin],
+      max: [content.max[0] + margin, content.max[1] + margin, content.max[2] + margin],
     },
+    keepIn: studioKeepIn(config),
   };
+}
+
+/** The same limits with another zoom-out limit (never below the zoom-in limit). */
+export function withMaxDistance(limits: CameraLimits, maxDistance: number): CameraLimits {
+  return { ...limits, maxDistance: Math.max(limits.minDistance, maxDistance) };
 }
 
 /** Bounding box of the default desk of the studio, in metres (origin on the floor). */
@@ -178,8 +302,21 @@ export function clampPoseInto(out: MutablePose, pose: Pose, limits: CameraLimits
   const tx = clamp(pose.target[0], pan.min[0], pan.max[0]);
   const ty = clamp(pose.target[1], pan.min[1], pan.max[1]);
   const tz = clamp(pose.target[2], pan.min[2], pan.max[2]);
-  const radius = clamp(pose.radius, limits.minDistance, limits.maxDistance);
   const azimuth = clamp(pose.azimuth, limits.minAzimuth, limits.maxAzimuth);
+  // The studio limit is taken at the widest tilt allowed: the final tilt is never wider (it
+  // only goes up to keep the minimum height), so the camera stays in the studio.
+  const studio = maxRadiusInStudio(
+    tx,
+    tz,
+    clamp(pose.polar, limits.minPolar, limits.maxPolar),
+    azimuth,
+    limits.keepIn,
+  );
+  const radius = clamp(
+    pose.radius,
+    limits.minDistance,
+    Math.max(limits.minDistance, Math.min(limits.maxDistance, studio)),
+  );
   const maxPolar = maxPolarForHeight(ty, radius, limits.minCameraY, limits.maxPolar);
   const polar = clamp(pose.polar, Math.min(limits.minPolar, maxPolar), maxPolar);
   out.target[0] = tx;
@@ -212,25 +349,16 @@ export function safeCameraY(x: number, y: number, z: number, limits: CameraLimit
   return inside ? max[1] : lifted;
 }
 
-function corners(box: Box): Vec3[] {
-  const out: Vec3[] = [];
-  for (const x of [box.min[0], box.max[0]]) {
-    for (const y of [box.min[1], box.max[1]]) {
-      for (const z of [box.min[2], box.max[2]]) out.push([x, y, z]);
-    }
-  }
-  return out;
-}
-
 const dot = (a: Vec3, b: Vec3) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
 
 /**
  * Smallest distance from `target`, along the direction (polar, azimuth), at which the whole
- * box is inside the framing rectangle of the screen, the target being drawn at the framing
- * centre (perspective camera, vertical FOV). The box is convex: its corners suffice.
+ * box (or the convex hull of the points) is inside the framing rectangle of the screen, the
+ * target being drawn at the framing centre (perspective camera, vertical FOV). A convex shape
+ * fits when its corners do.
  */
 export function fitRadius(
-  box: Box,
+  content: Box | readonly Vec3[],
   target: Vec3,
   polar: number,
   azimuth: number,
@@ -246,7 +374,8 @@ export function fitRadius(
   const tanRight = tan * aspect * (framing.right - framing.centerX);
   const tanLeft = tan * aspect * (framing.centerX - framing.left);
   let radius = 0;
-  for (const corner of corners(box)) {
+  const points = "min" in content ? boxCorners(content) : content;
+  for (const corner of points) {
     const rel: Vec3 = [corner[0] - target[0], corner[1] - target[1], corner[2] - target[2]];
     const lateral = dot(rel, right);
     const vertical = dot(rel, up);
@@ -270,11 +399,12 @@ export function viewPose(
   aspect: number,
   limits: CameraLimits = cameraLimits(config),
   zone: ScreenZone | null = null,
+  desk: DeskVolume = deskVolume(config),
 ): Pose {
   const { position, target } = config.camera.views[view];
   const pose = poseFromLookAt(position, target);
   const fit = fitRadius(
-    deskBox(config),
+    desk.points,
     pose.target,
     pose.polar,
     pose.azimuth,
@@ -283,6 +413,39 @@ export function viewPose(
     framingFor(pose.polar, zone),
   );
   return clampPose({ ...pose, radius: Math.max(pose.radius, fit) }, limits);
+}
+
+/**
+ * Pose after a change of desk (US-006 UX-10): the orientation of `current` (tilt and angle)
+ * is kept; the target goes back to the target of `view` (the last view command, Reset when the
+ * view was moved since) and the distance frames the whole new desk in the free `zone`, never
+ * closer than the catalog distance of that view. Then clamped to the limits.
+ */
+export function reframePose(
+  config: StudioConfig,
+  current: Pose,
+  view: ViewName,
+  aspect: number,
+  limits: CameraLimits,
+  zone: ScreenZone | null,
+  desk: DeskVolume,
+): Pose {
+  const { position, target } = config.camera.views[view];
+  const base = poseFromLookAt(position, target);
+  const { polar, azimuth } = current;
+  const fit = fitRadius(
+    desk.points,
+    base.target,
+    polar,
+    azimuth,
+    config.camera.fovDeg,
+    aspect,
+    framingFor(polar, zone),
+  );
+  return clampPose(
+    { target: base.target, polar, azimuth, radius: Math.max(base.radius, fit) },
+    limits,
+  );
 }
 
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t;

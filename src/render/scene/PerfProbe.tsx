@@ -8,11 +8,16 @@
  * - `measure(ms)`: renders continuously for `ms` (shadow pass included once) and returns the
  *   frame rate and the worst counters, because the scene is otherwise rendered on demand;
  * - `deskRect()`: screen rectangle of the desk (CSS px of the canvas) as the camera draws it
- *   now, for the framing test in the free zone (US-005 UX-8).
+ *   now, for the framing test in the free zone (US-005 UX-8), from the vertices of the desk
+ *   (an L-shaped desk is not its bounding box);
+ * - `geometries`, `textures`: GPU memory counted after the last rendered frame;
+ * - `deskSize()`: size of the desk drawn (mm, bounding box of top and legs, US-006 UX-10);
+ * - `viewDirection()`: unit direction of the camera (orientation kept after a change of desk).
+ * The desk is changed through the Desk panel in the E2E tests (US-006), never through here.
  */
 import { addAfterEffect, useThree } from "@react-three/fiber";
 import { useEffect } from "react";
-import { Box3, Vector3 } from "three";
+import { Box3, Vector3, type Mesh } from "three";
 import { requestShadowUpdate } from "./imperative";
 
 export interface PerfMeasure {
@@ -40,6 +45,8 @@ export interface P152Perf {
   readonly dpr: number;
   measure(durationMs?: number): Promise<PerfMeasure>;
   deskRect(): ScreenRect | null;
+  deskSize(): { width: number; depth: number; height: number } | null;
+  viewDirection(): [number, number, number];
 }
 
 declare global {
@@ -58,8 +65,14 @@ export default function PerfProbe() {
     let frames = 0;
     let drawCalls = 0;
     let triangles = 0;
+    // GPU memory after the last rendered frame: between a change and the next frame the
+    // disposed geometries are gone but the new ones are not uploaded yet.
+    let geometries = 0;
+    let textures = 0;
     const stop = addAfterEffect(() => {
       frames += 1;
+      geometries = gl.info.memory.geometries;
+      textures = gl.info.memory.textures;
       drawCalls = Math.max(drawCalls, gl.info.render.calls);
       triangles = Math.max(triangles, gl.info.render.triangles);
     });
@@ -97,31 +110,46 @@ export default function PerfProbe() {
       });
 
     // Called by the test only (allocations are fine here, never in the render loop).
-    const deskRect = (): ScreenRect | null => {
+    const deskParts = (): Mesh[] | null => {
       // The desk itself (top and legs), not its soft contact shadow.
       const parts = ["desk-top", "desk-legs"].map((name) => scene.getObjectByName(name));
-      if (parts.some((part) => part === undefined)) return null;
+      return parts.every((part) => part !== undefined) ? (parts as Mesh[]) : null;
+    };
+
+    const deskRect = (): ScreenRect | null => {
+      const parts = deskParts();
+      if (parts === null) return null;
       camera.updateMatrixWorld();
-      const box = new Box3();
-      for (const part of parts) if (part) box.expandByObject(part);
       const { clientWidth: width, clientHeight: height } = gl.domElement;
       const rect = { left: Infinity, top: Infinity, right: -Infinity, bottom: -Infinity };
       const point = new Vector3();
-      for (const x of [box.min.x, box.max.x]) {
-        for (const y of [box.min.y, box.max.y]) {
-          for (const z of [box.min.z, box.max.z]) {
-            point.set(x, y, z).project(camera);
-            const px = ((point.x + 1) / 2) * width;
-            const py = ((1 - point.y) / 2) * height;
-            rect.left = Math.min(rect.left, px);
-            rect.right = Math.max(rect.right, px);
-            rect.top = Math.min(rect.top, py);
-            rect.bottom = Math.max(rect.bottom, py);
-          }
+      for (const part of parts) {
+        part.updateMatrixWorld();
+        const position = part.geometry.getAttribute("position");
+        for (let i = 0; i < position.count; i++) {
+          point.fromBufferAttribute(position, i).applyMatrix4(part.matrixWorld).project(camera);
+          const px = ((point.x + 1) / 2) * width;
+          const py = ((1 - point.y) / 2) * height;
+          rect.left = Math.min(rect.left, px);
+          rect.right = Math.max(rect.right, px);
+          rect.top = Math.min(rect.top, py);
+          rect.bottom = Math.max(rect.bottom, py);
         }
       }
       return rect;
     };
+
+    const deskSize = () => {
+      const parts = deskParts();
+      if (parts === null) return null;
+      const box = new Box3();
+      for (const part of parts) box.expandByObject(part, true);
+      const size = box.getSize(new Vector3()).multiplyScalar(1000);
+      return { width: size.x, depth: size.z, height: size.y };
+    };
+
+    const viewDirection = (): [number, number, number] =>
+      camera.getWorldDirection(new Vector3()).toArray();
 
     window.__p152perf = {
       get drawCalls() {
@@ -134,16 +162,18 @@ export default function PerfProbe() {
         return frames;
       },
       get geometries() {
-        return gl.info.memory.geometries;
+        return geometries;
       },
       get textures() {
-        return gl.info.memory.textures;
+        return textures;
       },
       get dpr() {
         return gl.getPixelRatio();
       },
       measure,
       deskRect,
+      deskSize,
+      viewDirection,
     };
     // The probe arrives after the first frames: render one full frame (shadow pass included).
     requestShadowUpdate(gl);

@@ -88,7 +88,8 @@ export interface StudioConfig {
     };
     readonly contactShadow: {
       readonly opacity: number;
-      readonly deskFootprintMm: Range;
+      /** Desk contact planes = desk footprint minus this (width, depth), mm. */
+      readonly deskInsetMm: Range;
       readonly liftY: number;
     };
   };
@@ -113,12 +114,8 @@ export interface StudioConfig {
       readonly maxAzimuthDeg: number;
       readonly minCameraY: number;
       readonly pan: { readonly x: Range; readonly y: Range; readonly z: Range };
-      readonly deskKeepOutMm: {
-        readonly halfWidth: number;
-        readonly halfDepth: number;
-        readonly height: number;
-        readonly margin: number;
-      };
+      /** The keep-out box is the desk bounding box inflated by `margin` (mm). */
+      readonly deskKeepOutMm: { readonly margin: number };
     };
     readonly transitionMs: number;
   };
@@ -207,7 +204,7 @@ export function toStudioConfig(studio: StudioScene): StudioConfig {
       },
       contactShadow: {
         opacity: contactShadow.opacity,
-        deskFootprintMm: range(contactShadow.deskFootprintMm),
+        deskInsetMm: range(contactShadow.deskInsetMm),
         liftY: contactShadow.liftY,
       },
     },
@@ -244,12 +241,7 @@ export function toStudioConfig(studio: StudioScene): StudioConfig {
         maxAzimuthDeg: limits.maxAzimuthDeg,
         minCameraY: limits.minCameraY,
         pan: { x: range(limits.pan.x), y: range(limits.pan.y), z: range(limits.pan.z) },
-        deskKeepOutMm: {
-          halfWidth: limits.deskKeepOutMm.halfWidth,
-          halfDepth: limits.deskKeepOutMm.halfDepth,
-          height: limits.deskKeepOutMm.height,
-          margin: limits.deskKeepOutMm.margin,
-        },
+        deskKeepOutMm: { margin: limits.deskKeepOutMm.margin },
       },
       transitionMs: camera.transition.durationMs,
     },

@@ -47,6 +47,16 @@ const SIDE_LENS_SHIFT = 0.3;
  */
 export const FREE_ZONE_MARGIN_PX = 32;
 
+/**
+ * Smallest windows where the panels are docked (US-005 layout: 1024 px wide, toolbar 53 px,
+ * sidebar 248 px, inspector 312 px), short and usual. The zoom-out limit of a desk is
+ * sized on them (`deskMaxDistance`, ADR-3D-11); a taller window raises the limit to its framing
+ * (ViewRig). tests/e2e/desk.spec.ts checks the real shell at 1024 x 768.
+ */
+export const REFERENCE_ZONES: readonly ScreenZone[] = [640, 768].map((height) =>
+  Object.freeze({ top: 53, left: 248, right: 312, width: 1024, height }),
+);
+
 /** Lens shift of the whole view for a tilt: bottom inset from above, 0.3 from the side. */
 export function lensShiftFor(polar: number): number {
   const side = Math.sin(clamp(polar, 0, Math.PI / 2));

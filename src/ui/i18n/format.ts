@@ -7,3 +7,10 @@
 export function formatCentimetres(millimetres: number, language: string): string {
   return new Intl.NumberFormat(language, { maximumFractionDigits: 1 }).format(millimetres / 10);
 }
+
+/** Millimetres for display, whole and without grouping ("1400", as in the desk summary). */
+export function formatMillimetres(millimetres: number, language: string): string {
+  return new Intl.NumberFormat(language, { maximumFractionDigits: 0, useGrouping: false }).format(
+    millimetres,
+  );
+}

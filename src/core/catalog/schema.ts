@@ -65,6 +65,8 @@ export const ParamDefSchema = z.union([NumericParamSchema, EnumParamSchema]);
 
 const PresetSchema = z.strictObject({
   id: Slug,
+  /** Name of the model shown in the lists (US-006, e.g. "Compact desk"); default: entry name. */
+  name: LocalizedName.optional(),
   params: z.record(Key, EnumValue),
 });
 
@@ -272,7 +274,8 @@ export const StudioSceneSchema = z.looseObject({
     }),
     contactShadow: z.looseObject({
       opacity: Unit01,
-      deskFootprintMm: z.tuple([Millimetres, Millimetres]),
+      /** Desk contact planes = desk footprint minus this (width, depth), US-006. */
+      deskInsetMm: z.tuple([Millimetres, Millimetres]),
       liftY: z.number().min(0).max(0.01),
     }),
   }),
@@ -306,12 +309,8 @@ export const StudioSceneSchema = z.looseObject({
       maxAzimuthDeg: Degrees,
       minCameraY: Metres,
       pan: z.looseObject({ x: Range, y: Range, z: Range }),
-      deskKeepOutMm: z.looseObject({
-        halfWidth: Millimetres,
-        halfDepth: Millimetres,
-        height: Millimetres,
-        margin: z.number().min(0).max(1000),
-      }),
+      /** Inflation of the bounding box of the desk shown (US-006: derived from the desk). */
+      deskKeepOutMm: z.looseObject({ margin: z.number().min(0).max(1000) }),
     }),
     transition: z.looseObject({ durationMs: z.int().min(0).max(MAX_TRANSITION_MS) }),
   }),

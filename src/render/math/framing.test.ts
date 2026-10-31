@@ -1,8 +1,9 @@
 import fc from "fast-check";
 import { describe, expect, it } from "vitest";
 import { testCatalog } from "../../../tests/unit/helpers/fixtures";
-import { toStudioConfig, type ViewName } from "../../core";
-import { cameraLimits, deskBox, screenAxes, viewPose, type Pose } from "./camera";
+import { deskChoices, toStudioConfig, type Vec3, type ViewName } from "../../core";
+import { boxCorners, cameraLimits, deskBox, screenAxes, viewPose, type Pose } from "./camera";
+import { deskVolumeOf } from "./deskLayout";
 import {
   blendLensInto,
   createLens,
@@ -28,38 +29,37 @@ const VIEWS: readonly ViewName[] = ["reset", "top", "front"];
  * the target drawn at the framing centre: the same projection as the three.js camera with
  * `setViewOffset` (perspective, vertical FOV).
  */
-function deskOnScreen(pose: Pose, zone: ScreenZone) {
+function deskOnScreen(
+  pose: Pose,
+  zone: ScreenZone,
+  points: readonly Vec3[] = boxCorners(deskBox(config)),
+) {
   const { right, up, back } = screenAxes(pose);
   const framing = framingFor(pose.polar, zone);
   const tan = Math.tan((config.camera.fovDeg * DEG2RAD) / 2);
   const aspect = zone.width / zone.height;
-  const box = deskBox(config);
   const rect = { left: Infinity, right: -Infinity, top: Infinity, bottom: -Infinity };
-  for (const x of [box.min[0], box.max[0]]) {
-    for (const y of [box.min[1], box.max[1]]) {
-      for (const z of [box.min[2], box.max[2]]) {
-        const rel = [x - pose.target[0], y - pose.target[1], z - pose.target[2]] as const;
-        const dot = (axis: readonly number[]) =>
-          rel[0] * axis[0]! + rel[1] * axis[1]! + rel[2] * axis[2]!;
-        const depth = pose.radius - dot(back);
-        const ndcX = dot(right) / (depth * tan * aspect) + framing.centerX;
-        const ndcY = dot(up) / (depth * tan) + framing.centerY;
-        const px = ((ndcX + 1) / 2) * zone.width;
-        const py = ((1 - ndcY) / 2) * zone.height;
-        rect.left = Math.min(rect.left, px);
-        rect.right = Math.max(rect.right, px);
-        rect.top = Math.min(rect.top, py);
-        rect.bottom = Math.max(rect.bottom, py);
-      }
-    }
+  for (const [x, y, z] of points) {
+    const rel = [x - pose.target[0], y - pose.target[1], z - pose.target[2]] as const;
+    const dot = (axis: readonly number[]) =>
+      rel[0] * axis[0]! + rel[1] * axis[1]! + rel[2] * axis[2]!;
+    const depth = pose.radius - dot(back);
+    const ndcX = dot(right) / (depth * tan * aspect) + framing.centerX;
+    const ndcY = dot(up) / (depth * tan) + framing.centerY;
+    const px = ((ndcX + 1) / 2) * zone.width;
+    const py = ((1 - ndcY) / 2) * zone.height;
+    rect.left = Math.min(rect.left, px);
+    rect.right = Math.max(rect.right, px);
+    rect.top = Math.min(rect.top, py);
+    rect.bottom = Math.max(rect.bottom, py);
   }
   return rect;
 }
 
 const UX8_MARGIN_PX = 24;
 
-function expectInFreeZone(pose: Pose, zone: ScreenZone) {
-  const rect = deskOnScreen(pose, zone);
+function expectInFreeZone(pose: Pose, zone: ScreenZone, points?: readonly Vec3[]) {
+  const rect = deskOnScreen(pose, zone, points);
   expect(rect.left).toBeGreaterThanOrEqual(zone.left + UX8_MARGIN_PX);
   expect(rect.right).toBeLessThanOrEqual(zone.width - zone.right - UX8_MARGIN_PX);
   expect(rect.top).toBeGreaterThanOrEqual(zone.top + UX8_MARGIN_PX);
@@ -167,4 +167,22 @@ describe("views in the free zone (UX-8)", () => {
       }),
     );
   });
+});
+
+describe("every desk of the catalog in the free zone (US-006 UX-10, T3)", () => {
+  const SMALLEST: ScreenZone = { ...STUDIO, width: 1024 };
+  it.each(deskChoices(testCatalog()).map((choice) => [choice.id, choice.spec] as const))(
+    "%s: every view frames the whole desk at 1366 x 768 and 1024 x 768, margin >= 24 px",
+    (_, spec) => {
+      const desk = deskVolumeOf(spec);
+      const deskLimits = cameraLimits(config, desk);
+      for (const zone of [STUDIO, SMALLEST]) {
+        for (const view of VIEWS) {
+          const pose = viewPose(config, view, zone.width / zone.height, deskLimits, zone, desk);
+          expect(pose.radius).toBeLessThan(deskLimits.maxDistance);
+          expectInFreeZone(pose, zone, desk.points);
+        }
+      }
+    },
+  );
 });

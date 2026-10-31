@@ -23,3 +23,18 @@ export {
   type Vec3,
   type ViewName,
 } from "./studio";
+export {
+  DESK_SHAPES,
+  defaultDeskChoiceId,
+  deskChoiceId,
+  deskChoices,
+  deskSpec,
+  sameDesk,
+  studioDeskSpec,
+  type CornerDeskSpec,
+  type DeskChoice,
+  type DeskOrientation,
+  type DeskShape,
+  type DeskSpec,
+  type RectDeskSpec,
+} from "./desk";

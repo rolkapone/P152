@@ -81,9 +81,9 @@
       "bakeOnce": true
     },
     "contactShadow": {
-      "opacity": 0.42,
-      "technique": "radial/rounded-rect gradient plane under each object, generated once and shared",
-      "deskFootprintMm": [1500, 800],
+      "opacity": 0.24,
+      "technique": "radial/rounded-rect gradient plane under each object, generated once and shared. Desk planes derived from the desk shown (US-006, PO decision 31): its footprint minus deskInsetMm (width, depth); two planes for the L (main arm, return wing).",
+      "deskInsetMm": [200, 140],
       "liftY": 0.001,
       "depthWrite": false,
       "fog": false
@@ -153,11 +153,8 @@
       "minCameraY": 0.9,
       "pan": { "x": [-1.0, 1.0], "y": [0.5, 1.1], "z": [-0.8, 0.8] },
       "deskKeepOutMm": {
-        "halfWidth": 700,
-        "halfDepth": 350,
-        "height": 740,
         "margin": 100,
-        "notes": "camera must stay outside the desk box inflated by margin and above minCameraY (never under the top)"
+        "notes": "camera must stay outside the bounding box of the desk shown (US-006: derived from the desk) inflated by margin, and above minCameraY (never under the top)"
       },
       "damping": 0.07
     },
