@@ -685,7 +685,8 @@ Tests unitaires et de composants **colocalisés** (`*.test.ts(x)` à côté du f
 **Conséquences.**
 - (+) Une modification des tokens par l'ui-designer casse la CI tant que la copie n'est pas refaite (pas de dérive silencieuse).
 - (+) L'app fonctionne sans stockage (navigation privée, iframe sandboxée) : l'astuce est alors masquée pour la session seulement.
-- (−) Chunk principal ≈ 154 Ko gz avec React Aria (budget du shell fixé en US-005).
+- (−) Chunk principal ≈ 154 Ko gz avec React Aria (budget du shell fixé en US-005, ci-dessous).
+- **Budget du shell (US-005 T7), à valider par le PO** : plafonds gzip (zlib par défaut, 1 kB = 1000 o) **chunk principal ≤ 195 kB** et **chunk 3D ≤ 295 kB**, mesurés à 176,5 et 267,1 kB gz le 2026-10-31 (environ 10 % de marge). `scripts/check-bundle.mjs` (dans `pnpm check` et la CI) échoue au-delà, et aussi si le chunk 3D (`SceneCanvas-*.js`) disparaît ou est chargé par `index.html` (il doit rester en `lazy()`). Valeurs dans `config/bundle-budget.mjs`, testées par `tests/unit/bundle-budget.test.ts` ; un relèvement passe par cet ADR et l'accord du PO.
 - (−) Deux mécanismes d'annonce coexisteront si US-005 choisit le `LiveAnnouncer` : à unifier alors.
 
 **Alternatives écartées.**
