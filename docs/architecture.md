@@ -5,7 +5,7 @@
 
 ## Sommaire
 1. Vue d'ensemble et découpage en couches
-2. Scène 3D (ADR-3D-01 à ADR-3D-10)
+2. Scène 3D (ADR-3D-01 à ADR-3D-11)
 3. Application (ADR-APP-01 à ADR-APP-10)
 4. Build, CI et hébergement (ADR-OPS-01 à ADR-OPS-07)
 
@@ -315,7 +315,7 @@ Règles de dépendance (à faire respecter par lint, ex. `eslint-plugin-boundari
 **Décision.**
 - **Studio validé puis projeté** : `StudioSceneSchema` valide désormais chaque valeur lue par le rendu (fonds clair/sombre, cyclo, lumières, environnement, ombres, caméra, limites, transition) avec des bornes (`limits.ts`) et des contrôles d'ordre (`min < max`, code `bounds`). Le rendu ne reçoit que `toStudioConfig(studio)` (`core/catalog/studio.ts`), copie champ par champ et gelée : un champ non validé ne peut pas l'atteindre. Un test injecte une clé inconnue dans chaque objet et remplace chaque feuille par une valeur absurde : soit le catalogue est rejeté, soit la projection est identique ; la liste des champs descriptifs non lus est figée dans le test.
 - **Chargement** : `render/Viewport.tsx` (chunk principal, sans three.js) vérifie WebGL 2 puis charge `scene/SceneCanvas.tsx` en `lazy()` (three + R3F + camera-controls dans un chunk séparé). `frameloop="demand"`, `NeutralToneMapping`, ombres VSM `autoUpdate=false` (recalcul seulement quand la scène change), palier de qualité au démarrage (`shadow.defaults` : desktop `high`, mobile `medium`, DPR plafonné par palier).
-- **Vue contrainte** : `camera-controls` 3.1.2 (même version que celle embarquée par drei, MIT) piloté par une classe `ViewRig` (`render/scene/viewRig.ts`) ; toutes les règles sont des **fonctions pures** de `render/math/camera.ts`, testées en Node (fast-check) : distance 0,8–7 m (raison de la borne haute : voir `src/render/math/maxDistance.test.ts`), angles du catalogue, caméra jamais sous `minCameraY` (0,9 m : l'inclinaison maximale baisse quand on zoome) ni dans le bureau gonflé de 100 mm, cible bornée à l'intersection de la boîte de déplacement du catalogue et du bureau (la cible, au centre de l'écran, est un point du bureau : le déplacement ne sort jamais le bureau du cadre). Les maths en mètres restent dans `render/math/` (pures, sans three.js) et non dans `core/` : la conversion mm → m n'a lieu qu'à la frontière du rendu (section 1).
+- **Vue contrainte** : `camera-controls` 3.1.2 (même version que celle embarquée par drei, MIT) piloté par une classe `ViewRig` (`render/scene/viewRig.ts`) ; toutes les règles sont des **fonctions pures** de `render/math/camera.ts`, testées en Node (fast-check) : distance 0,8–7 m (borne haute selon le bureau depuis US-006 : ADR-3D-11), angles du catalogue, caméra jamais sous `minCameraY` (0,9 m : l'inclinaison maximale baisse quand on zoome) ni dans le bureau gonflé de 100 mm, cible bornée à l'intersection de la boîte de déplacement du catalogue et du bureau (la cible, au centre de l'écran, est un point du bureau : le déplacement ne sort jamais le bureau du cadre). Les maths en mètres restent dans `render/math/` (pures, sans three.js) et non dans `core/` : la conversion mm → m n'a lieu qu'à la frontière du rendu (section 1).
 - **Cadrage** : chaque vue part de la pose du catalogue et recule si besoin pour que tout le bureau tienne dans la zone libre (marge 5 %, 10 % de hauteur réservés en bas pour la barre de vue). La cible est dessinée au-dessus du centre de l'écran par un décalage d'objectif (`setViewOffset`) qui suit l'inclinaison (0,1 vu de dessus, 0,3 de côté) : le bureau, qui pend sous la cible, est centré au-dessus de la barre sans changer l'orbite. **Complément US-005 (UX-8)** : avec la zone libre publiée par le shell (`useShellLayout`, px : barre d'outils, volets collés), le cadrage se fait entre les volets et sous la barre d'outils avec une marge de 32 px (UX-8 : ≥ 24 px), au-dessus de la même réserve de 10 % ; le décalage d'objectif devient horizontal et vertical (`render/math/framing.ts`). La zone n'est lue qu'au cadrage (démarrage, Reset / Top / Front) : replier ou ouvrir un volet ne bouge jamais la caméra (UX-7), et le décalage glisse vers la nouvelle zone avec la transition de vue suivante (instantané en reduced motion). Seule exception : si la zone n'était pas mesurée au premier cadrage et que la vue n'a pas été touchée, le cadrage de départ est refait.
 - **Transitions** : Reset / Top / Front glissent sur un arc (interpolation sphérique, sans repli d'azimut) en 480 ms, courbe `cubic-bezier(0.65, 0, 0.35, 1)` (`--ease-in-out`), interrompues par tout geste ou touche ; saut direct et sans inertie sous `prefers-reduced-motion`.
 - **État de la vue dans `state/`** (`state/view/`, store Zustand de session) : statut (`loading`, `ready`, `unsupported`, `failed`, `contextLost`), vue active (`top` / `front` / aucune), dernier événement pour les annonces, `retry()`, taille du bureau. Le rendu enregistre un `ViewController` ; l'UI appelle `showView()` / `runViewCommand()` et ne voit jamais three.js. La correspondance touches → commandes (`viewCommandForKey`) est pure et testée.
@@ -334,6 +334,34 @@ Règles de dépendance (à faire respecter par lint, ex. `eslint-plugin-boundari
 
 ---
 
+### ADR-3D-11 — Distance de la caméra selon le bureau et espace du studio (US-006, risque R11)
+
+> Statut : **Proposé** (2026-10-31, US-006, graphics-engineer). Complète ADR-3D-10 (borne de distance fixe 0,8–7 m).
+
+**Contexte.** Les bureaux de US-006 vont jusqu'à 180 × 160 cm (angle). Dans la plus petite fenêtre à volets ouverts (1024 px de large, barre d'outils 53 px, volets 248 et 312 px), le cadrage demande jusqu'à 8,2 m (Reset, 1024 × 768). La borne fixe de 7 m coupait ce cadrage ; la monter au-delà d'environ 8 m laissait la caméra atteindre le mur courbe du fond aux angles latéraux (azimut ±109°), ou passer sous son sol qui remonte.
+
+**Décision.**
+- **Aucun changement du décor** (`studio.json`, DA validée) : ni cyclo plus profond, ni plus large, ni brouillard modifié.
+- **Distance maximale par bureau** (`deskMaxDistance`, `render/math/camera.ts`) : la borne du catalogue (7 m), ou plus pour un grand bureau : 1,1 × la distance de cadrage la plus grande des vues Reset / Top / Front dans les fenêtres de référence 1024 × 640 et 1024 × 768 à volets ouverts (`REFERENCE_ZONES`, `framing.ts`). Mesuré : 7 m jusqu'au 160 × 80, 8,97 m pour l'angle 180 × 160 (boîte englobante ; l'enveloppe réelle du L, US-006 T2, réduit un peu ce chiffre). Une fenêtre plus étroite ou plus haute que la référence relève la borne à son propre cadrage (`ViewRig.frameView`) : une vue n'est jamais coupée par la borne.
+- **Espace du studio pour la caméra** (`studioKeepIn`, `maxRadiusInStudio`), dérivé du cyclo avec un dégagement de 0,3 m : devant le mur et assez haut au-dessus de son sol courbe (z ≥ −2,8 m : mur à −3,1 m ; à −2,8 m le sol courbe atteint 0,6 m = hauteur minimale 0,9 − 0,3), sur le sol vers l'avant (z ≤ `floorEndZ` − 0,3) et sur les côtés. Pour chaque pose, la distance est bornée par le point où la direction de la caméra quitte cet espace : tourner vers le fond en vue éloignée rapproche la caméra, comme un mur réel. Appliqué dans `clampPose` (commandes, vues) et avant chaque image dans `ViewRig.frame` (glisser, molette), comme la limite d'inclinaison liée à la hauteur.
+- Les vues des 7 bureaux restent loin de ces limites (Reset à 33° d'azimut, Front à 0°, Top d'en haut) : le cadrage n'est jamais réduit par le studio dans les fenêtres de référence (test).
+
+**Conséquences.**
+- (+) Le plus grand bureau tient à 1024 px volets ouverts avec 10 % de marge de recul ; la caméra ne traverse jamais le décor, quelle que soit la pose (propriété fast-check, graine fixe, `maxDistance.test.ts`) ; aucun pixel du décor ne change.
+- (+) Les bornes suivront les tailles libres de US-007 sans nouvelle décision (2400 × 1000 : environ 9,7 m).
+- (−) Recul maximal au-delà de 9 m pour l'angle 180 × 160 : le brouillard linéaire (début à 9 m) teinte au plus quelques % de l'arrière du bureau, seulement en recul maximal ; jamais dans les vues cadrées à 1366 × 768 (4,7 m).
+- (−) Tourner vers le fond en vue très éloignée rapproche la caméra (au-delà d'environ 6 m de recul à ±109°) : perceptible seulement avec les grands bureaux.
+
+**Alternatives écartées.**
+1. **Cyclo plus profond ou plus large** : change la composition validée par le PO (mur plus loin derrière le bureau, plus de sol visible), demande une nouvelle validation du technical-artist et du PO, et ne règle pas les tailles libres suivantes.
+2. **Borne fixe plus haute (9 à 10 m)** : la caméra traverse le mur aux angles latéraux.
+3. **Limiter l'azimut selon la distance** : même garantie, mais la rotation s'arrêterait plus tôt sans raison visible ; borner la distance est l'effet naturel d'un mur.
+4. **Élargir le champ de vision** : déforme la perspective validée (32°).
+
+À vérifier par le technical-artist : rien dans `studio.json` ; seulement l'aspect du bureau 180 × 160 en recul maximal (brouillard) lors du contrôle QA.
+
+---
+
 ### Récapitulatif des choix 3D
 
 | Sujet | Choix | Écarté |
@@ -348,6 +376,7 @@ Règles de dépendance (à faire respecter par lint, ex. `eslint-plugin-boundari
 | Perf | Rendu à la demande, budgets chiffrés, paliers adaptatifs | Boucle continue, lightmaps, ombres multi-lumières |
 | XR | Origine au sol, @react-three/xr, repli USDZ | model-viewer, SDK commercial, natif |
 | Scène de base (US-004) | Studio validé puis projeté, camera-controls + maths pures, état de vue dans `state/` | drei `<CameraControls>`, studio strict, cible abaissée |
+| Distance et studio (US-006) | Distance max par bureau (fenêtres de référence), espace du studio borne chaque pose | cyclo agrandi, borne fixe plus haute, azimut limité |
 
 ### Points à trancher avec le developer (ADR applicatifs)
 - Framework UI et outil de build (préférence 3D : React + Vite + TypeScript strict).

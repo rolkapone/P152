@@ -211,6 +211,15 @@ describe("ViewRig", () => {
     expect(camera.position.y).toBeGreaterThanOrEqual(0.9 - 1e-6);
   });
 
+  it("raises the zoom-out limit to a framing narrower than the reference windows", () => {
+    const narrow: ScreenZone = { top: 53, left: 560, right: 560, width: 1366, height: 768 };
+    const { rig } = makeRig(true, () => narrow);
+    const deskLimit = cameraLimits(config).maxDistance;
+    expect(rig.limits.maxDistance).toBeGreaterThan(deskLimit);
+    expect(rig.endPose().radius).toBeGreaterThan(deskLimit);
+    expect(rig.endPose().radius).toBeLessThanOrEqual(rig.limits.maxDistance + 1e-9);
+  });
+
   it("releases the element on dispose", () => {
     const { rig, element } = makeRig();
     rig.dispose();

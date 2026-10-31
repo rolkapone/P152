@@ -35,14 +35,19 @@ import {
 } from "../../state";
 import {
   cameraLimits,
+  clampPose,
   clampPoseInto,
   createPose,
+  deskVolume,
   interpolatePoseInto,
   maxPolarForHeight,
+  maxRadiusInStudio,
   safeCameraY,
   stepPose,
   viewPose,
+  withMaxDistance,
   type CameraLimits,
+  type DeskVolume,
   type Pose,
   type ViewStep,
 } from "../math/camera";
@@ -130,7 +135,11 @@ export interface ViewRigOptions {
 
 export class ViewRig implements ViewController {
   readonly controls: CameraControlsImpl;
-  readonly limits: CameraLimits;
+  /** Limits of the desk shown now (zoom-out limit of the desk, ADR-3D-11). */
+  private deskLimits: CameraLimits;
+  /** The same, the zoom-out limit raised to the last framing so that it is never cut. */
+  private currentLimits: CameraLimits;
+  private desk: DeskVolume;
   private readonly camera: PerspectiveCamera;
   private readonly element: HTMLElement;
   private readonly config: StudioConfig;
@@ -165,18 +174,13 @@ export class ViewRig implements ViewController {
     this.now = options.now ?? (() => performance.now());
     this.freeZone = options.freeZone ?? (() => null);
     this.deskWidth = mmToM(options.config.desk.widthMm);
-    this.limits = cameraLimits(options.config);
+    this.desk = deskVolume(options.config);
+    this.deskLimits = cameraLimits(options.config, this.desk);
+    this.currentLimits = this.deskLimits;
 
     const controls = new CameraControlsImpl(options.camera);
     this.controls = controls;
-    const { limits } = this;
-    controls.minDistance = limits.minDistance;
-    controls.maxDistance = limits.maxDistance;
-    controls.minPolarAngle = limits.minPolar;
-    controls.maxPolarAngle = limits.maxPolar;
-    controls.minAzimuthAngle = limits.minAzimuth;
-    controls.maxAzimuthAngle = limits.maxAzimuth;
-    controls.setBoundary(new Box3(new Vector3(...limits.pan.min), new Vector3(...limits.pan.max)));
+    this.applyControlLimits();
     controls.boundaryFriction = 0;
     controls.dollyToCursor = false;
     controls.infinityDolly = false;
@@ -210,6 +214,23 @@ export class ViewRig implements ViewController {
     this.invalidate();
   }
 
+  /** Limits in force (those of the desk, the zoom-out limit raised to the last framing). */
+  get limits(): CameraLimits {
+    return this.currentLimits;
+  }
+
+  /** Static limits of camera-controls (the dynamic ones are set before each frame). */
+  private applyControlLimits(): void {
+    const { controls, currentLimits: limits } = this;
+    controls.minDistance = limits.minDistance;
+    controls.maxDistance = limits.maxDistance;
+    controls.minPolarAngle = limits.minPolar;
+    controls.maxPolarAngle = limits.maxPolar;
+    controls.minAzimuthAngle = limits.minAzimuth;
+    controls.maxAzimuthAngle = limits.maxAzimuth;
+    controls.setBoundary(new Box3(new Vector3(...limits.pan.min), new Vector3(...limits.pan.max)));
+  }
+
   setReducedMotion(reduced: boolean): void {
     this.reducedMotion = reduced;
     this.controls.smoothTime = reduced ? 0 : SMOOTH_TIME_S;
@@ -237,17 +258,28 @@ export class ViewRig implements ViewController {
     this.controls.getSpherical(this.spherical, true);
   }
 
-  /** Pose of a view in the zone of the last framing. */
+  /** Pose of a view in the zone of the last framing, with the limits in force. */
   viewPose(view: "reset" | "top" | "front"): Pose {
-    return viewPose(this.config, view, this.camera.aspect, this.limits, this.zone);
+    return viewPose(this.config, view, this.camera.aspect, this.limits, this.zone, this.desk);
   }
 
-  /** Reads the free zone now (it becomes `lensTo`), then frames the view in it. */
+  /**
+   * Reads the free zone now (it becomes `lensTo`), then frames the view in it. The zoom-out
+   * limit is raised to the framing if needed (a window taller than the reference ones), so a
+   * view is never cut by it; the studio space still bounds the camera.
+   */
   private frameView(view: "reset" | "top" | "front"): Pose {
     const zone = this.freeZone();
     this.zone = isUsableZone(zone) ? Object.freeze({ ...zone }) : null;
     lensInto(this.lensTo, this.zone);
-    return this.viewPose(view);
+    const free = withMaxDistance(this.deskLimits, Infinity);
+    const pose = viewPose(this.config, view, this.camera.aspect, free, this.zone, this.desk);
+    this.currentLimits = withMaxDistance(
+      this.deskLimits,
+      Math.max(this.deskLimits.maxDistance, pose.radius),
+    );
+    this.applyControlLimits();
+    return clampPose(pose, this.currentLimits);
   }
 
   /**
@@ -305,10 +337,15 @@ export class ViewRig implements ViewController {
     } else {
       // Zooming in lowers the largest tilt that keeps the camera above minCameraY.
       this.readEnd();
-      const { radius, phi } = this.spherical;
+      const { radius, phi, theta } = this.spherical;
       const maxPolar = maxPolarForHeight(this.target.y, radius, limits.minCameraY, limits.maxPolar);
       controls.maxPolarAngle = maxPolar;
       if (phi > maxPolar + 1e-6) void controls.rotatePolarTo(maxPolar, !this.reducedMotion);
+      // Turning towards the back wall while zoomed out brings the camera closer (ADR-3D-11).
+      const studio = maxRadiusInStudio(this.target.x, this.target.z, phi, theta, limits.keepIn);
+      const maxRadius = Math.max(limits.minDistance, Math.min(limits.maxDistance, studio));
+      controls.maxDistance = maxRadius;
+      if (radius > maxRadius + 1e-6) void controls.dollyTo(maxRadius, !this.reducedMotion);
     }
     const moving = controls.update(Math.min(deltaSeconds, MAX_DELTA_S));
     this.updateLensShift();
@@ -355,6 +392,8 @@ export class ViewRig implements ViewController {
   private applyPose(pose: Pose, smooth: boolean): void {
     const { controls, limits } = this;
     const safe = clampPoseInto(this.safePose, pose, limits);
+    // Lifted here, lowered again before the next frame where the studio requires it.
+    controls.maxDistance = Math.max(safe.radius, limits.maxDistance);
     controls.maxPolarAngle = Math.max(
       safe.polar,
       maxPolarForHeight(safe.target[1], safe.radius, limits.minCameraY, limits.maxPolar),
