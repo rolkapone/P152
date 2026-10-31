@@ -13,18 +13,18 @@
 
 /* ---- Police auto-hebergee (APP UNIQUEMENT, hors bloc synchronise) -----------
    Inter variable, sous-ensemble latin, licence SIL OFL 1.1.
-   Fichier : public/fonts/inter-latin-wght-normal.woff2 (~48 Ko), servi en same-origin
+   Fichier : public/fonts/inter-latin-wght-normal.woff2 (69 Ko : opsz fige a 14, toutes
+   les fonctions OpenType, dont ss03 de --font-features), servi en same-origin
    (CSP : font-src 'self'). Aucune requete vers Google Fonts / CDN.
-   Obtention : copier le fichier du paquet npm @fontsource-variable/inter (fichier
-   files/inter-latin-wght-normal.woff2) dans public/fonts/ puis consigner la licence
-   (voir design-system.md section 4). Ne PAS importer le CSS du paquet au runtime. */
+   Obtention et empreintes : docs/design/3d/licences-assets.md (release rsms/inter 4.1).
+   url() seul, sans local() : une Inter installee (axe opsz libre, autre version) rendrait
+   autrement que la coupe livree et que les captures (controle US-005). */
 @font-face {
   font-family: "Inter";
   font-style: normal;
   font-weight: 100 900;
   font-display: swap;
-  src: local("Inter Variable"), local("Inter"),
-       url("/fonts/inter-latin-wght-normal.woff2") format("woff2");
+  src: url("/fonts/inter-latin-wght-normal.woff2") format("woff2");
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
                  U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
                  U+2212, U+2215, U+FEFF, U+FFFD;
