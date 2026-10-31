@@ -17,7 +17,7 @@ describe("design tokens copy", () => {
     expect(syncedPart("src/ui/styles/tokens.css")).toBe(syncedPart("docs/design/ui/tokens.css"));
   });
 
-  it("does not load a font file that is not shipped yet (Inter is self-hosted in US-005)", () => {
+  it("loads no file itself: the Inter @font-face lives in src/ui/styles/fonts.css", () => {
     expect(readFileSync("src/ui/styles/tokens.css", "utf8")).not.toMatch(/url\(/);
   });
 });

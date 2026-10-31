@@ -53,7 +53,7 @@ describe("App", () => {
   it("renders its title through i18n", async () => {
     vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(null); // no WebGL in jsdom
     const { container, root } = await renderApp();
-    expect(container.querySelector("h1")?.textContent).toBe("P152");
+    expect(container.querySelector("h1")?.textContent).toBe("Deskfit");
     // Without a scene, the region neither takes the focus nor announces the keys.
     const view = container.querySelector("[data-scene-status]");
     expect(view?.hasAttribute("aria-label")).toBe(false);

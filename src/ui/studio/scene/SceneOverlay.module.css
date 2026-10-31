@@ -30,8 +30,9 @@
 
 .loadingText {
   margin: 0;
-  font-size: var(--text-md);
-  font-weight: var(--weight-medium);
+  font: var(--font-headline);
+  letter-spacing: var(--tracking-headline);
+  font-feature-settings: var(--font-features);
 }
 
 /* Opaque card (no glass): the message must stay readable whatever is behind. */
@@ -59,10 +60,9 @@
 
 .cardTitle {
   margin: 0;
-  font-size: var(--text-xl);
-  font-weight: var(--weight-semibold);
-  letter-spacing: var(--tracking-tight);
-  line-height: var(--leading-tight);
+  font: var(--font-title-2);
+  letter-spacing: var(--tracking-title-2);
+  font-feature-settings: var(--font-features);
 }
 
 /* The title receives the focus by script so that it is read first; it is not a control,
@@ -74,12 +74,17 @@
 
 .cardBody {
   margin: 0;
-  font-size: var(--text-md);
-  line-height: var(--leading-normal);
+  font: var(--font-body);
+  letter-spacing: var(--tracking-body);
+  font-feature-settings: var(--font-features);
   color: var(--color-text);
 }
 
-.cardAction {
+/* Stacked buttons: "Try again" (primary), then "Reload page" from the 2nd failure. */
+.cardActions {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-2);
   margin-top: var(--space-2);
 }
 
@@ -90,12 +95,13 @@
 }
 
 /* ---- Dock: view bar at the bottom centre, tip above it ---- */
-/* DOM order = Tab order (bar, then tip: UX-3); column-reverse draws the tip above the bar. */
+/* DOM order = Tab order (bar, then tip: UX-3); column-reverse draws the tip above the bar.
+   Centred in the free zone between the docked panes (--dl / --dr, set by the Studio shell). */
 .dock {
   position: absolute;
-  left: var(--float-inset);
-  right: var(--float-inset);
-  bottom: var(--float-inset);
+  left: calc(var(--dl, 0px) + var(--float-inset));
+  right: calc(var(--dr, 0px) + var(--float-inset));
+  bottom: var(--space-5);
   display: flex;
   flex-direction: column-reverse;
   align-items: center;
@@ -119,32 +125,36 @@
   }
 }
 
+/* material-thin + float (thin: primary text and icons only, design-system.md §5). */
 .bar {
   position: relative;
   display: flex;
-  gap: var(--space-2);
-  padding: var(--space-2);
+  /* 2 px between the pills, 4 px around them (3 px under 420 px): mockup values. */
+  gap: calc(var(--space-1) / 2);
+  padding: var(--space-1);
   border-radius: var(--radius-pill);
-  animation: rise var(--duration-slow) var(--ease-spring) both;
+  animation: rise var(--duration-spring) var(--ease-spring) both;
 }
 
 @container scene (max-width: 420px) {
   .bar {
-    /* 6 px: mockup value under 420 px. */
-    padding: calc(var(--space-1) + 2px);
+    padding: calc(var(--space-1) * 3 / 4);
   }
 }
 
+/* material-regular + float (any text). */
 .tip {
   display: flex;
   align-items: center;
   gap: var(--space-3);
   width: min(100%, 720px);
-  padding: var(--space-3) var(--space-4);
+  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4);
   border-radius: var(--radius-xl);
-  font-size: var(--text-sm);
-  line-height: var(--leading-normal);
-  animation: rise var(--duration-slow) var(--ease-spring) both;
+  color: var(--color-text);
+  font: var(--font-subheadline);
+  letter-spacing: var(--tracking-subheadline);
+  font-feature-settings: var(--font-features);
+  animation: rise var(--duration-spring) var(--ease-spring) both;
 }
 
 .tipIcon {
@@ -160,7 +170,7 @@
   display: flex;
   flex: none;
   align-items: center;
-  gap: var(--space-2);
+  gap: var(--space-1);
 }
 
 @container scene (max-width: 560px) {

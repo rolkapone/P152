@@ -1,0 +1,31 @@
+/* design-system.md §15, maquette US-005 `.empty` */
+.empty {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-1);
+  padding: var(--space-6) var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  text-align: center;
+}
+
+.badge {
+  display: grid;
+  place-items: center;
+  width: var(--control-lg);
+  height: var(--control-lg);
+  margin-bottom: var(--space-2);
+  border-radius: 50%;
+  background: var(--color-fill);
+  color: var(--color-text-muted);
+}
+
+.title {
+  margin: 0;
+  color: var(--color-text);
+}
+
+.description {
+  margin: 0;
+  color: var(--color-text-muted);
+}

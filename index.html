@@ -3,12 +3,24 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>P152</title>
+    <meta name="color-scheme" content="light dark" />
+    <!-- Same text as common.json app.title (set again from i18n by src/main.tsx). -->
+    <title>Deskfit - Plan your desk setup</title>
+    <!-- Self-hosted Inter (design-system.md §4), fetched early: same origin, CORS mode as @font-face. -->
+    <link
+      rel="preload"
+      href="/fonts/inter-latin-wght-normal.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
     <!-- Static copy of the inline stylesheet that React Aria usePress would inject at runtime (blocked by
          style-src 'self'). Same id: React Aria then skips its own injection. See SEC-03a. -->
     <link rel="stylesheet" id="react-aria-pressable-style" href="/react-aria-pressable.css" />
   </head>
   <body>
+    <!-- Static, outside i18n: shown only without JavaScript (UX US-005 §2.5). -->
+    <noscript>Turn on JavaScript to use this app.</noscript>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

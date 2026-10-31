@@ -6,6 +6,24 @@ import { waitForScene } from "./helpers/perf";
 // with the UI (developer / QA).
 
 const status = (page: Page) => page.locator("[data-scene-status]");
+const frames = (page: Page) =>
+  page.evaluate(() => (window as unknown as { __p152perf: { frames: number } }).__p152perf.frames);
+
+/**
+ * Loads the scene with a fake page clock, then freezes it: animation frames only run when the
+ * test advances the clock, so "no frame while idle" is checked over an exact span of page
+ * time, whatever the load of the machine (no real-time wait). The first second lets the
+ * camera damping settle.
+ */
+async function openFrozen(page: Page) {
+  await page.clock.install();
+  await page.goto("/");
+  await waitForScene(page);
+  const now = await page.evaluate(() => Date.now());
+  // Wide margin: pauseAt cannot jump to the past (docs/qa/ci-e2e-runner.md).
+  await page.clock.pauseAt(now + 60_000);
+  await page.clock.runFor(1000);
+}
 
 test("the 3D view starts in a labelled, focusable region without console errors", async ({
   page,
@@ -28,34 +46,23 @@ test("the 3D view starts in a labelled, focusable region without console errors"
 });
 
 test("renders on demand: no frame while nothing changes", async ({ page }) => {
-  await page.goto("/");
-  await waitForScene(page);
-  const frames = () =>
-    page.evaluate(
-      () => (window as unknown as { __p152perf: { frames: number } }).__p152perf.frames,
-    );
-  await page.waitForTimeout(500);
-  const before = await frames();
-  await page.waitForTimeout(1000);
-  expect(await frames()).toBe(before);
+  await openFrozen(page);
+  const before = await frames(page);
+  await page.clock.runFor(1000); // one second of page time: 60 animation frames offered
+  expect(await frames(page)).toBe(before);
 });
 
 test("view keys act only when the 3D view has the focus", async ({ page }) => {
-  await page.goto("/");
-  await waitForScene(page);
-  const frames = () =>
-    page.evaluate(
-      () => (window as unknown as { __p152perf: { frames: number } }).__p152perf.frames,
-    );
-  await page.waitForTimeout(300);
-  const idle = await frames();
+  await openFrozen(page);
+  const idle = await frames(page);
   await page.keyboard.press("1"); // focus is on the page body: nothing happens
-  await page.waitForTimeout(300);
-  expect(await frames()).toBe(idle);
+  await page.clock.runFor(500);
+  expect(await frames(page)).toBe(idle);
 
   await page.getByRole("group", { name: /3D view of your desk/ }).focus();
   await page.keyboard.press("1"); // Top view (instant: reduced motion in the E2E config)
-  await expect.poll(frames).toBeGreaterThan(idle); // a new frame, however loaded the machine
+  await page.clock.runFor(500);
+  expect(await frames(page)).toBeGreaterThan(idle);
   await expect(status(page)).toHaveAttribute("data-scene-status", "ready");
 });
 

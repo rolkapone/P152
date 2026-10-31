@@ -38,7 +38,7 @@ const close = (actual: readonly number[], expected: readonly number[], digits = 
 describe("cameraLimits (studio.json -> radians, metres)", () => {
   it("converts the catalog limits", () => {
     expect(limits.minDistance).toBe(0.8);
-    expect(limits.maxDistance).toBe(4.5);
+    expect(limits.maxDistance).toBe(7);
     expect(limits.maxPolar).toBeCloseTo(89 * DEG2RAD);
     expect(limits.minAzimuth).toBeCloseTo(-109 * DEG2RAD);
     expect(limits.minCameraY).toBe(0.9);
@@ -149,8 +149,8 @@ describe("fitRadius", () => {
   it("matches the analytic distance for a box seen from the front", () => {
     const box = { min: [-1, -0.5, 0] as Vec3, max: [1, 0.5, 0] as Vec3 };
     const tan = Math.tan((32 * DEG2RAD) / 2);
-    // Height-bound at aspect 1 (width / aspect > height): 1 / (tan / margin)
-    const plain = { margin: 1, bottomInset: 0, lensShift: 0 };
+    // Height-bound at aspect 1 (width / aspect > height): 1 / tan
+    const plain = { left: -1, right: 1, bottom: -1, top: 1, centerX: 0, centerY: 0 };
     expect(fitRadius(box, [0, 0, 0], Math.PI / 2, 0, 32, 1, plain)).toBeCloseTo(1 / tan);
     expect(fitRadius(box, [0, 0, 0], Math.PI / 2, 0, 32, 4, plain)).toBeCloseTo(0.5 / tan);
   });
@@ -159,12 +159,26 @@ describe("fitRadius", () => {
     const below = { min: [-0.1, -0.5, 0] as Vec3, max: [0.1, 0, 0] as Vec3 };
     const above = { min: [-0.1, 0, 0] as Vec3, max: [0.1, 0.5, 0] as Vec3 };
     const tan = Math.tan((32 * DEG2RAD) / 2);
-    const framing = { margin: 1, bottomInset: 0.1, lensShift: 0.3 };
+    // Bottom inset 0.1 of the height (NDC -0.8), target drawn at NDC 0.3.
+    const framing = { left: -1, right: 1, bottom: -0.8, top: 1, centerX: 0, centerY: 0.3 };
     expect(fitRadius(below, [0, 0, 0], Math.PI / 2, 0, 32, 4, framing)).toBeCloseTo(
       0.5 / (tan * 1.1),
     );
     expect(fitRadius(above, [0, 0, 0], Math.PI / 2, 0, 32, 4, framing)).toBeCloseTo(
       0.5 / (tan * 0.7),
+    );
+  });
+
+  it("fits a box on each side of a target drawn off-centre (free zone between panels)", () => {
+    const leftOf = { min: [-1, 0, 0] as Vec3, max: [0, 0, 0] as Vec3 };
+    const rightOf = { min: [0, 0, 0] as Vec3, max: [1, 0, 0] as Vec3 };
+    const tan = Math.tan((32 * DEG2RAD) / 2);
+    const framing = { left: -0.5, right: 0.9, bottom: -1, top: 1, centerX: 0.1, centerY: 0 };
+    expect(fitRadius(leftOf, [0, 0, 0], Math.PI / 2, 0, 32, 1, framing)).toBeCloseTo(
+      1 / (tan * 0.6),
+    );
+    expect(fitRadius(rightOf, [0, 0, 0], Math.PI / 2, 0, 32, 1, framing)).toBeCloseTo(
+      1 / (tan * 0.8),
     );
   });
 });

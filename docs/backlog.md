@@ -7,11 +7,11 @@
 | Points MVP (Must + Should) | **99** (Must 89, Should 10) ; +1 pt : SEC-03a passe de 1 à 2 pts (correctif CSP React Aria, finding MEDIUM US-004) ; **+3 pts le 2026-10-20 : US-005 passe de 5 à 8 pts** (design natif v0.4, décision 32) |
 | Dont stories sécurité (SEC-01 à SEC-05) | 9 (Must 8, Should 1) |
 | Points « Could » MVP (hors total, bonus) | 9 (US-021, US-023, SEC-06) |
-| Points livrés | **16 / 99 = 16,2 %** (Sprint 1 : US-001 3, US-002 2, US-003 3, SEC-01 3, US-004 5, toutes DONE) |
+| Points livrés | **18 / 99 = 18,2 %** (Sprint 1 : US-001 3, US-002 2, US-003 3, SEC-01 3, US-004 5, toutes DONE = 16 ; Sprint 2 : SEC-03a 2, DONE) |
 | Vitesse moyenne | **16 pts/sprint** (1 sprint terminé, 16 pts livrés ; prévision prudente de 15 pts conservée pour le planning) |
-| Sprint en cours | **Sprint 2** (ouvert le 2026-10-20) : SEC-03a 2 + US-005 **8** + US-006 5 + SEC-02 1 = **16 pts engagés** (capacité prudente 15 : dépassement de 1 pt, marge 0 ; SEC-02 peut glisser au Sprint 3) ; après le Sprint 2, livrés prévus 32 / 99 (32,3 %), restants 67 |
-| Sprints restants estimés avant MVP | **6 y compris le Sprint 2** (83 pts restants / 16 = 5,2 ; 6 si la vitesse retombe à 15) ; 5 après le Sprint 2 (67 / 16 = 4,2, arrondi prudent) |
-| Dernière mise à jour | 2026-10-20 (SEC-03a DONE, mergée 42c15cd ; Sprint 2 : 2 / 13 pts engagés livrés ; ouverture du Sprint 2 ; plan dans `docs/sprints/sprint-2.md`). Les SHA de commits cités dans ce document sont périmés (historique réécrit) : voir `git log --merges --oneline main` |
+| Sprint en cours | **Sprint 2** (ouvert le 2026-10-20) : SEC-03a 2 (DONE) + US-005 **8** + US-006 5 + SEC-02 1 = **16 pts engagés** (capacité prudente 15 : dépassement de 1 pt, marge 0 ; SEC-02 peut glisser au Sprint 3) ; après le Sprint 2, livrés prévus 32 / 99 (32,3 %), restants 67 |
+| Sprints restants estimés avant MVP | **6 y compris le Sprint 2** (81 pts restants / 16 = 5,1, arrondi prudent à 6 ; 6 aussi si la vitesse retombe à 15) ; 5 après le Sprint 2 (67 / 16 = 4,2) |
+| Dernière mise à jour | 2026-10-30 (SEC-03a DONE, mergée, comptée dans les 18 pts ; voies attribuées au Sprint 2 dans `docs/sprints/sprint-2.md` ; reprise de US-005 après limite d'usage : T0 poussée, revue à refaire). Les SHA de commits cités dans ce document sont périmés (historique réécrit) : voir `git log --merges --oneline main` |
 
 Détail du recalcul : 83 pts (kickoff) + SEC-01 (3) + SEC-02 (1) + SEC-03a (2 depuis la fin du Sprint 1) + SEC-03b (1) + SEC-04 (1) + SEC-05 (1) + US-024 (2, réglages d'alertes) + US-025 (2, Help et préférences d'affichage) = 96, puis +3 (US-005 5 → 8, restylage natif v0.4) = **99**. Les autres éléments issus de US-004 (dette, mineurs QA) sont des critères ajoutés à des stories existantes ou à SEC-06 (Could), sans point supplémentaire ; à réestimer au planning du Sprint 2 s'ils pèsent.
 Hypothèse : le premier déploiement public n'a lieu qu'à la fin du MVP (SEC-03a avant le premier push, SEC-03b avant ce déploiement, SEC-05 juste avant la release).
@@ -39,7 +39,7 @@ Aucune question ouverte pour le Sprint 2 : la question 1 (bornes du bureau) est 
 
 ### US-001 — Setup repo, build et CI  [Must | 3 pts]
 En tant qu'équipe, je veux un repo avec build, lint, tests et CI afin de livrer chaque story de façon fiable.
-**État au 2026-10-19 : DONE.** Mergée dans `main` (merge `--no-ff` dfdfcfe). Revue APPROVE au cycle 2/3 (`docs/reviews/US-001.md` ; cycle 1 bloqué sur l'audit tinypool/vitest, corrigé par Vitest 4.1.12). Secdevops PASS (`docs/security/scans/US-001.md`). Checks locaux verts (`docs/ci/local-run-US-001.md`). **Écart consigné** : la CI distante n'a pas été exécutée (décision PO : pas de dépôt ni de push au Sprint 1) ; son exécution réelle est reportée au Sprint 2 (SEC-01, SEC-02).
+**État au 2026-10-19 : DONE.** Mergée dans `main` (merge `--no-ff` dfdfcfe). Revue APPROVE au cycle 2/3 (`docs/reviews/US-001.md` ; cycle 1 bloqué sur l'audit tinypool/vitest, corrigé par Vitest 4.1.12). Secdevops PASS (`docs/security/scans/US-001.md`). Checks locaux verts (`docs/ci/local-run-US-001.md`). **Écart consigné** : la CI distante n'a pas été exécutée (décision PO : pas de dépôt ni de push au Sprint 1) ; son exécution réelle est reportée au Sprint 2 (SEC-01, SEC-02). **Levé le 2026-10-21** : CI distante exécutée sur la PR #2 (mergée, 925469d), 17/17 jobs verts.
 Critères d'acceptation :
 - [x] Étant donné un clone propre, quand on lance `pnpm install --frozen-lockfile` puis le build, alors il réussit sans erreur (premier `pnpm install && pnpm check` exécuté, `pnpm-lock.yaml` commité).
 - [x] Étant donné les jobs de `ci.yml`, quand on lance en local les mêmes commandes que ceux-ci (lint, types, tests unitaires, build), alors tout est vert. *(Décision PO 2026-10-19 : pas de dépôt GitHub ni de push au Sprint 1 ; la vérification de l'exécution réelle de la CI sur une PR est reportée au Sprint 2.)*
@@ -90,15 +90,15 @@ En tant qu'équipe, je veux que chaque PR soit scannée (secrets, SAST, dépenda
 **État au 2026-10-20 : DONE.** Mergée dans `main` (360a597). Revue APPROVE au cycle 1/3 ; secdevops PASS. La PR de test distante et le SARIF sont reportés au Sprint 2 (décision PO, pas de push) ; les findings restants sont tracés dans SEC-06.
 Critères d'acceptation :
 - [x] Le slot `# SECDEVOPS-SLOT` de `ci.yml` contient les jobs de `docs/security/ci-security.md` (gitleaks, CodeQL, Semgrep, zizmor, SCA + licences, `build-hardening`) et un job agrégateur `security` requis par `ci-ok`.
-- [ ] *(reporté au Sprint 2 : exige le dépôt distant, décision PO 2026-10-19)* Une PR de test contenant un faux secret, un `innerHTML`, une dépendance vulnérable HIGH, et un `dist` contenant `__p152test` fait échouer la CI (4 cas vérifiés puis annulés).
+- [ ] *(reste à faire, rattaché à SEC-02 T5 : la première PR distante, #2, est celle du correctif E2E, sans cas négatifs)* Une PR de test contenant un faux secret, un `innerHTML`, une dépendance vulnérable HIGH, et un `dist` contenant `__p152test` fait échouer la CI (4 cas vérifiés puis annulés).
 - [x] `.gitleaks.toml`, `.semgrep/p152.yml`, `scripts/check-licenses.mjs`, `.github/dependabot.yml` et le workflow hebdomadaire sont en place ; actions et images épinglées par SHA/digest.
 - [x] *(vérification locale, Sprint 1)* Chaque job de sécurité est exécuté en local avec la même commande que dans `ci.yml` (gitleaks, SCA + licences, zizmor, `build-hardening` hors contrôle `_headers`, Semgrep) et le résultat est consigné dans `docs/ci/local-run-SEC-01.md` ; ce qui n'est pas exécutable en local (CodeQL, Semgrep si Docker est arrêté) est listé comme non vérifié, jamais comme vert.
 - [x] *(vérification locale)* Les 4 cas négatifs (faux secret, `innerHTML`, dépendance HIGH, `__p152test` dans `dist`) sont rejoués en local sur une copie jetable, chacun fait échouer la commande du job correspondant, puis tout est annulé (arbre propre) ; les cas non faisables sont consignés.
 - [x] `docs/security/ci/` porte un bandeau « obsolète : les fichiers actifs sont à la racine / dans `.github/` » (finding de la revue US-002).
-- [ ] *(reporté au Sprint 2 : exige le dépôt distant)* Les rapports SARIF remontent dans l'onglet Code scanning.
+- [x] Les rapports SARIF remontent dans l'onglet Code scanning. *(vérifié sur la PR #2, première CI distante 17/17 verte ; `dependency-review` exécuté sur la PR)*
 Notes techniques / dépendances : devops + secdevops. Dépend de US-001 (CI exécutée au moins une fois). Le contrôle `dist/_headers` de `build-hardening` **reste bloquant** (décision secdevops, scan US-001) : il n'y a pas d'avertissement toléré. La génération de `public/_headers` est donc livrée par SEC-03a **avant le premier push** (Sprint 2, en tête). Les findings LOW du scan US-001 sont regroupés dans SEC-06.
 
-### SEC-02 — Durcissement du dépôt GitHub public  [Must | 1 pt]
+### SEC-02 — Durcissement du dépôt GitHub public  [Must | 1 pt | voie RENFORCÉE]
 En tant qu'équipe, je veux un dépôt public durci afin de réduire le risque de compromission de la chaîne de production.
 Critères d'acceptation :
 - [ ] MFA actif sur les comptes ayant un accès en écriture.
@@ -106,6 +106,9 @@ Critères d'acceptation :
 - [ ] Secret scanning + push protection, Dependabot alerts, private vulnerability reporting activés ; `SECURITY.md` publié.
 - [ ] Actions : `GITHUB_TOKEN` en lecture seule par défaut, approbation requise pour les workflows des contributeurs externes, épinglage SHA obligatoire si l'option est disponible.
 - [ ] `CODEOWNERS` couvre `.github/`, `config/security-headers.mjs`, `package.json`, `pnpm-lock.yaml`, `pnpm-workspace.yaml`, `.npmrc`, `.gitleaks.toml`, `.semgrep/`.
+- [ ] *(suivi PR #2)* Les alertes Dependabot, aujourd'hui **désactivées**, sont activées par le PO (Settings > Code security) ; vérifiable : l'onglet Security > Dependabot est accessible.
+- [ ] *(suivi PR #2)* Les 4 alertes de code scanning `p152-test-hook-reference` sur `PerfProbe.tsx` sont fermées comme faux positifs (« used in tests / false positive », hook protégé par `VITE_E2E`), avec un commentaire de justification ; vérifiable : 0 alerte ouverte de cette règle.
+- [ ] *(reporté de SEC-01)* La PR de test avec les 4 cas négatifs (faux secret, `innerHTML`, dépendance HIGH, `__p152test`) fait échouer la CI, puis est fermée sans merge.
 Notes techniques / dépendances : devops. **Les réglages du compte/dépôt GitHub ne sont appliqués qu'avec l'accord explicite du PO** (le PO réalise ou valide chaque action). Dépend de US-001 et de la création du dépôt distant.
 
 ### SEC-03a — Génération des en-têtes de sécurité (`_headers`, CSP) et CSP de React Aria  [Must, avant le premier push | 2 pts]
@@ -154,6 +157,7 @@ Critères d'acceptation :
 - [ ] *(suggestion revue SEC-03a)* Le test `skipIf` de `security-headers` ne peut plus masquer un échec (il échoue si `dist/` est absent en CI) ; `apply: () => true` du plugin est justifié ou remplacé par une condition explicite.
 - [ ] *(suggestion revue SEC-03a)* `csp.spec` utilise `waitForScene` (signal de scène prête) au lieu d'une attente implicite.
 - [ ] *(suivi SEC-03a, à traiter par la première story qui ajoute une modale ou un popover)* `usePreventScroll` de React Aria (overlays, modales) injecte un `<style>` au runtime, contraire à `style-src` : la story concernée doit prévoir le même correctif (feuille statique) ou une alternative, avec test E2E sous CSP. Non traité ici faute de composant concerné.
+- [ ] *(suivi PR #2, qa-tester)* `perf.spec` vérifie un budget de temps de chargement de la scène (seuil proposé par le qa-tester, valeur validée par le PO) ; le commentaire de `pauseClock` est corrigé pour refléter son comportement réel ; `docs/qa/ci-e2e-runner.md:7` est précisé (formulation corrigée selon la revue).
 - [ ] *(règle « 10 runs E2E sous charge », reformulée)* La règle « 10 exécutions sous charge CPU sans limite » est abandonnée (impossible à tenir par construction). Définition de `docs/reviews/SEC-03a.md` : (1) référence CI : 10 runs `CI=1 pnpm test:e2e` dans l'image Playwright épinglée limitée à `--cpus=4 --memory=8g`, 0 échec ; (2) stress local informatif : charge à 50 % des threads logiques, 4 workers, 10 runs, 0 échec dû à une assertion ou à une attente de test ; (3) contrôle de conception : `--repeat-each=10` vert sans charge et aucun `waitForTimeout` dans `tests/e2e`. Remplace le critère de 10 runs sous charge ci-dessus.
 Notes techniques / dépendances : devops + secdevops. Source : `docs/security/scans/US-001.md`, scan SEC-01, scan et revue SEC-03a. Hors total MVP (Could).
 
@@ -213,7 +217,7 @@ Décisions UX **VALIDÉES par le PO le 2026-10-19** :
 Notes techniques / dépendances : graphics-engineer + technical-artist ; ux-designer/ui-designer pour la barre flottante de scène. Dépend de US-001, US-003. Références : maquette `docs/design/ui/maquettes/index.html` (barre de scène), `docs/design/3d/apercu/index.html`, `docs/design/3d/direction-artistique.md` §3 et §10, wireframe W2.
 Références de design US-004 : UX `docs/design/ux/stories/US-004.md` ; maquette `docs/design/ui/maquettes/US-004.html` (**section 7 = consignes developer**, `docs/design/ui/design-system.md` §14) ; paramètres de scène `assets/catalog/scene/studio.json` ; spécification 3D `docs/design/3d/US-004-scene.md` (transition caméra 480 ms, cible (0 ; 0,72 ; 0), caméra jamais sous Y = 0,9 m ni dans le bureau).
 
-### US-005 — Shell de l'application en anglais  [UI] [Must | 8 pts]
+### US-005 — Shell de l'application en anglais  [UI] [Must | 8 pts | voie RENFORCÉE]
 > **Réestimée de 5 à 8 pts le 2026-10-20** (décision 32) : la direction v0.4 « Natif · Premium · Précis » ajoute la fenêtre macOS (barre d'outils unifiée, barre latérale, inspecteur), le repli iPadOS/iOS, 4 matériaux translucides, l'échelle typographique Apple en Inter et le restylage de la barre de vue, de l'astuce et des écrans de US-004. **Les critères « panneaux flottants », « verre 86 % » et « 758 px » ci-dessous sont remplacés par ceux de la rubrique v0.4** (le critère v0.4 prime en cas de conflit). Redécoupage envisageable si le developer le demande (ex. restylage de US-004 en story à part).
 En tant qu'utilisateur, je veux une interface claire en anglais (zone 3D, panneau d'objets, panneau de propriétés, alertes) afin de m'y repérer sans aide.
 Critères d'acceptation :
@@ -263,11 +267,11 @@ Critères d'acceptation :
   - Contrastes AA vérifiés sur chaque matériau, clair et sombre ; contrôle design contre les maquettes v0.4.
   - La **Liquid Glass** n'est pas dans cette story (voir US-025).
 Références de design US-005 : UX `docs/design/ux/stories/US-005.md` ; maquette `docs/design/ui/maquettes/US-005.html` ; `docs/design/ui/design-system.md` §15 (shell), §9 et §14 (mis à jour). Le graphics-engineer ajuste le cadrage à la zone libre (UX-8, marge de vue en pixels).
-Notes techniques / dépendances : ux-designer, ui-designer, developer. Dépend de US-001. Références : maquette `docs/design/ui/maquettes/index.html`, `docs/design/ui/design-system.md` §2–§5 et §9, wireframes W2 et W11. Les ESLint `boundaries` et `i18next` arrivent avec cette story (écart ADR consigné).
+Notes techniques / dépendances : ux-designer, ui-designer, developer. Dépend de US-001. Références : maquette `docs/design/ui/maquettes/index.html`, `docs/design/ui/design-system.md` §2–§5 et §9, wireframes W2 et W11. Les garde-fous de couches et de texte en dur sont des règles ESLint natives et locales (`config/eslint-plugin-p152.mjs`, ADR-APP-10) ; `eslint-plugin-boundaries` et `eslint-plugin-i18next` sont écartés (US-005 T0).
 
 ## Epic C — Bureau
 
-### US-006 — Choisir un bureau dans un catalogue  [UI][3D] [Must | 5 pts]
+### US-006 — Choisir un bureau dans un catalogue  [UI][3D] [Must | 5 pts | voie STANDARD]
 En tant qu'utilisateur, je veux choisir un bureau parmi des modèles aux dimensions réelles afin de partir de mon vrai mobilier.
 Critères d'acceptation :
 - [ ] Étant donné le panneau gauche, alors un onglet **"Desk"** (à côté de "Objects", contrôle segmenté, wireframe W3) liste **7 bureaux** du catalogue (`desk.json` v2 et `desk-corner.json`) : rectangulaires 100×60, 120×60, 140×70, 160×80, 180×80 cm ; d'angle 160×140 et 180×160 cm (**orientés à droite pour ce sprint**), sous forme de **lignes** d'une colonne avec vignette, « L × P cm » et nom (cm dans la ligne, cm et mm dans le résumé).

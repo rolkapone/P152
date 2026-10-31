@@ -3,13 +3,13 @@
   z-index: var(--z-menu);
   max-width: calc(100vw - 2 * var(--float-inset));
   /* 6 / 10 px: value of the mockup (US-004 .tt), between two steps of the spacing scale. */
-  padding: calc(var(--space-1) + 2px) calc(var(--space-2) + 2px);
+  padding: calc(var(--space-1) * 3 / 2) calc(var(--space-2) + var(--space-1) / 2);
   border-radius: var(--radius-sm);
   background: var(--color-text);
   color: var(--color-surface);
-  font-family: var(--font-sans);
-  font-size: var(--text-sm);
-  line-height: var(--leading-tight);
+  font: var(--font-footnote);
+  letter-spacing: var(--tracking-footnote);
+  font-feature-settings: var(--font-features);
   pointer-events: none;
   transition: opacity var(--duration-fast) var(--ease-standard);
 }

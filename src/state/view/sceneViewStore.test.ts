@@ -75,6 +75,22 @@ function readyStore(result = { limitReached: false }) {
 }
 
 describe("sceneViewStore", () => {
+  it("counts consecutive failed starts, reset by a ready view only", () => {
+    const store = createSceneViewStore();
+    expect(store.getState().failures).toBe(0);
+    store.getState().setStatus("failed");
+    store.getState().setStatus("failed"); // same status: not a new failure
+    expect(store.getState().failures).toBe(1);
+    store.getState().retry();
+    store.getState().setStatus("failed");
+    expect(store.getState().failures).toBe(2);
+    store.getState().retry();
+    store.getState().setStatus("unsupported");
+    expect(store.getState().failures).toBe(2);
+    store.getState().setStatus("ready");
+    expect(store.getState().failures).toBe(0);
+  });
+
   it("starts loading, with no active view", () => {
     const state = createSceneViewStore().getState();
     expect(state).toMatchObject({ status: "loading", activeView: null, attempt: 0 });

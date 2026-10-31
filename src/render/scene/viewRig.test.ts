@@ -10,6 +10,7 @@ import {
   posesEqual,
   viewPose,
 } from "../math/camera";
+import type { ScreenZone } from "../math/framing";
 import { DEG2RAD } from "../math/units";
 import { stepFor, ViewRig } from "./viewRig";
 
@@ -22,7 +23,7 @@ afterEach(() => {
   for (const rig of rigs.splice(0)) rig.dispose();
 });
 
-function makeRig(reducedMotion = false) {
+function makeRig(reducedMotion = false, freeZone: () => ScreenZone | null = () => null) {
   let now = 0;
   const camera = new PerspectiveCamera(config.camera.fovDeg, ASPECT, 0.1, 40);
   const element = document.createElement("div");
@@ -36,6 +37,7 @@ function makeRig(reducedMotion = false) {
     invalidate,
     onPointerViewChange,
     now: () => now,
+    freeZone,
   });
   rigs.push(rig);
   const advance = (ms: number) => {
@@ -214,5 +216,126 @@ describe("ViewRig", () => {
     rig.dispose();
     expect(element.style.cursor).toBe("");
     rigs.splice(rigs.indexOf(rig), 1);
+  });
+});
+
+/** 1366 × 768 Studio window: toolbar 53, sidebar 248, inspector 312 (UX-8). */
+const STUDIO: ScreenZone = { top: 53, left: 248, right: 312, width: 1366, height: 768 };
+const CLOSED: ScreenZone = { ...STUDIO, left: 0, right: 0 };
+
+/** Desk corners on screen, in CSS px of the 1366 × 768 view, as rendered by the camera. */
+function deskRect(camera: PerspectiveCamera) {
+  camera.updateMatrixWorld();
+  const { min, max } = (() => {
+    const w = config.desk.widthMm / 2000;
+    const d = config.desk.depthMm / 2000;
+    return { min: [-w, 0, -d], max: [w, config.desk.heightMm / 1000, d] };
+  })();
+  const rect = { left: Infinity, right: -Infinity, top: Infinity, bottom: -Infinity };
+  const point = new Vector3();
+  for (const x of [min[0]!, max[0]!]) {
+    for (const y of [min[1]!, max[1]!]) {
+      for (const z of [min[2]!, max[2]!]) {
+        point.set(x, y, z).project(camera);
+        const px = ((point.x + 1) / 2) * STUDIO.width;
+        const py = ((1 - point.y) / 2) * STUDIO.height;
+        rect.left = Math.min(rect.left, px);
+        rect.right = Math.max(rect.right, px);
+        rect.top = Math.min(rect.top, py);
+        rect.bottom = Math.max(rect.bottom, py);
+      }
+    }
+  }
+  return rect;
+}
+
+function expectInside(camera: PerspectiveCamera, zone: ScreenZone) {
+  const rect = deskRect(camera);
+  expect(rect.left).toBeGreaterThanOrEqual(zone.left + 24);
+  expect(rect.right).toBeLessThanOrEqual(zone.width - zone.right - 24);
+  expect(rect.top).toBeGreaterThanOrEqual(zone.top + 24);
+}
+
+describe("ViewRig in the free zone (US-005 UX-8)", () => {
+  it("starts framed between the panels, with a margin of at least 24 px", () => {
+    const { rig, camera } = makeRig(true, () => STUDIO);
+    expect(posesEqual(rig.endPose(), viewPose(config, "reset", ASPECT, rig.limits, STUDIO))).toBe(
+      true,
+    );
+    expectInside(camera, STUDIO);
+    // The target is drawn at the centre of the free zone (left of the window centre here).
+    const target = rig.controls.getTarget(new Vector3()).project(camera);
+    expect(((target.x + 1) / 2) * 1366).toBeCloseTo((248 + 1366 - 312) / 2);
+  });
+
+  it.each(["top", "front", "reset"] as const)("%s frames the desk in the free zone", (view) => {
+    const { rig, camera } = makeRig(true, () => STUDIO);
+    rig.run({ type: "view", view });
+    rig.frame(0.016);
+    expectInside(camera, STUDIO);
+  });
+
+  it("collapsing a panel never moves the camera; the next view command uses the new zone", () => {
+    let zone = STUDIO;
+    const { rig, camera, invalidate } = makeRig(true, () => zone);
+    const before = deskRect(camera);
+    const pose = rig.endPose();
+    invalidate.mockClear();
+    zone = CLOSED;
+    rig.freeZoneChanged();
+    rig.frame(0.016);
+    expect(deskRect(camera)).toEqual(before);
+    expect(posesEqual(rig.endPose(), pose, 1e-12)).toBe(true);
+    expect(invalidate).not.toHaveBeenCalled();
+    rig.run({ type: "view", view: "reset" });
+    rig.frame(0.016);
+    expectInside(camera, CLOSED);
+    // Centred in the window now (the free zone was left of its centre).
+    const after = deskRect(camera);
+    expect(after.right - after.left).toBeGreaterThanOrEqual(before.right - before.left - 1e-6);
+    expect((after.left + after.right) / 2).toBeGreaterThan((before.left + before.right) / 2);
+  });
+
+  it("frames the start view again when the zone arrives late, until the view is touched", () => {
+    let zone: ScreenZone | null = null;
+    const { rig, camera } = makeRig(true, () => zone);
+    zone = STUDIO;
+    rig.freeZoneChanged();
+    rig.frame(0.016);
+    expectInside(camera, STUDIO);
+    // Once framed in a zone, later changes wait for the next command.
+    zone = CLOSED;
+    rig.freeZoneChanged();
+    rig.frame(0.016);
+    expectInside(camera, STUDIO);
+  });
+
+  it("never reframes a view the user has already moved", () => {
+    let zone: ScreenZone | null = null;
+    const { rig } = makeRig(true, () => zone);
+    rig.run({ type: "turn", direction: "left" });
+    const turned = rig.endPose();
+    zone = STUDIO;
+    rig.freeZoneChanged();
+    expect(posesEqual(rig.endPose(), turned, 1e-12)).toBe(true);
+  });
+
+  it("the lens glides with the transition to the new zone (no jump at its start)", () => {
+    let zone = STUDIO;
+    const { rig, camera, advance } = makeRig(false, () => zone);
+    const centreX = () => {
+      camera.updateMatrixWorld();
+      return rig.controls.getTarget(new Vector3()).project(camera).x;
+    };
+    const start = centreX();
+    zone = CLOSED;
+    rig.run({ type: "view", view: "reset" });
+    advance(0);
+    expect(centreX()).toBeCloseTo(start, 6);
+    advance(240);
+    expect(centreX()).toBeGreaterThan(start);
+    expect(centreX()).toBeLessThan(0);
+    for (let i = 0; i < 4; i++) advance(120);
+    expect(centreX()).toBeCloseTo(0, 6);
   });
 });

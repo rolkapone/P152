@@ -1,19 +1,22 @@
-/* design-system.md §7, maquettes .btn */
+/* Pill buttons of design-system.md v0.4 §7 / §9 (maquettes .btn): default = gray fill,
+   primary = solid accent with its own text colour (white text stays at 4.5:1 in dark),
+   ghost = transparent. The focus ring and halo come from tokens.css: no box-shadow here. */
 .button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: var(--space-2);
-  border-radius: var(--radius-md);
-  border: var(--border-width) solid transparent;
-  font-family: var(--font-sans);
+  border: 0;
+  border-radius: var(--radius-pill);
+  font: var(--font-callout);
   font-weight: var(--weight-medium);
-  line-height: 1;
+  letter-spacing: var(--tracking-callout);
+  font-feature-settings: var(--font-features);
+  white-space: nowrap;
   cursor: pointer;
   transition:
     background var(--duration-fast) var(--ease-standard),
-    transform var(--duration-fast) var(--ease-spring),
-    box-shadow var(--duration-base) var(--ease-standard);
+    transform var(--duration-base) var(--ease-spring);
 }
 
 .button[data-pressed] {
@@ -23,7 +26,6 @@
 .md {
   height: var(--control-md);
   padding: 0 var(--space-4);
-  font-size: var(--text-md);
 }
 
 .sm {
@@ -43,7 +45,7 @@
 }
 
 .secondary {
-  background: var(--color-surface-2);
+  background: var(--color-fill);
   color: var(--color-text);
 }
 
@@ -52,16 +54,16 @@
 }
 
 .primary {
-  background: var(--color-accent);
-  color: var(--color-on-accent);
+  background: var(--color-accent-solid);
+  color: var(--color-on-accent-solid);
 }
 
 .primary[data-hovered] {
-  background: var(--color-accent-hover);
+  background: var(--color-accent-solid-hover);
 }
 
 .primary[data-pressed] {
-  background: var(--color-accent-active);
+  background: var(--color-accent-solid-active);
 }
 
 .ghost {
@@ -70,5 +72,5 @@
 }
 
 .ghost[data-hovered] {
-  background: var(--color-surface-2);
+  background: var(--color-fill-hover);
 }

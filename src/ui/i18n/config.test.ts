@@ -15,12 +15,12 @@ describe("i18n", () => {
   it("defaults to English with bundled resources", () => {
     expect(i18n.language).toBe("en");
     expect(i18n.resolvedLanguage).toBe("en");
-    expect(i18n.t("app.name")).toBe("P152");
+    expect(i18n.t("app.name")).toBe("Deskfit");
   });
 
   it("has typed keys: an unknown key does not compile", () => {
-    // @ts-expect-error "app.title" does not exist in locales/en/common.json
-    expect(i18n.t("app.title")).toBe("app.title");
+    // @ts-expect-error "app.unknownKey" does not exist in locales/en/common.json
+    expect(i18n.t("app.unknownKey")).toBe("app.unknownKey");
   });
 
   it("translates every import error code produced by core", () => {

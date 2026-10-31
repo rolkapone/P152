@@ -1,24 +1,29 @@
+/* Icon sizes and stroke of the design system (§6); CSS wins over Lucide's attributes. */
 .icon {
   flex: none;
   fill: none;
   stroke: currentColor;
-  stroke-width: 1.75;
+  stroke-width: var(--icon-stroke);
   stroke-linecap: round;
   stroke-linejoin: round;
 }
 
-/* Icon sizes follow the spacing scale: 16 / 20 / 24 px. */
 .sm {
-  width: var(--space-4);
-  height: var(--space-4);
+  width: var(--icon-sm);
+  height: var(--icon-sm);
 }
 
 .md {
-  width: var(--space-5);
-  height: var(--space-5);
+  width: var(--icon-md);
+  height: var(--icon-md);
 }
 
 .lg {
-  width: var(--space-6);
-  height: var(--space-6);
+  width: var(--icon-lg);
+  height: var(--icon-lg);
+}
+
+.xl {
+  width: var(--icon-xl);
+  height: var(--icon-xl);
 }

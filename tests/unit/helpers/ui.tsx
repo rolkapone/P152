@@ -5,6 +5,15 @@ import type { ReactNode } from "react";
 import { I18nextProvider } from "react-i18next";
 import { createI18n } from "../../../src/ui/i18n/config";
 
+// jsdom has no CSS.escape, which React Aria collections (Tabs) use to find the focused item.
+if (typeof globalThis.CSS?.escape !== "function") {
+  const escape = (value: string) => value.replace(/[^\w-]/g, (char) => `\\${char}`);
+  Object.defineProperty(globalThis, "CSS", {
+    value: { ...globalThis.CSS, escape },
+    configurable: true,
+  });
+}
+
 /** Renders inside the app's i18n provider (English resources). */
 export function renderWithI18n(ui: ReactNode): RenderResult {
   return render(<I18nextProvider i18n={createI18n()}>{ui}</I18nextProvider>);

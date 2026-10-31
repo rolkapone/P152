@@ -47,6 +47,8 @@ export interface SceneViewState {
   readonly lastEvent: ViewEvent | null;
   /** Incremented by `retry()`: the view remounts a fresh renderer. */
   readonly attempt: number;
+  /** Consecutive "failed" starts since the last ready view ("Reload page" from 2, UX-15). */
+  readonly failures: number;
   /** Size of the displayed desk, for "3D view ready. Desk 140 by 70 cm." */
   readonly deskSizeMm: { readonly width: number; readonly depth: number } | null;
 
@@ -77,6 +79,7 @@ export function createSceneViewStore() {
     activeView: null,
     lastEvent: null,
     attempt: 0,
+    failures: 0,
     deskSizeMm: null,
 
     runViewCommand(command, source) {
@@ -107,7 +110,11 @@ export function createSceneViewStore() {
       if (get().activeView !== null) set({ activeView: null });
     },
     setStatus(status) {
-      if (get().status !== status) set({ status });
+      const current = get();
+      if (current.status === status) return;
+      if (status === "failed") set({ status, failures: current.failures + 1 });
+      else if (status === "ready") set({ status, failures: 0 });
+      else set({ status });
     },
     setDeskSize(size) {
       const current = get().deskSizeMm;

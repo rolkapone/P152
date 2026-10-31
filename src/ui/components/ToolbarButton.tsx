@@ -1,10 +1,10 @@
 /**
  * Pill buttons of the floating scene bar (design-system.md §14, maquette US-004 `.vb`):
- * 36 px high, icon 20 px + visible label 14 px / 500 (the label is the accessible name).
+ * 36 px high, icon 18 px + visible label Callout 15 px / 500 (the label is the accessible name).
  * - `ToolbarButton`: action (Reset view), no pressed state.
  * - `ToolbarToggleButton`: view toggle (Top, Front) on React Aria `ToggleButton`
- *   (`aria-pressed`); pressed = accent-subtle fill + 2 px accent contour + check icon in
- *   place of the view icon (same slot: no layout shift), never the colour alone.
+ *   (`aria-pressed`); pressed = accent-subtle fill + weight 600 + check icon in place of
+ *   the view icon (same slot: no layout shift), never the colour alone (v0.4: no contour).
  */
 import type { Ref } from "react";
 import {

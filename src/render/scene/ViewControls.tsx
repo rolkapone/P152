@@ -1,12 +1,13 @@
 /**
  * React binding of the view rig (viewRig.ts): creates it for the canvas camera, registers it
- * as the `ViewController` of the state store and drives it before each frame.
+ * as the `ViewController` of the state store and drives it before each frame. The free zone
+ * between the panels (Studio shell) is read when a view is framed (UX-8).
  */
 import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useRef } from "react";
 import type { PerspectiveCamera } from "three";
 import type { StudioConfig } from "../../core";
-import { useSceneView } from "../../state";
+import { useSceneView, useShellLayout } from "../../state";
 import { ViewRig } from "./viewRig";
 
 interface ViewControlsProps {
@@ -35,10 +36,15 @@ export function ViewControls({ config, reducedMotion }: ViewControlsProps) {
       reducedMotion: reduced.current,
       invalidate,
       onPointerViewChange: () => useSceneView.getState().notifyPointerViewChange(),
+      freeZone: () => useShellLayout.getState().freeZone,
     });
     rig.current = next;
     const detach = store.attachController(next);
+    const unsubscribe = useShellLayout.subscribe((state, previous) => {
+      if (state.freeZone !== previous.freeZone) next.freeZoneChanged();
+    });
     return () => {
+      unsubscribe();
       detach();
       next.dispose();
       rig.current = null;

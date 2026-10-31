@@ -12,7 +12,13 @@ const NODE_TESTS = [
 
 export default defineConfig({
   plugins: [react(), securityHeadersPlugin()],
-  build: { target: "es2023", sourcemap: false },
+  build: {
+    target: "es2023",
+    sourcemap: false,
+    // The minifier drops the @license headers: the notices of every bundled dependency (MIT,
+    // ISC for lucide-react…) ship in this file instead (US-005, licence kept).
+    license: { fileName: "THIRD_PARTY_LICENSES.md" },
+  },
   test: {
     projects: [
       { extends: true, test: { name: "node", environment: "node", include: NODE_TESTS } },
