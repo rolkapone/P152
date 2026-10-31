@@ -15,9 +15,10 @@ export default defineConfig({
   forbidOnly: isCI,
   // Pas de retry : un test instable est un bug à signaler, pas à masquer (règle QA).
   retries: 0,
-  // The 3D view renders with SwiftShader (CPU): more than a few parallel pages saturate the
-  // machine and time out (US-004, measured with 16 workers on 24 threads). Same idea as CI.
-  workers: isCI ? 2 : 4,
+  // The 3D view renders with SwiftShader (CPU): parallel pages saturate the CPU and time out
+  // in goto / waitForScene (US-004: 16 workers on 24 threads; US-005 QA: 4 workers with
+  // --repeat-each=3, docs/qa/US-005.md). 2 workers locally, as in CI.
+  workers: 2,
   reporter: isCI ? [["list"], ["html", { open: "never" }]] : [["list"]],
   // Runner CI (2 vCPU, SwiftShader) : chaque chargement de la scène prend ~15 s (4-5 s en local),
   // un test à plusieurs actions dépasse 30 s (docs/qa/ci-e2e-runner.md). Délais élargis, sans retry
