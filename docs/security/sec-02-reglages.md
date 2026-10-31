@@ -64,3 +64,12 @@ Préférer `gh pr merge <n> --merge --admin` (bypass `pull_request`) à la désa
 
 ## Accords du PO (2026-10-31)
 Réglages appliqués hors ruleset, bypass Admin `pull_request`, exception minimatch (voir `exceptions.md`), sans `delete_branch_on_merge`, licence reportée, MFA confirmée. Ruleset : après correction du test de fuzz.
+
+## Application (2026-10-31)
+
+- PR #18 mergée (CI verte, `sha_pinning_required` n'a refusé aucune action).
+- Ruleset `main` (id 26280126) : le mode `evaluate` est refusé par le plan (422, Enterprise). Créé en `disabled`, T5 jouée, puis passé `active`.
+- T5 (PR #19, fermée sans merge, branche supprimée) : faux secret `github-pat` bloqué par gitleaks ; lodash 4.17.20 bloqué par `pnpm audit` ; `__p152test` bloqué par `check:bundle` ; injection de template bloquée par zizmor.
+- La règle `code_scanning` bloquait toute PR, même verte (PR #20 en `BLOCKED`, check CodeQL « neutral »). Retirée sur décision du PO.
+- État final : ruleset `active` = `deletion`, `non_fast_forward`, `pull_request` (merge commit seul), `required_status_checks` (`ci-ok`, app 15368) ; bypass Admin `pull_request` seulement.
+- À faire (SEC-06) : remettre la garde CodeQL >= high dans la CI, par exemple un job qui échoue s'il existe une alerte CodeQL high ouverte sur la PR.
