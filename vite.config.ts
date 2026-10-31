@@ -20,6 +20,8 @@ export default defineConfig({
     license: { fileName: "THIRD_PARTY_LICENSES.md" },
   },
   test: {
+    // Fixed fast-check seed for every property test, overridable with FC_SEED (README).
+    setupFiles: ["tests/unit/setup/fastCheck.ts"],
     projects: [
       { extends: true, test: { name: "node", environment: "node", include: NODE_TESTS } },
       {
