@@ -1,0 +1,9 @@
+# Default owner for everything
+*                              @rolkapone
+
+# Security-sensitive paths (explicit, so they stay protected if the default changes)
+/.github/                      @rolkapone
+/.gitleaks.toml                @rolkapone
+/.semgrep/                     @rolkapone
+/config/security-headers.mjs   @rolkapone
+/scripts/check-*               @rolkapone
