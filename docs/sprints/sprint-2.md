@@ -21,10 +21,10 @@ Reports du Sprint 1 : US-001 T6 (CI distante), SEC-01 T5/T6 (PR de test, SARIF) 
 
 ## Conditions et décisions du PO applicables
 
-- **Premier push** : seulement (1) SEC-03a mergée, (2) MFA du PO activée, (3) réglages du dépôt (SEC-02) validés par le PO, (4) **accord explicite du PO à ce moment-là**. Historique déjà réécrit avec l'adresse noreply GitHub (règle permanente : jamais l'e-mail pro). Le remote `origin` = https://github.com/rolkapone/P152.git (public, vide) est ajouté ; **rien n'est poussé**. Aucun agent ne pousse sans cet accord.
+- **Premier push** : conditions dans [decisions.md](../decisions.md) (décisions 23, 24 et 38). Historique déjà réécrit avec l'adresse noreply GitHub (règle permanente : jamais l'e-mail pro). Le remote `origin` = https://github.com/rolkapone/P152.git (public) est ajouté.
 - Docker tourne : Semgrep exécutable ce sprint.
-- Texte neutre de l'état `failed` accepté (décision 27) ; ombre de contact à alléger (26).
-- **SHA périmés** : l'historique ayant été réécrit, tous les SHA cités dans les docs (sprint-1, backlog, `docs/reviews/`, `docs/security/scans/`, `docs/ci/`) sont périmés ; la source de vérité est `git log --merges --oneline main`.
+- Texte neutre de l'état `failed` (décision 27) ; ombre de contact à alléger (26) : voir [decisions.md](../decisions.md).
+- **SHA** : aucun SHA de commit dans les docs (purgés au ménage de fin de Sprint 2) ; les numéros de PR font foi.
 
 ## Les 5 actions de la rétro du Sprint 1, appliquées
 
@@ -38,26 +38,18 @@ Reports du Sprint 1 : US-001 T6 (CI distante), SEC-01 T5/T6 (PR de test, SARIF) 
 
 ## Décisions du PO sur le design (validées le 2026-10-20)
 
-Design US-005 et US-006 **validé par le PO**, toutes décisions confirmées (backlog, décisions 29 à 31) :
-- Undo/Redo masqués jusqu'à US-019 ; verdict vide « Nothing to check yet » ; onglet Objects visible avec état vide ; nom affiché « Deskfit ».
-- Textes US-005 : `failed` neutre avec « Reload page » au 2e échec ; `tooManyObjects` reformulé ; `tooLarge` gardé en « 1 MB » (rattachés à US-018).
-- Catalogue de 7 bureaux (5 rectangulaires 100×60, 120×60, 140×70, 160×80, 180×80 ; 2 d'angle 160×140 et 180×160), angle orienté à droite ce sprint et sans « Custom size » ; flèches du clavier appliquent directement le bureau ; vignettes SVG dessinées par l'UI.
-- Bornes : rectangulaire 800–2400 × 500–1000 × 600–1300 mm ; angle 1200–2400 × 1000–2000 mm.
-- Ombre de contact allégée (0,24 ; bureau − 200×140 mm), dérivée du bureau, ainsi que le keep-out de la caméra → US-006.
+Design US-005 et US-006 **validé par le PO** : décisions 29 à 31 dans [decisions.md](../decisions.md).
 
-Rattachements : les données du catalogue (`desk.json` v2, `desk-corner.json`) sont commitées sur `feature/US-006-choix-bureau` (cd27e44) et font échouer le test « a catalog without any desk » de `validate.test.ts` : **le developer le corrige dans US-006**. Le générateur du bureau en L revient au graphics-engineer dans US-006.
+Rattachements : les données du catalogue (`desk.json` v2, `desk-corner.json`) sont commitées sur `feature/US-006-choix-bureau` (PR #16) et font échouer le test « a catalog without any desk » de `validate.test.ts` : **le developer le corrige dans US-006**. Le générateur du bureau en L revient au graphics-engineer dans US-006.
 
-Références : UX `docs/design/ux/stories/US-005.md` et `US-006.md` ; maquettes `docs/design/ui/maquettes/US-005.html` et `US-006.html`, `design-system.md` §15 (shell) et §16 (bureaux) ; aperçu 3D `docs/design/3d/apercu-bureaux/` et `docs/design/3d/US-006-bureaux.md`. Les critères UX (US-005 UX-1 à UX-22 ; US-006 UX-1 à UX-17) sont dans le backlog ; UX-23 de US-005 est rattaché à US-018. Le développement peut commencer.
+Références : UX `docs/design/ux/stories/US-005.md` et `US-006.md` ; maquettes `docs/design/ui/maquettes/US-005.html` et `US-006.html`, `design-system.md` §15 (shell) et §16 (bureaux) ; aperçu 3D `docs/design/3d/apercu-bureaux/` et `docs/design/3d/US-006-bureaux.md`. Les critères UX (US-005 UX-1 à UX-22 ; US-006 UX-1 à UX-17) sont dans les fiches de story (`docs/archive/stories/US-005.md` et `US-006.md`) ; UX-23 de US-005 est rattaché à US-018. Le développement peut commencer.
 
-## Décisions du PO du 2026-10-20 (soir) : design natif, workflow GitHub (backlog, décisions 32 à 36)
+## Design natif et workflow GitHub (décisions 32 à 36, voir [decisions.md](../decisions.md))
 
-- **Design v0.4 « Natif · Premium · Précis » VALIDÉ** (le v0.3 ne convenait pas) : fenêtre macOS (barre d'outils unifiée, barre latérale, inspecteur), repli iPadOS et iOS, 4 matériaux translucides, échelle typographique Apple en Inter, Lucide ; sans SF Pro, SF Symbols ni logo Apple. Références : `design-system.md` v0.4 (§12, §15, §16, §18 impact code), maquettes `US-004.html`, `US-005.html`, `US-006.html`. Ceci **remplace** « panneaux flottants », « verre 86 % » et « zone libre 758 px » dans les tâches T3/T4 de US-005 (zone libre **806 px à 1366**).
-- **Écarts UX validés** : bascules de volets dans la barre d'outils (Tab : droite juste après gauche, UX-5 de US-005 adapté) ; liste des bureaux en groupe unique avec filets, coche pour la ligne active (US-006 adapté).
+- **Design v0.4** (décision 32) : références `design-system.md` v0.4 (§12, §15, §16, §18 impact code), maquettes `US-004.html`, `US-005.html`, `US-006.html`. Ceci **remplace** « panneaux flottants », « verre 86 % » et « zone libre 758 px » dans les tâches T3/T4 de US-005 (zone libre **806 px à 1366**).
 - **US-005 réestimée à 8 pts** (restylage de la barre de vue, de l'astuce et des écrans de US-004 selon §18 : bouton principal en `--color-accent-solid`, coche au lieu du contour 2 px). Engagement 16 pts (voir tableau). Le developer peut demander le redécoupage du restylage de US-004 en story à part si T3 déborde.
-- **Liquid Glass** : apparence optionnelle plus tard, rattachée à US-025 (exploration `docs/design/ui/maquettes/explorations/liquid-glass.html`) ; hors Sprint 2.
-- **Ordre produit inchangé** : MVP = « ça rentre ? » ; design en R2 (styles, matières), R3 (ambiance), R4 (modèles 3D libres CC0/CC-BY) ; Blender en R4, le PO sera prévenu avant.
-- **Workflow GitHub** : chaque story = branche poussée + **PR ouverte par le devops** (description : story, critères, liens vers les rapports de revue, design, QA, sécurité) ; CI sur la PR ; merge **via la PR** (commit de merge). Les tâches devops ci-dessous sont mises à jour (étape « PR »). Le remote existe : le **premier push est fait** (`main` sur GitHub) ; première CI : 12 jobs verts, **e2e rouge** (timeouts du runner), correction par le qa-tester sur `fix/ci-e2e-runner-timeouts` (à merger via PR avant toute PR de story).
-- **Jamais versionnés** : `.claude/`, `CLAUDE.md`, `LISEZMOI-EQUIPE.md` (à inscrire dans `.gitignore` ; purge de l'historique et force-push de `main` en cours : **les SHA de ce document sont encore plus périmés**, source de vérité = `git log --merges --oneline main` / les PR).
+- **Workflow GitHub** (décision 35) : les tâches devops ci-dessous sont mises à jour (étape « PR »). Le remote existe : le **premier push est fait** (`main` sur GitHub) ; première CI : 12 jobs verts, **e2e rouge** (timeouts du runner), correction par le qa-tester sur `fix/ci-e2e-runner-timeouts` (à merger via PR avant toute PR de story).
+- **Jamais versionnés** (décision 36) : `.gitignore` ; purge de l'historique et force-push de `main` effectués.
 
 ## Design requis avant le développement (réalisé, voir ci-dessus)
 
@@ -69,12 +61,12 @@ Pour US-005 et US-006 ; SEC-03a et SEC-02 n'en ont pas.
 - **ui-designer**, après l'ux-designer : maquettes HTML de US-005 (shell complet : verre 86 % avec repli, thèmes clair/sombre, reduced-motion, Inter auto-hébergée, icônes Lucide) ; mise à jour de `docs/design/ui/maquettes/US-004.html` et de `design-system.md` §9 et §14 (info-bulle immédiate au focus clavier) ; maquette du panneau Desk (cartes, états normal/survol/actif/focus) de US-006.
 - **technical-artist** (US-006 [3D]) : catalogue de bureaux d'au moins 5 modèles (120×60, 140×70, 160×80, 180×80 cm, **bureau d'angle `desk.corner` à produire**), presets dans `assets/catalog/object-types/desk.json`, plateau et pieds lisibles, hauteur 720-750 mm, budget de triangles, aperçu pour le PO ; **ombre de contact allégée** (proposition chiffrée sur `studio.json`, aperçu avant/après) ; aucun asset externe (procédural), sinon licence consignée.
 
-Critères UX ajoutés aux stories dans le backlog le 2026-10-20. Le développement de US-005 et US-006 est autorisé ; SEC-03a est en cours (pas de dépendance au design).
+Critères UX ajoutés aux fiches de story le 2026-10-20. Le développement de US-005 et US-006 est autorisé ; SEC-03a est en cours (pas de dépendance au design).
 
 ## Stories et tâches
 
 ### 1. SEC-03a — En-têtes de sécurité, CSP, correctif React Aria [devops + secdevops + developer] — 2 pts
-Branche : `feature/SEC-03a-headers-csp`. **DONE** : mergée dans `main` (42c15cd), revue APPROVE au cycle 1/3 (`docs/reviews/SEC-03a.md`), secdevops PASS (`docs/security/scans/SEC-03a.md`, Semgrep via Docker, 0 ERROR, finding MEDIUM de US-004 clos). Critères d'acceptation 1 à 4 cochés dans le backlog.
+Branche : `feature/SEC-03a-headers-csp`. **DONE** : mergée dans `main` (voir l'historique), revue APPROVE au cycle 1/3 (`docs/reviews/SEC-03a.md`), secdevops PASS (`docs/security/scans/SEC-03a.md`, Semgrep via Docker, 0 ERROR, finding MEDIUM de US-004 clos). Critères d'acceptation 1 à 4 cochés dans le backlog.
 - [x] T1 (devops) Script de build qui génère `public/_headers` depuis `config/security-headers.mjs` ; `dist/_headers` présent après build (CSP stricte, `nosniff`, Referrer-Policy, Permissions-Policy, COOP, HSTS).
 - [x] T2 (devops) Test unitaire : contenu de `dist/_headers` = sortie de `config/security-headers.mjs` ; contrôle `dist/_headers` de `sec-build-hardening` vert, sans avertissement toléré.
 - [x] T3 (devops) `preview` et `dist-e2e` servent ces en-têtes (action 2).
@@ -116,30 +108,30 @@ Branche : `feature/US-006-choix-bureau`, mise à jour sur `main` avant T1b (merg
 - [x] T7 (devops) PR #16 ouverte, CI verte, merge via la PR.
 - Hors sprint : modale "Choose your desk" au premier lancement (US-020).
 
-### 4. SEC-02 — Durcissement du dépôt GitHub public [devops] — 1 pt — **IN PROGRESS** (2026-10-31)
-Branche : `feature/SEC-02-durcissement-depot` (à créer ; fichiers du dépôt : `SECURITY.md`, `CODEOWNERS`, absents de `main` au 2026-10-31). Les réglages du compte/dépôt GitHub sont appliqués **uniquement avec l'accord explicite du PO**, qui réalise ou valide chaque action : aucun réglage n'est appliqué avant son accord écrit.
-Critères (backlog SEC-02) : MFA ; ruleset `main` (PR obligatoire, `ci-ok` requis, Code scanning ≥ High bloquant, pas de force-push ni de suppression) ; secret scanning + push protection, Dependabot alerts, private vulnerability reporting, `SECURITY.md` ; `GITHUB_TOKEN` en lecture seule, approbation des workflows externes, épinglage SHA ; `CODEOWNERS` ; 4 alertes `p152-test-hook-reference` fermées avec justification ; PR de test à 4 cas négatifs (reportée de SEC-01), fermée sans merge.
+### 4. SEC-02 — Durcissement du dépôt GitHub public [devops] — 1 pt — **DONE** (2026-10-31)
+Branches et PR : PR #17 (`SECURITY.md`, `CODEOWNERS`) et PR #20 (section « Application ») mergées ; PR de test #19 fermée sans merge. Réglages appliqués par le PO (accord écrit), vérifiés par l'API le 2026-10-31. Workflow PR suivi (CI sur la PR, merge via la PR).
+Critères (fiche `docs/archive/stories/SEC-02.md`) : MFA ; ruleset `main` (PR obligatoire, `ci-ok` requis, Code scanning ≥ High bloquant, pas de force-push ni de suppression) ; secret scanning + push protection, Dependabot alerts, private vulnerability reporting, `SECURITY.md` ; `GITHUB_TOKEN` en lecture seule, approbation des workflows externes, épinglage SHA ; `CODEOWNERS` ; 4 alertes `p152-test-hook-reference` fermées avec justification ; PR de test à 4 cas négatifs (reportée de SEC-01), fermée sans merge.
 Dépendabot : 3 PR ouvertes (#12, #13, #15) à traiter au même moment que les alertes.
-- [ ] T1 (devops) `SECURITY.md`, `CODEOWNERS` (`.github/`, `config/security-headers.mjs`, `package.json`, `pnpm-lock.yaml`, `pnpm-workspace.yaml`, `.npmrc`, `.gitleaks.toml`, `.semgrep/`) ; prêts avant le push. *(2026-10-31 : fichiers absents de `main`, à faire.)*
-- [ ] T2 (PO) MFA activée sur le compte.
-- [ ] T3 (devops + PO) Liste pas à pas des réglages (ruleset `main`, `ci-ok` requis, Code scanning ≥ High bloquant, secret scanning + push protection, Dependabot alerts, private vulnerability reporting, `GITHUB_TOKEN` en lecture seule, approbation des workflows externes, épinglage SHA) ; le PO les applique ou les valide.
+- [x] T1 (devops) `SECURITY.md`, `CODEOWNERS` : **fait, PR #17**.
+- [x] T2 (PO) MFA activée sur le compte : confirmée par le PO le 2026-10-20, avant le premier push (décision 41).
+- [x] T3 (devops + PO) Réglages appliqués par le PO, vérifiés par l'API le 2026-10-31 (détail dans `docs/archive/stories/SEC-02.md`).
 - [x] T4 (devops) Premier push **fait** (`main` sur GitHub, accord du PO). Première CI : 12 jobs verts, **e2e rouge** (timeouts du runner), correction en cours par le qa-tester sur `fix/ci-e2e-runner-timeouts` ; `ci-ok` à vérifier une fois e2e vert. Un force-push de `main` (purge de l'historique) est en cours.
-- [ ] T4b (devops) La branche `feature/SEC-02-durcissement-depot` suit le workflow PR (push, PR avec liens vers les rapports, CI sur la PR, merge via la PR). Ruleset `main` : PR obligatoire, `ci-ok` requis.
+- [x] T4b (devops) Workflow PR suivi : PR #17 et PR #20 mergées via PR, ruleset `main` actif (`ci-ok` requis).
 - [x] T4c (devops) `.gitignore` : `.claude/`, `CLAUDE.md`, `LISEZMOI-EQUIPE.md` ; **fait** : purge de l'historique et force-push de `main` effectués.
-- [ ] T5 (devops, secdevops) Reports Sprint 1 : US-001 T6 (CI sur PR réelle) **vérifié** (PR #2, 17/17 verte) ; SEC-01 T6 (SARIF) **vérifié** ; SEC-01 T5 : **reste la PR de test avec les 4 cas négatifs**, rattachée ici ; consignés dans `docs/ci/`.
-- [ ] T6 (PO) Activer les alertes Dependabot (désactivées).
-- [ ] T7 (secdevops / PO) Fermer les 4 alertes de code scanning `p152-test-hook-reference` sur `PerfProbe.tsx` (faux positifs : hook protégé par `VITE_E2E`), avec justification.
+- [x] T5 (devops, secdevops) Reports Sprint 1 : PR de test #19 (4 cas négatifs arrêtés par la CI), fermée sans merge ; US-001 T6 et SEC-01 T6 vérifiés (PR #2) ; SEC-01 T5 rattaché ici, fait.
+- [x] T6 (PO) Alertes Dependabot activées (vérifié par l'API ; 1 alerte ouverte `minimatch`, exception jusqu'au 2026-11-30).
+- [x] T7 (secdevops / PO) 4 alertes `p152-test-hook-reference` fermées « used in tests » (vérifié : 0 ouverte).
 
 ### Marge (2 pts, non engagés)
-**Priorité n° 1 de la marge : tâche « Stabiliser `parseSetup.fuzz` »** (developer, 0 pt, prise sur la marge), à faire **juste après le premier push, ou avant**, et au plus tard au début de US-005. **Rouvert le 2026-10-31** : le correctif de US-005 n'était pas complet (le générateur ne filtre les clés interdites qu'au premier niveau ; contre-exemple `extensions.{"".{"".prototype}}`, graine 60940642 relevée par la revue sécurité de US-006). Le parseur est correct (`forbiddenKey`) ; le défaut est dans le test. Constat d'origine : `parseSetup.fuzz.test.ts` est instable (2 échecs sur 5 dans `pnpm check` sur la branche SEC-03a ; seed reproductible `-577722299`). Une fois sur GitHub, la CI rougirait au hasard. Sortie : cause identifiée et corrigée (le bug éventuel est dans `parseSetup`, pas masqué par un timeout), seed `-577722299` rejouée en test de non-régression, graine fixe pour la CI, `pnpm check` vert 10 fois (`--repeat`/boucle, sans charge artificielle).
+**Marge (faite, PR #18)** : tâche « Stabiliser `parseSetup.fuzz` » livrée en EXPRESS (developer, 2026-10-31) : générateur sans clés interdites à toute profondeur, graine fast-check globale (`FC_SEED`), timeout e2e 30 min ; test de fuite à 5 changements de bureau et `waitForScene` dans UX-6 (cycle 1). Contre-exemple `extensions.{"".{"".prototype}}`, graine 60940642.
 Ensuite, par ordre : (a) SEC-06 dette de test (`waitForTimeout` restants de `scene.spec.ts`, `open()` de `scene-ui.spec.ts`, LOW de SEC-03a) ; (b) ~~ombre de contact~~ (déplacée dans US-006) ; (c) SEC-03b (dont CORP `same-origin` via ADR-OPS-06), seulement si SEC-02 est terminée (pas de déploiement prévu). Aucune n'est prise avant que US-005 et US-006 soient en revue, hormis la stabilisation de `parseSetup.fuzz`.
 
 ## Moment du premier push
 
 Conditions restantes (selon le secdevops) :
-- (a) SEC-03a mergée : **FAIT** (42c15cd, scan PASS).
+- (a) SEC-03a mergée : **FAIT** ((scan PASS)).
 - (b) gitleaks exécuté sur **tout l'historique juste avant le push** (0 finding).
-- (c) MFA GitHub du PO activée.
+- (c) MFA GitHub du PO activée : **FAIT** (confirmée le 2026-10-20, décision 41).
 - (d) sur `rolkapone/P152` : secret scanning et push protection, private vulnerability reporting, Dependabot alerts activés.
 - Vérification préalable : aucun commit ne contient l'ancienne adresse, `git log` en noreply.
 - Le scrum-master signale ces conditions à l'orchestrateur ; **l'orchestrateur demande l'accord explicite du PO à ce moment-là** ; le devops pousse `main` seulement ensuite.
@@ -151,18 +143,18 @@ Le push est prévu en cours de sprint (pas à la fin) afin que la CI distante to
 | Story | Voie | Statut (TODO / IN PROGRESS / IN REVIEW / QA / SECURITY / DONE / BLOCKED) | Cycles | Prochain agent | PR |
 |---|---|---|---|---|---|
 | SEC-03a | — (livrée) | DONE | 1 / 3 | — | — (mergée avant le premier push) |
-| Stabiliser `parseSetup.fuzz` | — (tâche de marge) | TODO (rouvert : correctif incomplet) | 0 / 3 | developer (filtre de la valeur entière, graine fixe) | — |
+| Stabiliser `parseSetup.fuzz` (+ timeout e2e) | EXPRESS (PR #18) | DONE | 1 / 3 | — | #18 |
 | Fix CI e2e (`fix/ci-e2e-runner-timeouts`) | — (livrée) | DONE | 1 / 3 | — | #2 |
 | US-005 | RENFORCÉE | DONE | 1 / 3 | — | #14 |
-| US-006 | STANDARD | DONE | 0 / 3 | — (suivis dans le backlog) | #16 |
-| SEC-02 | RENFORCÉE | IN PROGRESS | 0 / 3 | devops (T1, branche à créer), puis accord du PO avant tout réglage | — |
+| US-006 | STANDARD | DONE | 0 / 3 | — (suivis dans `docs/dette.md`) | #16 |
+| SEC-02 | RENFORCÉE | DONE | 0 / 3 | — | #17, #20 |
 
 Notes du board (2026-10-31) :
 - **US-005 DONE** : revue APPROVE (T0, lots 1-2, UX-8 + lot 3, correction) ; design ECARTS MINEURS acceptés ; QA PASS après 1 cycle de correction (E2E instables sous charge : 2 workers en local, `waitForTimeout` supprimés et interdits par lint) ; secdevops PASS (threat model v1.4). Réserve : 5 runs de référence au lieu de 10 (Questions n° 3).
-- **US-006 DONE** (PR #16) : 5 pts, voie STANDARD, 0 cycle de correction. Plan de release : 31 / 99 livrés. Suivis dans le backlog (section « Dette et suivi issus de US-006 »). Réserve : 10 runs non faits (Questions n° 3).
+- **US-006 DONE** (PR #16) : 5 pts, voie STANDARD, 0 cycle de correction. Plan de release : 31 / 99 livrés. Suivis dans `docs/dette.md`. Réserve : 10 runs non faits (Questions n° 3).
 - **Fix e2e et SEC-03a** : suivis de SEC-06 (budget de chargement de `perf.spec`, commentaire `pauseClock`, `docs/qa/ci-e2e-runner.md:7`) ; LOW de SEC-03a -> SEC-06 ; CORP -> SEC-03b ; T7 rollup ouverte (R8).
-- **SEC-02** : IN PROGRESS. T1 (`SECURITY.md`, `CODEOWNERS`) à faire ; 3 Dependabot PR ouvertes (#12, #13, #15) ; alertes Dependabot et 4 alertes `p152-test-hook-reference` à traiter avec le PO ; T4b/T4c restent ouverts ; peut glisser au Sprint 3.
-- **Parse fuzz** : **rouvert le 2026-10-31** (revue sécurité de US-006, LOW #1) : le correctif de US-005 ne filtre que le premier niveau. La mention « stabilisé » était inexacte. Graine de référence 60940642 (secdevops) et `-577722299` (origine).
+- **SEC-02 DONE** (PR #17, #20 ; PR de test #19 fermée sans merge). Reste hors story : Scorecard ouvertes #5, #6, #7 (licence, décision PO), #9 ; 11 PR Dependabot ouvertes (#4 à #13, #15), dont #12, #13, #15 en CI rouge ; garde CodeQL ≥ high à remettre en CI (SEC-06). Incident pour la rétro : tentative de merge de la PR de test « DO NOT MERGE » (#19), refusée, jamais mergée.
+- **Parse fuzz** : **stabilisé (PR #18, 2026-10-31)**. Le correctif de US-005 ne filtrait que le premier niveau (LOW #1 de la revue sécurité de US-006) ; corrigé. Graines : 60940642 (secdevops), `-577722299` (origine).
 - **Règle d'équipe** : ne jamais lancer deux Playwright ou `pnpm check` en parallèle (même `test-results`, même port 4173).
 
 Voies (CLAUDE.md v3) : **US-005 RENFORCÉE** (police Inter auto-hébergée = asset téléchargé, nouvelle ressource servie sous CSP `font-src` ; icônes Lucide si ajoutées = nouvelle dépendance) ; **US-006 STANDARD** (catalogue interne, aucune lecture de fichier fourni par l'utilisateur, aucun réseau, aucune dépendance prévue) ; **SEC-02 RENFORCÉE** (comptes GitHub et réglages du dépôt : MFA, ruleset, Actions ; secdevops en revue approfondie, avis demandé via PASSATION). Aucune story EXPRESS au Sprint 2 (SEC-02 est à 1 pt mais touche aux comptes et aux réglages).
@@ -190,11 +182,59 @@ Voies (CLAUDE.md v3) : **US-005 RENFORCÉE** (police Inter auto-hébergée = ass
 Tranchées le 2026-10-20 : bornes du bureau, bureau d'angle (livré, sans « Custom size »), tous les textes et le design (décisions 29 à 31).
 
 1. **Budget de taille du shell** : valider le seuil proposé (195 kB gz index, 295 kB gz SceneCanvas) ; mesures US-005 : 176,6 kB gz index, 267,1 kB gz SceneCanvas.
-2. **Premier push** : l'accord sera demandé quand SEC-03a sera mergée et la MFA faite ; le PO peut déjà confirmer la date de la MFA. *(Premier push fait ; MFA et réglages SEC-02 restent à confirmer.)*
+2. **Premier push** : l'accord sera demandé quand SEC-03a sera mergée et la MFA faite ; le PO peut déjà confirmer la date de la MFA. *(Fait : MFA et réglages confirmés par le PO le 2026-10-20, décision 41 ; premier push fait.)*
 3. **Critère de sortie de US-005 et US-006 (règle temps réel)** : US-005 : 5 runs `--repeat-each=5` verts (460/460) au lieu des 10 demandés ; US-006 : 2 runs (244/244), `--repeat-each=10` non lancé. Accepter ce niveau, ou demander la campagne de 10 runs (environ 40 min de machine, à passer à `socle:ressources`) ?
 
 ## Revue du sprint
-(à rédiger en fin de sprint)
+
+**Objectif atteint** : dépôt publié et durci, shell en anglais et choix du bureau livrés. **16 pts livrés sur 16 engagés ; MVP 32 / 99 pts (32,3 %).**
+
+**Livré** : SEC-03a (2 pts) ; correctif E2E du runner (PR #2) ; US-005 shell (8 pts, PR #14) ; US-006 choix du bureau (5 pts, PR #16) ; SEC-02 (1 pt, PR #17 et #20 ; PR de test #19 fermée sans merge) ; stabilité CI `parseSetup.fuzz` (PR #18) ; purge de `.claude` de l'historique ; premier push (MFA et réglages confirmés par le PO le 2026-10-20, décision 41).
+
+**Non livré ou reporté** :
+- SEC-03a T7 (retrait de l'override rollup, R8) : ouverte.
+- Critère « 10 runs » de US-005 (5 runs) et US-006 (2 runs) : non tenu (R13).
+- Garde CodeQL >= High en CI : SEC-06 (règle retirée du ruleset, décision 40).
+- Alertes Scorecard #5, #6, #7, #9 ; 11 PR Dependabot ; exception minimatch jusqu'au 2026-11-30 ([dette](../dette.md)).
+- FPS mobile réel non mesuré ; modale de premier lancement (US-020).
+
+**Chiffres** (`equipe/ressources/bilan-sprint-2.md`) : 29 appels mesurés (devis 30-40), 25,7 M d'unités, environ 1,8 M par point ; developer + graphics-engineer = 71 %, contrôle = 20 %. Mesure partielle, quota en % non relevé.
+
+**Démo pas à pas (Windows, PowerShell)** :
+1. `pnpm install`, puis `pnpm dev` (aucun port fixé dans `vite.config.ts` : port Vite par défaut), ouvrir http://localhost:5173.
+2. Barre d'outils « Deskfit » : nom du setup et verdict « Nothing to check yet ».
+3. Volets gauche et droit : replier et déplier avec les bascules, recharger la page, l'état est mémorisé.
+4. Onglet Desk : 7 bureaux ; à la souris (clic), puis au clavier (Tab, flèches) ; la ligne active porte la coche, « Selected » se met à jour.
+5. Choisir un bureau d'angle : la scène le remplace, l'ombre de contact suit.
+6. Boutons Reset, Top, Front : la caméra se recadre.
+7. Thème sombre : régler Windows en mode sombre, l'application suit.
+8. Réduire la fenêtre (1366 px puis plus étroit) : les volets deviennent des tiroirs.
+9. Zoom du navigateur à 200 % (Ctrl +) : mise en page sans perte d'accès.
 
 ## Rétro
-(à rédiger en fin de sprint)
+
+**Ce qui a marché**
+- Voies et PASSATION : circuits clairs, 0 cycle de correction sur US-006 et SEC-02, 1 sur US-005.
+- Règles de lint relues avant le code (action 3 du Sprint 1).
+- PR et CI GitHub : tout mergé via PR, `ci-ok` requis.
+- Contrôles en parallèle (design, QA, sécurité) : environ 20 % du sprint.
+- Ruleset de `main` et cas négatifs de la PR de test #19 : bloqués comme prévu.
+
+**Ce qui a moins bien marché**
+- 4 interruptions par limite d'usage.
+- Un developer arrêté à 120 tours (lot US-005 trop gros : 10 M d'unités, 39 % du sprint).
+- E2E lancés en même temps par deux agents (revue et QA) : collisions sur `test-results` et le port 4173.
+- Tests instables sous charge et sur le runner ; CI E2E de 15 à 18 min par PR.
+- US-005 réestimée de 5 à 8 pts en cours de sprint.
+- Règle `code_scanning` qui bloquait toutes les PR (retirée, décision 40) ; mode evaluate indisponible (plan Free).
+- **Incident : le devops a tenté de merger la PR de test #19 « DO NOT MERGE »** ; refusé, jamais mergée.
+- Documents trop gros jusqu'au ménage de fin de sprint.
+- Critère « 10 runs » mal posé puis non tenu (5 et 2 runs).
+
+**Actions pour le Sprint 3** (les 3 économies de `socle:ressources`, à valider par le PO, plus le garde-fou d'incident)
+1. Appels d'implémentation de 3 à 4 tâches, un commit chacune, une PASSATION ; plus d'appel à 120 tours. Responsable : orchestrateur ; tâches courtes au planning : scrum-master.
+2. Jamais deux E2E en parallèle : reviewer sans E2E (il se fie à `pnpm check`), qa-tester seul à lancer les E2E ciblés par story, suite complète laissée à la CI. Responsable : orchestrateur, qa-tester.
+3. Coût CI : une seule vérification de la CI par PR, cache navigateurs Playwright / sharding, E2E limités aux specs touchées pour EXPRESS et docs (touche la CI : accord du PO). Responsable : devops.
+4. Garde-fou merge (incident #19) : le mandat de merge cite le numéro de PR ; le devops ne merge jamais une PR « DO NOT MERGE » ni hors story. Responsable : orchestrateur, devops.
+
+Rétro du Sprint 1 : actions 2, 3, 4 et 5 appliquées ; action 1 (temps réel) appliquée au code (plus de `waitForTimeout`) mais critère « 10 runs » non tenu (Questions n° 3).
