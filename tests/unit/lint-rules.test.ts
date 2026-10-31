@@ -2,9 +2,15 @@
 import { resolve } from "node:path";
 import { ESLint } from "eslint";
 import ts from "typescript";
-import { describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
 
 const eslint = new ESLint();
+
+// The first lint loads ESLint, typescript-eslint and the configuration (seconds when `pnpm check`
+// runs the coverage in parallel): done once here, outside the 5 s budget of each test.
+beforeAll(async () => {
+  await eslint.lintText("export {};\n", { filePath: "src/core/warm-up.ts" });
+}, 60_000);
 
 async function ruleIds(code: string, filePath: string): Promise<string[]> {
   const [result] = await eslint.lintText(code, { filePath });
@@ -383,5 +389,30 @@ describe("no hard-coded UI text (ADR-APP-05)", () => {
     const code =
       'declare const n: number;\nexport const A = () => <p className={"foo"} data-id={`row-${n}`}>{`${n}`} {"-"}</p>;\n';
     expect(await ruleIds(code, "src/ui/studio/A.tsx")).toEqual([]);
+  });
+});
+
+describe("no real-time wait in the E2E tests (US-005 QA)", () => {
+  it.each([
+    "await page.waitForTimeout(500);",
+    "await this.page.waitForTimeout(1);",
+    "await frame.waitForTimeout(10);",
+  ])("rejects %s", async (call) => {
+    const code = `declare const page: any, frame: any;
+export async function f(this: { page: any }) {
+  ${call}
+}
+`;
+    expect(await ruleIds(code, "tests/e2e/x.spec.ts")).toContain("no-restricted-syntax");
+  });
+
+  it("accepts the fake clock and observable waits", async () => {
+    const code = `declare const page: any;
+export async function f() {
+  await page.clock.runFor(500);
+  await page.waitForFunction(() => true);
+}
+`;
+    expect(await ruleIds(code, "tests/e2e/x.spec.ts")).not.toContain("no-restricted-syntax");
   });
 });

@@ -191,6 +191,20 @@ export default tseslint.config(
       ],
     },
   },
+  {
+    // No test depends on real time (Definition of Done, sprint 2 rule 1): page.clock or an
+    // observable state, never a fixed wait (US-005 QA).
+    files: ["tests/e2e/**/*.ts"],
+    rules: {
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector: "CallExpression[callee.property.name='waitForTimeout']",
+          message: "No real-time wait: use page.clock or wait for an observable state.",
+        },
+      ],
+    },
+  },
   { files: ["**/*.{js,mjs}"], languageOptions: { globals: globals.node } },
   prettier,
 );
