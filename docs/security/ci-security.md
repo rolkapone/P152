@@ -1,7 +1,7 @@
 # Sécurité en CI — P152
 
 > Story : US-002 (définition des scans) ; intégration : SEC-01 (devops + secdevops). Auteur : secdevops. **Version 1.2 du 2026-10-20** (v1.0 au kickoff ; historique en §9).
-> Cadre : ADR-OPS-01 (pnpm, `onlyBuiltDependencies`, `minimumReleaseAge`), ADR-OPS-03 (GitHub Actions, slot `# SECDEVOPS-SLOT`, `ci-ok`), ADR-OPS-06 (Cloudflare Pages, CSP stricte, hooks `VITE_E2E`), ADR-APP-03 (import) dans [`architecture.md`](../architecture.md) ; threat model [`threat-model.md`](threat-model.md) ; scan [`scans/US-001.md`](scans/US-001.md) ; exécution locale [`docs/ci/local-run-US-001.md`](../ci/local-run-US-001.md).
+> Cadre : ADR-OPS-01 (pnpm, `onlyBuiltDependencies`, `minimumReleaseAge`), ADR-OPS-03 (GitHub Actions, slot `# SECDEVOPS-SLOT`, `ci-ok`), ADR-OPS-06 (Cloudflare Pages, CSP stricte, hooks `VITE_E2E`), ADR-APP-03 (import) dans [`architecture/index.md`](../architecture/index.md) ; threat model [`threat-model.md`](threat-model.md) ; scan [`scans/US-001.md`](scans/US-001.md) ; exécution locale [`docs/ci/local-run-US-001.md`](../ci/local-run-US-001.md).
 > **Le devops intègre** : secdevops n'édite pas `.github/`. Depuis US-001, les jobs sont **intégrés** : la source de vérité du YAML est [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml) (bloc `SECDEVOPS-SLOT`) et [`.github/workflows/security-scheduled.yml`](../../.github/workflows/security-scheduled.yml). Ce document fixe la **politique** et l'**état** ; il ne duplique plus le YAML.
 > **Contexte Sprint 1 (décision PO)** : pas de dépôt distant ni de push. La CI n'a jamais tourné sur GitHub ; elle est vérifiée **en local** avec les mêmes commandes. Les contrôles propres à GitHub sont inactifs jusqu'au premier push (Sprint 2).
 

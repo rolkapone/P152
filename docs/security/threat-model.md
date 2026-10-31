@@ -1,7 +1,7 @@
 # Threat model — P152
 
 > Story : US-002 (threat model initial). Auteur : secdevops. **Version 1.4 du 2026-10-31** (v1.0 produite au kickoff ; historique en §13).
-> Entrées : [`docs/vision.md`](../vision.md) v0.2, [`docs/backlog.md`](../backlog.md), [`docs/architecture.md`](../architecture.md) (ADR-3D-02/03/04/09, ADR-APP-03/04/08/09, section « Sécurité transverse », ADR-OPS-01 à 07 et « Décisions du PO »), scan de US-001 [`scans/US-001.md`](scans/US-001.md), exécution locale de la CI [`docs/ci/local-run-US-001.md`](../ci/local-run-US-001.md), workflows réels [`.github/workflows/`](../../.github/workflows/).
+> Entrées : [`docs/vision.md`](../vision.md) v0.2, [`docs/backlog.md`](../backlog.md), [`docs/architecture/index.md`](../architecture/index.md) (ADR-3D-02/03/04/09, ADR-APP-03/04/08/09, section « Sécurité transverse », ADR-OPS-01 à 07 et « Décisions du PO »), scan de US-001 [`scans/US-001.md`](scans/US-001.md), exécution locale de la CI [`docs/ci/local-run-US-001.md`](../ci/local-run-US-001.md), workflows réels [`.github/workflows/`](../../.github/workflows/).
 > Contexte : SPA statique React/Vite/three.js, sans backend ni compte au MVP. **Décisions PO (2026-10-19)** : code sur GitHub, **dépôt public** ; app sur **Cloudflare Pages**, **sans domaine personnalisé** (`*.pages.dev`) ; **aucun dépôt distant ni push au Sprint 1** : la CI est vérifiée **en local** avec les mêmes commandes que les jobs ; aucun déploiement sans ordre du PO.
 > Méthode : actifs → acteurs → frontières de confiance → flux → STRIDE par composant → mesures → exigences et stories.
 > Contrôles CI : spécification et état réel dans [`ci-security.md`](ci-security.md).
@@ -134,7 +134,7 @@ Risque = vraisemblance × impact, avant mesure (« brut ») puis après mesure (
 | **Vraisemblance moyenne** | LOW | MEDIUM | HIGH |
 | **Vraisemblance faible** | LOW | LOW | MEDIUM |
 
-Statut des mesures : **ADR** = décidé dans `architecture.md` ; **CI** = contrôle intégré dans `.github/workflows/` (état détaillé dans `ci-security.md` §1) ; **Story** = travail planifié au backlog (section 9) ; **Amend.** = critère ajouté à une story existante (section 10). Le résiduel indiqué est celui **une fois la mesure en place** ; quand elle dépend d'une story non livrée, la story est citée.
+Statut des mesures : **ADR** = décidé dans `docs/architecture/` (un fichier par ADR) ; **CI** = contrôle intégré dans `.github/workflows/` (état détaillé dans `ci-security.md` §1) ; **Story** = travail planifié au backlog (section 9) ; **Amend.** = critère ajouté à une story existante (section 10). Le résiduel indiqué est celui **une fois la mesure en place** ; quand elle dépend d'une story non livrée, la story est citée.
 
 ---
 

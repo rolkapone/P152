@@ -54,7 +54,7 @@ Branche : `feature/US-001-repo-build-ci` (implémenteur : devops). Démarrée le
 - [x] T5 Vérifier `.gitignore` (`.env`, `.env.*`), `.env.example` factice, `.gitattributes` (LFS), `check:assets` vert.
 - [ ] T6 **Reportée au Sprint 2** (décision PO : pas de dépôt ni de push ce sprint). Remplacée au Sprint 1 par : exécuter en local les mêmes commandes que les jobs de `ci.yml` (lint, types, tests, build, `check:assets`) et consigner le résultat. Reste pour le Sprint 2 : pousser, vérifier `ci.yml` et `ci-ok`. Résultats : `docs/ci/local-run-US-001.md`.
 - [x] T7 Mettre à jour la doc d'installation (README) si nécessaire.
-Références : ADR-OPS-01/02/03 dans `docs/architecture.md`.
+Références : ADR-OPS-01/02/03 dans `docs/architecture/` (ADR-OPS-xx).
 
 ### US-002 — Threat model initial [secdevops] — 2 pts
 Branche : `feature/US-002-threat-model` (docs uniquement). **DONE**, mergée dans `main` (55a93a6).
