@@ -13,10 +13,10 @@ Fiche : [stories/SEC-06.md](stories/SEC-06.md).
 - drei (LOW) et dette de test (critères ajoutés à SEC-06, issus de US-004).
 - Règle de lint `waitForTimeout` : variantes calculées, alias et déstructuration non couverts (issu de US-005).
 - LOW `minimatch` (outil de dev), secdevops (issu de US-005) ; exception en cours : voir `docs/security/exceptions.md`.
-- Repli de `crypto.randomUUID` (`src/app/App.tsx:42`, secure context uniquement ; LOW #2 secdevops) : TypeError en HTTP sur IP du LAN (test smartphone). Repli `crypto.getRandomValues` ou test ; rattachement proposé : SEC-06 (developer).
+- Repli de `crypto.randomUUID` (`src/app/App.tsx:42`, secure context uniquement ; LOW #2 secdevops) : TypeError en HTTP sur IP du LAN (test smartphone). Repli `crypto.getRandomValues` ou test ; mode direct au Sprint 3 (D3).
 - Test négatif pour `preset.name` (`src/core/catalog/schema.ts:69`) : vide, 81 caractères, clé de langue en trop ; rattachement proposé : SEC-06.
 - `connectSceneDesk()` (`App.tsx:23`) abonné au niveau du module sans désabonnement (double abonnement HMR, dev seulement) ; SEC-06.
-- Garde CodeQL >= high à remettre dans la CI (décision 40 de [decisions.md](decisions.md)).
+- Garde CodeQL >= high : [SEC-06a](stories/SEC-06a.md) (Sprint 3).
 
 ## US-007
 - `deskSpec` compare un sous-ensemble de params (`desk.ts`) : à US-007, un 140×70 de hauteur différente resterait « Standard desk » (issu de US-006).
@@ -53,5 +53,5 @@ Fiche : [stories/SEC-06.md](stories/SEC-06.md).
 
 ## Traité (pour mémoire)
 - SEC-03a : correctif MEDIUM CSP React Aria. US-005 : texte neutre de l'état `failed`, mise à jour maquette / design-system §9 et §14 (info-bulle immédiate au focus clavier), budget de taille du shell : voir [archive/stories/SEC-03a.md](archive/stories/SEC-03a.md) et [archive/stories/US-005.md](archive/stories/US-005.md).
-- Fait en mode direct, hors sprint (US-005) : tokens.css en mouvement réduit `0s !important`, retrait de `:where(.pane *)`, fonts.css en `url()` seul, boutons de la carte d'erreur en pleine largeur.
+- (US-005) À faire en mode direct au Sprint 3 (constat du 2026-11-01 : absent du code, malgré la mention « fait ») : tokens.css en mouvement réduit `0s !important`, retrait de `:where(.pane *)`, fonts.css en `url()` seul, boutons de la carte d'erreur en pleine largeur.
 - Fuzz de `parseSetup` (PR #18, 2026-10-31 ; rouvert par la revue sécurité de US-006) : générateur sans clés interdites à toute profondeur, graine fast-check globale (`FC_SEED`). Contre-exemple `extensions.{"".{"".prototype}}` (graine 60940642) couvert ; le parseur était correct, le générateur ne filtrait que le premier niveau (LOW #1 secdevops).
