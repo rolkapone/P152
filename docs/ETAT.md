@@ -1,9 +1,9 @@
 # ETAT — P152 « Deskfit » (point d'entrée unique)
 
-Mis à jour le 2026-10-31 (ménage de fin de Sprint 2). Lire ce fichier en premier, puis uniquement les fichiers de sa story.
+Mis à jour le 2026-11-01 (Sprint 3 validé par le PO, en cours). Lire ce fichier en premier, puis uniquement les fichiers de sa story.
 
 ## Sprint en cours
-**Sprint 2 terminé** (ouvert le 2026-10-20) : 16 pts livrés sur 16 engagés ; MVP **32 / 99 pts (32,3 %)**, vitesse 16 pts/sprint ; **en attente de la revue du PO**. Revue et rétro rédigées dans [sprint-2](sprints/sprint-2.md) ; **attente de validation du PO**, puis planning du Sprint 3 (`socle:scrum-master`, devis de `socle:ressources`). Vitesse 16 / 16 ; 67 pts restants, 5 sprints estimés. La branche `docs/menage-sprint-2` (ce ménage) est poussée, **PR à ouvrir par le devops** après revue et rétro.
+**Sprint 3 en cours** ([sprint-3](sprints/sprint-3.md), validé le 2026-11-01, décisions 52 à 58). Engagement 12 pts : SEC-07 (EXPRESS 1), SEC-08 (STANDARD 2), SEC-09 ESLint 10 (RENFORCÉE 3), SEC-06a (RENFORCÉE 3), US-007 (STANDARD 3). SEC-13 reportée au Sprint 4. Budget 28 M unités (8 M avant le 6/11). Avant le 6/11 : mode direct D1-D3, SEC-07, design US-007, SEC-08 ; après : SEC-09, SEC-06a, US-007. MVP 32 / 99 (35 attendus). **Prochain : PR du planning (devops), puis correctifs de style D1-D3 et repli `randomUUID` (session principale).**
 
 ## Stories
 | Story | Statut | Voie | Prochain agent | PR |
@@ -13,12 +13,16 @@ Mis à jour le 2026-10-31 (ménage de fin de Sprint 2). Lire ce fichier en premi
 | US-006 Bureaux | DONE (S2) | STANDARD | — | #16 |
 | SEC-02 Dépôt GitHub | DONE (S2) | RENFORCÉE | — | #17, #20 |
 | Stabiliser `parseSetup.fuzz` | DONE (marge) | EXPRESS | — | #18 |
-| 23 stories ouvertes (SEC-03b, SEC-04, SEC-05, SEC-06, US-007 à US-025) | TODO | à attribuer au planning | `socle:scrum-master` (planning Sprint 3) | — |
+| SEC-07, SEC-08, SEC-09, SEC-06a, US-007 | TODO (S3) | EXPRESS / STANDARD / RENFORCÉE / RENFORCÉE / STANDARD | developer, ux-designer | — |
+| SEC-13 (Sprint 4, décision 54) | TODO | RENFORCÉE | developer | — |
+| Autres ouvertes (SEC-03b, SEC-04, SEC-05, SEC-06 reste, US-008 à US-025) | TODO | à attribuer | `socle:scrum-master` | — |
 
 Index complet : [backlog.md](backlog.md). Fiches ouvertes : [stories/](stories/). Fiches DONE : [archive/stories/](archive/stories/). Dette : [dette.md](dette.md). Reste du Sprint 1 : 16 pts DONE (US-001 à US-004, SEC-01).
 
 ## Dernières décisions ([decisions.md](decisions.md))
-- 41 — MFA et réglages du dépôt confirmés par le PO le 2026-10-20.
+- 52 à 58 — planification du Sprint 3 : plan, budget 28 M, SEC-13 au S4, PR CI, US-007 (UX), cm insécable, texte LICENSE.
+- 42 à 51 — revue du Sprint 2 : Sprint 2 validé, bundle 195/295, « 10 runs » reformulé, maintenance groupée, minimatch au 30/11, app lucrative, LICENSE propriétaire (dépôt public), budget.md, 3 économies, Liquid Glass à part (US-170).
+- 41 — MFA et réglages du dépôt confirmés le 2026-10-20.
 - 40 — Règle CodeQL ≥ High retirée du ruleset de `main` ; garde à remettre en CI (SEC-06).
 - 39 — Merge commit seul, sans suppression auto des branches ; bypass Admin `pull_request` ; exception minimatch.
 - 38 — Premier push : SEC-03a, MFA, réglages SEC-02 validés, accord explicite.
@@ -30,16 +34,15 @@ Index complet : [backlog.md](backlog.md). Fiches ouvertes : [stories/](stories/)
 - 32 — Design v0.4 « Natif · Premium · Précis » validé ; US-005 à 8 pts.
 
 ## Seuils actifs
-- **Budget du bundle shell : 195 kB gz (index) / 295 kB gz (SceneCanvas)**, mesuré 176,6 / 267,1 : **à confirmer par le PO**.
+- **Budget du bundle shell : 195 kB gz (index) / 295 kB gz (SceneCanvas)**, mesuré 176,6 / 267,1 : accepté (décision 43), à réduire si possible.
 - Perf : ≥ 60 FPS desktop milieu de gamme, ≥ 30 FPS smartphone récent (FPS mobile réel non mesuré) ; écran minimal 1366×768 (zone libre 806 px).
 - Règle d'équipe : jamais `waitForTimeout` ; jamais deux Playwright ou `pnpm check` en parallèle. Exception sécurité : minimatch (dev), jusqu'au 2026-11-30 ([exceptions](security/exceptions.md)).
 - Docs : ETAT ≤ 8 Ko, fiche de story ≤ 8 Ko, autres ≤ 40 Ko.
 
 ## Blocages et points en attente du PO
-- Budget du bundle (ci-dessus) et critère de sortie « 10 runs » de US-005 / US-006 (5 et 2 runs faits) : [sprint-2](sprints/sprint-2.md), Questions n° 1 et 3.
-- Questions du PO (revue Sprint 2) : bundle, « 10 runs », 11 PR Dependabot, exception minimatch, licence du dépôt, `budget.md` et `/usage`, 3 économies (dont CI), Liquid Glass (US-025 ou à part), questions long terme : [sprint-2](sprints/sprint-2.md).
+- Sprint 3 : plan, budget et CI validés (décisions 52 à 55). Reste : budget de quota à confirmer dans `equipe/ressources/budget.md` (non versionné) par `socle:ressources`.
 - Hors story : alertes Scorecard #5, #6, #7 (licence, décision PO), #9 ; 11 PR Dependabot ouvertes (#4 à #13, #15), dont #12, #13, #15 en CI rouge.
-- Garde CodeQL ≥ High à remettre en CI : SEC-06 ([fiche](stories/SEC-06.md)).
+- Garde CodeQL ≥ High à remettre en CI : [SEC-06a](stories/SEC-06a.md).
 - Questions long terme (affiliation, âge minimum, hébergement UE) : [backlog.md](backlog.md).
 
 ## Où trouver quoi

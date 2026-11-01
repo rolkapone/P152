@@ -75,5 +75,30 @@ Une ligne par décision, numérotation d'origine conservée (1 à 36 : ancien `b
 | 40 | 2026-10-31 | **Règle `code_scanning` (CodeQL ≥ High) retirée du ruleset de `main`** (elle bloquait toute PR, même verte) ; la garde est à remettre dans la CI (SEC-06). | [sec-02-reglages](security/sec-02-reglages.md), SEC-06 |
 | 41 | 2026-10-20 | **MFA du compte GitHub et réglages du dépôt confirmés par le PO**, avant le premier push (« La MFA et les réglages du dépôt sont faits »). Précise 38. | [sprint-2](sprints/sprint-2.md) |
 
+## Revue du Sprint 2 (2026-11-01)
+| N° | Date | Décision | Voir |
+|---|---|---|---|
+| 42 | 2026-11-01 | **Sprint 2 validé** par le PO. | [sprint-2](sprints/sprint-2.md) |
+| 43 | 2026-11-01 | **Budget du bundle accepté à 195 kB gz (index) / 295 kB gz (SceneCanvas)**, « si on ne peut pas faire mieux » : on cherche à réduire (mesuré 176,6 / 267,1). | [sprint-3](sprints/sprint-3.md) |
+| 44 | 2026-11-01 | **Critère « 10 runs » reformulé** : 10 runs `CI=1` dans l'image Playwright limitée à 4 CPU / 8 Go, plus un stress local informatif à 50 % des threads et `--repeat-each=10` sans charge. | SEC-06 |
+| 45 | 2026-11-01 | **Story de maintenance groupée des 11 PR Dependabot** expliquée et acceptée (lot 1 puis majeures par famille). | SEC-08, SEC-09, SEC-13 |
+| 46 | 2026-11-01 | **Exception minimatch** (outil de dev) maintenue jusqu'au 2026-11-30 ; levée par ESLint 10. | [exceptions](security/exceptions.md), SEC-09 |
+| 47 | 2026-11-01 | **L'application est à but lucratif.** | [vision](vision.md) |
+| 48 | 2026-11-01 | **Dépôt public avec `LICENSE` propriétaire** « Copyright © 2026 Carol MBONZIMA. All rights reserved » ; aucun paiement (pas de GitHub Pro) pour l'instant. | SEC-07 |
+| 49 | 2026-11-01 | **`budget.md` à finaliser par `socle:ressources`** : relevé /usage du 2026-11-01 = 14 % de la session, 42 % de la semaine, remise à zéro le 2026-11-06 à 16 h ; part P152 / P153 = 50 / 50 par défaut. | [sprint-3](sprints/sprint-3.md) |
+| 50 | 2026-11-01 | **Les 3 économies de `socle:ressources` acceptées** : appels courts de 3-4 tâches ; une seule suite E2E à la fois (le reviewer ne lance pas d'E2E, la QA cible, la CI lance la suite complète) ; CI : cache ou sharding Playwright et E2E limités aux specs touchées sur les PR EXPRESS ou docs. | [sprint-2](sprints/sprint-2.md) Rétro |
+| 51 | 2026-11-01 | **Liquid Glass : story à part** (R2/R3, hors MVP), retirée de US-025. | US-170, [plus tard](backlog-plus-tard.md) |
+
+## Planification du Sprint 3 (2026-11-01)
+| N° | Date | Décision | Voir |
+|---|---|---|---|
+| 52 | 2026-11-01 | **Plan du Sprint 3 validé** : 12 pts engagés (SEC-07, SEC-08, SEC-09, SEC-06a, US-007), SEC-13 en marge ; ordre avant le 6/11 (mode direct, SEC-07, design US-007, SEC-08) et après (SEC-09, SEC-06a, US-007). | [sprint-3](sprints/sprint-3.md) |
+| 53 | 2026-11-01 | **Budget du Sprint 3 : 28 M unités pondérées**, dont 8 M au plus avant le 6/11 ; part P152 / P153 à 50 / 50. | [sprint-3](sprints/sprint-3.md) (budget non versionné, `equipe/ressources/budget.md`) |
+| 54 | 2026-11-01 | **SEC-13 reportée au Sprint 4** (autres majeures). Précise 45. | SEC-13 |
+| 55 | 2026-11-01 | **PR CI dédiée acceptée** (cache Playwright + E2E limités aux specs touchées sur les PR EXPRESS ou docs), livrée avant SEC-08. Précise 50. | SEC-08, [sprint-3](sprints/sprint-3.md) |
+| 56 | 2026-11-01 | **US-007 :** flèches et stepper appliquent directement ; saisie appliquée à Entrée ou à la sortie du champ ; Échap restaure la dernière valeur valide ; « Custom size » désactivée avec la raison « Rectangular desks only » pour le bureau d'angle ; focus forcé sur le champ en erreur seulement à Entrée ; équivalent mm sur la ligne du libellé ; légende des bornes `desk.custom.range` ; tiret demi-cadratin dans les plages. | [UX US-007](design/ux/stories/US-007.md), US-007 |
+| 57 | 2026-11-01 | **« cm » insécable** (espace insécable avant l'unité) : vignettes réduites de 14 % (échelle 0,2275 px/cm) et métriques de ligne resserrées ; **impact US-006 accepté**. | US-006, [design-system](design/ui/design-system.md) §16 |
+| 58 | 2026-11-01 | **Texte du `LICENSE`** : « Copyright © 2026 Carol MBONZIMA. All rights reserved. » suivi d'une mention interdisant toute réutilisation sans autorisation écrite. Précise 48. | SEC-07 |
+
 ## Questions ouvertes (long terme, non bloquantes)
 Voir [backlog.md](backlog.md).

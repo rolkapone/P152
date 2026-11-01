@@ -7,6 +7,7 @@
 | Points MVP (Must + Should) | **99** (Must 89, Should 10) ; +1 pt : SEC-03a passe de 1 à 2 pts (correctif CSP React Aria, finding MEDIUM US-004) ; **+3 pts le 2026-10-20 : US-005 passe de 5 à 8 pts** (design natif v0.4, décision 32) |
 | Dont stories sécurité (SEC-01 à SEC-05) | 9 (Must 8, Should 1) |
 | Points « Could » MVP (hors total, bonus) | 9 (US-021, US-023, SEC-06) |
+| Maintenance et licence hors total MVP (ajoutées le 2026-11-01) | SEC-07 1, SEC-08 2, SEC-09 3, SEC-13 5, SEC-06a 3 (extrait de SEC-06 : SEC-06 passe à 2) = 14 pts, comptés dans la vitesse mais pas dans les 99 |
 | Points livrés | **32 / 99 = 32,3 %** (Sprint 1 : US-001 3, US-002 2, US-003 3, SEC-01 3, US-004 5, toutes DONE = 16 ; Sprint 2 : SEC-03a 2, US-005 8, US-006 5, SEC-02 1, DONE) |
 | Vitesse moyenne | **16 pts/sprint** (Sprint 1 : 16, Sprint 2 : 16 ; prévision prudente de 15 pts conservée pour le planning) |
 | Sprint en cours | **Sprint 2** (ouvert le 2026-10-20) : SEC-03a 2 (DONE) + US-005 **8** (DONE, PR #14) + US-006 **5** (DONE, PR #16) + SEC-02 1 (DONE, PR #17 et #20) = **16 pts livrés** sur 16 engagés (capacité prudente 15 : dépassement de 1 pt, accepté) ; livrés 32 / 99 (32,3 %), restants 67 |
@@ -47,13 +48,18 @@ Statuts au 2026-10-31 (fin du Sprint 2). Les stories DONE sont archivées dans `
 | SEC-02 | Durcissement du dépôt GitHub public | — | RENFORCÉE | 1 | DONE | S2 | [fiche](archive/stories/SEC-02.md) |
 | SEC-03a | Génération des en-têtes de sécurité (`_headers`, CSP) et CSP de React Aria | — | — | 2 | DONE | S2 | [fiche](archive/stories/SEC-03a.md) |
 | SEC-03b | Déploiement sécurisé sur Cloudflare Pages | — | — | 1 | TODO | — | [fiche](stories/SEC-03b.md) |
-| SEC-06 | Durcissement CI (findings LOW du scan US-001) | — | — | 2 | TODO | — | [fiche](stories/SEC-06.md) |
+| SEC-06 | Durcissement CI (reste, après extraction de SEC-06a) | — | — | 2 | TODO | — | [fiche](stories/SEC-06.md) |
+| SEC-06a | Garde CodeQL, fuzz hebdomadaire, ancrage Semgrep | — | RENFORCÉE | 3 | TODO | S3 | [fiche](stories/SEC-06a.md) |
+| SEC-07 | Licence propriétaire du dépôt | — | EXPRESS | 1 | TODO | S3 | [fiche](stories/SEC-07.md) |
+| SEC-08 | Maintenance des dépendances, lot 1 | — | STANDARD | 2 | TODO | S3 | [fiche](stories/SEC-08.md) |
+| SEC-09 | Maintenance, lot 2a : ESLint 10 (avant le 30/11) | — | RENFORCÉE | 3 | TODO | S3 | [fiche](stories/SEC-09.md) |
+| SEC-13 | Maintenance, lot 2b : autres majeures | — | RENFORCÉE | 5 | TODO | S3 (marge) ou S4 | [fiche](stories/SEC-13.md) |
 | SEC-04 | Mention « vos données restent dans ce navigateur » | [UI] | — | 1 | TODO | — | [fiche](stories/SEC-04.md) |
 | SEC-05 | Revue de sécurité avant la release MVP | — | — | 1 | TODO | — | [fiche](stories/SEC-05.md) |
 | US-004 | Scène 3D de base et caméra orbitale | [UI][3D] | — | 5 | DONE | S1 | [fiche](archive/stories/US-004.md) |
 | US-005 | Shell de l'application en anglais | [UI] | RENFORCÉE | 8 | DONE | S2 | [fiche](archive/stories/US-005.md) |
 | US-006 | Choisir un bureau dans un catalogue | [UI][3D] | STANDARD | 5 | DONE | S2 | [fiche](archive/stories/US-006.md) |
-| US-007 | Dimensions personnalisées du bureau | [UI] | — | 3 | TODO | — | [fiche](stories/US-007.md) |
+| US-007 | Dimensions personnalisées du bureau | [UI] | STANDARD | 3 | TODO | S3 | [fiche](stories/US-007.md) |
 | US-008 | Bibliothèque d'objets paramétrables, lot 1 | [3D] | — | 8 | TODO | — | [fiche](stories/US-008.md) |
 | US-009 | Bibliothèque d'objets paramétrables, lot 2 | [3D] | — | 5 | TODO | — | [fiche](stories/US-009.md) |
 | US-010 | Ajouter un objet à la scène | [UI][3D] | — | 3 | TODO | — | [fiche](stories/US-010.md) |
