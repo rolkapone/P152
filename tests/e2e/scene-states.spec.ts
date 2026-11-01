@@ -56,6 +56,24 @@ test("failed: neutral text, Try again, then Reload page from the 2nd failure (UX
   await alert.getByRole("button", { name: "Try again" }).click();
   await expect(alert.getByRole("button")).toHaveText(["Try again", "Reload page"]);
   await expect(title).toBeFocused();
+  // Stacked full-width buttons (maquette US-005, design control US-005): same left edge and
+  // width, filling the actions row, which spans the card content.
+  const [retry, reload, actions] = await Promise.all([
+    alert.getByRole("button", { name: "Try again" }).boundingBox(),
+    alert.getByRole("button", { name: "Reload page" }).boundingBox(),
+    alert.getByRole("button", { name: "Try again" }).locator("..").boundingBox(),
+  ]);
+  expect(retry && reload && actions).toBeTruthy();
+  expect(reload!.y).toBeGreaterThan(retry!.y);
+  expect(reload!.x).toBe(retry!.x);
+  expect(reload!.width).toBe(retry!.width);
+  expect(retry!.width).toBe(actions!.width);
+  const card = await alert.evaluate((e) => {
+    const style = getComputedStyle(e);
+    const box = e.getBoundingClientRect();
+    return box.width - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
+  });
+  expect(actions!.width).toBeCloseTo(card, 0);
 
   await Promise.all([
     page.waitForEvent("load"),

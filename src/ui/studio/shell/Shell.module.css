@@ -187,19 +187,12 @@
   overscroll-behavior: contain;
   padding: var(--space-3) var(--space-3) var(--space-5);
   color: var(--color-text);
-  /* Opening: visibility switches at once, not transitioned (a transition, even the 0.01 ms of
-     reduced motion, would keep the panel hidden when "Skip to alerts" focuses its title). */
+  /* Opening: visibility switches at once, not transitioned (a visibility transition would keep
+     the panel hidden when "Skip to alerts" focuses its title). Under reduced motion, tokens.css
+     sets every transition to 0 s: no transition is created at all. */
   transition:
     transform var(--duration-spring) var(--ease-spring-soft),
     opacity var(--duration-base) var(--ease-standard);
-}
-
-/* Under reduced motion, tokens.css gives every element a 0.01 ms transition of `all`: the
-   visibility inherited from a reopened panel would then stay "hidden" on its content for a
-   frame, and "Skip to alerts" could not focus the title. Content that declares no transition
-   of its own does not transition (zero specificity: components keep theirs). */
-:where(.pane *) {
-  transition-property: none;
 }
 
 .paneLeft {
