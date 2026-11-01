@@ -1,6 +1,6 @@
 # Sprint 3 — Licence, dépendances à jour, garde CI et bureau sur mesure
 
-**Dates** : planning le 2026-11-01 ; démarrage à la validation du PO.
+**Dates** : planning le 2026-11-01 ; **validé par le PO le 2026-11-01** (décisions 52 à 58) ; en cours.
 **Objectif du sprint** : protéger le dépôt (licence, dépendances, garde CodeQL) avant le 30/11, puis livrer les dimensions personnalisées du bureau (US-007), en ménageant le quota hebdomadaire.
 
 ## Capacité, quota et ordre
