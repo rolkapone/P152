@@ -11,6 +11,7 @@ import {
   useShellLayout,
 } from "../state";
 import { isNarrowWindow, SceneOverlay, StudioShell } from "../ui";
+import { randomUuid } from "./randomUuid";
 
 // Composition root (ADR-APP-09): the embedded catalog feeds the 3D view. A catalog that
 // fails validation never reaches the renderer (the view reports "failed").
@@ -39,7 +40,7 @@ export function App() {
   useLayoutEffect(() => {
     if (!catalog.ok) return;
     const setup = createSetup(catalog.value, {
-      id: crypto.randomUUID(),
+      id: randomUuid(),
       name: t("shell.documentName"),
       now: new Date().toISOString(),
     });
