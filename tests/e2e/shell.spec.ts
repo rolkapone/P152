@@ -239,7 +239,7 @@ test("Reduce transparency (.no-glass): opaque materials, same layout", async ({ 
   const toolbar = page.getByRole("banner");
   const before = await box(page, sidebar(page));
   await page.evaluate(() => document.documentElement.classList.add("no-glass"));
-  // Polled: under reduced motion every property still "transitions" for 0.01 ms.
+  // Polled: the computed style is read once the class change has been applied.
   await expect
     .poll(() =>
       toolbar.evaluate((e) => {
@@ -258,7 +258,7 @@ test("reduced motion: panels open and close without animation (UX-19)", async ({
       .transitionDuration.split(",")
       .map((value) => parseFloat(value)),
   );
-  for (const seconds of durations) expect(seconds).toBeLessThanOrEqual(0.001);
+  for (const seconds of durations) expect(seconds).toBe(0);
 });
 
 test("the dock follows the window and reopened panels: never under a panel (UX-7, UX-21)", async ({
