@@ -75,5 +75,19 @@ Une ligne par décision, numérotation d'origine conservée (1 à 36 : ancien `b
 | 40 | 2026-10-31 | **Règle `code_scanning` (CodeQL ≥ High) retirée du ruleset de `main`** (elle bloquait toute PR, même verte) ; la garde est à remettre dans la CI (SEC-06). | [sec-02-reglages](security/sec-02-reglages.md), SEC-06 |
 | 41 | 2026-10-20 | **MFA du compte GitHub et réglages du dépôt confirmés par le PO**, avant le premier push (« La MFA et les réglages du dépôt sont faits »). Précise 38. | [sprint-2](sprints/sprint-2.md) |
 
+## Revue du Sprint 2 (2026-11-01)
+| N° | Date | Décision | Voir |
+|---|---|---|---|
+| 42 | 2026-11-01 | **Sprint 2 validé** par le PO. | [sprint-2](sprints/sprint-2.md) |
+| 43 | 2026-11-01 | **Budget du bundle accepté à 195 kB gz (index) / 295 kB gz (SceneCanvas)**, « si on ne peut pas faire mieux » : on cherche à réduire (mesuré 176,6 / 267,1). | [sprint-3](sprints/sprint-3.md) |
+| 44 | 2026-11-01 | **Critère « 10 runs » reformulé** : 10 runs `CI=1` dans l'image Playwright limitée à 4 CPU / 8 Go, plus un stress local informatif à 50 % des threads et `--repeat-each=10` sans charge. | SEC-06 |
+| 45 | 2026-11-01 | **Story de maintenance groupée des 11 PR Dependabot** expliquée et acceptée (lot 1 puis majeures par famille). | SEC-08, SEC-09, SEC-13 |
+| 46 | 2026-11-01 | **Exception minimatch** (outil de dev) maintenue jusqu'au 2026-11-30 ; levée par ESLint 10. | [exceptions](security/exceptions.md), SEC-09 |
+| 47 | 2026-11-01 | **L'application est à but lucratif.** | [vision](vision.md) |
+| 48 | 2026-11-01 | **Dépôt public avec `LICENSE` propriétaire** « Copyright © 2026 Carol MBONZIMA. All rights reserved » ; aucun paiement (pas de GitHub Pro) pour l'instant. | SEC-07 |
+| 49 | 2026-11-01 | **`budget.md` à finaliser par `socle:ressources`** : relevé /usage du 2026-11-01 = 14 % de la session, 42 % de la semaine, remise à zéro le 2026-11-06 à 16 h ; part P152 / P153 = 50 / 50 par défaut. | [sprint-3](sprints/sprint-3.md) |
+| 50 | 2026-11-01 | **Les 3 économies de `socle:ressources` acceptées** : appels courts de 3-4 tâches ; une seule suite E2E à la fois (le reviewer ne lance pas d'E2E, la QA cible, la CI lance la suite complète) ; CI : cache ou sharding Playwright et E2E limités aux specs touchées sur les PR EXPRESS ou docs. | [sprint-2](sprints/sprint-2.md) Rétro |
+| 51 | 2026-11-01 | **Liquid Glass : story à part** (R2/R3, hors MVP), retirée de US-025. | US-170, [plus tard](backlog-plus-tard.md) |
+
 ## Questions ouvertes (long terme, non bloquantes)
 Voir [backlog.md](backlog.md).
