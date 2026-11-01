@@ -1,9 +1,9 @@
 # ETAT — P152 « Deskfit » (point d'entrée unique)
 
-Mis à jour le 2026-11-01 (Sprint 3 validé par le PO, en cours). Lire ce fichier en premier, puis uniquement les fichiers de sa story.
+Mis à jour le 2026-11-01 (Sprint 3 en cours : fins de story avant le 6/11 faites). Lire ce fichier en premier, puis uniquement les fichiers de sa story.
 
 ## Sprint en cours
-**Sprint 3 en cours** ([sprint-3](sprints/sprint-3.md), validé le 2026-11-01, décisions 52 à 58). Engagement 12 pts : SEC-07 (EXPRESS 1), SEC-08 (STANDARD 2), SEC-09 ESLint 10 (RENFORCÉE 3), SEC-06a (RENFORCÉE 3), US-007 (STANDARD 3). SEC-13 reportée au Sprint 4. Budget 28 M unités (8 M avant le 6/11). Avant le 6/11 : mode direct D1-D3, SEC-07, design US-007, SEC-08 ; après : SEC-09, SEC-06a, US-007. MVP 32 / 99 (35 attendus). **Prochain : PR du planning (devops), puis correctifs de style D1-D3 et repli `randomUUID` (session principale).**
+**Sprint 3 en cours** ([sprint-3](sprints/sprint-3.md), validé le 2026-11-01, décisions 52 à 58). Engagement 12 pts : SEC-07 (EXPRESS 1), SEC-08 (STANDARD 2), SEC-09 ESLint 10 (RENFORCÉE 3), SEC-06a (RENFORCÉE 3), US-007 (STANDARD 3). SEC-13 reportée au Sprint 4. Budget 28 M unités (8 M avant le 6/11). **Avant le 6/11, livré : D1-D3 + repli `randomUUID` (PR #23), SEC-07 (PR #24), SEC-08 (PR #26) ; 3 pts sur 12.** Design US-007 : statut à confirmer. MVP 32 / 99 inchangé (SEC-07 et SEC-08 hors total MVP ; 35 attendus après S3). **Prochain, après la remise à zéro du quota le 2026-11-06 à 16 h (Paris) : SEC-09 (ESLint 10, échéance minimatch 30/11), puis SEC-06a, puis US-007.**
 
 ## Stories
 | Story | Statut | Voie | Prochain agent | PR |
@@ -13,11 +13,17 @@ Mis à jour le 2026-11-01 (Sprint 3 validé par le PO, en cours). Lire ce fichie
 | US-006 Bureaux | DONE (S2) | STANDARD | — | #16 |
 | SEC-02 Dépôt GitHub | DONE (S2) | RENFORCÉE | — | #17, #20 |
 | Stabiliser `parseSetup.fuzz` | DONE (marge) | EXPRESS | — | #18 |
-| SEC-07, SEC-08, SEC-09, SEC-06a, US-007 | TODO (S3) | EXPRESS / STANDARD / RENFORCÉE / RENFORCÉE / STANDARD | developer, ux-designer | — |
+| Correctifs D1-D3 + repli `randomUUID` (mode direct) | DONE (S3) | direct | — | #23 |
+| SEC-07 LICENSE | DONE (S3) | EXPRESS | — | #24 |
+| CI : cache et E2E docs-only (hors story) | DONE (S3) | EXPRESS | — | #25 |
+| SEC-08 maintenance lot 1 | DONE (S3) | STANDARD | — | #26 |
+| SEC-09 ESLint 10 | TODO (S3, après le 6/11) | RENFORCÉE | developer | — |
+| SEC-06a garde CodeQL, fuzz, Semgrep | TODO (S3, après le 6/11) | RENFORCÉE | devops | — |
+| US-007 taille du bureau | TODO (S3, après le 6/11) | STANDARD | developer | — |
 | SEC-13 (Sprint 4, décision 54) | TODO | RENFORCÉE | developer | — |
 | Autres ouvertes (SEC-03b, SEC-04, SEC-05, SEC-06 reste, US-008 à US-025) | TODO | à attribuer | `socle:scrum-master` | — |
 
-Index complet : [backlog.md](backlog.md). Fiches ouvertes : [stories/](stories/). Fiches DONE : [archive/stories/](archive/stories/). Dette : [dette.md](dette.md). Reste du Sprint 1 : 16 pts DONE (US-001 à US-004, SEC-01).
+Index complet : [backlog.md](backlog.md). Fiches ouvertes : [stories/](stories/). Fiches DONE : [archive/stories/](archive/stories/) (SEC-07 et SEC-08 à archiver par `socle:archiviste`). Dette : [dette.md](dette.md). Reste du Sprint 1 : 16 pts DONE (US-001 à US-004, SEC-01).
 
 ## Dernières décisions ([decisions.md](decisions.md))
 - 52 à 58 — planification du Sprint 3 : plan, budget 28 M, SEC-13 au S4, PR CI, US-007 (UX), cm insécable, texte LICENSE.
@@ -41,7 +47,7 @@ Index complet : [backlog.md](backlog.md). Fiches ouvertes : [stories/](stories/)
 
 ## Blocages et points en attente du PO
 - Sprint 3 : plan, budget et CI validés (décisions 52 à 55). Reste : budget de quota à confirmer dans `equipe/ressources/budget.md` (non versionné) par `socle:ressources`.
-- Hors story : alertes Scorecard #5, #6, #7 (licence, décision PO), #9 ; 11 PR Dependabot ouvertes (#4 à #13, #15), dont #12, #13, #15 en CI rouge.
+- Hors story : alertes Scorecard #5, #6, #9 ; #7 (licence) acceptée comme choix du PO ([dette](dette.md)). 9 PR Dependabot ouvertes (#4 à #10, #12, #13) ; #11 et #15 fermées au profit de #26 ; #12 et #13 signalées en CI rouge.
 - Garde CodeQL ≥ High à remettre en CI : [SEC-06a](stories/SEC-06a.md).
 - Questions long terme (affiliation, âge minimum, hébergement UE) : [backlog.md](backlog.md).
 

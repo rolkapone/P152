@@ -52,14 +52,18 @@ Budget bundle 195 / 295 kB gz (43) ; « 10 runs » reformulé (44) ; maintenance
 
 | Story | Voie | Statut (TODO / IN PROGRESS / IN REVIEW / QA / SECURITY / DONE / BLOCKED) | Cycles | Prochain agent | PR |
 |---|---|---|---|---|---|
-| Direct D1-D3 | direct | TODO | 0 / 3 | session principale | — |
-| SEC-07 | EXPRESS | TODO | 0 / 3 | developer | — |
-| US-007 (design) | — | TODO | 0 / 3 | ux-designer | — |
-| SEC-08 | STANDARD | TODO | 0 / 3 | developer | — |
+| Direct D1-D3 + repli `randomUUID` | direct | DONE (revue EXPRESS APPROVE) | n.d. | — | #23 |
+| SEC-07 | EXPRESS | DONE | n.d. | — | #24 |
+| US-007 (design) | — | TODO (statut à confirmer) | 0 / 3 | ux-designer | — |
+| SEC-08 | STANDARD | DONE (revue APPROVE, secdevops PASS) | n.d. | — | #26 |
 | SEC-09 | RENFORCÉE | TODO (après le 6/11) | 0 / 3 | developer | — |
 | SEC-06a | RENFORCÉE | TODO (après le 6/11) | 0 / 3 | devops | — |
 | US-007 | STANDARD | TODO (après le 6/11) | 0 / 3 | developer | — |
 | SEC-13 | RENFORCÉE | TODO (marge) | 0 / 3 | developer | — |
+
+Hors story : CI cache et raccourci E2E docs-only, DONE (PR #25, EXPRESS, cycle 1 ; à confirmer sur la première PR purement documentaire).
+
+**Bilan avant le 6/11 (2026-11-01)** : 3 pts livrés sur 12 (SEC-07 1, SEC-08 2). Reste après le 6/11 : SEC-09, SEC-06a, US-007 (9 pts). Cycles « n.d. » : nombre de cycles non transmis par la passation, à compléter par le devops.
 
 ## Risques
 
@@ -70,10 +74,10 @@ Budget bundle 195 / 295 kB gz (43) ; « 10 runs » reformulé (44) ; maintenance
 | R16 | Une majeure (Vite 8) dépasse le budget du bundle ou casse la CSP | Moyenne / Moyen | Une famille par PR, mesure avant/après, retour arrière simple | developer |
 | R17 | CI E2E de 15 à 18 min par PR sur 5 PR : coût CI et quota | Élevée / Moyen | Une vérification par PR ; E2E limités aux specs touchées (accord PO) | devops |
 | R18 | Merge d'une mauvaise PR (incident #19) | Faible / Élevé | T0 : n° de PR dans le mandat, jamais « DO NOT MERGE » | orchestrateur |
-| R19 | Écart de dette : style « fait » dans `dette.md`, absent du code | Moyenne / Faible | Vérifier avant D1 ; corriger `dette.md` | scrum-master |
+| R19 | Écart de dette : style « fait » dans `dette.md`, absent du code | Moyenne / Faible | Vérifier avant D1 ; corriger `dette.md` | scrum-master (clos : constat confirmé, corrigé en PR #23) |
 
 ## Questions pour le PO
 1. Valider l'engagement de 12 pts (SEC-13 en marge) et l'ordre avant / après le 6/11.
 2. Budget de quota du sprint (devis de `socle:ressources` à venir, `budget.md`).
-3. Accord pour modifier la CI (cache Playwright, E2E ciblés sur PR EXPRESS / docs) : dans SEC-06a, ou PR dédiée ?
+3. Accord pour modifier la CI (cache Playwright, E2E ciblés sur PR EXPRESS / docs) : traité en PR dédiée (#25) ; reste à confirmer sur une PR purement documentaire.
 4. Texte de `LICENSE` : relire l'avis ajouté après la phrase imposée (pas un avis juridique).
