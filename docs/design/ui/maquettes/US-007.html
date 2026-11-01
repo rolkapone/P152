@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>US-007 - Custom desk size - mockup v0.4 (Deskfit)</title>
+<style>
+/* Police : la coupe livree par l'app (public/fonts, url() comme src/ui/styles/fonts.css), puis une Inter
+   installee, puis repli systeme. Aucun reseau. Chromium peut refuser une police en file:// : le repli joue. */
+@font-face{font-family:"Inter";font-style:normal;font-weight:100 900;font-display:swap;src:url("../../../../public/fonts/inter-latin-wght-normal.woff2") format("woff2"),local("Inter Variable");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+
+/* ======================= BEGIN SYNCED (tokens.css <-> maquettes) ======================= */
+:root {
+  /* ---- Typographie : Inter + echelle des styles dynamiques (minimum 14 px) ---- */
+  --font-sans: "Inter", system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, "Cascadia Mono", Consolas, Menlo, monospace;
+  --font-features: "kern", "calt", "ss03";                       /* defaut : guillemets et virgules ronds */
+  --font-features-alt: "kern", "calt", "ss03", "cv11", "ss01";   /* variante a evaluer (a simple, chiffres ouverts) */
+  font-feature-settings: var(--font-features);
+  --text-sm: 0.875rem;    /* 14 px - minimum de l'UI (Subheadline, Footnote, Caption) */
+  --text-md: 1rem;        /* 16 px - Body, Headline */
+  --text-lg: 1.0625rem;   /* 17 px - titre de barre, verdict */
+  --text-xl: 1.375rem;    /* 22 px - Title 2 */
+  --text-2xl: 1.75rem;    /* 28 px - Title 1 */
+  --text-3xl: 2.125rem;   /* 34 px - Large Title */
+  --leading-tight: 1.2;
+  --leading-snug: 1.3;
+  --leading-normal: 1.45;
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+  /* Styles (raccourci `font`). ATTENTION : `font:` remet font-feature-settings a zero ->
+     toujours ajouter `font-feature-settings: var(--font-features)` (les classes .t-* le font). */
+  --font-large-title: 700 2.125rem/1.2 var(--font-sans);
+  --font-title-1: 700 1.75rem/1.21 var(--font-sans);
+  --font-title-2: 600 1.375rem/1.27 var(--font-sans);
+  --font-title-3: 600 1.25rem/1.25 var(--font-sans);
+  --font-headline: 600 1rem/1.375 var(--font-sans);
+  --font-body: 400 1rem/1.375 var(--font-sans);
+  --font-callout: 400 0.9375rem/1.33 var(--font-sans);
+  --font-subheadline: 400 0.875rem/1.36 var(--font-sans);
+  --font-footnote: 400 0.875rem/1.29 var(--font-sans);
+  --font-caption: 500 0.875rem/1.29 var(--font-sans);
+  /* Chasse optique (Inter n'a pas d'axe opsz) : -0.0223 + 0.185 * e^(-0.1745 * px), arrondi */
+  --tracking-large-title: -0.022em;
+  --tracking-title-1: -0.021em;
+  --tracking-title-2: -0.018em;
+  --tracking-title-3: -0.017em;
+  --tracking-headline: -0.011em;
+  --tracking-body: -0.011em;
+  --tracking-callout: -0.009em;
+  --tracking-subheadline: -0.006em;
+  --tracking-footnote: -0.006em;
+  --tracking-caption: 0em;
+  --tracking-tight: -0.018em;     /* alias historique : titres >= 22 px */
+  --tracking-overline: 0.04em;
+
+  /* ---- Espacements (base 4 px) ---- */
+  --space-0: 0;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --panel-pad: 16px;
+  --float-inset: 12px;   /* marge des panneaux flottants (repli iPadOS / tiroirs) */
+
+  /* ---- Rayons concentriques : interne = externe - marge (22-8=14, 14-4=10, 10-4=6) ---- */
+  --radius-sm: 6px;      /* vignettes, tooltips, puces */
+  --radius-md: 10px;     /* champs, lignes de liste, segments internes */
+  --radius-lg: 14px;     /* groupes, cartes, alertes, popovers */
+  --radius-xl: 22px;     /* panneaux flottants, feuilles, modales */
+  --radius-pill: 999px;  /* boutons, segmented, verdict */
+
+  /* ---- Tailles ---- */
+  --control-sm: 32px;
+  --control-md: 36px;
+  --control-lg: 44px;
+  --topbar-h: 52px;        /* barre d'outils unifiee */
+  --panel-left-w: 248px;   /* barre laterale */
+  --panel-right-w: 312px;  /* inspecteur */
+  --drawer-max-w: 360px;   /* superposition (largeur < 1024 px) */
+  --popover-w: 320px;
+  --sheet-w: 480px;
+  --toggle-size: 40px;     /* cible des boutons de barre d'outils, pastille de verdict */
+  --row-min-h: 56px;       /* ligne de liste de choix (bureaux) */
+  --thumb-w: 56px;
+  --thumb-h: 44px;
+  --icon-sm: 16px;
+  --icon-md: 18px;
+  --icon-lg: 20px;
+  --icon-xl: 24px;
+  --icon-stroke: 1.6;      /* Lucide : 1.5 a 1.75 */
+  --focus-width: 3px;
+  --focus-offset: 2px;
+  --border-width: 1px;
+
+  /* ---- Motion ---- */
+  --duration-fast: 120ms;     /* survol, appui */
+  --duration-base: 200ms;     /* menus, toasts, fondus */
+  --duration-slow: 320ms;     /* barres, bandeaux */
+  --duration-spring: 460ms;   /* ressort : panneaux, feuilles, popovers, segment */
+  --duration-camera: 480ms;   /* transitions de camera 3D */
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-spring: cubic-bezier(0.34, 1.3, 0.64, 1);       /* ressort leger (repli : cubic-bezier) */
+  --ease-spring-soft: cubic-bezier(0.22, 1, 0.36, 1);    /* ressort amorti sans depassement */
+  --press-scale: 0.97;
+
+  /* ---- Materiaux (vibrancy) : filtres. Teintes dans les blocs de theme ---- */
+  --material-saturate: 180%;
+  --material-filter-ultra-thin: blur(16px) saturate(160%);
+  --material-filter-thin: blur(20px) saturate(170%);
+  --material-filter-regular: blur(28px) saturate(180%);
+  --material-filter-thick: blur(36px) saturate(180%);
+  --glass-blur: 28px;                                      /* alias historiques = materiau regular */
+  --glass-saturate: 180%;
+  --glass-filter: var(--material-filter-regular);
+  --glass-filter-soft: blur(12px) saturate(140%);          /* voile des feuilles */
+
+  /* ---- Z-index ---- */
+  --z-panel: 10;
+  --z-floating: 20;
+  --z-menu: 30;
+  --z-modal: 40;
+  --z-toast: 50;
+  --z-skip: 60;
+}
+
+/* Ressorts reels (equation d'un ressort amorti) quand linear() est supporte */
+@supports (transition-timing-function: linear(0, 1)) {
+  :root {
+    --ease-spring: linear(0, 0.081 5%, 0.258 10%, 0.46 15%, 0.644 20%, 0.793 25%, 0.901 30%, 0.972 35%, 1.014 40%, 1.033 45%, 1.038 50%, 1.035 55%, 1.029 60%, 1.021 65%, 1.014 70%, 1.008 75%, 1.004 80%, 1);
+    --ease-spring-soft: linear(0, 0.09 5%, 0.264 10%, 0.442 15%, 0.594 20%, 0.713 25%, 0.801 30%, 0.908 40%, 0.96 50%, 0.983 60%, 0.993 70%, 0.997 80%, 1);
+  }
+}
+
+/* ============================ THEME CLAIR ============================ */
+:root,
+[data-theme="light"] {
+  color-scheme: light;
+
+  --color-bg: #F2F2F7;              /* fond de fenetre (gris systeme) */
+  --color-surface: #FFFFFF;         /* lignes de groupe, champs, feuilles */
+  --color-surface-2: #EBEBF0;       /* aplats secondaires */
+  --color-raised: #FFFFFF;          /* pouce du controle segmente */
+  --color-overlay: rgba(0, 0, 0, 0.32);
+  --color-border: #D8D8DE;          /* decoratif */
+  --color-separator: rgba(60, 60, 67, 0.16);   /* filets : decoratifs */
+  --color-border-strong: #86868E;   /* contours porteurs d'information : 3.6:1 sur surface */
+  --color-fill: rgba(118, 118, 128, 0.14);     /* pistes (segmented, switch off), survol */
+  --color-fill-hover: rgba(118, 118, 128, 0.10);
+
+  --color-text: #1C1C1E;            /* 17:1 sur surface */
+  --color-text-muted: #4C4C54;      /* 8.4:1 sur surface ; 4.6:1 minimum sur materiau regular, pire fond */
+  --color-text-disabled: #9A9AA2;   /* desactive : exempte */
+
+  --color-accent: #0A64E8;          /* UNE couleur d'accent (bleu systeme). 5.2:1 sur surface */
+  --color-accent-hover: #0553C4;
+  --color-accent-active: #0443A3;
+  --color-on-accent: #FFFFFF;       /* 5.2:1 sur accent */
+  --color-accent-solid: #0A64E8;    /* aplat plein (bouton principal, switch actif) */
+  --color-accent-solid-hover: #0553C4;
+  --color-accent-solid-active: #0443A3;
+  --color-on-accent-solid: #FFFFFF;
+  --color-accent-subtle: #DDEAFE;   /* selection "accent tint", OPAQUE */
+  --color-accent-subtle-text: #0A46B8;  /* 6.7:1 sur accent-subtle */
+  --color-focus: #0A52C2;           /* 7.0:1 sur surface ; >= 3:1 meme sous materiau thin, pire fond */
+  --color-focus-halo: rgba(10, 82, 194, 0.28);
+
+  /* Statuts : semantiques, jamais decoratifs */
+  --color-success: #137A3F;
+  --color-success-bg: #E3F4EA;
+  --color-error: #B42318;
+  --color-error-bg: #FDECEA;
+  --color-warning: #8A4B00;
+  --color-warning-icon: #B86E00;
+  --color-warning-bg: #FFF3DC;
+  --color-info: #0B6B8A;
+  --color-info-bg: #E3F3F8;
+  --color-danger-solid: #B42318;
+  --color-on-danger: #FFFFFF;
+
+  /* Ombres tres douces */
+  --shadow-1: 0 0 0 0.5px rgba(0,0,0,.05), 0 1px 2px rgba(0,0,0,.04), 0 2px 8px rgba(0,0,0,.04);
+  --shadow-2: 0 0 0 0.5px rgba(0,0,0,.06), 0 4px 12px rgba(0,0,0,.06), 0 12px 32px rgba(0,0,0,.10);
+  --shadow-3: 0 0 0 0.5px rgba(0,0,0,.08), 0 8px 24px rgba(0,0,0,.08), 0 32px 80px rgba(0,0,0,.16);
+
+  /* Materiaux : teinte + opacite. Pire fond = noir pur. Regle d'usage dans design-system.md 5 */
+  --material-ultra-thin: rgba(246, 246, 248, 0.55);   /* glyphes seuls (>= 3:1) */
+  --material-thin: rgba(246, 246, 248, 0.72);         /* texte principal + icones */
+  --material-regular: rgba(246, 246, 248, 0.80);      /* tout texte (barre laterale, inspecteur, barres) */
+  --material-thick: rgba(248, 248, 250, 0.90);        /* menus, popovers, feuilles */
+  --material-solid: #F2F2F7;                          /* repli opaque des 3 premiers */
+  --material-solid-raised: #FFFFFF;                   /* repli opaque de thick */
+  --material-hairline: rgba(255, 255, 255, 0.60);     /* liseré interieur 1 px */
+  --material-outline: rgba(0, 0, 0, 0.10);            /* contour exterieur 0.5 px */
+  --material-rim: inset 0 0 0 1px var(--material-hairline), 0 0 0 0.5px var(--material-outline);
+  --glass-tint: var(--material-regular);              /* alias historiques */
+  --glass-border: var(--material-hairline);
+  --glass-shadow: var(--material-rim), 0 1px 2px rgba(0,0,0,.04), 0 8px 24px rgba(0,0,0,.08), 0 24px 56px rgba(0,0,0,.10);
+  --glass-link: #0A46B8;            /* lien sur materiau : 4.7:1 sur le pire fond */
+
+  /* Scene 3D : studio clair neutre (photo produit) */
+  --scene-bg-top: #FAFAFC;
+  --scene-bg-bottom: #DFE2E8;
+  --scene-floor: #EEF0F3;
+  --scene-shadow: rgba(40, 48, 64, 0.28);
+  --scene-desk: #D9CBB2;
+  --scene-desk-edge: #B2A283;
+  --scene-object: #8E97A6;
+  --scene-object-edge: #5F6878;
+  --scene-outline-inner: #FFFFFF;
+  --scene-outline-outer: #1B1F27;
+  --scene-selection: #0A64E8;
+  --scene-error: #B42318;
+  --scene-warning: #B86E00;
+}
+
+/* ============================ THEME SOMBRE ============================ */
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  --color-bg: #0B0B0D;
+  --color-surface: #1C1C1E;
+  --color-surface-2: #2C2C2E;
+  --color-raised: #48484C;
+  --color-overlay: rgba(0, 0, 0, 0.55);
+  --color-border: #38383A;
+  --color-separator: rgba(84, 84, 88, 0.55);
+  --color-border-strong: #8E8E98;   /* 5.2:1 sur surface */
+  --color-fill: rgba(118, 118, 128, 0.28);
+  --color-fill-hover: rgba(118, 118, 128, 0.18);
+
+  --color-text: #F5F5F7;            /* 15.6:1 */
+  --color-text-muted: #C7C7D0;      /* 8.3:1 sur surface-2 ; 4.9:1 sur materiau regular, pire fond */
+  --color-text-disabled: #6E6E76;
+
+  --color-accent: #5AA0FF;          /* 6.4:1 sur surface, 5.2:1 sur surface-2 */
+  --color-accent-hover: #7DB4FF;
+  --color-accent-active: #9BC4FF;
+  --color-on-accent: #0B1220;       /* 7.4:1 sur accent */
+  --color-accent-solid: #0A6CF0;    /* texte blanc dessus : 4.8:1 */
+  --color-accent-solid-hover: #0F66DC;
+  --color-accent-solid-active: #0B58BE;
+  --color-on-accent-solid: #FFFFFF;
+  --color-accent-subtle: #17335E;
+  --color-accent-subtle-text: #B3D1FF;  /* 8.1:1 sur accent-subtle */
+  --color-focus: #7DB4FF;
+  --color-focus-halo: rgba(125, 180, 255, 0.30);
+
+  --color-success: #4CC38A;
+  --color-success-bg: #12301F;
+  --color-error: #FF8A80;
+  --color-error-bg: #3A1714;
+  --color-warning: #F2B04A;
+  --color-warning-icon: #F2B04A;
+  --color-warning-bg: #33260D;
+  --color-info: #5CC4E0;
+  --color-info-bg: #0F2A33;
+  --color-danger-solid: #C4302B;
+  --color-on-danger: #FFFFFF;
+
+  --shadow-1: 0 0 0 0.5px rgba(255,255,255,.06), 0 1px 2px rgba(0,0,0,.30), 0 2px 8px rgba(0,0,0,.25);
+  --shadow-2: 0 0 0 0.5px rgba(255,255,255,.08), 0 4px 12px rgba(0,0,0,.35), 0 12px 32px rgba(0,0,0,.40);
+  --shadow-3: 0 0 0 0.5px rgba(255,255,255,.10), 0 8px 24px rgba(0,0,0,.40), 0 32px 80px rgba(0,0,0,.55);
+
+  --material-ultra-thin: rgba(30, 30, 33, 0.55);
+  --material-thin: rgba(30, 30, 33, 0.72);
+  --material-regular: rgba(30, 30, 33, 0.80);
+  --material-thick: rgba(28, 28, 30, 0.90);
+  --material-solid: #1C1C1E;
+  --material-solid-raised: #262628;
+  --material-hairline: rgba(255, 255, 255, 0.14);
+  --material-outline: rgba(0, 0, 0, 0.60);
+  --material-rim: inset 0 0 0 1px var(--material-hairline), 0 0 0 0.5px var(--material-outline);
+  --glass-tint: var(--material-regular);
+  --glass-border: var(--material-hairline);
+  --glass-shadow: var(--material-rim), 0 1px 2px rgba(0,0,0,.30), 0 8px 24px rgba(0,0,0,.35), 0 24px 56px rgba(0,0,0,.45);
+  --glass-link: #A8C8FF;            /* 5.1:1 sur le pire fond (blanc pur sous materiau sombre) */
+
+  --scene-bg-top: #3A414D;
+  --scene-bg-bottom: #12161C;
+  --scene-floor: #1C2129;
+  --scene-shadow: rgba(0, 0, 0, 0.5);
+  --scene-desk: #8C7B62;
+  --scene-desk-edge: #6A5B46;
+  --scene-object: #8E97A6;
+  --scene-object-edge: #C3CAD6;
+  --scene-outline-inner: #FFFFFF;
+  --scene-outline-outer: #0B0E12;
+  --scene-selection: #7DB4FF;
+  --scene-error: #FF8A80;
+  --scene-warning: #F2B04A;
+}
+
+/* Preference systeme si aucun choix explicite (defaut = systeme) */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    color-scheme: dark;
+    --color-bg: #0B0B0D; --color-surface: #1C1C1E; --color-surface-2: #2C2C2E; --color-raised: #48484C;
+    --color-overlay: rgba(0,0,0,.55); --color-border: #38383A; --color-separator: rgba(84,84,88,.55);
+    --color-border-strong: #8E8E98; --color-fill: rgba(118,118,128,.28); --color-fill-hover: rgba(118,118,128,.18);
+    --color-text: #F5F5F7; --color-text-muted: #C7C7D0; --color-text-disabled: #6E6E76;
+    --color-accent: #5AA0FF; --color-accent-hover: #7DB4FF; --color-accent-active: #9BC4FF; --color-on-accent: #0B1220;
+    --color-accent-solid: #0A6CF0; --color-accent-solid-hover: #0F66DC; --color-accent-solid-active: #0B58BE; --color-on-accent-solid: #FFFFFF;
+    --color-accent-subtle: #17335E; --color-accent-subtle-text: #B3D1FF;
+    --color-focus: #7DB4FF; --color-focus-halo: rgba(125,180,255,.30);
+    --color-success: #4CC38A; --color-success-bg: #12301F;
+    --color-error: #FF8A80; --color-error-bg: #3A1714;
+    --color-warning: #F2B04A; --color-warning-icon: #F2B04A; --color-warning-bg: #33260D;
+    --color-info: #5CC4E0; --color-info-bg: #0F2A33;
+    --color-danger-solid: #C4302B; --color-on-danger: #FFFFFF;
+    --shadow-1: 0 0 0 0.5px rgba(255,255,255,.06), 0 1px 2px rgba(0,0,0,.30), 0 2px 8px rgba(0,0,0,.25);
+    --shadow-2: 0 0 0 0.5px rgba(255,255,255,.08), 0 4px 12px rgba(0,0,0,.35), 0 12px 32px rgba(0,0,0,.40);
+    --shadow-3: 0 0 0 0.5px rgba(255,255,255,.10), 0 8px 24px rgba(0,0,0,.40), 0 32px 80px rgba(0,0,0,.55);
+    --material-ultra-thin: rgba(30,30,33,.55); --material-thin: rgba(30,30,33,.72);
+    --material-regular: rgba(30,30,33,.80); --material-thick: rgba(28,28,30,.90);
+    --material-solid: #1C1C1E; --material-solid-raised: #262628;
+    --material-hairline: rgba(255,255,255,.14); --material-outline: rgba(0,0,0,.60);
+    --material-rim: inset 0 0 0 1px var(--material-hairline), 0 0 0 0.5px var(--material-outline);
+    --glass-tint: var(--material-regular); --glass-border: var(--material-hairline);
+    --glass-shadow: var(--material-rim), 0 1px 2px rgba(0,0,0,.30), 0 8px 24px rgba(0,0,0,.35), 0 24px 56px rgba(0,0,0,.45);
+    --glass-link: #A8C8FF;
+    --scene-bg-top: #3A414D; --scene-bg-bottom: #12161C; --scene-floor: #1C2129; --scene-shadow: rgba(0,0,0,.5);
+    --scene-desk: #8C7B62; --scene-desk-edge: #6A5B46; --scene-object: #8E97A6;
+    --scene-object-edge: #C3CAD6; --scene-outline-inner: #FFFFFF; --scene-outline-outer: #0B0E12;
+    --scene-selection: #7DB4FF; --scene-error: #FF8A80; --scene-warning: #F2B04A;
+  }
+}
+
+/* ============ MATERIAUX : primitives + replis (opaque si non supporte / transparence reduite) ============
+   .material-ultra-thin | -thin | -regular | -thick : fond + flou. Ajouter .rim (liseré + contour) ou
+   .float (liseré + ombre douce) pour un element flottant ; un volet colle au bord n'en a pas
+   (un filet --color-separator suffit). .glass = regular + .float (alias historique).
+   Regle AA (pire fond : noir sous clair, blanc sous sombre) : ultra-thin = glyphes seuls ;
+   thin = texte principal + icones ; regular = tout texte ; thick = tout + statuts. */
+.material-ultra-thin { background: var(--material-ultra-thin); -webkit-backdrop-filter: var(--material-filter-ultra-thin); backdrop-filter: var(--material-filter-ultra-thin); }
+.material-thin { background: var(--material-thin); -webkit-backdrop-filter: var(--material-filter-thin); backdrop-filter: var(--material-filter-thin); }
+.material-regular { background: var(--material-regular); -webkit-backdrop-filter: var(--material-filter-regular); backdrop-filter: var(--material-filter-regular); }
+.material-thick { background: var(--material-thick); -webkit-backdrop-filter: var(--material-filter-thick); backdrop-filter: var(--material-filter-thick); }
+.rim { box-shadow: var(--material-rim); }
+.float { box-shadow: var(--glass-shadow); }
+.glass { background: var(--glass-tint); -webkit-backdrop-filter: var(--glass-filter); backdrop-filter: var(--glass-filter); box-shadow: var(--glass-shadow); }
+/* Voile des feuilles : flou leger de la scene derriere */
+.scrim {
+  background: var(--color-overlay);
+  -webkit-backdrop-filter: var(--glass-filter-soft);
+  backdrop-filter: var(--glass-filter-soft);
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .material-ultra-thin, .material-thin, .material-regular, .glass { background: var(--material-solid); }
+  .material-thick { background: var(--material-solid-raised); }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .material-ultra-thin, .material-thin, .material-regular, .glass { background: var(--material-solid); -webkit-backdrop-filter: none; backdrop-filter: none; }
+  .material-thick { background: var(--material-solid-raised); -webkit-backdrop-filter: none; backdrop-filter: none; }
+  .scrim { -webkit-backdrop-filter: none; backdrop-filter: none; }
+}
+/* Option utilisateur (US-025) / simulation : .no-glass sur <html> ou un conteneur */
+.no-glass .material-ultra-thin, .no-glass .material-thin, .no-glass .material-regular, .no-glass .glass,
+.material-ultra-thin.no-glass, .material-thin.no-glass, .material-regular.no-glass, .glass.no-glass { background: var(--material-solid); -webkit-backdrop-filter: none; backdrop-filter: none; }
+.no-glass .material-thick, .material-thick.no-glass { background: var(--material-solid-raised); -webkit-backdrop-filter: none; backdrop-filter: none; }
+.no-glass .scrim { -webkit-backdrop-filter: none; backdrop-filter: none; }
+
+/* Styles de texte (raccourci + chasse optique + options OpenType) */
+.t-large-title { font: var(--font-large-title); letter-spacing: var(--tracking-large-title); font-feature-settings: var(--font-features); }
+.t-title-1 { font: var(--font-title-1); letter-spacing: var(--tracking-title-1); font-feature-settings: var(--font-features); }
+.t-title-2 { font: var(--font-title-2); letter-spacing: var(--tracking-title-2); font-feature-settings: var(--font-features); }
+.t-title-3 { font: var(--font-title-3); letter-spacing: var(--tracking-title-3); font-feature-settings: var(--font-features); }
+.t-headline { font: var(--font-headline); letter-spacing: var(--tracking-headline); font-feature-settings: var(--font-features); }
+.t-body { font: var(--font-body); letter-spacing: var(--tracking-body); font-feature-settings: var(--font-features); }
+.t-callout { font: var(--font-callout); letter-spacing: var(--tracking-callout); font-feature-settings: var(--font-features); }
+.t-subheadline { font: var(--font-subheadline); letter-spacing: var(--tracking-subheadline); font-feature-settings: var(--font-features); }
+.t-footnote { font: var(--font-footnote); letter-spacing: var(--tracking-footnote); font-feature-settings: var(--font-features); }
+.t-caption { font: var(--font-caption); letter-spacing: var(--tracking-caption); font-feature-settings: var(--font-features); }
+
+/* Motion reduit : tout est neutralise (WCAG 2.3.3) */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-fast: 0ms;
+    --duration-base: 0ms;
+    --duration-slow: 0ms;
+    --duration-spring: 0ms;
+    --duration-camera: 0ms;
+    --press-scale: 1;
+  }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Focus visible commun : anneau accent + halo doux (wrappers : [data-focus-visible] de React Aria) */
+.focus-ring,
+:where(button, a, input, select, textarea, [tabindex]):focus-visible,
+[data-focus-visible] {
+  outline: var(--focus-width) solid var(--color-focus);
+  outline-offset: var(--focus-offset);
+  box-shadow: 0 0 0 calc(var(--focus-offset) + var(--focus-width) + 3px) var(--color-focus-halo);
+}
+/* ======================= END SYNCED ======================= */
+
+/* ===== Demo : mouvement reduit simule ===== */
+html.rm{--duration-fast:0ms;--duration-base:0ms;--duration-slow:0ms;--duration-spring:0ms;--duration-camera:0ms;--press-scale:1}
+html.rm *,html.rm *::before,html.rm *::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+
+/* ===== BASE + KIT (identique a US-006) ===== */
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--color-bg);color:var(--color-text);font:var(--font-body);letter-spacing:var(--tracking-body);font-feature-settings:var(--font-features);font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased}
+h1,h2,h3,p{margin:0}
+button,input{font:inherit;color:inherit;letter-spacing:inherit;font-feature-settings:inherit}
+a{color:var(--glass-link)}
+code{font:var(--weight-regular) var(--text-sm)/1.4 var(--font-mono);background:var(--color-fill);padding:1px 6px;border-radius:var(--radius-sm)}
+.muted{color:var(--color-text-muted)}
+.i{width:var(--icon-md);height:var(--icon-md);flex:none;fill:none;stroke:currentColor;stroke-width:var(--icon-stroke);stroke-linecap:round;stroke-linejoin:round}
+.i.sm{width:var(--icon-sm);height:var(--icon-sm)}
+.seg{--n:2;--i:0;position:relative;display:grid;grid-auto-flow:column;grid-auto-columns:1fr;padding:2px;border-radius:var(--radius-pill);background:var(--color-fill);isolation:isolate}
+.seg::before{content:"";position:absolute;z-index:-1;top:2px;bottom:2px;left:2px;width:calc((100% - 4px)/var(--n));border-radius:var(--radius-pill);background:var(--color-raised);box-shadow:0 1px 3px rgba(0,0,0,.14),0 0 0 .5px rgba(0,0,0,.06);transform:translateX(calc(var(--i)*100%));transition:transform var(--duration-spring) var(--ease-spring)}
+.seg>button{height:calc(var(--control-sm) - 4px);padding:0 var(--space-3);border:0;border-radius:var(--radius-pill);background:transparent;color:var(--color-text);font:var(--font-callout);font-weight:var(--weight-medium);font-feature-settings:var(--font-features);letter-spacing:var(--tracking-callout);cursor:pointer;white-space:nowrap}
+.seg>[aria-selected=true]{font-weight:var(--weight-semibold);color:var(--color-accent-subtle-text)}
+.sw{position:relative;flex:none;width:46px;height:28px;border:0;padding:0;border-radius:var(--radius-pill);background:var(--color-border-strong);cursor:pointer;transition:background var(--duration-base) var(--ease-standard)}
+.sw::after{content:"";position:absolute;top:2px;left:2px;width:24px;height:24px;border-radius:50%;background:var(--color-on-accent-solid);box-shadow:0 1px 3px rgba(0,0,0,.3);transition:transform var(--duration-spring) var(--ease-spring)}
+.sw[aria-checked=true]{background:var(--color-accent-solid)}.sw[aria-checked=true]::after{transform:translateX(18px)}
+.grp-h{font:var(--font-subheadline);font-weight:var(--weight-semibold);font-feature-settings:var(--font-features);letter-spacing:var(--tracking-subheadline);color:var(--color-text-muted);padding:0 var(--space-4) var(--space-2)}
+.grp-f{font:var(--font-footnote);font-feature-settings:var(--font-features);letter-spacing:var(--tracking-footnote);color:var(--color-text-muted);padding:var(--space-2) var(--space-4) 0}
+.grp{background:var(--color-surface);border-radius:var(--radius-lg);overflow:hidden}
+.grp>.r{position:relative;display:flex;align-items:center;gap:var(--space-3);min-height:44px;padding:var(--space-2) var(--space-4)}
+.grp>.r+.r::before{content:"";position:absolute;top:0;left:var(--space-4);right:0;height:1px;background:var(--color-separator)}
+.r .lbl{flex:1;min-width:0}
+
+/* ===== US-007 : carte de liste (RadioGroup + bloc des champs, freres dans une meme carte) ===== */
+.dcard{--gap-half:calc(var(--space-1) / 2);--row-pad-y:calc(var(--space-1) + var(--gap-half));background:var(--color-surface);border-radius:var(--radius-lg);overflow:hidden}
+.dlist{display:grid}
+.dlist>.r,.cf{position:relative}
+.dlist>.r+.r::before,.cf::before{content:"";position:absolute;top:0;left:var(--space-4);right:0;height:var(--border-width);background:var(--color-separator)}
+/* Ligne (TOUTES les lignes, metriques US-007) : padding 6/12/6/8, ecart 8, coche 16 -> +18 px de texte */
+.opt{display:flex;align-items:center;gap:var(--space-2);min-height:var(--row-min-h);padding:var(--row-pad-y) var(--space-3) var(--row-pad-y) var(--space-2);color:var(--color-text);cursor:pointer;transition:background var(--duration-fast) var(--ease-standard)}
+.opt:hover,.opt.is-hover{background:var(--color-fill-hover)}
+.opt:active{background:var(--color-fill)}
+.opt[aria-checked=true]{background:var(--color-accent-subtle)}
+.opt .tx{display:grid;gap:var(--gap-half);min-width:0;flex:1}
+.opt .t1{font:var(--font-headline);font-feature-settings:var(--font-features),"tnum";letter-spacing:var(--tracking-headline);overflow-wrap:anywhere}
+.opt .t2{font:var(--font-subheadline);font-feature-settings:var(--font-features);letter-spacing:var(--tracking-subheadline);color:var(--color-text-muted);overflow-wrap:anywhere}
+.opt[aria-checked=true] .t1{color:var(--color-accent-subtle-text)}
+.opt .chk{color:var(--color-accent-subtle-text);visibility:hidden}
+.opt[aria-checked=true] .chk{visibility:visible}
+.opt:focus-visible,.opt.is-focus{outline:var(--focus-width) solid var(--color-focus);outline-offset:calc(-1 * var(--focus-width));box-shadow:none}
+.thumb{flex:none;width:var(--thumb-w);height:var(--thumb-h);color:var(--color-text-muted)}
+.opt[aria-checked=true] .thumb{color:var(--color-accent-subtle-text)}
+.thumb svg{display:block;width:100%;height:100%}
+/* Ligne Custom size desactivee (bureau d'angle actif) : raison lisible (muted), pas focusable */
+.cust.is-dis{cursor:not-allowed}
+.cust.is-dis:hover,.cust.is-dis:active{background:transparent}
+.cust.is-dis .t1,.cust.is-dis .thumb{color:var(--color-text-disabled)}
+/* Metriques US-006, pour la comparaison avant / apres seulement */
+.opt.v6{gap:var(--space-3);padding:var(--row-pad-y) var(--space-4) var(--row-pad-y) var(--space-3)}
+.opt.v6 .chk{width:var(--icon-md);height:var(--icon-md)}
+
+/* ===== US-007 : bloc des champs (ouverture 200 ms, instantanee en reduced motion ; replie = hors Tab) ===== */
+.cfs{display:grid;grid-template-rows:0fr;visibility:hidden;transition:grid-template-rows var(--duration-base) var(--ease-standard),visibility 0s linear var(--duration-base)}
+.cfs.open{grid-template-rows:1fr;visibility:visible;transition:grid-template-rows var(--duration-base) var(--ease-standard),visibility 0s}
+.cfs>.in{min-height:0;overflow:hidden}
+.cf{display:grid;gap:var(--row-pad-y);padding:var(--space-2) var(--space-4) var(--space-3)}
+.cf-h{display:flex;align-items:baseline;justify-content:space-between;gap:var(--space-2)}
+.cf-h label{font:var(--font-subheadline);font-feature-settings:var(--font-features);letter-spacing:var(--tracking-subheadline);color:var(--color-text)}
+.cf-mm{font:var(--font-footnote);font-feature-settings:var(--font-features),"tnum";letter-spacing:var(--tracking-footnote);color:var(--color-text-muted);white-space:nowrap}
+.cf-row{display:flex;align-items:center;gap:var(--space-2)}
+/* NumberField : biseau (surface + contour border-strong 3:1), valeur a droite, suffixe "cm" jamais coupe */
+.nfld{display:flex;flex:1;min-width:0;align-items:center;gap:var(--space-1);height:var(--control-md);padding:0 var(--space-3);border-radius:var(--radius-md);background:var(--color-surface);box-shadow:inset 0 0 0 var(--border-width) var(--color-border-strong);cursor:text}
+.nfld input{flex:1;width:100%;min-width:0;height:100%;padding:0;border:0;background:transparent;text-align:right;font:var(--font-body);font-feature-settings:var(--font-features),"tnum";letter-spacing:var(--tracking-body);color:var(--color-text)}
+.nfld input:focus-visible,.nfld input:focus{outline:0;box-shadow:none}
+.sfx{flex:none;font:var(--font-body);font-feature-settings:var(--font-features);letter-spacing:var(--tracking-body);color:var(--color-text-muted);white-space:nowrap}
+.nfld:focus-within,.nfld.is-focus{outline:var(--focus-width) solid var(--color-focus);outline-offset:var(--focus-offset);box-shadow:inset 0 0 0 var(--border-width) var(--color-focus),0 0 0 calc(var(--focus-offset) + var(--focus-width) + 3px) var(--color-focus-halo)}
+.nfld.err{box-shadow:inset 0 0 0 calc(2 * var(--border-width)) var(--color-error)}
+.nfld.err:focus-within,.nfld.err.is-focus{box-shadow:inset 0 0 0 calc(2 * var(--border-width)) var(--color-error),0 0 0 calc(var(--focus-offset) + var(--focus-width) + 3px) var(--color-focus-halo)}
+/* Stepper pilule 2 x 36 (hors Tab, comme React Aria), cote atteint desactive */
+.stp{display:inline-flex;flex:none;height:var(--control-md);border-radius:var(--radius-pill);background:var(--color-fill);overflow:hidden}
+.stp button{display:grid;place-items:center;width:var(--control-md);height:100%;padding:0;border:0;background:transparent;color:var(--color-text);cursor:pointer;transition:background var(--duration-fast) var(--ease-standard)}
+.stp button+button{box-shadow:inset var(--border-width) 0 0 var(--color-separator)}
+.stp button:hover:not(:disabled){background:var(--color-fill-hover)}
+.stp button:active:not(:disabled){background:var(--color-fill)}
+.stp button:disabled{color:var(--color-text-disabled);cursor:default}
+/* Erreur : icone + texte + contour 2 px (jamais la couleur seule) */
+.cf-err{display:flex;align-items:flex-start;gap:var(--space-2);font:var(--font-footnote);font-feature-settings:var(--font-features);letter-spacing:var(--tracking-footnote);color:var(--color-error)}
+.cf-err .i{margin-top:var(--gap-half)}
+.rng{margin-top:calc(var(--space-2) - var(--space-4));padding-top:0}
+
+/* ===== SHELL reduit (barre laterale + scene) : memes regles que US-005 / US-006 ===== */
+.app{position:relative;width:100%;height:100%;overflow:hidden;container:app/inline-size;display:grid;grid-template-rows:auto 1fr;grid-template-columns:100%;isolation:isolate;background:var(--color-bg);color:var(--color-text);font:var(--font-body);letter-spacing:var(--tracking-body);font-feature-settings:var(--font-features);font-variant-numeric:tabular-nums}
+.pane{position:absolute;grid-row:2;grid-column:1/-1;top:0;bottom:0;z-index:3;display:flex;flex-direction:column;gap:var(--space-5);overflow:auto;overscroll-behavior:contain;padding:var(--space-3) var(--space-3) var(--space-5)}
+.pane-l{left:0;width:var(--panel-left-w);border-right:1px solid var(--color-separator)}
+.pane h2.h,.sbdemo h2.h{font:var(--font-headline);font-feature-settings:var(--font-features);letter-spacing:var(--tracking-headline)}
+.pane .help,.sbdemo .help{font:var(--font-subheadline);font-feature-settings:var(--font-features);letter-spacing:var(--tracking-subheadline);color:var(--color-text-muted);margin-top:2px}
+.pane [role=tabpanel],.sbdemo [role=tabpanel]{display:grid;gap:var(--space-4)}
+@container app (max-width:1023px){
+  .pane{top:var(--float-inset);bottom:var(--float-inset);width:min(var(--drawer-max-w),calc(100% - 64px));border:0;border-radius:var(--radius-xl);box-shadow:var(--glass-shadow)}
+  .pane-l{left:var(--float-inset)}
+}
+.scene{position:absolute;inset:0;z-index:1;overflow:hidden;background:linear-gradient(var(--scene-bg-top),var(--scene-bg-bottom));--dl:0px}
+@container app (min-width:1024px){.scene{--dl:var(--dlw,0px)}}
+.art{position:absolute;top:0;bottom:0;left:var(--dl);right:0;width:calc(100% - var(--dl));height:100%}
+.sbdemo{width:var(--panel-left-w);display:flex;flex-direction:column;gap:var(--space-5);padding:var(--space-3) var(--space-3) var(--space-5);border-radius:var(--radius-lg);color:var(--color-text)}
+
+/* ===== Page de demonstration ===== */
+.demo{position:sticky;top:0;z-index:var(--z-menu);display:flex;flex-wrap:wrap;gap:var(--space-3) var(--space-6);align-items:center;padding:var(--space-2) var(--space-6);border-bottom:1px solid var(--color-separator)}
+.demo label{display:inline-flex;gap:var(--space-2);align-items:center;font:var(--font-callout);font-feature-settings:var(--font-features)}
+.wrap{max-width:1240px;margin:0 auto;padding:var(--space-8) var(--space-6) var(--space-16)}
+h2.sec{font:var(--font-title-2);letter-spacing:var(--tracking-title-2);font-feature-settings:var(--font-features);margin:var(--space-16) 0 var(--space-2)}
+.lead{max-width:80ch;color:var(--color-text-muted);margin-bottom:var(--space-4)}
+.chip{display:inline-block;font:var(--font-caption);font-feature-settings:var(--font-features);background:var(--color-fill);padding:2px 10px;border-radius:var(--radius-pill);margin-bottom:var(--space-2)}
+.fig{margin:var(--space-4) 0 0}
+.cap{margin:var(--space-2) 0 0;font:var(--font-footnote);color:var(--color-text-muted)}
+.devbox{margin:0 auto;position:relative}
+.dev{transform-origin:0 0;border-radius:14px;overflow:hidden;box-shadow:var(--shadow-3)}
+.bench{display:flex;gap:var(--space-6);flex-wrap:wrap;align-items:flex-start;padding:var(--space-6);border-radius:var(--radius-xl);background:linear-gradient(var(--scene-bg-top),var(--scene-bg-bottom));color:var(--color-text)}
+.bench figure{margin:0}.bench .chip{background:var(--color-surface)}
+.phones{display:flex;gap:var(--space-8);flex-wrap:wrap;align-items:flex-start}
+.fitbox{width:calc(var(--panel-left-w) - 2 * var(--space-3) - var(--border-width))}
+ul.dev-notes{margin:0 0 var(--space-3);padding-left:var(--space-5)}ul.dev-notes li{margin-bottom:var(--space-2)}
+table{border-collapse:collapse;width:100%;font:var(--font-footnote)}
+th,td{text-align:left;vertical-align:top;padding:6px 10px;border-bottom:1px solid var(--color-separator)}
+th{font-weight:var(--weight-semibold);background:var(--color-surface-2)}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
+  <filter id="soft6" x="-20%" y="-50%" width="140%" height="200%"><feGaussianBlur stdDeviation="10"/></filter>
+  <symbol id="check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+  <symbol id="plus" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M12 5v14"/></symbol>
+  <symbol id="circle-alert" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></symbol>
+</defs></svg>
+
+<header class="demo material-regular" role="group" aria-label="Demo options">
+  <strong class="t-headline">US-007 Custom desk size <span class="muted" style="font-weight:400">mockup v0.4</span></strong>
+  <label>Reduce transparency <button class="sw" type="button" role="switch" aria-checked="false" id="s-glass" aria-label="Reduce transparency"></button></label>
+  <label>Reduce motion <button class="sw" type="button" role="switch" aria-checked="false" id="s-rm" aria-label="Reduce motion"></button></label>
+  <a href="index.html">Design system</a><a href="US-006.html">US-006 desk</a>
+</header>
+
+<main class="wrap">
+  <p class="chip">US-007 / Sprint 3 / maquette haute fidélité</p>
+  <h1 class="t-large-title">Custom desk size</h1>
+  <p class="lead t-body" style="margin-top:var(--space-2)">Onglet Desk de la barre latérale (base : US-006). <strong>Custom size</strong> est la 8<sup>e</sup> ligne du groupe radio « Desk model » ; la choisir déplie, dans la même carte, trois NumberField Width / Depth / Height en cm avec l'équivalent mm. Toutes les lignes passent aux nouvelles métriques (« cm » jamais seul à la ligne, §5). Le dessin de la scène est un <strong>substitut</strong> qui suit les cotes.</p>
+
+  <h2 class="sec">1. Fenêtre macOS 1366 px, clair (interactive)</h2>
+  <p class="lead">Zone sous la barre d'outils : 1366 × 716. Flèches, stepper et molette (champ focalisé) appliquent à chaque pas : 1 cm, Maj 0,1, Ctrl 10 ; Début / Fin = bornes. Une saisie s'applique à Entrée ou à la sortie du champ ; hors bornes ou vide : erreur, la scène garde la dernière valeur valide ; Échap restaure. Choisir une autre ligne referme les champs, les valeurs sont gardées. Le volet est défilé : à l'ouverture, le bloc des champs est amené dans la vue (le focus reste sur la ligne).</p>
+  <div id="f-light"></div>
+  <p class="cap" role="status" aria-live="polite">Annonce aux lecteurs d'écran (masquée dans l'app), regroupée à 400 ms : <span id="ann-t">Custom desk. 150 by 75 cm, height 74 cm.</span></p>
+
+  <h2 class="sec">2. Sombre 1366 px : saisie hors bornes, borne atteinte</h2>
+  <p class="lead">Width contient « 45 » (validé par Entrée) : contour 2 px, icône, message relié ; le résumé et la scène montrent toujours 150 cm. Height est à 130 cm : le bouton + est désactivé (le texte des bornes reste sous la carte).</p>
+  <div id="f-dark"></div>
+
+  <h2 class="sec">3. États de la ligne et des champs</h2>
+  <p class="lead">De gauche à droite : Custom size jamais utilisée (Standard actif, plan en pointillé) ; bureau d'angle actif, ligne désactivée avec sa raison, aucun champ ; champs ouverts avec focus clavier sur Width, Depth vidé puis validé, Height à la borne haute. Sur fond de studio pour montrer le matériau.</p>
+  <div class="bench" data-theme="light" id="b-light"></div>
+  <div class="bench" data-theme="dark" id="b-dark" style="margin-top:var(--space-4)"></div>
+
+  <h2 class="sec">4. Tiroir (iOS 390 × 844), clair et sombre</h2>
+  <p class="lead">Superposition flottante (US-005 §15) : 326 px de large, colonne utile 302 px ; même composition empilée (libellé et mm, puis champ et stepper). Échap dans un champ <strong>avec brouillon ou erreur</strong> restaure la valeur et ne ferme pas le tiroir.</p>
+  <div class="phones" id="f-phones"></div>
+
+  <h2 class="sec">5. « cm » sur une ligne : avant / après</h2>
+  <p class="lead">Colonne utile réelle : 248 − 2 × 12 − 1 = <strong>223 px</strong> (et non 235). Avant : texte de 97 px, « cm » passait seul à la ligne (QA US-006). Après : padding 6 / 12 / 6 / 8, écart 8, coche 16 → texte de 115 px, et espaces insécables (U+00A0) après « × » et avant « cm » : la seule coupure possible reste après le premier nombre (« 239.9 » / « × 99.9 cm ») si la police ou le zoom l'imposent.</p>
+  <div class="bench" data-theme="light" id="b-fit"></div>
+
+  <h2 class="sec">6. Anatomie</h2>
+  <table>
+    <tr><th>Partie</th><th>Spécification</th></tr>
+    <tr><td>Ligne (toutes)</td><td>56 mini (<code>--row-min-h</code>), padding 6 / 12 / 6 / 8 (<code>--space-3</code>, <code>--space-2</code>), écart 8, coche 16 (<code>--icon-sm</code>), vignette 56 × 44 inchangée. Dimensions Headline tabulaire « W ×&#160;D&#160;cm » (U+00A0). Filet décalé de 16.</td></tr>
+    <tr><td>Vignette</td><td>Échelle commune <strong>0,2275 px/cm</strong> : la borne max de Custom size (240 cm) entre dans la boîte moins 1,4 de contour ; calculée une fois (catalogue + bornes), jamais pendant la saisie. Custom jamais utilisée ou désactivée : plan 140 × 70 en pointillé 3 / 2 sans remplissage.</td></tr>
+    <tr><td>Ligne Custom size</td><td>Jamais utilisée : « Custom size » / « Set your own size ». Utilisée, repliée ou active : « 150 × 75 cm » / « Custom size » (active : teinte <code>accent-subtle</code> + coche + <code>aria-checked</code>, même si les cotes égalent un modèle). Désactivée : « Custom size » en <code>text-disabled</code>, « Rectangular desks only » en <code>text-muted</code> (8,4:1 / 8,3:1), non focusable, <code>cursor: not-allowed</code>.</td></tr>
+    <tr><td>Bloc des champs</td><td>Dans la carte, sous la ligne Custom size, hors du <code>radiogroup</code>. Un bloc par champ : padding 8 / 16 / 12, ligne 1 libellé Subheadline + équivalent mm Footnote <code>text-muted</code> tabulaire à droite ; ligne 2 champ biseau (flex, 36, <code>--radius-md</code>, contour <code>border-strong</code> 3,6:1 / 5,2:1), valeur Body 16 tabulaire alignée à droite + suffixe « cm » <code>text-muted</code> en <code>nowrap</code>, stepper pilule 2 × 36 (icônes Lucide <code>minus</code> / <code>plus</code> 16).</td></tr>
+    <tr><td>Focus</td><td>Sur le biseau (<code>:focus-within</code>) : anneau 3 px <code>--color-focus</code> décalé de 2 + halo ; en erreur le contour rouge 2 px reste dessous.</td></tr>
+    <tr><td>Erreur</td><td>Contour 2 px <code>--color-error</code> + icône <code>circle-alert</code> 16 + message Footnote <code>--color-error</code> (6,6:1 clair, 7,4:1 sombre), <code>role="alert"</code> une fois, <code>aria-invalid</code>, <code>aria-describedby</code> = mm + erreur.</td></tr>
+    <tr><td>Bornes</td><td>Légende <code>.grp-f</code> sous la carte quand les champs sont ouverts : « Width 80-240 cm, depth 50-100 cm, height 60-130 cm. » (proposition, clé <code>desk.custom.range</code>, à valider par l'ux-designer).</td></tr>
+    <tr><td>Résumé</td><td>« Custom, 150 × 75 cm » (Headline) / « 1500 × 750 × 740 mm » (Subheadline muted) / légende inchangée.</td></tr>
+  </table>
+
+  <h2 class="sec">7. Consignes developer</h2>
+  <ul class="dev-notes">
+    <li><strong>Structure</strong> : la carte (<code>--color-surface</code>, <code>--radius-lg</code>, <code>overflow: hidden</code>) devient un wrapper qui contient le <code>RadioGroup</code> (simple grille, sans fond) <strong>puis</strong>, en frère, le bloc des champs. Les champs ne doivent pas être dans le <code>radiogroup</code> : le listener Début / Fin de <code>DeskPanel</code> et les flèches de React Aria captureraient leurs touches. Custom size = 8<sup>e</sup> <code>Radio</code> (<code>value="custom"</code>, <code>isDisabled</code> si bureau d'angle ; Début / Fin et flèches la sautent alors).</li>
+    <li><strong>« cm » sur une ligne</strong> (toutes les lignes, résumé, erreurs, mm) : espaces insécables dans les chaînes de <code>src/locales/en/</code>, écrits <code> </code> pour rester visibles en revue, ex. <code>"size": "{{width}} × {{depth}} cm"</code>, <code>"{{value}} mm"</code>. Nouvelles métriques de <code>.row</code> : padding <code>var(--row-pad-y) var(--space-3) var(--row-pad-y) var(--space-2)</code>, <code>gap: var(--space-2)</code>, coche <code>--icon-sm</code>. Garder <code>overflow-wrap: anywhere</code> (jamais de rognage à 320 px).</li>
+    <li><strong>Vignette</strong> : <code>thumbScale()</code> reçoit les modèles du catalogue <strong>et</strong> un spec fictif aux bornes max de Custom size (largeur 2400 mm) : toutes les vignettes rapetissent de 14 %, aucune ne déborde, l'échelle ne bouge pas pendant la saisie. Pointillé : <code>stroke-dasharray: 3 2</code>, <code>fill-opacity: 0</code>.</li>
+    <li><strong>NumberField</strong> (wrapper <code>ui/components/NumberField</code> sur RAC) : valeur seule dans l'input (16 px : pas de zoom iOS), <code>inputMode="decimal"</code>, nom accessible = libellé + suffixe (<code>aria-labelledby</code> « Width cm »), suffixe <code>aria-hidden</code>. <strong>Ne pas passer <code>minValue</code> / <code>maxValue</code> à RAC</strong> : il borne en silence à la sortie, alors que l'UX veut garder le texte et afficher l'erreur ; validation maison sur les bornes du catalogue, steppers désactivés par nous. Maj (0,1) et Ctrl (10) dans <code>onKeyDown</code> (RAC ne les gère pas). Steppers hors Tab (défaut RAC), nommés « Decrease width » / « Increase width ». Molette au focus seulement.</li>
+    <li><strong>Échap</strong> : avec brouillon ou erreur, restaure et <code>stopPropagation()</code> (sinon le tiroir se ferme, §15) ; sans brouillon, laisser remonter. Entrée en erreur : focus gardé ; sortie par Tab : jamais de retour forcé.</li>
+    <li><strong>Ouverture</strong> : <code>grid-template-rows: 0fr → 1fr</code> en <code>--duration-base</code> / <code>--ease-standard</code> + <code>visibility</code> (replié = hors Tab et hors arbre), instantané en reduced motion via les tokens. Le volet <code>.pane</code> désactive les transitions de son contenu (<code>:where(.pane *)</code>) : le bloc déclare la sienne. Après ouverture, amener le bloc dans la vue (<code>scrollIntoView({ block: "nearest" })</code>, sans <code>smooth</code> en reduced motion) : à 716 px de haut il est sous le pli. Focus laissé sur la ligne.</li>
+    <li><strong>Textes</strong> : clés <code>desk.custom.*</code> de l'UX §5 ; l'équivalent mm suit le texte du champ pendant la frappe (rien n'est appliqué) et disparaît si le texte n'est pas un nombre. Proposition : tiret demi-cadratin (–) dans <code>error.*</code> et <code>range</code> (« 800–2400 mm »), à trancher par l'ux-designer.</li>
+    <li><strong>Tokens</strong> : aucun nouveau, <code>tokens.css</code> inchangé. Icônes Lucide à ajouter au registre <code>Icon</code> : <code>minus</code>, <code>plus</code>, <code>circle-alert</code> (<code>lucide-react</code> déjà présent).</li>
+    <li><strong>Contrastes</strong> : contour du champ 3,6:1 / 5,2:1 ; contour d'erreur et message 6,6:1 / 7,4:1 ; mm et raison <code>text-muted</code> 8,4:1 / 8,3:1 ; anneau 7,0:1 / 8,0:1 ; glyphes du stepper sur <code>fill</code> ≥ 14:1 ; dimensions actives 6,7:1 / 8,1:1.</li>
+  </ul>
+</main>
+
+<script>
+(function(){
+var NB=' ';
+var ic=function(id,c){return '<svg class="i '+(c||'')+'" aria-hidden="true" focusable="false"><use href="#'+id+'"/></svg>'};
+var DK=[{id:'compact',n:'Compact desk',w:100,d:60,h:74},{id:'basic',n:'Basic desk',w:120,d:60,h:74},{id:'standard',n:'Standard desk',w:140,d:70,h:74},{id:'large',n:'Large desk',w:160,d:80,h:74},{id:'gaming',n:'Gaming desk',w:180,d:80,h:74},{id:'corner',n:'Corner desk',w:160,d:140,L:60,h:74},{id:'cornerl',n:'Corner desk large',w:180,d:160,L:70,h:74}];
+var B={w:[80,240],d:[50,100],h:[60,130]};           /* bornes du catalogue (decision 30), en cm */
+var KEYS=['w','d','h'],LBL={w:'Width',d:'Depth',h:'Height'};
+var K=Math.min((56-1.4)/B.w[1],(44-1.4)/160);        /* echelle commune : catalogue + borne max de Custom size */
+function byId(id){return DK.filter(function(x){return x.id===id})[0]}
+function isCorner(id){var d=byId(id);return !!(d&&d.L)}
+function fmt(v){return String(Math.round(v*10)/10)}
+function size(w,d){return fmt(w)+' ×'+NB+fmt(d)+NB+'cm'}
+function parse(t){t=String(t).trim().replace(',','.');return /^\d+(\.\d+)?$/.test(t)?+t:null}
+function rangeMsg(k){return 'Enter a '+LBL[k].toLowerCase()+' between '+B[k][0]+' and '+B[k][1]+NB+'cm ('+B[k][0]*10+'-'+B[k][1]*10+NB+'mm).'}
+function emptyMsg(k){return 'Enter a '+LBL[k].toLowerCase()+' in'+NB+'cm.'}
+function rangeText(){return 'Width '+B.w[0]+'-'+B.w[1]+NB+'cm, depth '+B.d[0]+'-'+B.d[1]+NB+'cm, height '+B.h[0]+'-'+B.h[1]+NB+'cm.'}
+function thumb(d,dash){var w=d.w*K,h=d.d*K,x=(56-w)/2,y=(44-h)/2,a=(d.L||0)*K,s='fill="currentColor" fill-opacity="'+(dash?0:.16)+'" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"'+(dash?' stroke-dasharray="3 2"':'');
+  return '<svg viewBox="0 0 56 44" aria-hidden="true">'+(d.L?'<path d="M'+x+' '+y+'H'+(x+w)+'V'+(y+h)+'H'+(x+w-a)+'V'+(y+a)+'H'+x+'Z" '+s+'/>':'<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="2" '+s+'/>')+'</svg>'}
+function cur(s){return s.sel==='custom'?{w:s.c.w,d:s.c.d,h:s.c.h}:byId(s.sel)}
+
+/* ---- gabarits ---- */
+function row(d,o){return '<div class="r opt'+(o.focus===d.id?' is-focus':'')+(o.hover===d.id?' is-hover':'')+'" role="radio" aria-checked="false" tabindex="-1" data-id="'+d.id+'"><span class="thumb">'+thumb(d)+'</span><span class="tx"><span class="t1">'+size(d.w,d.d)+'</span><span class="t2">'+d.n+'</span></span>'+ic('check','sm chk')+'</div>'}
+function custRow(){return '<div class="r opt cust" role="radio" aria-checked="false" tabindex="-1" data-id="custom"><span class="thumb"></span><span class="tx"><span class="t1"></span><span class="t2"></span></span>'+ic('check','sm chk')+'</div>'}
+function field(k,u,o){var id=u+k,l=LBL[k].toLowerCase();
+  return '<div class="cf" data-k="'+k+'"><div class="cf-h"><label for="'+id+'" id="'+id+'-l">'+LBL[k]+'</label><span class="cf-mm" id="'+id+'-mm"></span></div>'+
+  '<div class="cf-row"><div class="nfld'+(o.focusField===k?' is-focus':'')+'"><input id="'+id+'" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" aria-labelledby="'+id+'-l '+id+'-u" aria-describedby="'+id+'-mm"><span class="sfx" id="'+id+'-u" aria-hidden="true">cm</span></div>'+
+  '<div class="stp"><button type="button" tabindex="-1" data-dir="-1" aria-label="Decrease '+l+'">'+ic('minus','sm')+'</button><button type="button" tabindex="-1" data-dir="1" aria-label="Increase '+l+'">'+ic('plus','sm')+'</button></div></div>'+
+  '<p class="cf-err" id="'+id+'-e" role="alert" hidden>'+ic('circle-alert','sm')+'<span></span></p></div>'}
+function panel(u,o){
+  var seg='<div class="seg" role="tablist" aria-label="Library" style="--n:2;--i:0"><button type="button" role="tab" aria-selected="true">Desk</button><button type="button" role="tab" aria-selected="false">Objects</button></div>';
+  return seg+'<div role="tabpanel"><div><h2 class="h">Choose your desk</h2><p class="help">Pick the model closest to yours.</p></div>'+
+    '<div class="dcard"><div class="dlist" role="radiogroup" aria-label="Desk model">'+DK.map(function(d){return row(d,o)}).join('')+custRow()+'</div>'+
+    '<div class="cfs"><div class="in">'+KEYS.map(function(k){return field(k,u,o)}).join('')+'</div></div></div>'+
+    '<p class="grp-f rng" hidden>'+rangeText()+'</p><section class="sum" aria-labelledby="'+u+'sum"></section></div>'}
+function summary(s,u){var c=cur(s);return '<h3 class="grp-h" id="'+u+'sum">Selected</h3><div class="grp"><div class="r"><span class="lbl t-headline">'+(s.sel==='custom'?'Custom':c.n)+', '+size(c.w,c.d)+'</span></div><div class="r"><span class="lbl t-subheadline muted">'+Math.round(c.w*10)+' × '+Math.round(c.d*10)+' × '+Math.round(c.h*10)+NB+'mm</span></div></div><div class="grp-f">Width × depth × height</div>'}
+
+/* Scene : bureau en axonometrie a l'echelle (vrai cadrage : Three.js) */
+function deskSVG(d){
+  var k=2,c=Math.cos(Math.PI/6)*k,s=Math.sin(Math.PI/6)*k,H=d.h||74,T=2.5,cx=500,cy=450;
+  var P=function(x,y,z){return [cx+(x-y)*c,cy+(x+y)*s-z*k]};
+  var pts=function(poly,z){return poly.map(function(p){var q=P(p[0],p[1],z);return q[0].toFixed(1)+','+q[1].toFixed(1)}).join(' ')};
+  var w2=d.w/2,d2=d.d/2,a=d.L||0;
+  var poly=d.L?[[-w2,-d2],[w2,-d2],[w2,d2],[w2-a,d2],[w2-a,-d2+a],[-w2,-d2+a]]:[[-w2,-d2],[w2,-d2],[w2,d2],[-w2,d2]];
+  var legs=d.L?[[-w2+5,-d2+5],[w2-5,-d2+5],[w2-5,d2-5],[w2-a+5,d2-5],[-w2+5,-d2+a-5]]:[[-w2+5,-d2+5],[w2-5,-d2+5],[w2-5,d2-5],[-w2+5,d2-5]];
+  legs.sort(function(p,q){return (p[0]+p[1])-(q[0]+q[1])});
+  var out='<polygon points="'+pts(poly.map(function(p){return [p[0]*1.04,p[1]*1.04]}),0)+'" filter="url(#soft6)" style="fill:var(--scene-shadow)"/>';
+  legs.forEach(function(l){var t=P(l[0],l[1],H-T),b=P(l[0],l[1],0);out+='<rect x="'+(t[0]-4).toFixed(1)+'" y="'+t[1].toFixed(1)+'" width="8" height="'+(b[1]-t[1]).toFixed(1)+'" rx="2" style="fill:var(--scene-object-edge)"/>'});
+  for(var z=H-T;z<H;z+=.5)out+='<polygon points="'+pts(poly,z)+'" style="fill:var(--scene-desk-edge)"/>';
+  out+='<polygon points="'+pts(poly,H)+'" stroke-linejoin="round" style="fill:var(--scene-desk);stroke:var(--scene-desk-edge);stroke-width:1.5"/>';
+  return '<svg class="art" viewBox="0 0 1000 620" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false">'+out+'</svg>';
+}
+
+/* ---- etat -> DOM (mise a jour sur place : le focus n'est jamais perdu) ---- */
+function sync(P){
+  var s=P.s,u=P.u,corner=isCorner(s.sel),open=s.sel==='custom';
+  [].forEach.call(P.querySelectorAll('.dlist>.opt'),function(r){var on=r.dataset.id===s.sel;r.setAttribute('aria-checked',String(on));r.tabIndex=on?0:-1});
+  var cr=P.querySelector('.cust'),shown=s.used&&!corner;
+  cr.classList.toggle('is-dis',corner);
+  if(corner){cr.setAttribute('aria-disabled','true');cr.removeAttribute('tabindex')}else cr.removeAttribute('aria-disabled');
+  cr.querySelector('.t1').textContent=shown?size(s.c.w,s.c.d):'Custom size';
+  cr.querySelector('.t2').textContent=corner?'Rectangular desks only':(s.used?'Custom size':'Set your own size');
+  cr.querySelector('.thumb').innerHTML=shown?thumb(s.c):thumb({w:140,d:70},true);
+  P.querySelector('.cfs').classList.toggle('open',open);
+  P.querySelector('.rng').hidden=!open;
+  KEYS.forEach(function(k){
+    var f=P.querySelector('.cf[data-k='+k+']'),inp=f.querySelector('input'),err=s.err[k],txt=s.draft[k]!=null?s.draft[k]:fmt(s.c[k]),n=parse(txt);
+    inp.value=txt;
+    f.querySelector('.cf-mm').textContent=n==null?'':Math.round(n*10)+NB+'mm';
+    f.querySelector('.nfld').classList.toggle('err',!!err);
+    if(err){inp.setAttribute('aria-invalid','true');inp.setAttribute('aria-describedby',u+k+'-mm '+u+k+'-e')}else{inp.removeAttribute('aria-invalid');inp.setAttribute('aria-describedby',u+k+'-mm')}
+    var e=f.querySelector('.cf-err');e.querySelector('span').textContent=err||'';e.hidden=!err;
+    f.querySelector('[data-dir="-1"]').disabled=s.c[k]<=B[k][0];
+    f.querySelector('[data-dir="1"]').disabled=s.c[k]>=B[k][1];
+  });
+  P.querySelector('.sum').innerHTML=summary(s,u);
+  var app=P.closest('.app');if(app){app.querySelector('.art').outerHTML=deskSVG(cur(s))}
+}
+function reveal(P){if(P.scrollHeight<=P.clientHeight)return;setTimeout(function(){var r=P.querySelector('.rng'),t=r.offsetTop+r.offsetHeight-P.clientHeight+12;if(t>P.scrollTop)P.scrollTop=t},document.documentElement.classList.contains('rm')?0:220)}
+
+var annT;
+function announce(P){if(!P.closest('#f-light'))return;clearTimeout(annT);annT=setTimeout(function(){var s=P.s,c=cur(s);document.getElementById('ann-t').textContent=s.sel==='custom'?'Custom desk. '+fmt(c.w)+' by '+fmt(c.d)+' cm, height '+fmt(c.h)+' cm.':c.n+' selected. '+c.w+' by '+c.d+' cm.'},400)}
+function choose(P,id){var s=P.s;if(id===s.sel)return;
+  if(id==='custom'){if(isCorner(s.sel))return;if(!s.used){var d=byId(s.sel);s.c={w:d.w,d:d.d,h:d.h};s.used=true}}
+  s.sel=id;s.draft={};s.err={};s.dirty={};sync(P);announce(P);if(id==='custom')reveal(P)}
+function set(P,k,v){var s=P.s;v=Math.min(B[k][1],Math.max(B[k][0],Math.round(v*10)/10));var ch=v!==s.c[k];s.c[k]=v;s.draft[k]=null;s.err[k]=null;s.dirty[k]=false;sync(P);if(ch)announce(P)}
+function step(P,k,dir,e){var m=e.shiftKey?.1:(e.ctrlKey||e.metaKey)?10:1;set(P,k,P.s.c[k]+dir*m)}
+function commit(P,k){var s=P.s,t=s.draft[k];s.dirty[k]=false;if(t==null)return;var n=parse(t);
+  if(String(t).trim()===''){s.err[k]=emptyMsg(k)}
+  else if(n==null||n<B[k][0]||n>B[k][1]){s.err[k]=rangeMsg(k)}
+  else{set(P,k,n);return}
+  sync(P)}
+function pane(el){return el&&el.closest?el.closest('[data-p]'):null}
+function keyOf(el){return el.closest('.cf').dataset.k}
+
+/* ---- montage ---- */
+var PS=[];
+function st(sel,c,x){x=x||{};return {sel:sel,used:!!c,c:c||{w:140,d:70,h:74},draft:x.draft||{},err:x.err||{},dirty:{}}}
+function paneHTML(s,o,cls,attrs){var n=PS.length;PS.push(s);return '<aside class="'+cls+'" aria-label="Desk and objects" data-p="'+n+'"'+(attrs||'')+'>'+panel('p'+n+'-',o||{})+'</aside>'}
+function frame(o){return '<figure class="fig"><span class="chip">'+o.label+'</span><div class="devbox" data-w="'+o.w+'" data-h="'+o.h+'"><div class="dev"><div class="app" data-theme="'+o.theme+'" style="--dlw:'+(o.w>=1024?'248px':'0px')+'">'+paneHTML(o.s,o.o,'pane pane-l material-regular')+'<main class="scene" aria-label="3D view of your desk"><svg class="art"></svg></main></div></div></div></figure>'}
+function mount(){
+  var set_=function(id,h){document.getElementById(id).innerHTML=h};
+  set_('f-light',frame({theme:'light',w:1366,h:716,s:st('custom',{w:150,d:75,h:74}),label:'macOS - clair - Custom size active, 150 × 75 cm (1366 × 716 sous la barre d\'outils)'}));
+  set_('f-dark',frame({theme:'dark',w:1366,h:716,s:st('custom',{w:150,d:75,h:130},{draft:{w:'45'},err:{w:rangeMsg('w')}}),label:'macOS - sombre - Width hors bornes, Height à la borne haute'}));
+  var bench=function(t){var a=' data-theme="'+t+'"';return '<figure><span class="chip">Jamais utilisée</span>'+paneHTML(st('standard'),{},'sbdemo material-regular rim',a)+'</figure>'+
+    '<figure><span class="chip">Bureau d\'angle actif</span>'+paneHTML(st('cornerl',{w:150,d:75,h:74}),{},'sbdemo material-regular rim',a)+'</figure>'+
+    '<figure><span class="chip">Focus, champ vide, borne haute</span>'+paneHTML(st('custom',{w:160,d:80,h:130},{draft:{d:''},err:{d:emptyMsg('d')}}),{focusField:'w'},'sbdemo material-regular rim',a)+'</figure>'};
+  set_('b-light',bench('light'));set_('b-dark',bench('dark'));
+  set_('f-phones',frame({theme:'light',w:390,h:844,s:st('custom',{w:150,d:75,h:74}),label:'iOS - clair - tiroir ouvert'})+frame({theme:'dark',w:390,h:844,s:st('custom',{w:120,d:60,h:72}),label:'iOS - sombre - tiroir ouvert'}));
+  var fitRow=function(d,old){return '<div class="r opt'+(old?' v6':'')+'"><span class="thumb">'+thumb(d)+'</span><span class="tx"><span class="t1">'+(old?d.w+' × '+d.d+' cm':size(d.w,d.d))+'</span><span class="t2">'+d.n+'</span></span>'+ic('check','sm chk')+'</div>'};
+  var fit=function(old,lbl){var c={id:'x',n:'Custom size',w:239.9,d:99.9,h:74};return '<figure><span class="chip">'+lbl+'</span><div class="fitbox"><div class="dcard"><div class="dlist">'+fitRow(byId('corner'),old)+fitRow(byId('cornerl'),old)+fitRow(c,old)+'</div></div></div></figure>'};
+  set_('b-fit',fit(true,'Avant (US-006) : texte 97 px')+fit(false,'Après (US-007) : texte 115 px, U+00A0'));
+  [].forEach.call(document.querySelectorAll('[data-p]'),function(P){P.s=PS[+P.dataset.p];P.u='p'+P.dataset.p+'-';sync(P)});
+  fitFrames();
+  [].forEach.call(document.querySelectorAll('.pane'),function(P){if(P.s.sel==='custom')P.scrollTop=P.scrollHeight});
+}
+function fitFrames(){[].forEach.call(document.querySelectorAll('.devbox'),function(b){var d=b.firstElementChild,w=+b.dataset.w,h=+b.dataset.h,s=Math.min(1,b.parentNode.parentNode.clientWidth/w);d.style.width=w+'px';d.style.height=h+'px';d.style.transform='scale('+s+')';b.style.width=w*s+'px';b.style.height=h*s+'px'})}
+window.addEventListener('resize',fitFrames);
+
+/* ---- interactions ---- */
+document.addEventListener('click',function(e){
+  var t=e.target;if(!t.closest)return;
+  var seg=t.closest('.seg>button');if(seg){var sg=seg.parentNode,all=[].slice.call(sg.children);all.forEach(function(x){x.setAttribute('aria-selected',String(x===seg))});sg.style.setProperty('--i',all.indexOf(seg));return}
+  var sw=t.closest('.sw[role=switch]');if(sw){sw.setAttribute('aria-checked',String(sw.getAttribute('aria-checked')!=='true'));return}
+  var b=t.closest('.stp button');if(b){if(!b.disabled)step(pane(b),keyOf(b),+b.dataset.dir,e);return}
+  var o=t.closest('.dlist>.opt');if(o&&pane(o))choose(pane(o),o.dataset.id);
+});
+document.addEventListener('keydown',function(e){
+  var t=e.target;if(!t.closest)return;var P=pane(t);if(!P)return;
+  if(t.matches('.cf input')){var k=keyOf(t),s=P.s;
+    if(e.key==='Enter'){e.preventDefault();if(s.dirty[k])commit(P,k)}
+    else if(e.key==='Escape'){if(s.draft[k]!=null||s.err[k]){e.preventDefault();e.stopPropagation();s.draft[k]=null;s.err[k]=null;s.dirty[k]=false;sync(P)}}
+    else if(e.key==='ArrowUp'||e.key==='ArrowDown'){e.preventDefault();step(P,k,e.key==='ArrowUp'?1:-1,e)}
+    else if(e.key==='Home'||e.key==='End'){e.preventDefault();set(P,k,B[k][e.key==='Home'?0:1])}
+    return}
+  var o=t.closest('.dlist>.opt');if(!o)return;
+  if(/^Arrow|^Home$|^End$/.test(e.key)){e.preventDefault();
+    var all=[].slice.call(o.parentNode.children).filter(function(x){return x.getAttribute('aria-disabled')!=='true'}),i=Math.max(0,all.indexOf(o)),
+      n=e.key==='Home'?0:e.key==='End'?all.length-1:(i+(/Down|Right/.test(e.key)?1:-1)+all.length)%all.length;
+    all[n].focus();choose(P,all[n].dataset.id)}
+  else if(e.key===' '){e.preventDefault();choose(P,o.dataset.id)}
+});
+document.addEventListener('input',function(e){var t=e.target;if(!t.matches||!t.matches('.cf input'))return;var P=pane(t),k=keyOf(t),n=parse(t.value);
+  P.s.draft[k]=t.value;P.s.dirty[k]=true;t.closest('.cf').querySelector('.cf-mm').textContent=n==null?'':Math.round(n*10)+NB+'mm'});
+document.addEventListener('focusout',function(e){var t=e.target;if(t.matches&&t.matches('.cf input')){var P=pane(t),k=keyOf(t);if(P.s.dirty[k])commit(P,k)}});
+document.addEventListener('wheel',function(e){var t=e.target;if(!t.matches||!t.matches('.cf input')||document.activeElement!==t)return;e.preventDefault();step(pane(t),keyOf(t),(e.deltaY||e.deltaX)<0?1:-1,e)},{passive:false});
+/* le listener du bouton passe avant celui du document (qui bascule aria-checked) : on lit l'etat d'avant */
+document.getElementById('s-glass').addEventListener('click',function(){document.documentElement.classList.toggle('no-glass',this.getAttribute('aria-checked')!=='true')});
+document.getElementById('s-rm').addEventListener('click',function(){document.documentElement.classList.toggle('rm',this.getAttribute('aria-checked')!=='true')});
+mount();
+})();
+</script>
+</body>
+</html>
