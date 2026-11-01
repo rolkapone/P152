@@ -359,18 +359,45 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+      # PR dont le diff ne touche que docs/**, *.md ou LICENSE : le job reste vert (ci-ok refuse skipped)
+      # mais saute install, build et tests. push sur main et PR touchant du code : suite complete.
+      - name: Detect docs-only change
+        id: scope
+        env:
+          EVENT: ${{ github.event_name }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          # POSIX sh : le conteneur Playwright execute `run` avec dash (pas de pipefail, pas de <<<).
+          set -eu
+          echo "docs_only=false" >> "$GITHUB_OUTPUT"
+          if [ "$EVENT" != "pull_request" ]; then echo "Not a pull request: full E2E suite."; exit 0; fi
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git fetch --no-tags --depth=1 origin "$BASE_SHA"
+          # --no-renames : un renommage src/x.ts -> docs/x.md doit lister aussi src/x.ts (ancien chemin),
+          # sinon il contournerait les E2E.
+          files="$(git diff --no-renames --name-only "$BASE_SHA" HEAD)"
+          if [ -z "$files" ]; then echo "Empty diff: full E2E suite."; exit 0; fi
+          code="$(printf '%s\n' "$files" | grep -v -E '^(docs/.*|.*\.md|LICENSE)$' | head -n 1 || true)"
+          if [ -n "$code" ]; then echo "Code change detected ($code): full E2E suite."; exit 0; fi
+          echo "docs_only=true" >> "$GITHUB_OUTPUT"
+          echo "Docs-only change (docs/**, *.md, LICENSE): E2E skipped by design, job succeeds."
       - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+        if: steps.scope.outputs.docs_only != 'true'
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        if: steps.scope.outputs.docs_only != 'true'
         with:
           node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+        if: steps.scope.outputs.docs_only != 'true'
       # Build E2E (VITE_E2E=true) : jamais déployé, distinct de l'artefact `dist`.
       - run: pnpm build:e2e
-      # Navigateurs fournis par l'image ; pas de `playwright install`.
+        if: steps.scope.outputs.docs_only != 'true'
+      # Navigateurs fournis par l'image (aucun cache navigateur utile) ; le store pnpm est deja cache par setup-node.
       - run: pnpm test:e2e
+        if: steps.scope.outputs.docs_only != 'true'
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        if: always()
+        if: always() && steps.scope.outputs.docs_only != 'true'
         with:
           name: playwright-report
           path: |
