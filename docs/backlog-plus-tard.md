@@ -124,3 +124,6 @@ Prérequis : threat model upload, quotas.
   Critères d'acceptation :
   - [ ] Pas de `camera-access` ; `Permissions-Policy: xr-spatial-tracking=(self)` (dans `config/security-headers.mjs`) ; aucune donnée spatiale transmise.
   - [ ] CSP et en-têtes revus (contrôle `sec-build-hardening` mis à jour).
+
+## Apparence (R2/R3, hors MVP)
+- US-170 — Apparence « Liquid Glass » [UI] [Could] ~3 : choix optionnel (Standard / Liquid Glass) dans Help, désactivé par défaut, sans effet sur la mise en page ; repli sur le matériau standard avec `.no-glass` / `prefers-reduced-transparency` ; exploration : `docs/design/ui/maquettes/explorations/liquid-glass.html` ; critères : contraste AA vérifié sur fond de scène, coût GPU mesuré (≥ 60 FPS conservés), CSP inchangée. Voie probable : STANDARD. Décisions 33 et 51 ([decisions.md](decisions.md)).
