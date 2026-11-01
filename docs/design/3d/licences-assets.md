@@ -27,7 +27,7 @@ Le symbole « ≈ » n'est pas dans le sous-ensemble (design-system §4). Le SHA
 
 | Composant | Version | Licence | Source |
 |---|---|---|---|
-| lucide-react | 1.61.0 | ISC | npm `lucide-react` (publiée le 2026-10-21), © Lucide Icons and Contributors ; licence reproduite dans `THIRD_PARTY_LICENSES.md` à la racine du build (option `build.license` de Vite, toutes les dépendances embarquées) |
+| lucide-react | 1.63.0 | ISC | npm `lucide-react` (version 1.63.0), © Lucide Icons and Contributors ; licence reproduite dans `THIRD_PARTY_LICENSES.md` à la racine du build (option `build.license` de Vite, toutes les dépendances embarquées) |
 
 ## Dépendances logicielles de l'aperçu (non redistribuées)
 
