@@ -8,12 +8,17 @@ Regroupe les anciennes sections « Dette et suivi » du backlog (issues de US-00
 - (issu de US-005) Timeouts de 5 s des tests unitaires lourds sous charge (SEC-06, developer).
 - (issu de US-005) UX-7 à reformuler (ux-designer) : le dock suit la zone libre à l'ouverture d'un volet. À arbitrer avec UX-21 (barre décentrée de 124 px quand le volet gauche est replié : accepté par la QA et le contrôle design).
 
+## Suivi ouvert (constats du Sprint 3, 2026-11-01)
+- `animation-duration: 0.01ms` sous mouvement réduit (`tokens.css`) : à aligner sur `0s`, comme D1 (PR #23). Rattachement à décider au planning du Sprint 4 (`socle:scrum-master`).
+- Hook `commit-msg` en panne dans un worktree git. Le secdevops a dû le contourner avec `SKIP_SIMPLE_GIT_HOOKS` après avoir lancé les vérifications à la main (SEC-08). Rattachement proposé : devops (outillage).
+- `shell.spec.ts:76` « follows the system theme » a échoué une fois. À surveiller ; si récidive, ouvrir une story de correction (SEC-06 : tests dépendants de l'état, pas du temps réel).
+- Alerte Scorecard #7 (License) : acceptée comme choix du PO, dépôt public avec `LICENSE` propriétaire (décisions 47 et 48, [SEC-07](stories/SEC-07.md)). Aucun paiement. Scorecard #5, #6 et #9 restent à traiter.
+
 ## SEC-06
 Fiche : [stories/SEC-06.md](stories/SEC-06.md).
 - drei (LOW) et dette de test (critères ajoutés à SEC-06, issus de US-004).
 - Règle de lint `waitForTimeout` : variantes calculées, alias et déstructuration non couverts (issu de US-005).
 - LOW `minimatch` (outil de dev), secdevops (issu de US-005) ; exception en cours : voir `docs/security/exceptions.md`.
-- Repli de `crypto.randomUUID` (`src/app/App.tsx:42`, secure context uniquement ; LOW #2 secdevops) : TypeError en HTTP sur IP du LAN (test smartphone). Repli `crypto.getRandomValues` ou test ; mode direct au Sprint 3 (D3).
 - Test négatif pour `preset.name` (`src/core/catalog/schema.ts:69`) : vide, 81 caractères, clé de langue en trop ; rattachement proposé : SEC-06.
 - `connectSceneDesk()` (`App.tsx:23`) abonné au niveau du module sans désabonnement (double abonnement HMR, dev seulement) ; SEC-06.
 - Garde CodeQL >= high : [SEC-06a](stories/SEC-06a.md) (Sprint 3).
@@ -46,6 +51,7 @@ Fiche : [stories/SEC-06.md](stories/SEC-06.md).
 
 ## En attente du PO
 - Budget du bundle 195 / 295 kB gz (mesuré 176,6 / 267,1) : à confirmer ([sprint-2](sprints/sprint-2.md), Questions n° 1).
+- Dépendance `dependency-review-action` en v5 (majeure) acceptée par secdevops, hors critère de [SEC-08](stories/SEC-08.md) : à confirmer, puis décision.
 
 ## R4 et option i18n
 - Nom de catalogue lu en `name.en` seulement (`src/core/catalog/desk.ts`, `deskChoices`) : exception à i18n (texte de catalogue, sans clé), à consigner par ADR ou décision ; reprise avec une 2e langue ([plus tard](backlog-plus-tard.md)).
@@ -53,5 +59,6 @@ Fiche : [stories/SEC-06.md](stories/SEC-06.md).
 
 ## Traité (pour mémoire)
 - SEC-03a : correctif MEDIUM CSP React Aria. US-005 : texte neutre de l'état `failed`, mise à jour maquette / design-system §9 et §14 (info-bulle immédiate au focus clavier), budget de taille du shell : voir [archive/stories/SEC-03a.md](archive/stories/SEC-03a.md) et [archive/stories/US-005.md](archive/stories/US-005.md).
-- (US-005) À faire en mode direct au Sprint 3 (constat du 2026-11-01 : absent du code, malgré la mention « fait ») : tokens.css en mouvement réduit `0s !important`, retrait de `:where(.pane *)`, fonts.css en `url()` seul, boutons de la carte d'erreur en pleine largeur.
+- (US-005) Mode direct du Sprint 3, PR #23 (2026-11-01) : `tokens.css` en mouvement réduit `0s !important`, retrait de `:where(.pane *)`, `fonts.css` en `url()` seul, boutons de la carte d'erreur en pleine largeur. Constat du 2026-11-01 : ces points étaient marqués « faits » mais absents du code ; corrigés en PR #23.
+- (SEC-06, LOW #2 secdevops) Repli de `crypto.randomUUID` (`src/app/App.tsx`, secure context uniquement) : TypeError en HTTP sur IP du LAN. Repli `crypto.getRandomValues` et test, PR #23 (D3).
 - Fuzz de `parseSetup` (PR #18, 2026-10-31 ; rouvert par la revue sécurité de US-006) : générateur sans clés interdites à toute profondeur, graine fast-check globale (`FC_SEED`). Contre-exemple `extensions.{"".{"".prototype}}` (graine 60940642) couvert ; le parseur était correct, le générateur ne filtrait que le premier niveau (LOW #1 secdevops).
