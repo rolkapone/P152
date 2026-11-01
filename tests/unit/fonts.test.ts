@@ -23,7 +23,9 @@ describe("self-hosted Inter", () => {
   });
 
   it("is declared with font-display: swap and a system fallback", () => {
-    expect(fontsCss).toContain(`url("${FONT_URL}") format("woff2")`);
+    expect(fontsCss).toContain(`src: url("${FONT_URL}") format("woff2");`);
+    // The shipped file only: a local Inter would render differently (design control US-005 §2).
+    expect(fontsCss).not.toMatch(/local\(/);
     expect(fontsCss).toMatch(/font-display: swap;/);
     expect(fontsCss).toMatch(/font-weight: 100 900;/);
     const tokens = readFileSync("src/ui/styles/tokens.css", "utf8");
