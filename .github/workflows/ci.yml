@@ -367,19 +367,18 @@ jobs:
           EVENT: ${{ github.event_name }}
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: |
-          set -euo pipefail
+          # POSIX sh : le conteneur Playwright execute `run` avec dash (pas de pipefail, pas de <<<).
+          set -eu
           echo "docs_only=false" >> "$GITHUB_OUTPUT"
           if [ "$EVENT" != "pull_request" ]; then echo "Not a pull request: full E2E suite."; exit 0; fi
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
           git fetch --no-tags --depth=1 origin "$BASE_SHA"
-          files="$(git diff --name-only "$BASE_SHA" HEAD)"
+          # --no-renames : un renommage src/x.ts -> docs/x.md doit lister aussi src/x.ts (ancien chemin),
+          # sinon il contournerait les E2E.
+          files="$(git diff --no-renames --name-only "$BASE_SHA" HEAD)"
           if [ -z "$files" ]; then echo "Empty diff: full E2E suite."; exit 0; fi
-          while IFS= read -r f; do
-            case "$f" in
-              docs/*|*.md|LICENSE) ;;
-              *) echo "Code change detected ($f): full E2E suite."; exit 0 ;;
-            esac
-          done <<< "$files"
+          code="$(printf '%s\n' "$files" | grep -v -E '^(docs/.*|.*\.md|LICENSE)$' | head -n 1 || true)"
+          if [ -n "$code" ]; then echo "Code change detected ($code): full E2E suite."; exit 0; fi
           echo "docs_only=true" >> "$GITHUB_OUTPUT"
           echo "Docs-only change (docs/**, *.md, LICENSE): E2E skipped by design, job succeeds."
       - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
