@@ -1,15 +1,13 @@
 /* Inter, self-hosted (design-system.md §4; SIL OFL 1.1, public/fonts/OFL.txt): variable
    weight axis, Latin subset, same origin only (CSP font-src falls back to default-src 'self').
-   Outside the synced token block, as in docs/design/ui/tokens.css. Only the variable local
-   copy is tried first: a static local "Inter" would fake every weight from one cut. */
+   Outside the synced token block, as in docs/design/ui/tokens.css. The shipped file only: an
+   installed Inter 4 has a free opsz axis and would render differently from the shipped cut. */
 @font-face {
   font-family: "Inter";
   font-style: normal;
   font-weight: 100 900;
   font-display: swap;
-  src:
-    local("Inter Variable"),
-    url("/fonts/inter-latin-wght-normal.woff2") format("woff2");
+  src: url("/fonts/inter-latin-wght-normal.woff2") format("woff2");
   unicode-range:
     U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
     U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
