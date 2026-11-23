@@ -1,9 +1,9 @@
 # ETAT — P152 « Deskfit » (point d'entrée unique)
 
-Mis à jour le 2026-11-01 (Sprint 3 en cours : fins de story avant le 6/11 faites). Lire ce fichier en premier, puis uniquement les fichiers de sa story.
+Mis à jour le 2026-11-23 (Sprint 3 en cours : reprise après l'audit du 23/11, aucune story traitée entre le 1/11 et le 23/11). Lire ce fichier en premier, puis uniquement les fichiers de sa story.
 
 ## Sprint en cours
-**Sprint 3 en cours** ([sprint-3](sprints/sprint-3.md), validé le 2026-11-01, décisions 52 à 58). Engagement 12 pts : SEC-07 (EXPRESS 1), SEC-08 (STANDARD 2), SEC-09 ESLint 10 (RENFORCÉE 3), SEC-06a (RENFORCÉE 3), US-007 (STANDARD 3). SEC-13 reportée au Sprint 4. Budget 28 M unités (8 M avant le 6/11). **Avant le 6/11, livré : D1-D3 + repli `randomUUID` (PR #23), SEC-07 (PR #24), SEC-08 (PR #26) ; 3 pts sur 12.** Design US-007 : statut à confirmer. MVP 32 / 99 inchangé (SEC-07 et SEC-08 hors total MVP ; 35 attendus après S3). **Prochain, après la remise à zéro du quota le 2026-11-06 à 16 h (Paris) : SEC-09 (ESLint 10, échéance minimatch 30/11), puis SEC-06a, puis US-007.**
+**Sprint 3 en cours** ([sprint-3](sprints/sprint-3.md), validé le 2026-11-01, décisions 52 à 58). Engagement 12 pts : SEC-07 (EXPRESS 1), SEC-08 (STANDARD 2), SEC-09 ESLint 10 (RENFORCÉE 3), SEC-06a (RENFORCÉE 3), US-007 (STANDARD 3). SEC-13 reportée au Sprint 4. Budget 28 M unités (8 M avant le 6/11). **Avant le 6/11, livré : D1-D3 + repli `randomUUID` (PR #23), SEC-07 (PR #24), SEC-08 (PR #26) ; 3 pts sur 12.** Design US-007 : statut à confirmer. MVP 32 / 99 inchangé (SEC-07 et SEC-08 hors total MVP ; 35 attendus après S3). **Prochain (quota remis à zéro depuis le 6/11) : SEC-09 (ESLint 10, échéance dure minimatch 2026-11-30), puis SEC-06a, puis US-007.**
 
 ## Stories
 | Story | Statut | Voie | Prochain agent | PR |
@@ -17,9 +17,9 @@ Mis à jour le 2026-11-01 (Sprint 3 en cours : fins de story avant le 6/11 faite
 | SEC-07 LICENSE | DONE (S3) | EXPRESS | — | #24 |
 | CI : cache et E2E docs-only (hors story) | DONE (S3) | EXPRESS | — | #25 |
 | SEC-08 maintenance lot 1 | DONE (S3) | STANDARD | — | #26 |
-| SEC-09 ESLint 10 | TODO (S3, après le 6/11) | RENFORCÉE | developer | — |
-| SEC-06a garde CodeQL, fuzz, Semgrep | TODO (S3, après le 6/11) | RENFORCÉE | devops | — |
-| US-007 taille du bureau | TODO (S3, après le 6/11) | STANDARD | developer | — |
+| SEC-09 ESLint 10 | TODO (S3) | RENFORCÉE | developer | — |
+| SEC-06a garde CodeQL, fuzz, Semgrep | TODO (S3) | RENFORCÉE | devops | — |
+| US-007 taille du bureau | TODO (S3) | STANDARD | developer | — |
 | SEC-13 (Sprint 4, décision 54) | TODO | RENFORCÉE | developer | — |
 | Autres ouvertes (SEC-03b, SEC-04, SEC-05, SEC-06 reste, US-008 à US-025) | TODO | à attribuer | `socle:scrum-master` | — |
 
@@ -47,7 +47,7 @@ Index complet : [backlog.md](backlog.md). Fiches ouvertes : [stories/](stories/)
 
 ## Blocages et points en attente du PO
 - Sprint 3 : plan, budget et CI validés (décisions 52 à 55). Reste : budget de quota à confirmer dans `equipe/ressources/budget.md` (non versionné) par `socle:ressources`.
-- Hors story : alertes Scorecard #5, #6, #9 ; #7 (licence) acceptée comme choix du PO ([dette](dette.md)). 9 PR Dependabot ouvertes (#4 à #10, #12, #13) ; #11 et #15 fermées au profit de #26 ; #12 et #13 signalées en CI rouge.
+- Hors story (relevé du 2026-11-23) : alertes Scorecard #5 et #9 ouvertes, #6 corrigée ; #7 (licence) acceptée comme choix du PO ([dette](dette.md)). 11 PR Dependabot ouvertes : #6 et #10 (ESLint 10, CI verte, absorbées par SEC-09), #5, #29, #35 (CI verte), #4, #8, #9, #12, #13, #36 (CI rouge). Mise à jour Dependabot `docker-compose` en échec chaque semaine ([dette](dette.md)).
 - Garde CodeQL ≥ High à remettre en CI : [SEC-06a](stories/SEC-06a.md).
 - Questions long terme (affiliation, âge minimum, hébergement UE) : [backlog.md](backlog.md).
 

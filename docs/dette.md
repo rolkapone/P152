@@ -12,7 +12,9 @@ Regroupe les anciennes sections « Dette et suivi » du backlog (issues de US-00
 - `animation-duration: 0.01ms` sous mouvement réduit (`tokens.css`) : à aligner sur `0s`, comme D1 (PR #23). Rattachement à décider au planning du Sprint 4 (`socle:scrum-master`).
 - Hook `commit-msg` en panne dans un worktree git. Le secdevops a dû le contourner avec `SKIP_SIMPLE_GIT_HOOKS` après avoir lancé les vérifications à la main (SEC-08). Rattachement proposé : devops (outillage).
 - `shell.spec.ts:76` « follows the system theme » a échoué une fois. À surveiller ; si récidive, ouvrir une story de correction (SEC-06 : tests dépendants de l'état, pas du temps réel).
-- Alerte Scorecard #7 (License) : acceptée comme choix du PO, dépôt public avec `LICENSE` propriétaire (décisions 47 et 48, [SEC-07](stories/SEC-07.md)). Aucun paiement. Scorecard #5, #6 et #9 restent à traiter.
+- Alerte Scorecard #7 (License) : acceptée comme choix du PO, dépôt public avec `LICENSE` propriétaire (décisions 47 et 48, [SEC-07](stories/SEC-07.md)). Aucun paiement. Scorecard #6 (SecurityPolicy) corrigée le 2026-11-02 ; #5 (BranchProtection) et #9 (Maintained, dépôt de moins de 90 jours) restent ouvertes.
+- (audit du 2026-11-23, devops avec secdevops, à rattacher à [SEC-06a](stories/SEC-06a.md)) Dependabot : l'écosystème `docker-compose` de `.github/dependabot.yml` échoue chaque semaine depuis le 2026-11-03 (« No Dockerfiles nor Kubernetes YAML found in / ») : le dépôt n'a ni fichier compose ni Dockerfile, les images Playwright et Semgrep sont épinglées dans `ci.yml`. À décider : retirer l'entrée, ou ajouter un fichier que Dependabot sait suivre (ADR-OPS-05).
+- (audit du 2026-11-23) `pnpm check` était rouge en local depuis le 2026-11-10 : Prettier lisait les sauvegardes de `equipe/` (non versionné). Corrigé par `.prettierignore`.
 
 ## SEC-06
 Fiche : [stories/SEC-06.md](stories/SEC-06.md).
