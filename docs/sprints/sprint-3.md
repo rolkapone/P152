@@ -56,9 +56,9 @@ Budget bundle 195 / 295 kB gz (43) ; « 10 runs » reformulé (44) ; maintenance
 | SEC-07 | EXPRESS | DONE | n.d. | — | #24 |
 | US-007 (design) | — | TODO (statut à confirmer) | 0 / 3 | ux-designer | — |
 | SEC-08 | STANDARD | DONE (revue APPROVE, secdevops PASS) | n.d. | — | #26 |
-| SEC-09 | RENFORCÉE | TODO (après le 6/11) | 0 / 3 | developer | — |
-| SEC-06a | RENFORCÉE | TODO (après le 6/11) | 0 / 3 | devops | — |
-| US-007 | STANDARD | TODO (après le 6/11) | 0 / 3 | developer | — |
+| SEC-09 | RENFORCÉE | TODO | 0 / 3 | developer | — |
+| SEC-06a | RENFORCÉE | TODO | 0 / 3 | devops | — |
+| US-007 | STANDARD | TODO | 0 / 3 | developer | — |
 | SEC-13 | RENFORCÉE | TODO (marge) | 0 / 3 | developer | — |
 
 Hors story : CI cache et raccourci E2E docs-only, DONE (PR #25, EXPRESS, cycle 1 ; à confirmer sur la première PR purement documentaire).
